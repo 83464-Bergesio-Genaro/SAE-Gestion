@@ -1,46 +1,90 @@
 import { useState } from "react";
+import "./login.css";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+const carreras = [
+    {value:"sistemas",label:"Sistemas"},
+    {value:"electrica",label:"Electrica"},
+    {value:"electronica",label:"Electronica"},
+    {value:"mecanica",label:"Mecanica"},
+    {value:"metalurgica",label:"Metalurgica"},
+    {value:"quimica",label:"Quimica"},
+    {value:"industrial",label:"Industrial"},
+    {value:"civil",label:"Civil"}
+];
+
 export default function Login() {
+    const { login } = useAuth();
+    const [legajo, setLegajo] = useState("");
+    const [dominio, setDominio] = useState("sistemas");
+    const [password, setPassword] = useState("");
+    const navigate = useNavigate();
+    const handleLogin = () => {
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
+        const session = login(legajo, dominio, password);
 
-  const [user, setUser] = useState("");
-  const [pass, setPass] = useState("");
-
-  const handleLogin = () => {
-
-    const session = login(user, pass);
-
-    if (session.id_perfil === 1) {
-      navigate("/Inicio");
-    } else {
-      navigate("/Principal");
-    }
-  };
+        if(session){
+            console.log(session);
+            if (session.id_perfil !== 1) {
+                navigate("/Inicio");
+            } else {
+                navigate("/Principal");
+            }
+        }
+        else{
+            alert("ERROR, NO NO NO");
+        }
+    };
 
   return (
     <div>
+        <div className="login-image"></div>
+        <div className="login-container">
 
-      <h2>Login</h2>
+            <h2>SAE GESTION</h2>
 
-      <input
-        placeholder="usuario"
-        onChange={(e) => setUser(e.target.value)}
-      />
+            <div className="login-user">
 
-      <input
-        placeholder="password"
-        type="password"
-        onChange={(e) => setPass(e.target.value)}
-      />
+                <input
+                    type="text"
+                    placeholder="Legajo"
+                    className="legajo-input"
+                    value={legajo}
+                    onChange={(e) => setLegajo(e.target.value)}
+                />
 
-      <button onClick={handleLogin}>
-        Ingresar
-      </button>
+                <span className="login-span">@</span>
+                <select 
+                    className="domain-select" 
+                    value={dominio} 
+                    onChange={(e) => setDominio(e.target.value)}
+                >
+                    {carreras.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
 
+                <span className="login-span">.frc.utn.edu.ar</span>
+
+            </div>
+            <div className="login-password">
+                 <input
+                    type="password"
+                    placeholder="Contraseña"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="password-input"
+                />
+
+                <button className="login-button" onClick={handleLogin}>
+                    Ingresar
+                </button>
+            </div>
+        </div>
     </div>
   );
+
 }

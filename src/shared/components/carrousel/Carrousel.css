@@ -8,10 +8,8 @@
 }
 
 .hero-overlay {
- 
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -19,6 +17,14 @@
 
   color: white;
   text-align: center;
+}
+
+.hero-overlay.dark {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-overlay.light {
+  align-items: center;
 }
 
 .hero-overlay h1 {
@@ -30,7 +36,6 @@
 }
 
 @media (max-width: 768px) {
-
   .hero-carousel {
     display: none;
   }
@@ -38,5 +43,4 @@
   .hero-overlay h1 {
     font-size: 32px;
   }
-
 }

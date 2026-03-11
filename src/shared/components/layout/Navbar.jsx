@@ -30,7 +30,6 @@ export default function Navbar() {
             style={{
               background: item.color,
               backgroundImage: "url(" + item.image + ")",
-              textAlign: "center",
             }}
           >
             <h4> {item.label}</h4>

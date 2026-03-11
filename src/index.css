@@ -1,6 +1,7 @@
 /* Global Styles */* {
   box-sizing: border-box;
   font-family:var(--font);
+    width: 100% !important;
 }
 
 body {

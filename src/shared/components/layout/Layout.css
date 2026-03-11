@@ -1,16 +1,5 @@
 /* NAVBAR BASE (mobile first) */
 /* titulo */
-.public-navbar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 10px 50px;
-  background: var(--navbar);
-  color: black;
-  transition: background 0.3s ease;
-  width: 100% !important;
-}
 
 .navbar {
   display: block;
@@ -21,18 +10,16 @@
   border-bottom: 1px solid #eee;
   transition: background 0.3s ease;
   width: 100% !important;
-  height: 65px;
+  height:none;
 }
 
-.nav-logo {
+.nav-logo{
   background-image: url("../../../../public/images/navbar/utnFRClogo.png");
   width: 100%;
   height: 100px;
   background-repeat: no-repeat;
-  background-position: fixed;
-  
+  background-position: center;
 }
-
 /* links */
 
 .nav-links {
@@ -117,14 +104,15 @@
   .navbar {
     display: inline-flex;
     flex-direction: row;
-    padding: 0px;
+    padding: 0px 0px 0px 40px;
     width: 100% !important;
+     height: 65px;
   }
   .nav-logo {
     background-position: left;
     background-position-x: 35px;
-    background-position-y: 25px;
     width: 100% !important;
+    height: 65px;
   }
   .nav-links {
     display: flex;

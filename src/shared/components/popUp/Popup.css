@@ -1,0 +1,60 @@
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's on top of other content */
+}
+
+.popup-content {
+  background-color: white;
+  padding: 20px;
+  
+  border-radius: 10px;
+  width: 80% !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+.popup-message{
+    font-size: 28px;
+    min-height: 50px;
+    line-height: 40px;
+}
+.popup-button{
+    padding: 5px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+/* Optional: a simple CSS loader */
+.loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 70%;
+  width: 70px !important;
+  min-height: 70px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (min-width: 768px){
+    .popup-content {
+        width: 50% !important;
+        padding-bottom: 20px;
+    }
+    .popup-button{
+        margin-top: 5vh;
+        height: 40px;
+        width: 70% !important;
+    }
+}

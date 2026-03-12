@@ -39,7 +39,7 @@ export default function App() {
             <Route
               path="/Inicio"
               element={
-                <ProtectedRoute role={1}>
+                <ProtectedRoute role={2}>
                   <EmployedMain />
                 </ProtectedRoute>
               }
@@ -48,7 +48,7 @@ export default function App() {
             <Route
               path="/Gestion-Deportes"
               element={
-                <ProtectedRoute role={1}>
+                <ProtectedRoute role={2}>
                   <EmployedSports />
                 </ProtectedRoute>
               }
@@ -56,7 +56,7 @@ export default function App() {
             <Route
               path="/Gestion-Becas"
               element={
-                <ProtectedRoute role={1}>
+                <ProtectedRoute role={2}>
                   <EmployedScholarships />
                 </ProtectedRoute>
               }
@@ -66,7 +66,7 @@ export default function App() {
             <Route
               path="/Principal"
               element={
-                <ProtectedRoute role={2}>
+                <ProtectedRoute role={1}>
                   <StudentMain />
                 </ProtectedRoute>
               }
@@ -75,7 +75,7 @@ export default function App() {
             <Route
               path="/Mis-Deportes"
               element={
-                <ProtectedRoute role={2}>
+                <ProtectedRoute role={1}>
                   <StudentSports />
                 </ProtectedRoute>
               }
@@ -84,7 +84,7 @@ export default function App() {
             <Route
               path="/Mis-Becas"
               element={
-                <ProtectedRoute role={2}>
+                <ProtectedRoute role={1}>
                   <Scholarships />
                 </ProtectedRoute>
               }

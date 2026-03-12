@@ -3,7 +3,6 @@ import "./Layout.css";
 import { useAuth } from "../../auth/AuthContext";
 import { sharedMenu, studentMenu, employedMenu } from "../../menus/MenuConfig";
 import SessionLog from "./Session";
-import { AppBar, Toolbar, Box, Typography } from "@mui/material";
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -12,9 +11,9 @@ export default function Navbar() {
   if (!user) {
     menu = sharedMenu;
   } else {
-    if (user?.id_perfil === 1) {
+    if (user?.id_perfil === 2) {
       menu = employedMenu;
-    } else if (user?.id_perfil === 2) {
+    } else if (user?.id_perfil === 1) {
       menu = studentMenu;
     }
   }

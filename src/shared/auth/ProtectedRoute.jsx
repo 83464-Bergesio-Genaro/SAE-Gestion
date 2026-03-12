@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children, role }) {
   if (!user) {
     return <Navigate to="/login" />;
   }
-
+  console.log(user.id_perfil, role);
   if (role && user.id_perfil !== role) {
     return <Navigate to="/" />;
   }

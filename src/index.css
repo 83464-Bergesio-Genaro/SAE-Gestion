@@ -1,16 +1,17 @@
-/* Global Styles */* {
+/* Global Styles */
+* {
   box-sizing: border-box;
-  font-family:var(--font);
-    width: 100% !important;
+  font-family: var(--font);
 }
 
 body {
   margin: 0;
 
   background: var(--background);
-  transition: background 0.3s ease, color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
 }
-
 
 :root {
   line-height: 1.5;
@@ -24,19 +25,17 @@ h1 {
   font-size: 2.5em;
   line-height: 1.1;
 }
-h2{
+h2 {
   font-size: 1.5em;
   line-height: 1;
 }
-h3{
+h3 {
   font-size: 1em;
   line-height: 0.5;
 }
 /* MAIN CONTENT */
 
 .main-content {
-  
   width: 100%;
   min-height: 88vh !important; /* This makes the root at least 100% of the viewport height */
 }
-

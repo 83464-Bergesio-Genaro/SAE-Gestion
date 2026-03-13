@@ -22,17 +22,17 @@ export function EventoCard({ evento }) {
       >
         <Box textAlign="center" mb={1}>
           <Typography sx={{ fontSize: 22, fontWeight: 700 }}>
-            {evento.fecha}
+            {evento.fecha_evento}
           </Typography>
           <Typography sx={{ fontSize: 20, fontWeight: 700 }}>
-            {evento.hora}
+            {evento.horario_inicio}
           </Typography>
         </Box>
 
         <Divider sx={{ borderColor: "rgba(255,255,255,0.10)", mb: 2 }} />
 
         <Typography sx={{ fontSize: 18, fontWeight: 700 }}>
-          {evento.titulo}
+          {evento.nombre_evento}
         </Typography>
 
         <Typography sx={{}}>

@@ -1,48 +1,49 @@
 import { useMemo, useState } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import SharedJPASistemas from "../../pages/degrees/systems";
 const items = [
   {
     title: "Ing. Sistemas de Información",
     img: "https://picsum.photos/800/600?1",
-    route: "/sistemas",
+    route: "/JPA/sistemas",
   },
   {
     title: "Ing. Electrica",
     img: "https://picsum.photos/800/600?2",
-    route: "/electricidad",
+    route: "/JPA/electrica",
   },
   {
     title: "Ing. Quimica",
     img: "https://picsum.photos/800/600?3",
-    route: "/quimica",
+    route: "/JPA/quimica",
   },
 
   {
     title: "Ing. Metalurgica",
     img: "https://picsum.photos/800/600?45",
-    route: "/metalurgica",
+    route: "/JPA/metalurgica",
   },
 
   {
     title: "Ing. Electronica",
     img: "https://picsum.photos/800/600?5",
-    route: "/electronica",
+    route: "/JPA/electronica",
   },
   {
     title: "Ing. Civil",
     img: "https://picsum.photos/800/600?6",
-    route: "/civil",
+    route: "/JPA/civil",
   },
   {
     title: "Ing. Industrial",
     img: "https://picsum.photos/800/600?7",
-    route: "/industrial",
+    route: "/JPA/industrial",
   },
   {
     title: "Ing. Mecanica",
     img: "https://picsum.photos/800/600?8",
-    route: "/mecanica",
+    route: "/JPA/mecanica",
   },
 ];
 

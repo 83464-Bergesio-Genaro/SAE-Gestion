@@ -1,3 +1,7 @@
+/* =========================
+   VIDEO
+========================= */
+
 .video-container {
   position: relative;
   width: 100%;
@@ -13,8 +17,102 @@
   border: 0;
 }
 
+/* =========================
+   CARDS
+========================= */
+
+.card-jpa {
+  width: 100%;
+  min-height: 32px;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.card-jpa:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-jpa-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.typography-jpa {
+  font-size: 20px !important;
+  font-weight: 500;
+}
+
 .icon-jpa {
   font-size: 30px;
+}
+
+/* =========================
+   FLOATING ACTION BUTTON
+========================= */
+
+.fab-participar {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  padding: 0 16px;
+  width: 56px;
+  height: 56px;
+
+  overflow: hidden;
+  white-space: nowrap;
+
+  transition: all 0.3s ease;
+}
+
+.fab-participar .texto {
+  opacity: 0;
+  white-space: nowrap;
+  transition:
+    opacity 0.2s ease,
+    width 0.3s ease;
+  width: 0;
+}
+
+/* =========================
+   DESKTOP
+========================= */
+
+@media (min-width: 900px) {
+  .card-jpa-content {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .fab-participar:hover {
+    width: 220px;
+    justify-content: flex-start;
+  }
+
+  .fab-participar:hover .texto {
+    opacity: 1;
+    margin-left: 5%;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 899px) {
+  .fab-participar .texto {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -27,32 +125,41 @@
   }
 }
 
-.card-jpa {
-  padding: 16px;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  text-align: left;
-  gap: 16px;
-  min-height: 64px;
-  transition: 0.2s;
-  cursor: pointer;
+.colectivo-ERSA {
+  color: #d32f2f !important;
+  border-color: #d32f2f !important;
 }
 
-.card-jpa:hover {
-  transform: translateY(-4px);
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+.colectivo-Aucor {
+  color: #2e7d32 !important;
+  border-color: #2e7d32 !important;
 }
 
-@media (min-width: 900px) {
-  .card-jpa {
-    width: 100%;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    gap: 8px;
-    min-height: 100px;
-  }
+.colectivo-Tamse {
+  color: #0288d1 !important;
+  border-color: #0288d1 !important;
+}
+
+.colectivo-Coniferal {
+  color: #ef6c00 !important;
+  border-color: #ef6c00 !important;
+}
+
+.colectivo-ERSA > .MuiChip-avatar {
+  color: white !important;
+  background-color: #d32f2f;
+}
+
+.colectivo-Tamse > .MuiChip-avatar {
+  color: white !important;
+  background: #0288d1;
+}
+.colectivo-Aucor > .MuiChip-avatar {
+  color: white !important;
+  background: #2e7d32;
+}
+
+.colectivo-Coniferal > .MuiChip-avatar {
+  color: white !important;
+  background: #ef6c00;
 }

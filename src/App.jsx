@@ -17,6 +17,15 @@ import StudentSports from "./students/pages/sports/StudentSports";
 
 import Scholarships from "./students/pages/scholarships/Scholarships";
 import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
+import SharedJPASistemas from "./shared/pages/degrees/systems";
+import SharedJPAQuimica from "./shared/pages/degrees/chemical";
+import SharedJPACivil from "./shared/pages/degrees/civil";
+import SharedJPAElectric from "./shared/pages/degrees/electric";
+import SharedJPAElectrical from "./shared/pages/degrees/electrical";
+import SharedJPAIndustrial from "./shared/pages/degrees/industrial";
+import SharedJPAMecanic from "./shared/pages/degrees/mecanic";
+import SharedJPAMetalurgic from "./shared/pages/degrees/metalurgic";
+import SharedJPAParticipar from "./shared/pages/participar";
 
 export default function App() {
   useEffect(() => {
@@ -34,6 +43,15 @@ export default function App() {
             <Route path="/" element={<SharedMain />} />
             <Route path="/login" element={<Login />} />
             <Route path="/JPA" element={<SharedJPA />} />
+            <Route path="/JPA/sistemas" element={<SharedJPASistemas />} />
+            <Route path="/JPA/quimica" element={<SharedJPAQuimica />} />
+            <Route path="/JPA/civil" element={<SharedJPACivil />} />
+            <Route path="/JPA/electrica" element={<SharedJPAElectric />} />
+            <Route path="/JPA/electronica" element={<SharedJPAElectrical />} />
+            <Route path="/JPA/industrial" element={<SharedJPAIndustrial />} />
+            <Route path="/JPA/mecanica" element={<SharedJPAMecanic />} />
+            <Route path="/JPA/metalurgica" element={<SharedJPAMetalurgic />} />
+            <Route path="/JPA/participar" element={<SharedJPAParticipar />} />
 
             {/* EMPLOYED */}
             <Route

@@ -1,0 +1,25 @@
+.paper-container {
+  max-width: 100%;
+  margin: auto;
+  border-radius: 10px;
+  margin-top: 2%;
+}
+
+.typography-title {
+  padding: 10px 0px;
+  font-weight: bolder !important;
+  text-align: left;
+  font-family: "Poppins" !important;
+}
+
+.typography-text {
+  text-align: justify;
+  font-family: "Poppins" !important;
+}
+
+.banner-image {
+  display: flex;
+  position: relative;
+  width: 100%;
+}
+

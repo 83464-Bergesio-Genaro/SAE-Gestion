@@ -318,7 +318,11 @@ export default function SharedJPAParticipar() {
                           }
                         />
                       </Grid>
-                      <Grid size={{ xs: 12 }}>
+                      <Grid
+                        size={{ xs: 12 }}
+                        justifyContent="flex-end"
+                        display="flex"
+                      >
                         <Button variant="contained" type="submit">
                           Enviar
                         </Button>
@@ -344,7 +348,7 @@ export default function SharedJPAParticipar() {
                           fullWidth
                           required
                           id="outlined-required"
-                          label="Ingrese email"
+                          label="Ingrese el email"
                           name="user_email"
                           type="email"
                         />
@@ -366,10 +370,13 @@ export default function SharedJPAParticipar() {
                           id="outlined-required"
                           label="Descripción stand"
                           name="desc"
-                          rows={2}
                         />
                       </Grid>
-                      <Grid size={{ xs: 12 }}>
+                      <Grid
+                        size={{ xs: 12 }}
+                        justifyContent="flex-end"
+                        display="flex"
+                      >
                         <Button variant="contained" type="submit">
                           Enviar
                         </Button>
@@ -395,7 +402,7 @@ export default function SharedJPAParticipar() {
                           fullWidth
                           required
                           id="outlined-required"
-                          label="Ingrese su email"
+                          label="Ingrese el email"
                           name="user_email"
                           type="email"
                         />
@@ -405,7 +412,7 @@ export default function SharedJPAParticipar() {
                           fullWidth
                           required
                           id="outlined-required"
-                          label="Teléfono de contacto"
+                          label="Teléfono"
                           name="phone"
                         />
                       </Grid>
@@ -452,7 +459,11 @@ export default function SharedJPAParticipar() {
                           </Select>
                         </FormControl>
                       </Grid>
-                      <Grid size={{ xs: 12 }}>
+                      <Grid
+                        size={{ xs: 12 }}
+                        justifyContent="flex-end"
+                        display="flex"
+                      >
                         <Button variant="contained" type="submit">
                           Enviar
                         </Button>

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Carrousel from "../components/carrousel/Carrousel";
-
+import News from "../components/news/New";
 const images = [
   "/images/carrousel/AuditorioUTN.jpeg",
   "/images/carrousel/EntradaUTN.jpg",
@@ -14,8 +14,9 @@ export default function Main() {
         images={images}
         isDark={true}
         title="SAE GESTION"
-        subtitle="Resolviendo tus problemas desde el ingreso hasta el egreso"
+        subtitle="Estamos para servirte"
       />
+      <News></News>
     </div>
   );
 }

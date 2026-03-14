@@ -59,17 +59,66 @@
     .info-hidden{
         opacity: 1; 
         display: flex;
-        padding: 20px;
+        padding: 20px 10px;
+    }
+    .info-visita-image{
+        background-image: url("../../../../public/images/infoSection/visitasFRC.jpg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 30%;
+        height: 200px;        
+    }
+    .info-tuto-image{
+        background-image: url("../../../../public/images/infoSection/tutoriasFRC.jpg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 30%;
+        height: 200px;
+    }       
+    .info-inter-image{
+        background-image: url("../../../../public/images/infoSection/coruscant.webp");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: right;
+        width: 30%;
+        height: 200px;
+    }       
+    .info-becas-image{
+        background-image: url("../../../../public/images/infoSection/scholarshipsFRC.webp");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: left;
+        width: 30%;
+        height: 200px;
+    }    
+    .info-salud-image{
+        background-image: url("../../../../public/images/infoSection/saludFRC.jpg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: left;
+        width: 30%;
+        height: 200px;
+    }
+    .info-depo-image{
+        background-image: url("../../../../public/images/infoSection/deportesFRC.jpg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: right;
+        width: 30%;
+        height: 200px;
     }
     .info-biblo-image{
         background-image: url("../../../../public/images/infoSection/biblotecaFRC.jpg");
         background-size: contain;
         background-repeat: no-repeat;
-        width: 20%;
-        height: 80px;
+        width: 30%;
+        height: 200px;
     }
     .info-hidden-text{
-        width: 70%;
+        width: 80%;
+        padding: 0 20px;
     }
     .info-hidden .info-hidden-text{
         text-align: left;

@@ -81,8 +81,18 @@
     opacity 0.2s ease,
     width 0.3s ease;
   width: 0;
+  
 }
-
+.fab-participar:hover {
+  min-width: 220px;
+  justify-content: flex-start;
+  transition:  min-width 0.3s ease !important;
+  
+}
+.fab-participar:hover .texto {
+  opacity: 1;
+  margin-left: 5%;
+}
 /* =========================
    DESKTOP
 ========================= */
@@ -92,28 +102,13 @@
     flex-direction: column;
     justify-content: center;
     text-align: center;
-  }
-
-  .fab-participar:hover {
-    width: 220px;
-    justify-content: flex-start;
-  }
-
-  .fab-participar:hover .texto {
-    opacity: 1;
-    margin-left: 5%;
+    
   }
 }
 
 /* =========================
    MOBILE
 ========================= */
-
-@media (max-width: 899px) {
-  .fab-participar .texto {
-    display: none;
-  }
-}
 
 @media (max-width: 768px) {
   .video-container {

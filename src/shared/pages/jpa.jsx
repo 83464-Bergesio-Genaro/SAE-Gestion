@@ -11,8 +11,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Divider,
-  IconButton,
   Grid,
   Stack,
   CardActionArea,
@@ -20,31 +18,32 @@ import {
 import "./jpa.css";
 import InteractiveGrid from "../components/galleryZoomGrid/galleryZoomGrid";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { CalendarEvent } from "../components/calendarEvent/calendarEvent";
 import Fab from "@mui/material/Fab";
 
 import { ObtenerEventosPublicos } from "../../api/JPAService";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {InfoSection,InfoSectionWithId} from "../components/infoSection/InfoSection";
 
 const itemVertical = [
   {
     title: "Deportes",
     icon: SportsSoccerIcon,
     route: "JPA/deportes",
+    section: "info-deportes"
   },
   {
     title: "Bienestar",
     icon: FavoriteIcon,
     route: "JPA/bienestar",
+    section: "info-bienestar"
   },
   {
     title: "Becas",
     icon: SavingsIcon,
     route: "JPA/becas",
+    section: "info-becas"
   },
 ];
 
@@ -53,21 +52,25 @@ const items = [
     title: "Biblioteca",
     icon: MenuBookIcon,
     route: "JPA/biblioteca",
+    section: "info-biblioteca"
   },
   {
     title: "Intercambios",
     icon: FlightIcon,
     route: "JPA/intercambios",
+    section: "info-intercambios"
   },
   {
     title: "Tutorías",
     icon: SchoolIcon,
     route: "JPA/tutorias",
+    section: "info-tutorias"
   },
   {
     title: "Visitas Tec.",
     icon: FactoryIcon,
     route: "JPA/visitas",
+    section: "info-visitas"
   },
 ];
 
@@ -88,8 +91,13 @@ export default function JPA() {
   }, []);
 
   return (
-    <div>
+    <div className="desktop-info">
       <Container>
+        
+        <Typography variant="h3" align="center" sx={{ mt: 4 }}>
+          JORNADA DE PUERTAS ABIERTAS
+        </Typography>
+        
         <Box sx={{ ml: { xs: 2, md: 4 }, mr: { xs: 2, md: 4 } }}>
           {/*  Grid de video y grid vertical*/}
           <Grid
@@ -108,7 +116,7 @@ export default function JPA() {
                 alignItems: "stretch",
               }}
             >
-              <Box className="video-container">
+              <Box className="video-container" >
                 <iframe
                   className="youtube-video"
                   src="https://www.youtube.com/embed/atGzunuzHIk?si=xgR3Ds0TcnPD66wg"
@@ -119,7 +127,6 @@ export default function JPA() {
                 />
               </Box>
             </Grid>
-
             <Grid
               size={{ xs: 6, md: 3 }}
               sx={{
@@ -137,20 +144,23 @@ export default function JPA() {
               >
                 {itemVertical.map((item) => (
                   <Card key={item.title} className="card-jpa">
-                    <CardActionArea>
-                      <CardContent className="card-jpa-content">
-                        <item.icon
-                          sx={{ fontSize: 40, mb: { xs: 0, md: 1 } }}
-                        />
-                        <Typography className="typography-jpa">
-                          {item.title}
-                        </Typography>
-                      </CardContent>
-                    </CardActionArea>
+                    <a href={"#"+item.section}>
+                      <CardActionArea>
+                        <CardContent className="card-jpa-content">
+                          <item.icon
+                            sx={{ fontSize: 40, mb: { xs: 0, md: 1 } }}
+                          />
+                          <Typography className="typography-jpa">
+                            {item.title}
+                          </Typography>
+                        </CardContent>
+                      </CardActionArea>
+                    </a>
                   </Card>
                 ))}
               </Stack>
             </Grid>
+  
           </Grid>
           {/*  Grid Horizontal*/}
           <Grid
@@ -167,24 +177,32 @@ export default function JPA() {
                 size={{ xs: 6, md: 3 }}
                 sx={{ display: "flex", justifyContent: "center" }}
               >
-                <Card key={item.title} className="card-jpa">
+                <Card key={item.title} className="card-jpa" href="#">
+                <a href={"#"+item.section}>
                   <CardActionArea>
-                    <CardContent className="card-jpa-content">
+                    <CardContent className="card-jpa-content" >
                       <item.icon sx={{ fontSize: 40, mb: { xs: 0, md: 1 } }} />
                       <Typography className="typography-jpa">
                         {item.title}
                       </Typography>
                     </CardContent>
                   </CardActionArea>
+                </a>
                 </Card>
               </Grid>
             ))}
           </Grid>
         </Box>
+       
+
         <Typography variant="h3" align="center" sx={{ mt: 4 }}>
           ¡CONOCÉ NUESTRAS CARRERAS!
         </Typography>
+
         <InteractiveGrid />
+
+        <InfoSectionWithId/>
+
         <Typography variant="h4" align="center" sx={{ mt: 3 }}>
           AGENDA DE EVENTOS
         </Typography>
@@ -208,6 +226,7 @@ export default function JPA() {
           <span className="texto"> Quiero participar</span>
         </Fab>
       </Container>
+
     </div>
   );
 }

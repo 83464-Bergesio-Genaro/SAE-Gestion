@@ -2,7 +2,13 @@
   box-sizing: border-box;
   font-family:var(--font);
 }
-
+html{
+   scroll-behavior: smooth;
+}
+a{
+  text-decoration: none !important;
+  color: var(--text)
+}
 body {
   margin: 0;
 

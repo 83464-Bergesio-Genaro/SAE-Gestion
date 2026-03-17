@@ -93,14 +93,14 @@
   text-align: left;
   padding: 5px 20px;
   background: var(--secondary);
-  min-height: 5vh;
+  min-height: 6vh;
+  max-height: 12vh;
   width: 100% !important;
-
   color: var(--text);
 }
 /* DESKTOP */
 
-@media (min-width: 768px) {
+@media (min-width: 1300px) {
   .navbar {
     display: inline-flex;
     flex-direction: row;

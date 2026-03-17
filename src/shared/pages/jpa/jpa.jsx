@@ -16,15 +16,15 @@ import {
   CardActionArea,
 } from "@mui/material";
 import "./jpa.css";
-import InteractiveGrid from "../components/galleryZoomGrid/galleryZoomGrid";
+import InteractiveGrid from "../../components/galleryZoomGrid/galleryZoomGrid";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
-import { CalendarEvent } from "../components/calendarEvent/calendarEvent";
+import { CalendarEvent } from "../../components/calendarEvent/calendarEvent";
 import Fab from "@mui/material/Fab";
 
-import { ObtenerEventosPublicos } from "../../api/JPAService";
+import { ObtenerEventosPublicos } from "../../../api/JPAService";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {InfoSection,InfoSectionWithId} from "../components/infoSection/InfoSection";
+import {InfoSection,InfoSectionWithId} from "../../components/infoSection/InfoSection";
 
 const itemVertical = [
   {

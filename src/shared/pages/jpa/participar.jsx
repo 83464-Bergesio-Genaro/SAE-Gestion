@@ -27,7 +27,7 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 import emailjs from "@emailjs/browser";
 import { useState, useRef } from "react";
-import checkImage from "../../../public/images/logos/comprobado.png";
+import checkImage from "../../../../public/images/logos/comprobado.png";
 
 export default function SharedJPAParticipar() {
   const colectivos = [

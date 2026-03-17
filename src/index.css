@@ -1,6 +1,7 @@
 /* Global Styles */* {
   box-sizing: border-box;
-  font-family:var(--font);
+  font-family: var(--font) !important;
+  
 }
 html{
    scroll-behavior: smooth;
@@ -10,9 +11,9 @@ a{
   color: var(--text)
 }
 body {
+  background: linear-gradient(135deg, #92E0DB 6.71%, #5B96CC 91.97%);
+  width: 100%;
   margin: 0;
-
-  background: var(--background);
   transition: background 0.3s ease, color 0.3s ease;
 }
 
@@ -38,10 +39,18 @@ h3{
   line-height: 0.5;
 }
 /* MAIN CONTENT */
-
 .main-content {
-  
   width: 100%;
-  min-height: 88vh !important; /* This makes the root at least 100% of the viewport height */
+  min-height: 65vh; /* This makes the root at least 100% of the viewport height */
 }
-
+@media (min-width: 600px) and (max-width: 1300px){
+.main-content {
+  width: 100%;
+  min-height: 89vh; /* This makes the root at least 100% of the viewport height */
+}
+}
+@media (min-width: 1300px){
+  .main-content {
+    min-height: 87vh !important; /* This makes the root at least 100% of the viewport height */
+  }
+}

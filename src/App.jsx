@@ -6,9 +6,9 @@ import { AuthProvider } from "./shared/auth/AuthContext";
 import ProtectedRoute from "./shared/auth/ProtectedRoute";
 import MainLayout from "./shared/components/layout/MainLayout";
 
-import Login from "./shared/pages/login";
-import SharedMain from "./shared/pages/main";
-import SharedJPA from "./shared/pages/jpa";
+import Login from "./shared/pages/login/login";
+import SharedMain from "./shared/pages/home/main";
+import SharedJPA from "./shared/pages/jpa/jpa";
 import EmployedMain from "./employed/pages/main/";
 import StudentMain from "./students/pages/main";
 
@@ -25,7 +25,7 @@ import SharedJPAElectrical from "./shared/pages/degrees/electrical";
 import SharedJPAIndustrial from "./shared/pages/degrees/industrial";
 import SharedJPAMecanic from "./shared/pages/degrees/mecanic";
 import SharedJPAMetalurgic from "./shared/pages/degrees/metalurgic";
-import SharedJPAParticipar from "./shared/pages/participar";
+import SharedJPAParticipar from "./shared/pages/jpa/participar";
 
 export default function App() {
   useEffect(() => {

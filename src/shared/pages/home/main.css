@@ -90,7 +90,7 @@ h3{
     .main-title-container{
         width: 50%;
         color: white;
-        padding: 100px 5%;
+        padding: 50px 5%;
     }
 
     .main-button-container{
@@ -107,6 +107,6 @@ h3{
     .main-image-container{
         background-position: 75%,80%;
         background-size: 400px,550px;
-        height: 80vh;
+        height: 85vh;
     }
 }

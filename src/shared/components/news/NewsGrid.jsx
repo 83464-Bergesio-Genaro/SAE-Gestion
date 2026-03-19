@@ -1,53 +1,25 @@
-import { useMemo, useState } from "react";
+import { useMemo,useEffect, useState } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { ObtenerNoticiasPublicas,getDownloadUrl} from "../../../api/PrensaService";
+import "./News.css";
 
-const items = [
-  {
-    title: "Ing. Sistemas de Información",
-    img: "../../../../public/images/degreesJPA/ingenieriaSistemas.jpeg",
-    route: "/JPA/sistemas",
-  },
-  {
-    title: "Ing. Electrica",
-    img: "../../../../public/images/degreesJPA/ingenieriaElectrica.jpg",
-    route: "/JPA/electrica",
-  },
-  {
-    title: "Ing. Quimica",
-    img: "../../../../public/images/degreesJPA/ingenieriaQuimica.jpg",
-    route: "/JPA/quimica",
-  },
-
-  {
-    title: "Ing. Metalurgica",
-    img: "../../../../public/images/degreesJPA/ingenieriaMetalurgica.jpg",
-    route: "/JPA/metalurgica",
-  },
-
-  {
-    title: "Ing. Electronica",
-    img: "../../../../public/images/degreesJPA/ingenieriaElectronica.jpg",
-    route: "/JPA/electronica",
-  },
-  {
-    title: "Ing. Civil",
-    img: "../../../../public/images/degreesJPA/ingenieriaCivil.jpg",
-    route: "/JPA/civil",
-  },
-  {
-    title: "Ing. Industrial",
-    img: "../../../../public/images/degreesJPA/ingenieriaIndustrial.jpg",
-    route: "/JPA/industrial",
-  },
-  {
-    title: "Ing. Mecanica",
-    img:  "../../../../public/images/degreesJPA/ingenieriaMecanica.jpg",
-    route: "/JPA/mecanica",
-  },
-];
-
-export default function InteractiveGrid() {
+export default function NewsGrid() {
+    const [newsList, setEventosJPA] = useState([]);
+      useEffect(() => {
+        const ObtenerEventosPublicosApi = async () => {
+          try {
+            const respuesta = await ObtenerNoticiasPublicas();
+            if(respuesta?.success && respuesta?.data){
+              setEventosJPA(respuesta?.data);
+            }
+    
+          } catch (error) {
+            console.error("Error al traer Eventos:", error);
+          }
+        };
+        ObtenerEventosPublicosApi();
+      }, []);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const navigate = useNavigate();
 
@@ -70,13 +42,15 @@ export default function InteractiveGrid() {
   }, [hoveredRow]);
 
   return (
+    <section className="news-section">
+      <h2>Novedades</h2>
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box
         onMouseLeave={() => setHoveredIndex(null)}
         sx={{
           display: "grid",
           gridTemplateColumns: {
-            xs: "repeat(2, 1fr)",
+            xs: "repeat(1, 1fr)",
             md: gridTemplateColumns,
           },
           gridTemplateRows: {
@@ -88,14 +62,14 @@ export default function InteractiveGrid() {
             "grid-template-columns 350ms ease, grid-template-rows 350ms ease",
         }}
       >
-        {items.map((item, index) => {
+        {newsList.map((news, index) => {
           const isActive = hoveredIndex === index;
           const isDimmed = hoveredIndex !== null && hoveredIndex !== index;
 
           return (
             <Box
-              key={item.title}
-              onClick={() => navigate(item.route)}
+              key={news.titulo_publicacion}
+              onClick={() => window.open(news.ruta_publicacion,"_blank")}//Generalmente instagram, se podria hacer que rediriga dentro de la aplicacion
               onMouseEnter={() => setHoveredIndex(index)}
               sx={{
                 position: "relative",
@@ -107,8 +81,8 @@ export default function InteractiveGrid() {
             >
               <Box
                 component="img"
-                src={item.img}
-                alt={item.title}
+                src={news.portada}
+                alt={news.titulo_publicacion}
                 sx={{
                   width: "100%",
                   height: "100%",
@@ -147,7 +121,7 @@ export default function InteractiveGrid() {
                 <Typography
                   sx={{
                     mt: 0.5,
-                    fontSize: isActive ? 24 : 18,
+                    fontSize: isActive ? 16 : 16,
                     fontWeight: 700,
                     lineHeight: 1.1,
                     transform: {
@@ -161,13 +135,49 @@ export default function InteractiveGrid() {
                     transition: "all 350ms ease",
                   }}
                 >
-                  {item.title}
+                  {news.fecha_inicio}
                 </Typography>
+                <Typography
+                  sx={{
+                    mt: 0.5,
+                    fontSize: isActive ? 24 : 18,
+                    fontWeight: 700,
+                    lineHeight: 1.1,
+                    transform: {
+                      xs: "translateY(0)", // mobile siempre visible
+                      md: isActive ? "translateY(0)" : "translateY(8px)",
+                    },
+                    opacity: {
+                      xs: 1,
+                      md:  isActive ? 0 : 1,
+                    }
+                  }}
+                > {news.titulo}
+                </Typography>
+                <Typography
+                  sx={{
+                    mt: 0.5,
+                    fontSize: isActive ? 18 : 14,
+                    fontWeight: 700,
+                    lineHeight: 1.1,
+                    transform: {
+                      xs: "translateY(0)", // mobile siempre visible
+                      md: isActive ? "translateY(0)" : "translateY(8px)",
+                    },
+                    opacity: {
+                      xs: 1, // mobile siempre visible
+                      md: isActive ? 1 : 0,
+                    },
+                  }}
+                >
+                  {news.descripcion}
+                </Typography>                
               </Box>
             </Box>
           );
         })}
       </Box>
     </Container>
+    </section>
   );
 }

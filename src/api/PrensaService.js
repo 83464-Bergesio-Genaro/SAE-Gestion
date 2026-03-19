@@ -11,7 +11,6 @@ export async function ObtenerNoticiasPublicas(){
                 {
                     const data = await response.json();
                     let  listaPublicaciones =data.map(mapPublicacionPublica);
-                    console.log(listaPublicaciones);
                     //Se ordena el listado obtenido de acuerdo a su prioridad
                     listaPublicaciones=[...listaPublicaciones].sort((a, b) => b.prioridad - a.prioridad);
                     return {success:true,data:listaPublicaciones,message:""};

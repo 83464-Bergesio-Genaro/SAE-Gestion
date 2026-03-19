@@ -1,11 +1,5 @@
 import { Link } from "react-router-dom";
-import Carrousel from "../../components/carrousel/Carrousel";
-import NewsSection from "../../components/news/New";
-/*const images = [
-  "/images/carrousel/AuditorioUTN.jpeg",
-  "/images/carrousel/EntradaUTN.jpg",
-  "/images/carrousel/FedeOlivos.jpeg",
-];*/
+import NewsGrid from "../../components/news/NewsGrid";
 import "./main.css";
 
 export default function Main() {
@@ -31,9 +25,7 @@ export default function Main() {
         <div className="main-image-container">
         </div>
       </div>
-      <NewsSection></NewsSection>
+      <NewsGrid></NewsGrid>
     </div>
-
-
   );
 }

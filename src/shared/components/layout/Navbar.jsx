@@ -11,7 +11,7 @@ export default function Navbar() {
   if (!user) {
     menu = sharedMenu;
   } else {
-    if (user?.id_perfil === 2) {
+    if (user?.id_perfil !== 1) {
       menu = employedMenu;
     } else if (user?.id_perfil === 1) {
       menu = studentMenu;
@@ -26,10 +26,6 @@ export default function Navbar() {
           <Link
             key={item.path}
             to={item.path}
-            style={{
-              background: item.color,
-              backgroundImage: "url(" + item.image + ")",
-            }}
           >
             <h4> {item.label}</h4>
           </Link>

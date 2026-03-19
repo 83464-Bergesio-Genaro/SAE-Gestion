@@ -11,7 +11,11 @@ export default function Navbar() {
   if (!user) {
     menu = sharedMenu;
   } else {
+<<<<<<< HEAD
     if (user?.id_perfil !== 1) {
+=======
+    if (user?.id_perfil === 2 || user?.id_perfil === 5) {
+>>>>>>> c77dceb (feat: Se Agrega modulo de Prensa)
       menu = employedMenu;
     } else if (user?.id_perfil === 1) {
       menu = studentMenu;

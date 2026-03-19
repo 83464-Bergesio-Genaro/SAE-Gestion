@@ -26,6 +26,8 @@ import SharedJPAIndustrial from "./shared/pages/degrees/industrial";
 import SharedJPAMecanic from "./shared/pages/degrees/mecanic";
 import SharedJPAMetalurgic from "./shared/pages/degrees/metalurgic";
 import SharedJPAParticipar from "./shared/pages/jpa/participar";
+import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
+import Prensa from "./shared/pages/prensa/Prensa";
 
 export default function App() {
   useEffect(() => {
@@ -52,6 +54,7 @@ export default function App() {
             <Route path="/JPA/mecanica" element={<SharedJPAMecanic />} />
             <Route path="/JPA/metalurgica" element={<SharedJPAMetalurgic />} />
             <Route path="/JPA/participar" element={<SharedJPAParticipar />} />
+            <Route path="/Prensa" element={<Prensa />} />
 
             {/* EMPLOYED */}
             <Route
@@ -76,6 +79,14 @@ export default function App() {
               element={
                 <ProtectedRoute role={2}>
                   <EmployedScholarships />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/Gestion-Prensa"
+              element={
+                <ProtectedRoute role={5}>
+                  <AdministrarPrensa />
                 </ProtectedRoute>
               }
             />

@@ -44,6 +44,12 @@ export const studentMenu = [
     path: "/Mis-Deportes",
     color:"#3062AC",
     image:"none"
+  },
+  {
+    label: "Prensa",
+    path: "/Prensa",
+    color:"#5E8ACC",
+    image:"none"
   }
 ];
 
@@ -57,13 +63,19 @@ export const employedMenu = [
   {
     label: "Deportes",
     path: "/Gestion-Deportes",
-    color:"#8FABD4",
+    color:"#56719a",
     image:"none"
   },
     {
     label: "Becas",
     path: "/Gestion-Becas",
     color:"#3F76C8",
+    image:"none"
+  },
+  {
+    label: "Prensa",
+    path: "/Prensa",
+    color:"#5E8ACC",
     image:"none"
   }
 ];

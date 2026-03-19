@@ -1,14 +1,7 @@
-/* Global Styles */* {
+/* Global Styles */
+* {
   box-sizing: border-box;
-  font-family: var(--font) !important;
-  
-}
-html{
-   scroll-behavior: smooth;
-}
-a{
-  text-decoration: none !important;
-  color: var(--text)
+  font-family: var(--font);
 }
 body {
   background: linear-gradient(135deg, #92E0DB 6.71%, #5B96CC 91.97%);

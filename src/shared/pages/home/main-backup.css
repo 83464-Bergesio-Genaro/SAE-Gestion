@@ -1,0 +1,112 @@
+h1{
+    font-size: 1.5em;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+h3{
+    font-size: 0px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.main-container{
+    display: flex;
+    padding: 10px;
+}
+.main-title-container{
+    width: 50%;
+    color: white;
+    padding: 20px 10px;
+    text-align: center;
+}
+
+.main-button-container{
+    display: block;
+}
+.main-button-container .main-jpa-button,
+.main-button-container .main-login-button{
+    width: 100%;
+    height: 50px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+    box-shadow: none;
+    cursor:pointer;
+    margin-top: 5px;
+}
+.main-button-container .main-jpa-button{
+    background: #5B96CC !important;
+}
+.main-button-container .main-login-button{
+    background: #4f9916 !important;
+}
+.main-image-container{
+    position: relative;
+    background-image: url("../../../../public/images/principal/logoUTNrotado.png"),
+    url("../../../../public/images/principal/utnBackLogo.svg");
+    background-repeat: no-repeat;
+    background-position:center, center;
+    background-size: 50%,70%;
+    min-height:80px;
+    width: 50%;
+}
+@media  (min-width: 600px) and (max-width: 1300px) {
+    h1{
+        font-size: 2em;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+    }
+    h3{
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+    }
+
+    .main-image-container{
+        background-position: center,center;
+        background-size: 170px,220px;
+        height: 45vh;
+    }
+}
+@media (min-width: 1300px){
+    h1{
+        font-size: 4.8em;
+    }
+    h3{
+        font-size: 1.5em;
+    }
+    .main-container{
+        padding: 10px 100px;
+    }
+    .main-title-container{
+        padding: 100px 5%;
+        text-align: left;
+    }
+    .main-title-container{
+        width: 50%;
+        color: white;
+        padding: 50px 5%;
+    }
+
+    .main-button-container{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 0 20% 0 0;
+        gap:10px;
+    }
+    .main-button-container .main-jpa-button,
+    .main-button-container .main-login-button{
+        font-size: 1.1em;
+        height: 50px;
+    }
+    .main-image-container{
+        background-position: 75%,80%;
+        background-size: 400px,550px;
+        height: 85vh;
+    }
+}

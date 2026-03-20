@@ -1,4 +1,5 @@
 import { appConfig } from "../config/appConfig";
+import {mapPublicacionPublica} from "./formatters/PrensaFormatter.js";
 
 function getToken() {
   const stored = localStorage.getItem("session");
@@ -121,7 +122,7 @@ export async function descargarDocumentoPorId(idDocumento) {
     return res.json();
   }
 
-  if (contentType.startsWith("image/")) {
+  if (contentType.startsWith("image/") || contentType.includes("application/pdf")) {
     const blob = await res.blob();
     const dataUrl = await new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -133,7 +134,9 @@ export async function descargarDocumentoPorId(idDocumento) {
     const disposition = res.headers.get("Content-Disposition") || "";
     const fileNameMatch = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
     const fileName = fileNameMatch?.[1] ? decodeURIComponent(fileNameMatch[1].replace(/"/g, "")) : "documento";
-    const extension = contentType.split("/")[1] || "jpg";
+    const extension = contentType.includes("application/pdf")
+      ? "pdf"
+      : contentType.split("/")[1] || "jpg";
 
     return {
       id: idDocumento,
@@ -145,3 +148,76 @@ export async function descargarDocumentoPorId(idDocumento) {
 
   throw new Error("Formato de respuesta no soportado");
 }
+
+export async function ObtenerNoticiasPublicas(){
+  try {
+    const response = await fetch(`${appConfig.apiUrl}/api/Prensa/ListarPublicacionesActivas`);
+
+    switch (response.status) {
+
+      case 200:
+      {
+        const data = await response.json();
+        let  listaPublicaciones =data.map(mapPublicacionPublica);
+        //Se ordena el listado obtenido de acuerdo a su prioridad
+        listaPublicaciones=[...listaPublicaciones].sort((a, b) => b.prioridad - a.prioridad);
+        return {success:true,data:listaPublicaciones,message:""};
+      }
+      case 204:
+        return {
+          success: false,
+          data:[],
+          message: "No hay publicaciones a listar"
+        };
+      case 400:
+        return {
+          success: false,
+          data:null,
+          message: "Se envio parametros a una vista"
+        };
+      case 401:
+
+        return {
+          success: false,
+          data:null,
+          message: "Paso a usar JWT el endpoint"
+        };
+
+      case 409:
+        return {
+          success: false,
+          data:null,
+          message: "Conflicto en la base de datos"
+        };
+
+      case 500:
+        return {
+          success: false,
+          data:null,
+          message: "Error interno del servidor"
+        };
+
+      default:
+
+        return {
+          success: false,
+          data:null,
+          message: "Respuesta desconocida"
+        };
+    }
+  } catch (error) {
+    console.log("Error: "+error)
+    return {
+      success: false,
+      data:null,
+      message: "Error no contemplado"
+    };
+  }
+}
+
+export function getDownloadUrl(id){
+  console.log(`${appConfig.apiUrl}/api/Prensa/DescargarDocumentoXId/${id}`);
+  return `${appConfig.apiUrl}/api/Prensa/DescargarDocumentoXId/${id}`;
+
+}
+

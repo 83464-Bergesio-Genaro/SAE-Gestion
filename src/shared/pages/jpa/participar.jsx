@@ -1,7 +1,6 @@
 import {
   Avatar,
   Box,
-  Button,
   Chip,
   Container,
   Dialog,
@@ -15,7 +14,6 @@ import {
   MenuItem,
   Paper,
   Select,
-  TextField,
   Typography,
   Tab,
 } from "@mui/material";
@@ -27,6 +25,7 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 import emailjs from "@emailjs/browser";
 import { useState, useRef } from "react";
+import SAEButton from "../../components/buttons/SAEButton";
 import checkImage from "../../../../public/images/logos/comprobado.png";
 
 export default function SharedJPAParticipar() {
@@ -265,38 +264,34 @@ export default function SharedJPAParticipar() {
                     />
                     <Grid container spacing={2} p={2}>
                       <Grid size={{ xs: 12 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
-                          id="outlined-required"
                           label="Nombre de la organización"
                           name="user_name"
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
-                          id="outlined-required"
                           label="Ingrese el email"
                           name="user_email"
                           type="email"
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 4 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
-                          id="outlined-required"
                           label="Teléfono"
                           name="phone"
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 4 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
-                          id="outlined-required"
                           label="Cantidad"
                           name="amount"
                         />
@@ -323,9 +318,9 @@ export default function SharedJPAParticipar() {
                         justifyContent="flex-end"
                         display="flex"
                       >
-                        <Button variant="contained" type="submit">
+                        <SAEButton variant="contained" type="submit">
                           Enviar
-                        </Button>
+                        </SAEButton>
                       </Grid>
                     </Grid>
                   </form>
@@ -335,7 +330,7 @@ export default function SharedJPAParticipar() {
                     <input type="hidden" name="form_type" value="Empresas" />
                     <Grid container spacing={2} p={2}>
                       <Grid size={{ xs: 12 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -344,7 +339,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 6 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -354,7 +349,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 6 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -363,7 +358,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 12 }}>
-                        <TextField
+                        <SAETextField
                           multiline
                           fullWidth
                           required
@@ -377,9 +372,9 @@ export default function SharedJPAParticipar() {
                         justifyContent="flex-end"
                         display="flex"
                       >
-                        <Button variant="contained" type="submit">
+                        <SAEButton variant="contained" type="submit">
                           Enviar
-                        </Button>
+                        </SAEButton>
                       </Grid>
                     </Grid>
                   </form>
@@ -389,7 +384,7 @@ export default function SharedJPAParticipar() {
                     <input type="hidden" name="form_type" value="Estudiantes" />
                     <Grid container spacing={2} p={2}>
                       <Grid size={{ xs: 12 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -398,7 +393,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -408,7 +403,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 6 }}>
-                        <TextField
+                        <SAETextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -464,9 +459,9 @@ export default function SharedJPAParticipar() {
                         justifyContent="flex-end"
                         display="flex"
                       >
-                        <Button variant="contained" type="submit">
+                        <SAEButton variant="contained" type="submit">
                           Enviar
-                        </Button>
+                        </SAEButton>
                       </Grid>
                     </Grid>
                   </form>
@@ -499,13 +494,13 @@ export default function SharedJPAParticipar() {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button
+          <SAEButton
             variant="contained"
             onClick={closeDialog}
             style={{ color: "white" }}
           >
             Cerrar
-          </Button>
+          </SAEButton>
         </DialogActions>
       </Dialog>
     </>

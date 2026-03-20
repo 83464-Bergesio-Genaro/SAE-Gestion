@@ -1,31 +1,51 @@
+import { Box, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
+import SAEButton from "../../components/buttons/SAEButton";
 import NewsGrid from "../../components/news/NewsGrid";
 import "./main.css";
 
 export default function Main() {
   return (
-    <div>
-      <div className="main-container">
-        <div className="main-title-container">
-          <h1>Secretaría de <br/>
-              Asuntos <br/>
-              Estudiantiles</h1>
+    <Box>
+      <Box className="main-container">
+        <Box className="main-title-container">
+          <Typography component="h1" sx={{ m: 0 }}>
+            Secretaría de <br />
+            Asuntos <br />
+            Estudiantiles
+          </Typography>
 
-              <h3>Universidad Tecnologica Nacional - Facultad Regional Córdoba</h3>
-              <div className="main-button-container">
-                <Link key="jpa" to="/JPA" >
-                <button className="main-jpa-button">Conoce nuestra Universidad</button>
-                </Link>
+          <Typography component="h3" sx={{ m: 0 }}>
+            Universidad Tecnologica Nacional - Facultad Regional Córdoba
+          </Typography>
 
-                <Link key="login" to="/login" >
-                  <button className="main-login-button">Soy parte de la UTN</button>
-                </Link>
-              </div>
-        </div>
-        <div className="main-image-container">
-        </div>
-      </div>
-      <NewsGrid></NewsGrid>
-    </div>
+          <Box className="main-button-container">
+            <SAEButton
+              className="main-jpa-button"
+              component={Link}
+              to="/JPA"
+              variant="contained"
+              sx={{ textTransform: "none" }}
+            >
+              Conoce nuestra Universidad
+            </SAEButton>
+
+            <SAEButton
+              className="main-login-button"
+              component={Link}
+              to="/login"
+              variant="contained"
+              sx={{ bgcolor: "#4f9916", textTransform: "none", "&:hover": { bgcolor: "#3d7a11" } }}
+            >
+              Soy parte de la UTN
+            </SAEButton>
+          </Box>
+        </Box>
+
+        <Box className="main-image-container" />
+      </Box>
+
+      <NewsGrid />
+    </Box>
   );
 }

@@ -13,7 +13,6 @@ export default function NewsGrid() {
             if(respuesta?.success && respuesta?.data){
               setEventosJPA(respuesta?.data);
             }
-    
           } catch (error) {
             console.error("Error al traer Eventos:", error);
           }
@@ -43,7 +42,7 @@ export default function NewsGrid() {
 
   return (
     <section className="news-section">
-      <h2>Novedades</h2>
+      <h2>Novedades1</h2>
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box
         onMouseLeave={() => setHoveredIndex(null)}
@@ -171,7 +170,7 @@ export default function NewsGrid() {
                   }}
                 >
                   {news.descripcion}
-                </Typography>                
+                </Typography>
               </Box>
             </Box>
           );

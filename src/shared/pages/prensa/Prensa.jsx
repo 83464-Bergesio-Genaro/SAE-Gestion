@@ -7,12 +7,10 @@ import {
   Typography,
   Chip,
   Container,
-  TextField,
   InputAdornment,
   Dialog,
   DialogTitle,
   DialogContent,
-  Button,
   CircularProgress,
   List,
   ListItem,
@@ -25,18 +23,20 @@ import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
+import SAEButton from "../../components/buttons/SAEButton";
+import SAETextField from "../../components/inputs/SAETextField";
+import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
 import {
   listarPublicacionesActivas,
   listarDocumentosPorPublicacion,
   descargarDocumentoPorId,
 } from "../../../api/PrensaService";
 
-const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"]);
+const PREVIEW_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "pdf"]);
 
 function getDocumentId(doc) {
   return doc?.id ?? doc?.id_documento ?? doc?.idDocumento ?? null;
@@ -81,9 +81,9 @@ function getDocumentExtension(doc) {
   return normalizeExtension(parts.pop());
 }
 
-function isImageDocument(doc) {
+function isPreviewableDocument(doc) {
   const extension = getDocumentExtension(doc);
-  return IMAGE_EXTENSIONS.has(extension);
+  return PREVIEW_EXTENSIONS.has(extension);
 }
 
 function getImageSource(doc) {
@@ -191,8 +191,8 @@ export default function Prensa() {
     try {
       const data = await descargarDocumentoPorId(documentId);
 
-      if (!isImageDocument(data) && !isImageDocument(doc)) {
-        setPreviewError("Solo se permite vista previa para imágenes.");
+      if (!isPreviewableDocument(data) && !isPreviewableDocument(doc)) {
+        setPreviewError("Solo se permite vista previa para imágenes o PDF.");
         return;
       }
 
@@ -241,20 +241,19 @@ export default function Prensa() {
           Prensa
         </Typography>
         {user?.id_perfil === 5 && (
-          <Button
-            variant="outlined"
+          <SAEButton
+            variant="contained"
             startIcon={<SettingsIcon />}
             onClick={() => navigate("/Gestion-Prensa")}
           >
             Administrar
-          </Button>
+          </SAEButton>
         )}
       </Box>
 
-      <TextField
+      <SAETextField
         fullWidth
         placeholder="Buscar publicación..."
-        variant="outlined"
         size="small"
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
@@ -275,20 +274,22 @@ export default function Prensa() {
           <CircularProgress />
         </Box>
       ) : publicacionesFiltradas.length === 0 ? (
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 4 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 4, textAlign: "center" }}>
           No se encontraron publicaciones.
         </Typography>
       ) : (
-        <Masonry
-          columns={{ xs: 1, sm: 2, md: 3 }}
-          spacing={{ xs: 2, sm: 3, md: 3 }}
-        >
-          {publicacionesFiltradas.map((pub, index) => {
-            const prio = prioridadLabel(pub.prioridad);
-            return (
-              <Card key={pub.id ?? index} sx={{ borderRadius: 2 }}>
-                <CardActionArea onClick={() => handleCardClick(pub)}>
-                  <CardContent>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Masonry
+            columns={{ xs: 1, sm: 2, md: 3 }}
+            spacing={{ xs: 2, sm: 3, md: 3 }}
+            sx={{ width: "100%", maxWidth: 1200 }}
+          >
+            {publicacionesFiltradas.map((pub, index) => {
+              const prio = prioridadLabel(pub.prioridad);
+              return (
+                <Card key={pub.id ?? index} sx={{ borderRadius: 2 }}>
+                  <CardActionArea onClick={() => handleCardClick(pub)}>
+                    <CardContent>
                     <Box
                       sx={{
                         display: "flex",
@@ -340,12 +341,13 @@ export default function Prensa() {
                         </Typography>
                       </Box>
                     </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            );
-          })}
-        </Masonry>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              );
+            })}
+          </Masonry>
+        </Box>
       )}
 
       {/* Dialog de detalle */}
@@ -452,47 +454,16 @@ export default function Prensa() {
         )}
       </Dialog>
 
-      <Dialog open={previewOpen} onClose={handleClosePreview} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              {getDocumentName(previewDoc, previewDocName || "Vista previa")}
-            </Typography>
-            <IconButton
-              size="small"
-              onClick={handleDownloadPreview}
-              disabled={!previewDoc || previewLoading || !!previewError}
-              aria-label="Descargar imagen"
-              title="Descargar"
-            >
-              <DownloadIcon fontSize="small" />
-            </IconButton>
-          </Box>
-          <IconButton onClick={handleClosePreview} size="small" aria-label="Cerrar">
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          {previewLoading && (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress />
-            </Box>
-          )}
-
-          {!previewLoading && previewError && (
-            <Typography color="error">{previewError}</Typography>
-          )}
-
-          {!previewLoading && !previewError && previewDoc && (
-            <Box
-              component="img"
-              src={getImageSource(previewDoc)}
-              alt={getDocumentName(previewDoc, previewDocName || "Archivo")}
-              sx={{ width: "100%", maxHeight: "70vh", objectFit: "contain", borderRadius: 1, bgcolor: "grey.100" }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <DocumentPreviewDialog
+        open={previewOpen}
+        onClose={handleClosePreview}
+        title={getDocumentName(previewDoc, previewDocName || "Vista previa")}
+        imageSrc={previewDoc ? getImageSource(previewDoc) : ""}
+        isPdf={getDocumentExtension(previewDoc) === "pdf"}
+        loading={previewLoading}
+        error={previewError}
+        onDownload={handleDownloadPreview}
+      />
     </Container>
   );
 }

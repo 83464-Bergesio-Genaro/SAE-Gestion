@@ -14,6 +14,7 @@ import {
   Grid,
   Stack,
   CardActionArea,
+  Link,
 } from "@mui/material";
 import "./jpa.css";
 import InteractiveGrid from "../../components/galleryZoomGrid/galleryZoomGrid";
@@ -144,7 +145,7 @@ export default function JPA() {
               >
                 {itemVertical.map((item) => (
                   <Card key={item.title} className="card-jpa">
-                    <a href={"#"+item.section}>
+                    <Link  href={"#"+item.section}>
                       <CardActionArea>
                         <CardContent className="card-jpa-content">
                           <item.icon
@@ -155,7 +156,7 @@ export default function JPA() {
                           </Typography>
                         </CardContent>
                       </CardActionArea>
-                    </a>
+                    </Link>
                   </Card>
                 ))}
               </Stack>
@@ -178,16 +179,16 @@ export default function JPA() {
                 sx={{ display: "flex", justifyContent: "center" }}
               >
                 <Card key={item.title} className="card-jpa" href="#">
-                <a href={"#"+item.section}>
-                  <CardActionArea>
-                    <CardContent className="card-jpa-content" >
-                      <item.icon sx={{ fontSize: 40, mb: { xs: 0, md: 1 } }} />
-                      <Typography className="typography-jpa">
-                        {item.title}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </a>
+                  <Link href={"#"+item.section}>
+                    <CardActionArea>
+                      <CardContent className="card-jpa-content" >
+                        <item.icon sx={{ fontSize: 40, mb: { xs: 0, md: 1 } }} />
+                        <Typography className="typography-jpa">
+                          {item.title}
+                        </Typography>
+                      </CardContent>
+                    </CardActionArea>
+                  </Link>
                 </Card>
               </Grid>
             ))}

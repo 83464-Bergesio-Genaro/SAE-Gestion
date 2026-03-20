@@ -3,12 +3,10 @@ import {
   Box,
   Typography,
   Container,
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   IconButton,
   Switch,
   FormControlLabel,
@@ -26,6 +24,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
+import SAEButton from "../../../shared/components/buttons/SAEButton";
+import SAETextField from "../../../shared/components/inputs/SAETextField";
 import {
   listarPublicacionesCompleto,
   crearPublicacion,
@@ -351,34 +351,33 @@ export default function AdministrarPrensa() {
 
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
+          <SAEButton
             variant={filtroEstado === "todos" ? "contained" : "outlined"}
             onClick={() => setFiltroEstado("todos")}
             size="small"
           >
             Todas
-          </Button>
-          <Button
+          </SAEButton>
+          <SAEButton
             variant={filtroEstado === "activas" ? "contained" : "outlined"}
             onClick={() => setFiltroEstado("activas")}
             size="small"
             color="success"
           >
             Activas
-          </Button>
-          <Button
+          </SAEButton>
+          <SAEButton
             variant={filtroEstado === "vencidas" ? "contained" : "outlined"}
             onClick={() => setFiltroEstado("vencidas")}
             size="small"
             color="error"
           >
             Vencidas
-          </Button>
+          </SAEButton>
         </Box>
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <TextField
+          <SAETextField
             placeholder="Buscar..."
-            variant="outlined"
             size="small"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
@@ -393,14 +392,14 @@ export default function AdministrarPrensa() {
               },
             }}
           />
-          <Button
+          <SAEButton
             variant="contained"
             startIcon={<AddIcon />}
             onClick={handleOpenNueva}
             size="small"
           >
             Nueva
-          </Button>
+          </SAEButton>
         </Box>
       </Box>
 
@@ -430,13 +429,13 @@ export default function AdministrarPrensa() {
               </IconButton>
             </DialogTitle>
             <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: "16px !important" }}>
-              <TextField
+              <SAETextField
                 label="Título"
                 fullWidth
                 value={editData.titulo_publicacion}
                 onChange={(e) => handleChange("titulo_publicacion", e.target.value)}
               />
-              <TextField
+              <SAETextField
                 label="Descripción"
                 fullWidth
                 multiline
@@ -444,7 +443,7 @@ export default function AdministrarPrensa() {
                 value={editData.descripcion}
                 onChange={(e) => handleChange("descripcion", e.target.value)}
               />
-              <TextField
+              <SAETextField
                 label="Fecha Inicio"
                 type="datetime-local"
                 fullWidth
@@ -452,7 +451,7 @@ export default function AdministrarPrensa() {
                 onChange={(e) => handleChange("fecha_inicio", e.target.value)}
                 slotProps={{ inputLabel: { shrink: true } }}
               />
-              <TextField
+              <SAETextField
                 label="Fecha Vigencia"
                 type="datetime-local"
                 fullWidth
@@ -490,7 +489,7 @@ export default function AdministrarPrensa() {
                 }
                 label="No dar de baja"
               />
-              <Button
+              <SAEButton
                 variant="outlined"
                 component="label"
                 startIcon={<CloudUploadIcon />}
@@ -501,16 +500,16 @@ export default function AdministrarPrensa() {
                   hidden
                   onChange={(e) => setArchivo(e.target.files?.[0] || null)}
                 />
-              </Button>
+              </SAEButton>
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 2 }}>
-              <Button
+              <SAEButton
                 variant="contained"
                 onClick={handleSave}
                 disabled={saving}
               >
                 {saving ? "Guardando..." : "Guardar"}
-              </Button>
+              </SAEButton>
             </DialogActions>
           </>
         )}
@@ -527,13 +526,13 @@ export default function AdministrarPrensa() {
               </IconButton>
             </DialogTitle>
             <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: "16px !important" }}>
-              <TextField
+              <SAETextField
                 label="Título"
                 fullWidth
                 value={nuevaData.titulo_publicacion}
                 onChange={(e) => handleNuevaChange("titulo_publicacion", e.target.value)}
               />
-              <TextField
+              <SAETextField
                 label="Descripción"
                 fullWidth
                 multiline
@@ -541,7 +540,7 @@ export default function AdministrarPrensa() {
                 value={nuevaData.descripcion}
                 onChange={(e) => handleNuevaChange("descripcion", e.target.value)}
               />
-              <TextField
+              <SAETextField
                 label="Fecha Inicio"
                 type="datetime-local"
                 fullWidth
@@ -549,7 +548,7 @@ export default function AdministrarPrensa() {
                 onChange={(e) => handleNuevaChange("fecha_inicio", e.target.value)}
                 slotProps={{ inputLabel: { shrink: true } }}
               />
-              <TextField
+              <SAETextField
                 label="Fecha Vigencia"
                 type="datetime-local"
                 fullWidth
@@ -587,7 +586,7 @@ export default function AdministrarPrensa() {
                 }
                 label="No dar de baja"
               />
-              <Button
+              <SAEButton
                 variant="outlined"
                 component="label"
                 startIcon={<CloudUploadIcon />}
@@ -598,16 +597,16 @@ export default function AdministrarPrensa() {
                   hidden
                   onChange={(e) => setArchivoNueva(e.target.files?.[0] || null)}
                 />
-              </Button>
+              </SAEButton>
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 2 }}>
-              <Button
+              <SAEButton
                 variant="contained"
                 onClick={handleSaveNueva}
                 disabled={savingNueva}
               >
                 {savingNueva ? "Guardando..." : "Guardar"}
-              </Button>
+              </SAEButton>
             </DialogActions>
           </>
         )}
@@ -627,9 +626,9 @@ export default function AdministrarPrensa() {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" color="error" onClick={handleDeleteConfirm}>
+          <SAEButton variant="contained" color="error" onClick={handleDeleteConfirm}>
             Eliminar
-          </Button>
+          </SAEButton>
         </DialogActions>
       </Dialog>
 

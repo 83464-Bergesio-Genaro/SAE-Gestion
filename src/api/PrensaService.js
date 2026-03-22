@@ -79,6 +79,14 @@ export async function listarDocumentosPorPublicacion(idPublicacion) {
   return res.json();
 }
 
+export async function listarDocumentosSinData() {
+  const res = await fetch(
+    `${appConfig.apiUrl}/api/Prensa/ListarDocumentosSinData`,
+    getHeaders("GET")
+  );
+  return res.json();
+}
+
 export async function crearDocumentoPrensa(formData) {
   const token = getToken();
   const headers = {};

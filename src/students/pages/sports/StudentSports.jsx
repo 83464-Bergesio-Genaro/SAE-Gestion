@@ -121,6 +121,7 @@ export default function StudentSports() {
     try {
       var texto = "";
       if (card.esta_inscripto) {
+     
         // DESINSCRIBIR
         await DesinscribirDeporte(card.id_inscripcion, user.token);
         texto = "Desinscripción realizada con éxito";

@@ -103,10 +103,11 @@ export function apiPut(endpoint, body, options = {}) {
   });
 }
 
-export function apiDelete(endpoint, options = {}) {
+export function apiDelete(endpoint, body,options = {}) {
   return apiRequest(endpoint, {
     ...options,
-
+    token: body.token,
+    mapper: body.mapper,
     method: "DELETE",
   });
 }

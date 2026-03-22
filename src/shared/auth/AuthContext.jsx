@@ -39,7 +39,8 @@ const [user, setUser] = useState(() => {
 
           const session = {
               token: result.data.token??"",
-              legajo: result.data.legajo_armado??"",
+              legajo: (result.data.legajo_armado ?? "").split('@')[0],
+              email : result.data.legajo_armado??"",
               nombre: result.data.nombre_usuario??"",
               id_perfil: result.data.id_perfil??0,
               expiration: Date.now() + 3600000

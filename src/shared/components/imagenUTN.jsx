@@ -1,9 +1,6 @@
-import * as React from "react";
 export default function ImagenUTN() {
   return (
     <svg
-      width={681}
-      height={754}
       viewBox="0 0 681 754"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

@@ -31,7 +31,7 @@ export default function Navbar() {
               backgroundImage: "url(" + item.image + ")",
             }}
           >
-            <h4> {item.label}</h4>
+            <h5> {item.label}</h5>
           </Link>
         ))}
       </div>

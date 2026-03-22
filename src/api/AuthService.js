@@ -3,9 +3,9 @@ import { appConfig } from "../config/appConfig";
 export default async function ObtenerTokenJWT(legajo, dominio, password) {
 
 try {
-console.log(`${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`);
+console.log(`${appConfig.apiUrl}/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`);
 const response = await fetch(
-    `${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`
+    `${appConfig.apiUrl}/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`
   );
   console.log(response);
  switch (response.status) {

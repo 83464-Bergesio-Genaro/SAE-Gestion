@@ -3,7 +3,7 @@ import { appConfig } from "../config/appConfig";
 export default async function ObtenerTokenJWT(legajo, dominio, password) {
 
   try {
-    const response = await fetch(`${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`);
+    const response = await fetch(`${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`, { headers: { "ngrok-skip-browser-warning": "true" } });
     switch (response.status) {
 
         case 201:

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { appConfig } from "./config/appConfig";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import { AuthProvider } from "./shared/auth/AuthContext";
 import ProtectedRoute from "./shared/auth/ProtectedRoute";
@@ -39,7 +39,7 @@ export default function App() {
   }, []);
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <MainLayout>
           <Routes>
             {/* Public */}
@@ -122,7 +122,7 @@ export default function App() {
             />
           </Routes>
         </MainLayout>
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   );
 }

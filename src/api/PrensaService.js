@@ -14,7 +14,7 @@ function getToken() {
 
 function getHeaders(method, body) {
   const token = getToken();
-  const headers = { "Content-Type": "application/json" };
+  const headers = { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const options = { method, headers };
   if (body) options.body = JSON.stringify(body);
@@ -79,9 +79,17 @@ export async function listarDocumentosPorPublicacion(idPublicacion) {
   return res.json();
 }
 
+export async function listarDocumentosSinData() {
+  const res = await fetch(
+    `${appConfig.apiUrl}/api/Prensa/ListarDocumentosSinData`,
+    getHeaders("GET")
+  );
+  return res.json();
+}
+
 export async function crearDocumentoPrensa(formData) {
   const token = getToken();
-  const headers = {};
+  const headers = { "ngrok-skip-browser-warning": "true" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(
     `${appConfig.apiUrl}/api/Prensa/CrearDocumentoPrensaLibre`,
@@ -151,7 +159,7 @@ export async function descargarDocumentoPorId(idDocumento) {
 
 export async function ObtenerNoticiasPublicas(){
   try {
-    const response = await fetch(`${appConfig.apiUrl}/api/Prensa/ListarPublicacionesActivas`);
+    const response = await fetch(`${appConfig.apiUrl}/api/Prensa/ListarPublicacionesActivas`, { headers: { "ngrok-skip-browser-warning": "true" } });
 
     switch (response.status) {
 

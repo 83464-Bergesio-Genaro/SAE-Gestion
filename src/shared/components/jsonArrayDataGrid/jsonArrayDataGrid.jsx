@@ -73,7 +73,7 @@ export default function JsonArrayDataGrid({ title, data }) {
   }));
 
   return (
-    <Card sx={{ bgcolor: "white" }}>
+    <Card>
       <CardContent>
         <Typography variant="h2" sx={{ fontWeight: "bold" }}>
           {title}

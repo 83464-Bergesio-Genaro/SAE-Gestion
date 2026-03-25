@@ -27,7 +27,10 @@ import {
   CheckCircleOutline,
   HighlightOff,
   UploadFile,
+  CheckCircle,
   FileUpload,
+  Cancel,
+  EmojiEvents
 } from "@mui/icons-material";
 
 import DeportesMasonry from "../../components/deportesMasonery";
@@ -121,7 +124,6 @@ export default function StudentSports() {
     try {
       var texto = "";
       if (card.esta_inscripto) {
-     
         // DESINSCRIBIR
         await DesinscribirDeporte(card.id_inscripcion, user.token);
         texto = "Desinscripción realizada con éxito";
@@ -213,13 +215,20 @@ export default function StudentSports() {
       <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
         <DialogTitle>{popupSuccess ? "Éxito" : "Error"}</DialogTitle>
 
-        <DialogContent>
+        <DialogContent >
           <DialogContentText>{popupMessage}</DialogContentText>
+          <Box display="flex" justifyContent="center" mt="0">
+            {popupSuccess ? (
+              <CheckCircle sx={{ fontSize: 60 }} color="success" />
+            ) : (
+              <Cancel sx={{ fontSize: 60 }} color="error" />
+            )}
+          </Box>
         </DialogContent>
 
         <DialogActions>
           <Button onClick={() => setOpenPopup(false)} autoFocus>
-            Aceptar
+            Cerrar
           </Button>
         </DialogActions>
       </Dialog>

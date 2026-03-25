@@ -298,7 +298,13 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
           label="Buscar"
           value={textoBusqueda}
           onChange={(e) => setTextoBusqueda(e.target.value)}
-          sx={{ minWidth: 250 }}
+          sx={{
+            minWidth: 250,
+            width: {
+              xs: "100%",
+              md: 300,
+            },
+          }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -347,7 +353,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                 <Button
                   size="medium"
                   variant="contained"
-                  startIcon={<AddIcon />}
+                  startIcon={card.esta_inscripto === false?<AddIcon/> :<CancelIcon />}
                   onClick={() => handleOpen(index)} // Abrir el diálogo específico del card
                   color={card.esta_inscripto === false ? "success" : "error"}
                   fullWidth
@@ -367,7 +373,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                       {card.esta_inscripto === false
                         ? "Inscribir"
                         : "Desinscribirte"}{" "}
-                      de {card.deporte} ?
+                      de {card.deporte}?
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>

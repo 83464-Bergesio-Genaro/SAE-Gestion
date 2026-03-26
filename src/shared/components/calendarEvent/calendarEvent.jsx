@@ -34,13 +34,14 @@ export function CalendarEvent({ eventos }) {
 
   return (
     <Box>
+      
       <Box sx={{ position: "relative" }}>
         <Box
           sx={{
             margin: 4,
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 2,
+            gap: 4,
           }}
         >
           {visibleItems.map((evento, index) => (

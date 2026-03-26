@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Divider, Typography } from "@mui/material";
+import { Box, Card, CardContent, Divider,Link, Typography } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 export function EventoCard({ evento }) {
@@ -7,8 +7,8 @@ export function EventoCard({ evento }) {
       sx={{
         height: "100%",
         borderRadius: 4,
-        backgroundColor: "#37518A",
-        color: "white",
+        backgroundColor: "white",
+        color: "black",
         boxShadow: "0 8px 18px rgba(0,0,0,0.28)",
       }}
     >
@@ -24,36 +24,37 @@ export function EventoCard({ evento }) {
           <Typography sx={{ fontSize: 22, fontWeight: 700 }}>
             {evento.fecha_evento}
           </Typography>
-          <Typography sx={{ fontSize: 20, fontWeight: 700 }}>
+          <Typography sx={{ fontSize: 40, fontWeight: 700 }}>
             {evento.horario_inicio}
           </Typography>
         </Box>
 
-        <Divider sx={{ borderColor: "rgba(255,255,255,0.10)", mb: 2 }} />
+        <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.5)", mb: 2 }} />
+         <Box mb={1}>
+            <Typography sx={{ fontSize: 24, fontWeight: 700,textAlign:"center" }}>
+              {evento.nombre_evento}
+            </Typography>
 
-        <Typography sx={{ fontSize: 18, fontWeight: 700 }}>
-          {evento.nombre_evento}
-        </Typography>
+            <Typography sx={{textAlign:"center" }}>
+              {evento.encargado}
+            </Typography>
+         </Box>
 
-        <Typography sx={{}}>
-          <Box component="span" sx={{ fontWeight: 700 }}></Box>{" "}
-          {evento.encargado}
-        </Typography>
-
-        <Typography sx={{ mb: 2 }}>
+        <Typography sx={{ mb: 2 ,marginTop:4}}>
           <Box component="span" sx={{ fontWeight: 700 }}>
             Duración:
           </Box>{" "}
           {evento.duracion}
         </Typography>
-
         <Divider
-          sx={{ borderColor: "rgba(255,255,255,0.10)", mt: "auto", mb: 2 }}
+          sx={{ borderColor: "rgba(0, 0, 0, 0.6)", mt: "auto", mb: 2 }}
         />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <LocationOnIcon sx={{ fontSize: 22 }} />
-          <Typography sx={{ fontSize: 15 }}>{evento.lugar}</Typography>
+          <Link target="_blank" href={evento.lugar} sx={{textDecoration:"none"}}>
+          <Typography sx={{ fontSize: 16,color:"black" }}>Ver Ubicacion en Maps</Typography>
+          </Link>
         </Box>
       </CardContent>
     </Card>

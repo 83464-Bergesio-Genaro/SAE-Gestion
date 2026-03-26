@@ -1,125 +1,12 @@
-/* =========================
-   VIDEO
-========================= */
-
-.video-container {
-  position: relative;
-  width: 100%;
-  max-width: 720px;
-  aspect-ratio: 16 / 9;
-  margin: auto;
+html{
+  scroll-behavior: smooth;
 }
-
-.youtube-video {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 0;
+a:hover{
+  text-decoration: none;
 }
-
-/* =========================
-   CARDS
-========================= */
-
-.card-jpa {
-  width: 100%;
-  min-height: 32px;
-  transition: 0.2s;
-  cursor: pointer;
+.desktop-container{
+    display: none;
 }
-
-.card-jpa:hover {
-  transform: translateY(-4px);
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.card-jpa-content {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  text-align: left;
-}
-
-.typography-jpa {
-  font-size: 20px !important;
-  font-weight: 500;
-}
-
-.icon-jpa {
-  font-size: 30px;
-}
-
-/* =========================
-   FLOATING ACTION BUTTON
-========================= */
-
-.fab-participar {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-
-  padding: 0 16px;
-  width: 56px;
-  height: 56px;
-
-  overflow: hidden;
-  white-space: nowrap;
-
-  transition: all 0.3s ease;
-}
-
-.fab-participar .texto {
-  opacity: 0;
-  white-space: nowrap;
-  transition:
-    opacity 0.2s ease,
-    width 0.3s ease;
-  width: 0;
-  
-}
-.fab-participar:hover {
-  min-width: 220px;
-  justify-content: flex-start;
-  transition:  min-width 0.3s ease !important;
-  
-}
-.fab-participar:hover .texto {
-  opacity: 1;
-  margin-left: 5%;
-}
-/* =========================
-   DESKTOP
-========================= */
-
-@media (min-width: 900px) {
-  .card-jpa-content {
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    
-  }
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 768px) {
-  .video-container {
-    max-width: 350px;
-  }
-
-  .icon-jpa {
-    font-size: 40px;
-  }
-}
-
 .colectivo-ERSA {
   color: #d32f2f !important;
   border-color: #d32f2f !important;
@@ -157,4 +44,247 @@
 .colectivo-Coniferal > .MuiChip-avatar {
   color: white !important;
   background: #ef6c00;
+}
+
+/*    JPA TOP INFO     */
+
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 20px;
+  padding: 40px;
+}
+.menu-container{
+  background-color: black;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+.video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;  
+}
+.video-container iframe {
+  height: 100%;
+  border-radius: 12px;
+  aspect-ratio: 16 / 9;
+  border: none;
+}
+.side-menu {
+  display: grid;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0px;
+  display: none;
+}
+.bottom-menu {
+  display: grid;
+  gap: 20px;
+  display: none; /*Es para dejar el codigo por si lo quieren ver en el futuro*/
+}
+
+.menu-card:hover{
+  transform: scale(1.03);
+  opacity: 0.8;
+}
+/*  FINAL  JPA TOP INFO     */
+
+/*    GRILLA INTERACTIVA     */
+.interactive-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;  
+  padding: 10px;
+  margin-top: 10px; 
+}
+  /*  FINAL GRILLA INTERACTIVA     */
+
+/*    SECCIONES     */
+.info-container{
+  padding: 10px 40px;
+  gap:10px;
+  display: grid;
+  place-items: center;  
+}
+.info-secciones{
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  background-color: #1f5e9c ;
+  border: 1px solid #000000;
+  color: white;
+  box-shadow:0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  transition: all 0.3s ease; /* Smooth transition for width/height changes */
+  margin-bottom: 10px;
+  border-radius: 12px;
+  min-height: 100px;
+  padding: 0px 16px;
+}
+.info-content{
+  max-height: 40px; /* Initial height for the visible content */
+  transition: max-height 0.5s ease-out;
+  align-items: center;
+  text-align: center;
+}
+.info-content h2{
+  font-size: 22px;
+}
+.info-hidden, .info-hidden-left{
+  font-size: 16px;
+  text-align: left;
+  opacity: 0;
+  height: auto;
+  transition: opacity 0.4s ease-out;
+}
+.info-secciones:hover .info-content {
+    max-height: 600px; /* A large enough value to accommodate the expanded content */
+}
+.info-secciones:hover .info-content .info-hidden,
+.info-secciones:hover .info-content .info-hidden-left {
+  opacity: 1; /* A large enough value to accommodate the expanded content */
+  transition: opacity 0.1s ease-in;
+  height: fit-content;
+}
+
+/*  FINAL SECCIONES     */
+
+
+
+@media (min-width: 1200px){
+  .mobile-container{
+      display: none;
+  }
+  .desktop-container{
+    margin-top: 50px;
+    display: grid;
+}
+  /*    JPA TOP INFO     */
+  .home-grid {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 22px;
+    column-gap: 6px;
+    padding: 70px;
+  }
+
+  /* VIDEO */
+  .menu-container{
+    max-height: 460px;
+  }
+  .video-container {
+    grid-column: 1;
+    grid-row: 1;
+    height: 100%;
+  }
+  /* SIDE MENU */
+
+  .side-menu {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-left: 8px;
+  }
+
+  /* BOTTOM MENU */
+  .bottom-menu {
+    grid-column: 1 / span 2;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  /*   FINAL JPA TOP INFO     */
+
+  /*    GRILLA INTERACTIVA     */
+  .interactive-container{
+      margin-top: 40px; 
+    padding: 20px 44px;
+  }  
+  /*  FINAL GRILLA INTERACTIVA     */
+
+  /*           SECCIONES           */
+  .info-container{
+    row-gap: 40px;
+    padding: 70px 22vw;
+  }
+  .info-secciones{
+    scroll-margin-top: 100px;
+    margin: 0;
+    padding: 10px;
+    background-color: white;
+    color: black;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+      transition: transform 0.3s ease-in-out;
+  }
+  .info-secciones:hover{
+    transition: transform 0.3s  ease-in-out;
+    transform: scale(1.03);
+    opacity: 0.98;
+  }
+  .info-content{
+    max-height: 500px; /* Initial height for the visible content */
+  }
+  .info-content h2{
+    font-size: 30px;
+  }
+  .info-hidden,
+  .info-hidden-left{
+      opacity: 1; 
+      display: grid;
+      text-align: left;
+      padding: 30px 20px;
+      font-size: 20px;
+  }
+  .info-hidden{
+      grid-template-columns: 3fr 1fr;
+  }
+  .info-hidden-left{
+      grid-template-columns: 1fr 3fr;
+  }
+  .info-hidden-text{
+    padding: 0px 30px;
+  }
+
+  .info-visita-image,
+  .info-tuto-image,
+  .info-inter-image,
+  .info-becas-image,
+  .info-salud-image,
+  .info-depo-image,
+  .info-biblo-image{
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      width: 100%;
+      border-radius: 50px;     
+  }
+
+    .info-visita-image{
+        background-image: url("../../../../public/images/infoSection/visitasFRC.jpg");
+    }
+    .info-tuto-image{
+        background-image: url("../../../../public/images/infoSection/tutoriasFRC.jpg");
+    }       
+    .info-inter-image{
+        background-image: url("../../../../public/images/infoSection/coruscant.webp");
+    }       
+    .info-becas-image{
+        background-image: url("../../../../public/images/infoSection/scholarshipsFRC.webp");
+    }    
+    .info-salud-image{
+        background-image: url("../../../../public/images/infoSection/saludFRC.jpg");
+    }
+    .info-depo-image{
+        background-image: url("../../../../public/images/infoSection/deportesFRC.jpg");
+    }
+    .info-biblo-image{
+        background-image: url("../../../../public/images/infoSection/biblotecaFRC.jpg");
+    }
+    .events-container{
+          padding: 70px 20vw;
+    }
+  /*  FINAL SECCIONES     */
 }

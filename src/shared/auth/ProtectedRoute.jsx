@@ -9,7 +9,11 @@ export default function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" />;
   }
 
-  if (role && user.id_perfil !== role) {
+  const hasRole = Array.isArray(role)
+    ? role.includes(user.id_perfil)
+    : user.id_perfil === role;
+
+  if (role && !hasRole) {
     return <Navigate to="/" />;
   }
 

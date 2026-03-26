@@ -62,7 +62,7 @@ export default function App() {
             <Route
               path="/Inicio"
               element={
-                <ProtectedRoute role={2}>
+                <ProtectedRoute role={[2, 5]}>
                   <EmployedMain />
                 </ProtectedRoute>
               }
@@ -71,7 +71,7 @@ export default function App() {
             <Route
               path="/Gestion-Deportes"
               element={
-                <ProtectedRoute role={2}>
+                <ProtectedRoute role={[2, 5]}>
                   <EmployedSports />
                 </ProtectedRoute>
               }
@@ -79,7 +79,7 @@ export default function App() {
             <Route
               path="/Gestion-Becas"
               element={
-                <ProtectedRoute role={2}>
+                <ProtectedRoute role={[2, 5]}>
                   <EmployedScholarships />
                 </ProtectedRoute>
               }

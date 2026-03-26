@@ -12,6 +12,9 @@ import {
   InputAdornment,
   Snackbar,
   Alert,
+  Card,
+  CardContent,
+  Stack,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
@@ -107,7 +110,7 @@ export default function AdministrarPrensa() {
     {
       field: "fecha_inicio",
       headerName: C.colStartDate,
-      width: 160,
+      width: 140,
       valueFormatter: (value) =>
         value
           ? new Date(value).toLocaleDateString("es-AR", { year: "numeric", month: "short", day: "numeric" })
@@ -116,7 +119,7 @@ export default function AdministrarPrensa() {
     {
       field: "fecha_vigencia",
       headerName: C.colExpiry,
-      width: 160,
+      width: 140,
       valueFormatter: (value) =>
         value
           ? new Date(value).toLocaleDateString("es-AR", { year: "numeric", month: "short", day: "numeric" })
@@ -167,72 +170,89 @@ export default function AdministrarPrensa() {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <SAEButton
-            variant={filtroEstado === "todos" ? "contained" : "outlined"}
-            onClick={() => setFiltroEstado("todos")}
-            size="small"
-          >
-            {C.filterAll}
-          </SAEButton>
-          <SAEButton
-            variant={filtroEstado === "activas" ? "contained" : "outlined"}
-            onClick={() => setFiltroEstado("activas")}
-            size="small"
-            color="success"
-          >
-            {C.filterActive}
-          </SAEButton>
-          <SAEButton
-            variant={filtroEstado === "vencidas" ? "contained" : "outlined"}
-            onClick={() => setFiltroEstado("vencidas")}
-            size="small"
-            color="error"
-          >
-            {C.filterExpired}
-          </SAEButton>
-        </Box>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <SAETextField
-            placeholder={C.searchPlaceholder}
-            size="small"
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            sx={{ width: 250, "& .MuiInputBase-input": { py: "4px" } }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              },
+      <Card sx={{ borderRadius: 4, boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)", mb: 3 }}>
+        <CardContent>
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={1.5}
+            sx={{
+              mb: 2.5,
+              width: "100%",
+              justifyContent: "space-between",
+              alignItems: { xs: "stretch", md: "center" },
             }}
-          />
-          <SAEButton
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={nueva.actions.open}
-            size="small"
           >
-            {C.newButtonLabel}
-          </SAEButton>
-        </Box>
-      </Box>
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", flex: 1, minWidth: 0 }}>
+              <SAEButton
+                variant={filtroEstado === "todos" ? "contained" : "outlined"}
+                onClick={() => setFiltroEstado("todos")}
+                size="small"
+              >
+                {C.filterAll}
+              </SAEButton>
+              <SAEButton
+                variant={filtroEstado === "activas" ? "contained" : "outlined"}
+                onClick={() => setFiltroEstado("activas")}
+                size="small"
+                color="success"
+              >
+                {C.filterActive}
+              </SAEButton>
+              <SAEButton
+                variant={filtroEstado === "vencidas" ? "contained" : "outlined"}
+                onClick={() => setFiltroEstado("vencidas")}
+                size="small"
+                color="error"
+              >
+                {C.filterExpired}
+              </SAEButton>
+            </Stack>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <SAETextField
+                placeholder={C.searchPlaceholder}
+                size="small"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                sx={{
+                  width: { xs: "100%", sm: 250 },
+                  "& .MuiOutlinedInput-root": { height: "30px" },
+                  "& .MuiInputBase-input": { py: 0 },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              <SAEButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={nueva.actions.open}
+                size="small"
+              >
+                {C.newButtonLabel}
+              </SAEButton>
+            </Stack>
+          </Stack>
 
-      <Box sx={{ width: "100%" }}>
-        <DataGrid
-          rows={rowsFiltradas}
-          columns={columns}
-          loading={loading}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-          pageSizeOptions={[5, 10, 25]}
-          disableRowSelectionOnClick
-          autoHeight
-          sx={{ borderRadius: 2 }}
-        />
-      </Box>
+          <Box sx={{ width: "100%" }}>
+            <DataGrid
+              rows={rowsFiltradas}
+              columns={columns}
+              loading={loading}
+              initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+              pageSizeOptions={[5, 10, 25]}
+              disableRowSelectionOnClick
+              autoHeight
+              sx={{ borderRadius: 2 }}
+            />
+          </Box>
+        </CardContent>
+      </Card>
 
       <NuevaPublicacionDialog state={nueva.state} actions={nueva.actions} />
 

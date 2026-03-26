@@ -2,52 +2,7 @@ import { useMemo, useState } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const items = [
-  {
-    title: "Ing. Sistemas de Información",
-    img: "../../../../public/images/degreesJPA/ingenieriaSistemas.jpeg",
-    route: "/JPA/sistemas",
-  },
-  {
-    title: "Ing. Electrica",
-    img: "../../../../public/images/degreesJPA/ingenieriaElectrica.jpg",
-    route: "/JPA/electrica",
-  },
-  {
-    title: "Ing. Quimica",
-    img: "../../../../public/images/degreesJPA/ingenieriaQuimica.jpg",
-    route: "/JPA/quimica",
-  },
-
-  {
-    title: "Ing. Metalurgica",
-    img: "../../../../public/images/degreesJPA/ingenieriaMetalurgica.jpg",
-    route: "/JPA/metalurgica",
-  },
-
-  {
-    title: "Ing. Electronica",
-    img: "../../../../public/images/degreesJPA/ingenieriaElectronica.jpg",
-    route: "/JPA/electronica",
-  },
-  {
-    title: "Ing. Civil",
-    img: "../../../../public/images/degreesJPA/ingenieriaCivil.jpg",
-    route: "/JPA/civil",
-  },
-  {
-    title: "Ing. Industrial",
-    img: "../../../../public/images/degreesJPA/ingenieriaIndustrial.jpg",
-    route: "/JPA/industrial",
-  },
-  {
-    title: "Ing. Mecanica",
-    img:  "../../../../public/images/degreesJPA/ingenieriaMecanica.jpg",
-    route: "/JPA/mecanica",
-  },
-];
-
-export default function InteractiveGrid() {
+export default function InteractiveGrid({items}) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const navigate = useNavigate();
 
@@ -70,7 +25,7 @@ export default function InteractiveGrid() {
   }, [hoveredRow]);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="x4" sx={{ padding:"0px"}}>
       <Box
         onMouseLeave={() => setHoveredIndex(null)}
         sx={{

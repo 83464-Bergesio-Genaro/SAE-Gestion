@@ -14,7 +14,7 @@ export default function Main() {
             Asuntos <br />
             Estudiantiles
           </Typography>
-
+ 
           <Typography component="h3" sx={{ m: 0 }}>
             Universidad Tecnologica Nacional - Facultad Regional Córdoba
           </Typography>

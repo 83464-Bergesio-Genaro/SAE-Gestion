@@ -8,7 +8,7 @@ export const mapEventoPublico = (eventoJPA) => ({
     eventoJPA.horario_inicio,
     eventoJPA.horario_fin,
   ),
-  lugar: "Falta de BBDD",
+  lugar:eventoJPA.ubicacion,
   nombre_evento: eventoJPA.nombre_evento,
 });
 
@@ -25,13 +25,13 @@ const calcularHorasMinutos = (inicio, fin) => {
   const minutos = diff % 60;
 
   if (minutos === 0) return `${horas}hs`;
-  return `${horas}hs ${minutos}m`;
+  return `${horas}:${minutos}hs`;
 };
 
 const mostrarHorasMinutos = (horario) => {
   const [h1, m1, s1] = horario.split(":").map(Number);
   if (m1 === 0) return `${h1}hs`;
-  return `${h1}hs ${m1}m`;
+  return `${h1}:${m1}hs`;
 };
 
 const formatearFecha = (fecha) => {

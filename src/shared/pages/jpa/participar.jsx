@@ -11,6 +11,7 @@ import {
   FormControl,
   Grid,
   InputLabel,
+  TextField,
   MenuItem,
   Paper,
   Select,
@@ -130,10 +131,6 @@ export default function SharedJPAParticipar() {
 
   const [dialog, setDialog] = useState(false);
 
-  const openDialog = () => {
-    setDialog(true);
-  };
-
   const closeDialog = () => {
     setDialog(false);
   };
@@ -200,7 +197,7 @@ export default function SharedJPAParticipar() {
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1063.1657514756466!2d-64.19445682694611!3d-31.442516265642624!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9432a2f66864ac1d%3A0x353cb4569b42a5bb!2sSecretar%C3%ADa%20de%20Asuntos%20Estudiantiles%20(S.A.E.)%20%7C%20U.T.N.%20%E2%80%93%20F.R.C.!5e0!3m2!1ses-419!2sar!4v1725738818372!5m2!1ses-419!2sar"
                 loading="lazy"
                 width="100%"
-                height="175px"
+                height="375px"
               ></iframe>
             </Grid>
             <Grid
@@ -264,7 +261,7 @@ export default function SharedJPAParticipar() {
                     />
                     <Grid container spacing={2} p={2}>
                       <Grid size={{ xs: 12 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           label="Nombre de la organización"
@@ -272,7 +269,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           label="Ingrese el email"
@@ -281,7 +278,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 4 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           label="Teléfono"
@@ -289,7 +286,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 4 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           label="Cantidad"
@@ -330,7 +327,7 @@ export default function SharedJPAParticipar() {
                     <input type="hidden" name="form_type" value="Empresas" />
                     <Grid container spacing={2} p={2}>
                       <Grid size={{ xs: 12 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -339,7 +336,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 6 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -349,7 +346,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 6 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -358,7 +355,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 12 }}>
-                        <SAETextField
+                        <TextField
                           multiline
                           fullWidth
                           required
@@ -384,7 +381,7 @@ export default function SharedJPAParticipar() {
                     <input type="hidden" name="form_type" value="Estudiantes" />
                     <Grid container spacing={2} p={2}>
                       <Grid size={{ xs: 12 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -393,7 +390,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           id="outlined-required"
@@ -403,7 +400,7 @@ export default function SharedJPAParticipar() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12, lg: 6 }}>
-                        <SAETextField
+                        <TextField
                           fullWidth
                           required
                           id="outlined-required"

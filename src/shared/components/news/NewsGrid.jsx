@@ -42,7 +42,7 @@ export default function NewsGrid() {
 
   return (
     <section className="news-section">
-      <h2>Novedades1</h2>
+      <h2>Novedades</h2>
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box
         onMouseLeave={() => setHoveredIndex(null)}

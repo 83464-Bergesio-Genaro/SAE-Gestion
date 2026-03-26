@@ -3,8 +3,9 @@
   box-sizing: border-box;
   font-family: var(--font);
 }
-
 body {
+  background: linear-gradient(135deg, #92E0DB 6.71%, #5B96CC 91.97%);
+  width: 100%;
   margin: 0;
 
   background: var(--background);
@@ -34,8 +35,7 @@ h3 {
   line-height: 0.5;
 }
 /* MAIN CONTENT */
-
 .main-content {
   width: 100%;
-  min-height: 88vh !important; /* This makes the root at least 100% of the viewport height */
+  min-height: 65vh; /* This makes the root at least 100% of the viewport height */
 }

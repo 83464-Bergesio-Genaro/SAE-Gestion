@@ -1,8 +1,8 @@
 import { useState } from "react";
 import "./login.css";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../../auth/AuthContext";
 //import { useNavigate } from "react-router-dom";
-import {PopupError,PopUpWaiting} from "../components/popUp/Popup";
+import {PopupError,PopUpWaiting} from "../../components/popUp/Popup";
 
 const carreras = [
     {value:"sistemas",label:"Sistemas"},

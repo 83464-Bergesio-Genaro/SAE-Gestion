@@ -1,46 +1,43 @@
 /* NAVBAR BASE (mobile first) */
 /* titulo */
-
+ 
 .navbar {
   display: block;
   justify-content: space-between;
   align-items: center;
   padding: 0;
-  background: var(--navbar);
-  border-bottom: 1px solid #eee;
   transition: background 0.3s ease;
   width: 100% !important;
-  height: none;
+  /*background-color: var(--navbar);*/
 }
 
-.nav-logo {
-  background-image: url("../../../../public/images/navbar/utnFRClogo.png");
+.nav-logo{
+  background-image: url("saeLogo.svg");
   width: 100%;
   height: 100px;
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  margin: 10px 0;
 }
 /* links */
 
 .nav-links {
   display: flex;
   flex-direction: column;
-
   width: 100% !important;
-
   transition: background 0.3s ease;
 }
 
 .nav-links a {
-  width: 100% !important;
-
   display: flex;
   text-decoration: none;
   text-align: center;
   width: auto;
-  min-height: 65px;
-  font-size: 32px;
-  color: var(--text);
+  min-height: 50px;
+  font-size: 24px;
+  color:white;
+  border: 1px solid white;
   transition: background 0.3s ease;
   background-repeat: no-repeat !important;
   background-size: cover !important;
@@ -93,14 +90,14 @@
   text-align: left;
   padding: 5px 20px;
   background: var(--secondary);
-  min-height: 5vh;
+  min-height: 6vh;
+  max-height: 12vh;
   width: 100% !important;
-
   color: var(--text);
 }
 /* DESKTOP */
 
-@media (min-width: 768px) {
+@media (min-width: 1300px) {
   .navbar {
     display: inline-flex;
     flex-direction: row;
@@ -110,25 +107,27 @@
   }
   .nav-logo {
     background-position: left;
-    background-position-x: 35px;
+    background-position-x: 0px;
     width: 100% !important;
-    height: 65px;
+    height: 45px;
   }
   .nav-links {
     display: flex;
     flex-direction: row;
     font-weight: bold;
-    height: 65px;
+    height: 40px;
     width: 100% !important;
   }
 
   .nav-links a {
+    border: none;
+    background-color: none;
     width: auto;
-    background-image: none !important;
     display: flex;
     min-height: auto;
     font-size: 24px;
     width: 100% !important;
+
   }
   .nav-logout {
     height: 40px;

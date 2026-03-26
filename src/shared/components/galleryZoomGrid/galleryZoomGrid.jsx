@@ -1,48 +1,49 @@
 import { useMemo, useState } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+
 const items = [
   {
     title: "Ing. Sistemas de Información",
-    img: "https://picsum.photos/800/600?1",
-    route: "/sistemas",
+    img: "../../../../public/images/degreesJPA/ingenieriaSistemas.jpeg",
+    route: "/JPA/sistemas",
   },
   {
     title: "Ing. Electrica",
-    img: "https://picsum.photos/800/600?2",
-    route: "/electricidad",
+    img: "../../../../public/images/degreesJPA/ingenieriaElectrica.jpg",
+    route: "/JPA/electrica",
   },
   {
     title: "Ing. Quimica",
-    img: "https://picsum.photos/800/600?3",
-    route: "/quimica",
+    img: "../../../../public/images/degreesJPA/ingenieriaQuimica.jpg",
+    route: "/JPA/quimica",
   },
 
   {
     title: "Ing. Metalurgica",
-    img: "https://picsum.photos/800/600?45",
-    route: "/metalurgica",
+    img: "../../../../public/images/degreesJPA/ingenieriaMetalurgica.jpg",
+    route: "/JPA/metalurgica",
   },
 
   {
     title: "Ing. Electronica",
-    img: "https://picsum.photos/800/600?5",
-    route: "/electronica",
+    img: "../../../../public/images/degreesJPA/ingenieriaElectronica.jpg",
+    route: "/JPA/electronica",
   },
   {
     title: "Ing. Civil",
-    img: "https://picsum.photos/800/600?6",
-    route: "/civil",
+    img: "../../../../public/images/degreesJPA/ingenieriaCivil.jpg",
+    route: "/JPA/civil",
   },
   {
     title: "Ing. Industrial",
-    img: "https://picsum.photos/800/600?7",
-    route: "/industrial",
+    img: "../../../../public/images/degreesJPA/ingenieriaIndustrial.jpg",
+    route: "/JPA/industrial",
   },
   {
     title: "Ing. Mecanica",
-    img: "https://picsum.photos/800/600?8",
-    route: "/mecanica",
+    img:  "../../../../public/images/degreesJPA/ingenieriaMecanica.jpg",
+    route: "/JPA/mecanica",
   },
 ];
 

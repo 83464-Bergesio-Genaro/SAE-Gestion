@@ -37,6 +37,6 @@ themes: {
     }
   },
 
-  font: "Georgia, 'Times New Roman', Times, serif"
+  font: "sans-serif"
 
 };

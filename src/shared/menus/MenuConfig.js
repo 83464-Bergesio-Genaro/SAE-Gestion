@@ -45,23 +45,11 @@ export const studentMenu = [
     image: "none",
   },
   {
-    label: "Viajes",
-    path: "/Mis-Viajes",
-    color: "#D98AC5",
-    image: "none",
-  },
-  {
-    label: "Cursos",
-    path: "/Mis-Cursos",
-    color: "#1b7bf8",
-    image: "none",
-  },
-  {
-    label: "Consultas",
-    path: "/Consultas",
-    color: "#8ab9d9",
-    image: "none",
-  },
+    label: "Prensa",
+    path: "/Prensa",
+    color:"#5E8ACC",
+    image:"none"
+  }
 ];
 
 export const employedMenu = [
@@ -74,13 +62,19 @@ export const employedMenu = [
   {
     label: "Deportes",
     path: "/Gestion-Deportes",
-    color: "#8FABD4",
-    image: "none",
+    color:"#56719a",
+    image:"none"
   },
   {
     label: "Becas",
     path: "/Gestion-Becas",
-    color: "#3F76C8",
-    image: "none",
+    color:"#3F76C8",
+    image:"none"
   },
+  {
+    label: "Prensa",
+    path: "/Prensa",
+    color:"#5E8ACC",
+    image:"none"
+  }
 ];

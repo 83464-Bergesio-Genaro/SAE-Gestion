@@ -1,0 +1,162 @@
+.main-title-container h1{
+    font-size: clamp(2.2rem, 4.8vw, 5rem);
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1.03;
+    letter-spacing: -0.01em;
+}
+.main-title-container h3{
+    margin-top: 12px;
+    font-size: clamp(1rem, 1.8vw, 1.6rem);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.28;
+    max-width: 680px;
+}
+
+.main-container{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+    padding: 26px 42px;
+    min-height: 62vh;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+.main-title-container{
+    width: 54%;
+    color: white;
+    padding: 20px 10px;
+    text-align: left;
+}
+
+.main-button-container{
+    margin-top: 18px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 520px;
+}
+.main-button-container .main-jpa-button,
+.main-button-container .main-login-button{
+    min-width: 210px;
+    height: 52px;
+    padding: 0 18px;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: white;
+    font-weight: bold;
+    box-shadow: none;
+    cursor:pointer;
+}
+.main-button-container .main-jpa-button{
+    background: #5B96CC !important;
+}
+.main-button-container .main-login-button{
+    background: #4f9916 !important;
+}
+.main-image-container{
+    position: relative;
+    background-image: url("../../../../public/images/principal/logoUTNrotado.png"),
+    url("../../../../public/images/principal/utnBackLogo.svg");
+    background-repeat: no-repeat;
+    background-position: center, center;
+    background-size: 56%, 78%;
+    min-height: 420px;
+    width: 46%;
+}
+@media (max-width: 899px) {
+    .main-container{
+        flex-direction: column;
+        align-items: stretch;
+        min-height: auto;
+        gap: 6px;
+        padding: 18px 14px;
+    }
+    .main-title-container,
+    .main-image-container{
+        width: 100%;
+    }
+    .main-title-container{
+        text-align: center;
+        padding: 22px 12px;
+    }
+    .main-title-container h1{
+        font-size: 2.85rem;
+    }
+    .main-title-container h3{
+        font-size: 1.3rem;
+        max-width: none;
+    }
+    .main-button-container{
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .main-button-container .main-jpa-button,
+    .main-button-container .main-login-button{
+        min-width: 100%;
+    }
+    .main-image-container{
+        background-position: center, center;
+        background-size: 195px, 285px;
+        min-height: 230px;
+        height: 230px;
+    }
+}
+@media  (min-width: 900px) and (max-width: 1299px) {
+    .main-container{
+        padding: 20px 24px;
+        gap: 8px;
+    }
+    .main-title-container{
+        width: 58%;
+    }
+    .main-title-container h1{
+        font-size: 3.1rem;
+    }
+    .main-title-container h3{
+        font-size: 1.1rem;
+    }
+    .main-button-container{
+        flex-direction: row;
+        max-width: 500px;
+    }
+
+    .main-image-container{
+        background-position: center, center;
+        background-size: 255px, 340px;
+        min-height: 340px;
+        height: 45vh;
+    }
+}
+@media (min-width: 1300px){
+    .main-container{
+        padding: 24px 70px;
+    }
+    .main-title-container{
+        width: 54%;
+        padding: 40px 10px;
+        text-align: left;
+    }
+    .main-button-container{
+        max-width: 560px;
+        gap: 12px;
+    }
+    .main-button-container .main-jpa-button,
+    .main-button-container .main-login-button{
+        font-size: 1.05rem;
+        height: 54px;
+        min-width: 230px;
+    }
+    .main-image-container{
+        background-position: center, center;
+        background-size: 390px, 540px;
+        min-height: 520px;
+        height: 70vh;
+    }
+}

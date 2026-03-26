@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import "./Layout.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -5,12 +6,12 @@ import Footer from "./Footer";
 
 export default function MainLayout({ children }) {
   return (
-    <div >
+    <Box>
       <Navbar />
-      <main className="main-content">
+      <main className="main-content" style={{ marginTop: 90 }}>
         {children}
       </main>
-        <Footer/>
-    </div>
+      <Footer/>
+    </Box>
   );
 }

@@ -1,10 +1,15 @@
 import { useAuth } from "../../auth/AuthContext";
+import SAEButton from "../buttons/SAEButton";
 
 export default function SessionLog() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   return (
-    <button className="nav-logout" onClick={logout}>
-      Cerrar Sesion
-    </button>
+    <SAEButton
+      variant="outlined"
+      onClick={logout}
+      sx={{ fontWeight: "bold", whiteSpace: "nowrap" }}
+    >
+      Cerrar Sesión {user.nombre}
+    </SAEButton>
   );
 }

@@ -254,11 +254,10 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
     if (!item) return;
 
     try {
+      handleClose();
       await onInscribirClick(item);
     } catch (error) {
       console.error("Error:", error);
-    } finally {
-      handleClose();
     }
   };
 
@@ -346,7 +345,6 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                   {card.deporte}
                 </Typography>
                 <Chip
-                  size="small"
                   label={card.esta_inscripto ? "Inscripto" : "No Inscripto"}
                   color={card.esta_inscripto ? "success" : "error"}
                   sx={{ mt: -1 }}

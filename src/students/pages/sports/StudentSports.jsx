@@ -12,11 +12,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  CircularProgress,
   DialogContentText,
   Stack,
   Snackbar,
   Alert,
 } from "@mui/material";
+import utnLogo from "../../../assets/utn.png";
 
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
 
@@ -279,6 +281,8 @@ export default function StudentSports() {
     let archivoGuardado;
 
     try {
+      setLoading(true);
+
       archivoGuardado = await CrearDocumentoEstudiante(
         item.id_tipo_documento,
         archivoRenombrado,
@@ -295,6 +299,8 @@ export default function StudentSports() {
         message: "Error al subir el archivo",
         severity: "error",
       });
+    } finally {
+      setLoading(false);
     }
 
     setDocumentos((prev) =>
@@ -366,6 +372,10 @@ export default function StudentSports() {
 
   async function handleDelete(item) {
     try {
+      setOpenPopup(false);
+
+      setLoading(true);
+
       await EliminarDocumentoEstudiante(item.id_archivo, user.token);
 
       setSnackbar({
@@ -394,12 +404,15 @@ export default function StudentSports() {
         message: C.docEliminadoError,
         severity: "error",
       });
+    } finally {
+      setLoading(false);
     }
-    setOpenPopup(false);
   }
 
   const handleInscribirClick = async (card) => {
     try {
+      setLoading(true);
+
       if (card.esta_inscripto) {
         // DESINSCRIBIR
         await DesinscribirDeporte(card.id_inscripcion, user.token);
@@ -427,6 +440,8 @@ export default function StudentSports() {
         message: C.errorHandleSucscription,
         severity: "error",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -440,6 +455,49 @@ export default function StudentSports() {
         bgcolor: "#f4f8fc",
       }}
     >
+      {loading && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0, // top:0, left:0, right:0, bottom:0
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 1300,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            pointerEvents: "all",
+            backdropFilter: "blur(2px)",
+          }}
+          textAlign="center"
+        >
+          <Box
+            sx={{
+              position: "relative",
+              width: 200,
+              height: 200,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <CircularProgress size={200} thickness={2.8} />
+            <Box
+              component="img"
+              src={utnLogo}
+              alt="UTN girando"
+              sx={{
+                width: 125,
+                height: 125,
+                objectFit: "contain",
+                position: "absolute",
+                borderRadius: "50%",
+                bgcolor: "white",
+                p: 0.5,
+                boxShadow: 1,
+              }}
+            />
+          </Box>
+        </Box>
+      )}
       <Container maxWidth="xl">
         <Box
           sx={{
@@ -500,7 +558,6 @@ export default function StudentSports() {
             }}
           />
         </Box>
-
         <Box sx={{ mt: 3 }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
             {C.documentationTitle}
@@ -551,7 +608,7 @@ export default function StudentSports() {
                             : C.docStataUplodaded
                         }
                         color={!item.subido ? "grey" : "success"}
-                      ></Chip>
+                      />
                     </Stack>
 
                     <Box

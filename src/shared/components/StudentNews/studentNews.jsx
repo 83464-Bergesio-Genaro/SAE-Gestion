@@ -1,77 +1,55 @@
 import {
   Box,
-  Container,
-  Grid,
+  Card,
   Typography,
   IconButton,
-  useMediaQuery,
+  Stack,
+  CardMedia,
+  CardContent,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useMemo, useState } from "react";
 
 function ItemNovedad({ titulo, descripcion, invertida, imagen }) {
-  const isMobile = useMediaQuery("(max-width:600px)");
   return (
-    <Grid container spacing={2}>
-      {!invertida && (
-        <Grid size={{ xs: 4, md: 3 }}>
-          <Box
-            component="img"
-            src={imagen}
-            alt={titulo}
-            sx={{
-              width: "100%", // 🔥 CLAVE
-              height: "auto",
-              objectFit: "cover",
-              borderRadius: 1,
-              display: "block",
-            }}
-            mb="2"
-          />
-        </Grid>
-      )}
-
-      <Grid size={{ xs: 8, md: 9 }}>
-        <Box
+    <Card
+      sx={{
+        borderRadius: 4,
+        boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
+        border: "1px solid rgba(17, 53, 101, 0.08)",
+        opacity: 1,
+        marginBottom: 3,
+        display: "flex",
+        flexDirection: { xs: "column", md: invertida ? "row-reverse" : "row" },
+      }}
+    >
+      {
+        <CardMedia
           sx={{
-            textAlign: invertida ? { xs: "left", md: "right" } : "left",
-            width: "100%",
+            width: { xs: "100%", md: 300 },
+            height: { xs: 200, md: "auto" },
+            objectFit: "cover",
           }}
-        >
-          <Typography
-            variant="h5"
-            sx={{
-              color: "#5b8fcb",
-              fontWeight: 700,
-            }}
-          >
+          component="img"
+          image={imagen}
+        />
+      }
+
+      <Box sx={{ flex: 1 }}>
+        <CardContent>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: "#14325c" }}>
             {titulo}
           </Typography>
-
-          <Typography variant="subtitle2">
-            {isMobile ? descripcion.slice(0, 120) + "..." : descripcion}
+          <Typography
+            variant="subtitle1"
+            sx={{ mt: 1, color: "#5a6f8f", minHeight: 48 }}
+          >
+            {descripcion}
           </Typography>
-        </Box>
-      </Grid>
-
-      {invertida && (
-        <Grid size={{ xs: 4, md: 3 }}>
-          <Box
-            component="img"
-            src={imagen}
-            alt={titulo}
-            sx={{
-              width: "100%", // 🔥 CLAVE
-              height: "auto",
-              objectFit: "cover",
-              borderRadius: 1,
-              display: "block",
-            }}
-          />
-        </Grid>
-      )}
-    </Grid>
+        </CardContent>
+      </Box>
+    </Card>
   );
 }
 
@@ -96,24 +74,8 @@ export default function NovedadesEstudiantiles({ novedades }) {
   };
 
   return (
-    <Box
-      sx={{
-        backgroundColor: "white",
-        borderRadius: 2,
-        px: { xs: 2, md: 5 },
-        pl: 3,
-        pt: 3,
-        pb: 3,
-        pr: 3,
-        m: 1,
-        mb: 4,
-      }}
-    >
-      <Typography variant="h4" sx={{ mb: 2, pt: 2 }}>
-        <b>Novedades Estudiantiles</b>
-      </Typography>
-
-      <Container>
+    <Box sx={{ mt : 1 }}>
+      <Stack>
         {novedadesPaginadas.map((item) => (
           <ItemNovedad
             key={item.id}
@@ -123,7 +85,7 @@ export default function NovedadesEstudiantiles({ novedades }) {
             imagen={item.imagen}
           />
         ))}
-      </Container>
+      </Stack>
 
       <Box
         sx={{

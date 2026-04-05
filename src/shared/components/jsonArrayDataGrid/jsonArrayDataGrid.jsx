@@ -1,27 +1,20 @@
 import { DataGrid } from "@mui/x-data-grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
+import { InputAdornment } from "@mui/material";
 import MuiPagination from "@mui/material/Pagination";
+import { Search } from "@mui/icons-material";
 import {
-  GridToolbarContainer,
-  GridToolbarQuickFilter,
   gridPageCountSelector,
   GridPagination,
   useGridApiContext,
   useGridSelector,
 } from "@mui/x-data-grid";
+import { useState, useMemo } from "react";
+import SAETextField from "../../../shared/components/inputs/SAETextField";
 
-function CustomToolbar() {
-  return (
-    <GridToolbarContainer>
-      <Box sx={{ flexGrow: 1 }} />
-      <GridToolbarQuickFilter />
-    </GridToolbarContainer>
-  );
-}
 function CustomPagination(props) {
   return <GridPagination ActionsComponent={Pagination} {...props} />;
 }
@@ -47,10 +40,10 @@ const autosizeOptions = {
   expand: true,
 };
 
-export default function JsonArrayDataGrid({ title, data }) {
-  // data: array de objetos JSON
-  const campos =
-    data.length > 0
+export default function JsonArrayDataGrid({ data }) {
+  const [busqueda, setBusqueda] = useState("");
+  const campos = useMemo(() => {
+    return data.length > 0
       ? Object.keys(data[0]).filter(
           (key) =>
             key.toLowerCase() !== "id" &&
@@ -58,6 +51,27 @@ export default function JsonArrayDataGrid({ title, data }) {
             key.toLowerCase() !== "cuil_responsable",
         )
       : [];
+  }, [data]);
+
+  const rowsFiltradas = useMemo(() => {
+    let filtradas = data;
+    const termino = busqueda.toLowerCase().trim();
+    if (termino && termino.length > 2) {
+      filtradas = filtradas.filter((r) =>
+        campos.some((campo) => {
+          const valor = r[campo];
+          if (valor === null || valor === undefined) return false;
+          return String(valor).toLowerCase().includes(termino);
+        }),
+      );
+    }
+
+    return filtradas;
+  }, [data, busqueda, campos]);
+
+
+  // data: array de objetos JSON
+
   const columns = campos.map((campo) => ({
     field: campo,
     headerName: campo
@@ -73,21 +87,54 @@ export default function JsonArrayDataGrid({ title, data }) {
   }));
 
   return (
-    <Card>
+    <Card
+      sx={{
+        borderRadius: 4,
+        boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+        mb: 3,
+      }}
+    >
       <CardContent>
-        <Typography variant="h2" sx={{ fontWeight: "bold" }}>
-          {title}
-        </Typography>
-        <Divider sx={{ pb: 2 }} variant="middle" />
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={1.5}
+          sx={{
+            mb: 2,
+            width: "100%",
+            justifyContent: "flex-end",
+            alignItems: { xs: "stretch", md: "right" },
+          }}
+        >
+          <SAETextField
+            placeholder="Buscar..."
+            size="small"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            sx={{
+              width: { xs: "100%", sm: 250 },
+              "& .MuiOutlinedInput-root": { height: "30px" },
+              "& .MuiInputBase-input": { py: 0 },
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        </Stack>
         <Box
           sx={{
             width: "100%",
             overflowX: "auto", // Permite scroll horizontal si hay muchas columnas
-            minHeight: 300, // Altura mínima para que se vea bien en web
+            minHeight: 200, // Altura mínima para que se vea bien en web
           }}
         >
           <DataGrid
-            rows={data}
+            rows={rowsFiltradas}
             columns={columns}
             initialState={{
               pagination: {
@@ -96,10 +143,11 @@ export default function JsonArrayDataGrid({ title, data }) {
                 },
               },
             }}
+            pageSizeOptions={[5, 10, 25]}
             autosizeOnMount={true}
             autosizeOptions={autosizeOptions}
             disableColumnFilter
-            slots={{ toolbar: CustomToolbar, pagination: CustomPagination }}
+            slots={{ pagination: CustomPagination }}
             ignoreDiacritics
             disableRowSelectionOnClick
             sx={{
@@ -108,7 +156,9 @@ export default function JsonArrayDataGrid({ title, data }) {
                 whiteSpace: "normal",
                 lineHeight: "1.2",
               },
+              borderRadius: 2,
             }}
+            getRowId={(row) => row.id}
           />
         </Box>
       </CardContent>

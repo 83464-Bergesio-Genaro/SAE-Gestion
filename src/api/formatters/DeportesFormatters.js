@@ -20,7 +20,7 @@ export const mapHorarioAlumno = (HorarioAlumno) => ({
   dia: HorarioAlumno.dia,
   espacio_deportivo: HorarioAlumno.espacio_deportivo,
   nombre_deporte: HorarioAlumno.nombre_deporte,
-  docente_resposable: HorarioAlumno.docente_resposable,
+  docente_responsable: HorarioAlumno.docente_responsable,
   esta_incripto: HorarioAlumno.esta_incripto,
 });
 
@@ -120,3 +120,4 @@ export const mapResponseInscripcionDeporte = (ResponseInscripcionDeporte) => ({
 export const mapResponseEliminar = (ResponseEliminar) => ({
   texto: ResponseEliminar,
 });
+

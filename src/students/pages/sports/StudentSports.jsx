@@ -4,34 +4,23 @@ import {
   Typography,
   Card,
   Container,
-  List,
-  ListItemButton,
-  ListItemText,
-  ListItemIcon,
-  ListItem,
-  Avatar,
   IconButton,
-  Divider,
   Box,
   Grid,
   Dialog,
+  Chip,
   DialogActions,
   DialogContent,
   DialogTitle,
   DialogContentText,
-  Button,
+  Stack,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import {
-  Edit,
-  QuestionMark,
-  CheckCircleOutline,
-  HighlightOff,
-  UploadFile,
-  CheckCircle,
-  FileUpload,
-  Cancel,
-  EmojiEvents
-} from "@mui/icons-material";
+
+import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+
+import { FileUpload, Delete } from "@mui/icons-material";
 
 import DeportesMasonry from "../../components/deportesMasonery";
 import JsonArrayDataGrid from "../../../shared/components/jsonArrayDataGrid/jsonArrayDataGrid";
@@ -44,39 +33,105 @@ import {
   DesinscribirDeporte,
 } from "../../../api/DeportesServices";
 
+import {
+  CrearDocumentoEstudiante,
+  DescargarDocumentacionXId,
+  EliminarDocumentoEstudiante,
+  ListarDocumentacionXLegajo,
+} from "../../../api/EstudianteService";
+
+import {
+  isPdfDocument,
+  construirNombre,
+  MAX_SIZE_BYTES,
+  MAX_SIZE_MB,
+  INITIAL_PREVIEW,
+} from "./sports.utils";
+
+import { ObtenerTiposDocumento } from "../../../api/HerramientasService";
+
 import { useState, useEffect } from "react";
+import SAEButton from "../../../shared/components/buttons/SAEButton";
+import { SPORTS_STRINGS } from "./sports.strings";
+const C = SPORTS_STRINGS;
 
 export default function StudentSports() {
-  const documentos = [
-    { id: 1, nombre: "Alumno Regular", completo: true },
-    { id: 2, nombre: "Certificado de Alumno Regular", completo: null },
-    { id: 3, nombre: "DNI", completo: true },
-    { id: 4, nombre: "Ficha Medica Vigente", completo: false },
-  ];
+  function closePreview() {
+    setPreview((prev) => ({ ...prev, open: false }));
+  }
+
+  const [documentos, setDocumentos] = useState([
+    {
+      id_tipo_documento: null,
+      nombre: "Certificado de Alumno Regular",
+      subido: false,
+      archivo: null,
+      archivoNombre: "",
+      formatoNombre: "{legajo}_AlumnoRegular",
+      id_archivo: null,
+    },
+    {
+      id_tipo_documento: null,
+      nombre: "Fotocopia Documento",
+      subido: false,
+      archivo: null,
+      archivoNombre: "",
+      formatoNombre: "{legajo}_DNI",
+      id_archivo: null,
+    },
+    {
+      id_tipo_documento: null,
+      nombre: "Ficha Medica o E.M.M.A.C",
+      subido: false,
+      archivo: null,
+      archivoNombre: "",
+      formatoNombre: "{legajo}_FichaMedica",
+      id_archivo: null,
+    },
+  ]);
 
   const { user } = useAuth();
   const [deportista, setIdDeportista] = useState(null);
   const [openPopup, setOpenPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
-  const [popupSuccess, setPopupSuccess] = useState(true);
+  const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
   const [horariosDeportista, setHorariosDeportista] = useState([]);
   const [torneoDeportista, setTorneoDeportista] = useState([]);
+  const [preview, setPreview] = useState(INITIAL_PREVIEW);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const ObtenerIdDeportistaApi = async () => {
     try {
       const data = await ObtenerIdDeportista(user.legajo, user.token);
       setIdDeportista(data);
+      return data;
     } catch (error) {
       console.error("Error al traer Id Deportista:", error);
+      setSnackbar({
+        open: true,
+        message: C.errorLoadSportman,
+        severity: "error",
+      });
+      return null;
     }
   };
 
-  const ObtenerHorariosDeportistaApi = async () => {
+  const ObtenerHorariosDeportistaApi = async (deportista) => {
     try {
       const data = await ObtenerHorariosDeportista(deportista.id, user.token);
       setHorariosDeportista(data.horarios);
+      return data.horarios;
     } catch (error) {
       console.error("Error al traer Horario Deportivos:", error);
+      setSnackbar({
+        open: true,
+        message: C.errorLoadSportmanHorario,
+        severity: "error",
+      });
+      return [];
     }
   };
 
@@ -85,48 +140,269 @@ export default function StudentSports() {
       const resultados = await Promise.all(
         deportesIds.map((id) => ObtenerTorneosXDeporte(id, user.token)),
       );
+
       const torneos = resultados.flat();
 
       setTorneoDeportista(torneos);
     } catch (error) {
       console.error("Error al traer torneos:", error);
+      setSnackbar({
+        open: true,
+        message: C.erroLoadTournaments,
+        severity: "error",
+      });
     }
   };
 
+  const ObtenerTipoDocuemntos = async () => {
+    try {
+      const data = await ObtenerTiposDocumento(user.token);
+
+      if (!data || data.length === 0) return;
+
+      const mapBackend = Object.fromEntries(
+        data.map((d) => [d.nombre.toLowerCase().trim(), [d.id, d.extension]]),
+      );
+
+      setDocumentos((prev) =>
+        prev.map((doc) => ({
+          ...doc,
+          id_tipo_documento: mapBackend[doc.nombre.toLowerCase().trim()]
+            ? mapBackend[doc.nombre.toLowerCase().trim()][0]
+            : null,
+          extension: mapBackend[doc.nombre.toLowerCase().trim()]
+            ? mapBackend[doc.nombre.toLowerCase().trim()][1]
+            : null,
+        })),
+      );
+    } catch (error) {
+      console.error("Error al traer tipos de documentos:", error);
+      setSnackbar({
+        open: true,
+        message: C.errotLoadDocumentsType,
+        severity: "error",
+      });
+    }
+  };
+
+  async function handlePreview(id, nombre) {
+    setPreview({
+      open: true,
+      loading: true,
+      title: nombre,
+      imageSrc: null,
+      isPdf: false,
+      error: null,
+    });
+    try {
+      const data = await DescargarDocumentacionXId(id, user.token);
+      setPreview({
+        open: true,
+        loading: false,
+        title: nombre,
+        imageSrc: data.datos_documento,
+        isPdf: isPdfDocument(data),
+        error: null,
+      });
+    } catch {
+      setPreview((prev) => ({
+        ...prev,
+        loading: false,
+        error: "No se pudo cargar el documento",
+      }));
+    }
+  }
+
+  const ObtenerDocumentosEstudiante = async () => {
+    try {
+      const data = await ListarDocumentacionXLegajo(user.email, user.token);
+      if (!data || data.length === 0) return;
+      setDocumentos((prev) =>
+        prev.map((doc) => {
+          const docBackend = data.find(
+            (d) =>
+              Number(d.documento?.id_tipo_documento) ===
+              Number(doc.id_tipo_documento),
+          );
+
+          if (!docBackend) return doc;
+
+          return {
+            ...doc,
+            subido: true,
+            archivo: docBackend.documento,
+            archivoNombre: docBackend.documento.nombre_documento,
+            id_archivo: docBackend.documento.id,
+          };
+        }),
+      );
+    } catch (error) {
+      console.error("Error al traer Id Deportista:", error);
+    }
+  };
+
+  const handleArchivoChange = async (e, item) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const extensionArchivo = `.${file.name.split(".").pop().toLowerCase()}`;
+
+    const extensionesPermitidas = item.extension
+      .split(",")
+      .map((ext) => ext.trim().toLowerCase());
+
+    if (!extensionesPermitidas.includes(extensionArchivo)) {
+      alert(`Solo se permiten archivos: ${item.extension}`);
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_SIZE_BYTES) {
+      alert(`El archivo no puede superar los ${MAX_SIZE_MB} MB.`);
+      e.target.value = "";
+      return;
+    }
+
+    const nuevoNombre = construirNombre(
+      item.formatoNombre,
+      {
+        legajo: user.legajo,
+      },
+      extensionArchivo,
+    );
+
+    const archivoRenombrado = new File([file], nuevoNombre, {
+      type: file.type,
+      lastModified: file.lastModified,
+    });
+
+    let archivoGuardado;
+
+    try {
+      archivoGuardado = await CrearDocumentoEstudiante(
+        item.id_tipo_documento,
+        archivoRenombrado,
+        user.token,
+      );
+      setSnackbar({
+        open: true,
+        message: "Archivo subido con éxito",
+        severity: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: "Error al subir el archivo",
+        severity: "error",
+      });
+    }
+
+    setDocumentos((prev) =>
+      prev.map((doc) =>
+        Number(doc.id_tipo_documento) === Number(item.id_tipo_documento)
+          ? {
+              ...doc,
+              archivo: archivoGuardado,
+              archivoNombre: archivoGuardado.nombre_documento,
+              subido: true,
+              id_archivo: archivoGuardado.id,
+            }
+          : doc,
+      ),
+    );
+    e.target.value = "";
+  };
+
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    ObtenerIdDeportistaApi();
+    if (!user) return;
+
+    const inicializarPantalla = async () => {
+      try {
+        setLoading(true);
+
+        // 1. Deportista
+        const idDeportista = await ObtenerIdDeportistaApi();
+
+        // 2. Tipos de documentos
+        await ObtenerTipoDocuemntos();
+
+        // 3. Documentos del estudiante
+        await ObtenerDocumentosEstudiante();
+
+        // 4. Horarios del deportista
+        let horDepor = [];
+        if (idDeportista) {
+          horDepor = await ObtenerHorariosDeportistaApi(idDeportista);
+        }
+
+        // 5. Torneos por deporte
+        const deportesIds = Array.from(
+          new Set(
+            (horDepor || [])
+              .filter((h) => h.esta_inscripto)
+              .map((h) => h.id_deporte),
+          ),
+        );
+
+        if (deportesIds.length > 0) {
+          await ObtenerTorneosPorDeporte(deportesIds);
+        }
+      } catch (error) {
+        console.error("Error al inicializar la pantalla:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    inicializarPantalla();
   }, [user]);
 
-  useEffect(() => {
-    if (!deportista) return;
+  async function DeleteDocument(document) {
+    setOpenPopup(true);
+    setDocumentoAEliminar(document);
+  }
 
-    ObtenerHorariosDeportistaApi();
-  }, [deportista, user]);
+  async function handleDelete(item) {
+    try {
+      await EliminarDocumentoEstudiante(item.id_archivo, user.token);
 
-  useEffect(() => {
-    const deportesIds = horariosDeportista
-      .filter((h) => h.esta_inscripto === true)
-      .map((h) => h.id_deporte);
-    if (deportesIds.length === 0) return;
+      setSnackbar({
+        open: true,
+        message: C.docEliminado,
+        severity: "success",
+      });
 
-    ObtenerTorneosPorDeporte(deportesIds);
-  }, [horariosDeportista, user]);
-
-  const handleUpload = (doc) => {
-    console.log("Subir archivo para:", doc);
-  };
-
-  const handleEdit = (doc) => {
-    console.log("Editar archivo para:", doc);
-  };
+      setDocumentos((prev) =>
+        prev.map((doc) =>
+          Number(doc.id_tipo_documento) === Number(item.id_tipo_documento)
+            ? {
+                ...doc,
+                archivo: null,
+                archivoNombre: "",
+                subido: false,
+                id_archivo: null,
+              }
+            : doc,
+        ),
+      );
+    } catch (error) {
+      console.error("Error al eliminar el documento:", error);
+      setSnackbar({
+        open: true,
+        message: C.docEliminadoError,
+        severity: "error",
+      });
+    }
+    setOpenPopup(false);
+  }
 
   const handleInscribirClick = async (card) => {
     try {
-      var texto = "";
       if (card.esta_inscripto) {
         // DESINSCRIBIR
         await DesinscribirDeporte(card.id_inscripcion, user.token);
-        texto = "Desinscripción realizada con éxito";
       } else {
         // INSCRIBIR
         await CrearInscripcionDeporte(
@@ -134,104 +410,289 @@ export default function StudentSports() {
           deportista.id,
           user.token,
         );
-        texto = "Inscripción realizada con éxito";
       }
+      setSnackbar({
+        open: true,
+        message: card.esta_inscripto
+          ? C.successUnsuscription
+          : C.successInsncription,
+        severity: "success",
+      });
 
-      setPopupMessage(texto);
-      setPopupSuccess(true);
-      setOpenPopup(true);
-
-      // 🔄 refrescar datos
-      await ObtenerHorariosDeportistaApi();
+      await ObtenerHorariosDeportistaApi(deportista);
     } catch (error) {
-      setPopupMessage("Error al realizar la accion");
-      setPopupSuccess(false);
-      setOpenPopup(true);
-
-      console.error(error);
+      console.error("Error al manejar la Inscripcion :", error);
+      setSnackbar({
+        open: true,
+        message: C.errorHandleSucscription,
+        severity: "error",
+      });
     }
   };
+
   return (
-    <Container>
-      <Card>
-        <CardContent>
-          <Grid
-            container
-            spacing={{ xs: 2, md: 3 }}
-            columns={{ xs: 4, sm: 8, md: 12 }}
-            sx={{ justifyContent: "flex-end" }}
-          >
-            <Grid sx={{ xs: 1, sm: 1, md: 1, marginLeft: "auto" }}></Grid>
-          </Grid>
-          <Grid
-            container
-            spacing={{ xs: 4, md: 6 }}
-            columns={{ xs: 4, sm: 8, md: 12 }}
-            sx={{ justifyContent: "flex-start" }}
-          >
-            <Grid sx={{ xs: 1, sm: 3, md: 4 }}>
-              <Avatar sx={{ height: 300, width: 300 }} />
-            </Grid>
-            <Grid sx={{ xs: 1, sm: 5, md: 6 }}>
-              <Typography variant="h2" sx={{ fontWeight: "bold" }}>
-                {user.nombre}
-              </Typography>
-              <List>
-                {documentos.map((doc) => (
-                  <ListItem
-                    secondaryAction={
-                      <Box display="flex" gap={1}>
-                        <IconButton
-                          onClick={() => handleUpload(doc)}
-                          edge="end"
-                        >
-                          <FileUpload />
-                        </IconButton>
-                        <IconButton onClick={() => handleEdit(doc)} edge="end">
-                          <Edit />
-                        </IconButton>
-                      </Box>
-                    }
-                  >
-                    <ListItemText>{doc.nombre}</ListItemText>
-                  </ListItem>
-                ))}
-              </List>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-      <br />
-      {horariosDeportista.length > 0 && (
-        <DeportesMasonry
-          deportes={horariosDeportista}
-          onInscribirClick={handleInscribirClick}
-        />
-      )}
-      {torneoDeportista.length > 0 && (
-        <JsonArrayDataGrid title="Torneos" data={torneoDeportista} />
-      )}
-      <br />
-      <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
-        <DialogTitle>{popupSuccess ? "Éxito" : "Error"}</DialogTitle>
-
-        <DialogContent >
-          <DialogContentText>{popupMessage}</DialogContentText>
-          <Box display="flex" justifyContent="center" mt="0">
-            {popupSuccess ? (
-              <CheckCircle sx={{ fontSize: 60 }} color="success" />
-            ) : (
-              <Cancel sx={{ fontSize: 60 }} color="error" />
-            )}
+    <Box
+      sx={{
+        mt: "-90px",
+        pt: { xs: "114px", md: "130px" },
+        pb: 8,
+        minHeight: "calc(100vh - 90px)",
+        bgcolor: "#f4f8fc",
+      }}
+    >
+      <Container maxWidth="xl">
+        <Box
+          sx={{
+            overflow: "hidden",
+            borderRadius: 6,
+            px: { xs: 3, md: 3 },
+            py: { xs: 2, md: 2 },
+            minHeight: 100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 3,
+            background:
+              "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%)",
+            color: "white",
+            backgroundImage:
+              "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('/images/carrousel/EntradaUTN.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <Box sx={{ maxWidth: 700 }}>
+            <Typography
+              variant="h3"
+              sx={{
+                mt: 1,
+                fontWeight: 800,
+                lineHeight: 1.1,
+                fontSize: { xs: "2rem", md: "3rem" },
+              }}
+            >
+              {C.bigTitle}
+            </Typography>
+            <Typography
+              sx={{
+                mt: 2,
+                maxWidth: 560,
+                fontSize: { xs: 16, md: 18 },
+                opacity: 0.92,
+              }}
+            >
+              {C.bigSubtitle}
+            </Typography>
           </Box>
-        </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpenPopup(false)} autoFocus>
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+          <Box
+            sx={{
+              display: { xs: "none", md: "block" },
+              width: 80,
+              height: 80,
+              borderRadius: "20px",
+              backgroundImage: "url('/images/principal/logoUTNrotado.png')",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "contain",
+              transform: "rotate(8deg)",
+              filter: "drop-shadow(0 18px 35px rgba(0,0,0,0.22))",
+            }}
+          />
+        </Box>
+
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
+            {C.documentationTitle}
+          </Typography>
+          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
+            {C.documentationSubtitle}
+          </Typography>
+        </Box>
+        <Grid container spacing={2.5} sx={{ mt: 1 }}>
+          {documentos.map((item) => (
+            <Grid item xs={12} sm={6} md={3}>
+              <Card
+                sx={{
+                  minWidth: 357,
+                  height: "100%",
+                  borderRadius: 4,
+                  flexDirection: "column",
+                  boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
+                  border: "1px solid rgba(17, 53, 101, 0.08)",
+                  transition:
+                    "background-color 0.25s ease, border-color 0.25s ease",
+
+                  "&:hover": {
+                    backgroundColor: "#f1f5fb", // un tono más oscuro que el fondo actual
+                    borderColor: "rgba(17, 53, 101, 0.2)",
+                  },
+                }}
+              >
+                <CardContent
+                  sx={{
+                    p: 3,
+                  }}
+                >
+                  <Stack sx={{ height: "100%" }}>
+                    <Typography variant="h6">
+                      <strong>{item.nombre}</strong>
+                    </Typography>
+                    <Box sx={{ flexGrow: 1, mt: 1 }} />
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Chip
+                        label={
+                          !item.subido
+                            ? C.docStateNotUploaded
+                            : C.docStataUplodaded
+                        }
+                        color={!item.subido ? "grey" : "success"}
+                      ></Chip>
+                    </Stack>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        gap: 1,
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        mt: 1,
+                      }}
+                    >
+                      <SAEButton
+                        onClick={() =>
+                          handlePreview(item.id_archivo, item.archivoNombre)
+                        }
+                      >
+                        {item.archivoNombre
+                          ? item.archivoNombre.length > 23
+                            ? item.archivoNombre.slice(0, 23) + "..."
+                            : item.archivoNombre
+                          : ""}
+                      </SAEButton>
+                      <IconButton
+                        component="label"
+                        size="small"
+                        color="primary"
+                        disabled={item.subido}
+                      >
+                        <FileUpload />
+                        <input
+                          type="file"
+                          hidden
+                          accept={item.extension}
+                          onChange={(e) => handleArchivoChange(e, item)}
+                        />
+                      </IconButton>
+
+                      <IconButton
+                        size="small"
+                        color="error"
+                        disabled={!item.subido}
+                        onClick={() => DeleteDocument(item)}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+        <Box sx={{ mt: 3, mb: 2 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
+            {C.sportsTitle}
+          </Typography>
+          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
+            {C.sportsSubTitle}
+          </Typography>
+        </Box>
+
+        {horariosDeportista.length > 0 && (
+          <Card
+            sx={{
+              overflow: "hidden",
+              borderRadius: 6,
+              px: { xs: 2, md: 3 },
+              py: { xs: 3, md: 1 },
+            }}
+          >
+            <DeportesMasonry
+              deportes={horariosDeportista}
+              onInscribirClick={handleInscribirClick}
+            />
+          </Card>
+        )}
+        {torneoDeportista.length > 0 && (
+          <>
+            <Box sx={{ mt: 3, mb: 2 }}>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 800, color: "#123666" }}
+              >
+                {C.tournamnetsTitle}
+              </Typography>
+              <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
+                {C.tournamnetsSubTitle}
+              </Typography>
+            </Box>
+
+            <JsonArrayDataGrid data={torneoDeportista} />
+          </>
+        )}
+
+        {/*Dialog para Borrar Documento*/}
+        <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
+          <DialogTitle>{C.deleteDocTitle}</DialogTitle>
+
+          <DialogContent>
+            <DialogContentText>
+              {C.deleteDocMessage(documentoAEliminar?.archivoNombre)}
+            </DialogContentText>
+          </DialogContent>
+
+          <DialogActions>
+            <SAEButton
+              onClick={() => handleDelete(documentoAEliminar)}
+              autoFocus
+            >
+              {C.deleteDocButton}
+            </SAEButton>
+          </DialogActions>
+        </Dialog>
+
+        <DocumentPreviewDialog
+          open={preview.open}
+          onClose={closePreview}
+          title={preview.title}
+          imageSrc={preview.imageSrc}
+          isPdf={preview.isPdf}
+          loading={preview.loading}
+          error={preview.error}
+        />
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </Box>
   );
 }

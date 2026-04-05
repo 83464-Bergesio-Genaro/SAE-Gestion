@@ -25,6 +25,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useState, useEffect } from "react";
 import Chip from "@mui/material/Chip";
+import SAEButton from "../../shared/components/buttons/SAEButton";
+import SAETextField from "../../shared/components/inputs/SAETextField";
 
 const DIAS = [
   "Lunes",
@@ -268,34 +270,35 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
         alignItems="center"
         gap={2}
         mb={2}
+        mt={2}
         flexWrap="wrap"
       >
         {/* IZQUIERDA */}
         <Box display="flex" gap={2}>
-          <Button
+          <SAEButton
             variant={filtro === "todos" ? "contained" : "outlined"}
             onClick={() => setFiltro("todos")}
           >
             Todos
-          </Button>
-          <Button
+          </SAEButton>
+          <SAEButton
             variant={filtro === "inscriptos" ? "contained" : "outlined"}
             onClick={() => setFiltro("inscriptos")}
           >
             Inscriptos
-          </Button>
-          <Button
+          </SAEButton>
+          <SAEButton
             variant={filtro === "noinscriptos" ? "contained" : "outlined"}
             onClick={() => setFiltro("noinscriptos")}
           >
             No inscriptos
-          </Button>
+          </SAEButton>
         </Box>
 
         {/* DERECHA */}
-        <TextField
+        <SAETextField
           size="small"
-          label="Buscar"
+          placeholder="Buscar..."
           value={textoBusqueda}
           onChange={(e) => setTextoBusqueda(e.target.value)}
           sx={{
@@ -321,7 +324,15 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
       >
         {agrupadoFiltrado.map((card, index) => (
           <Grid spacing={10} size={{ xs: 4, sm: 4, md: 4 }} key={index}>
-            <Card>
+            <Card
+              sx={{
+                borderRadius: 6,
+                px: { xs: 1, md: 2 },
+                py: { xs: 0.5, md: 1 },
+                boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
+                border: "1px solid rgba(17, 53, 101, 0.08)",
+              }}
+            >
               <CardContent>
                 <Typography gutterBottom variant="body1">
                   {ubicacionATexto(card.ubicacion)}
@@ -349,11 +360,13 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                   {profesoresToTexto(card.profesores)}
                 </Typography>
               </CardContent>
-              <CardActions justifyContent="center">
-                <Button
+              <CardActions>
+                <SAEButton
                   size="medium"
                   variant="contained"
-                  startIcon={card.esta_inscripto === false?<AddIcon/> :<CancelIcon />}
+                  startIcon={
+                    card.esta_inscripto === false ? <AddIcon /> : <CancelIcon />
+                  }
                   onClick={() => handleOpen(index)} // Abrir el diálogo específico del card
                   color={card.esta_inscripto === false ? "success" : "error"}
                   fullWidth
@@ -361,10 +374,11 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                   {card.esta_inscripto === false
                     ? "Inscribir"
                     : "Desinscribirte"}
-                </Button>
+                </SAEButton>
                 <Dialog
                   open={openDialogIndex === index}
                   onClose={() => handleClose()}
+                  sx={{ borderRadius: 6 }}
                 >
                   <DialogTitle>{card.deporte}</DialogTitle>
                   <DialogContent>
@@ -377,7 +391,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
-                    <Button
+                    <SAEButton
                       fullWidth
                       onClick={() => handleInscripcion(card.id_deporte)}
                       variant="contained"
@@ -388,7 +402,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                         card.esta_inscripto === false ? (
                           <CheckIcon />
                         ) : (
-                          <RemoveIcon />
+                          <CancelIcon />
                         )
                       }
                       autoFocus
@@ -396,7 +410,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                       {card.esta_inscripto === false
                         ? "Inscribirse"
                         : "Desincribirse"}
-                    </Button>
+                    </SAEButton>
                   </DialogActions>
                 </Dialog>
               </CardActions>

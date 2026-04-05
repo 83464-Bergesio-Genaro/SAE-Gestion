@@ -4,11 +4,9 @@
   font-family: var(--font);
 }
 body {
-  background: linear-gradient(135deg, #92E0DB 6.71%, #5B96CC 91.97%);
+  background: linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);
   width: 100%;
   margin: 0;
-
-  background: var(--background);
   transition:
     background 0.3s ease,
     color 0.3s ease;

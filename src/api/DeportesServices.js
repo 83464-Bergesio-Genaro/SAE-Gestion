@@ -9,23 +9,27 @@ import {
   mapResponseInscripcionDeporte,
 } from "./formatters/DeportesFormatters";
 
+import { appConfig } from "../config/appConfig";
+
+export const URLApiCotroller = `${appConfig.apiUrl}/api/Deporte`;
+
 import { apiDelete, apiPost, apiRequest } from "./apiClient";
 export async function ObtenerHorariosActivos(token) {
-  return apiRequest(`/Deporte/ObtenerHorariosActivos`, {
+  return apiRequest(`${URLApiCotroller}/ObtenerHorariosActivos`, {
     token,
     mapper: mapHorarioAlumno,
   });
 }
 
 export async function ObtenerDeportesActivos(token) {
-  return apiRequest(`/Deporte/ObtenerDeportesActivos`, {
+  return apiRequest(`${URLApiCotroller}/ObtenerDeportesActivos`, {
     token,
     mapper: mapDeportesActivos,
   });
 }
 
 export async function ObtenerEspDeportivoActivos(token) {
-  return apiRequest(`/Deporte/ObtenerEspDeportivoActivos`, {
+  return apiRequest(`${URLApiCotroller}/ObtenerEspDeportivoActivos`, {
     token,
     mapper: mapEspDeportivoActivos,
   });
@@ -33,7 +37,7 @@ export async function ObtenerEspDeportivoActivos(token) {
 
 export async function ObtenerInscripcionesXDeportista(id_deportista, token) {
   return apiRequest(
-    `/Deporte/ObtenerInscripcionesXDeportista/${id_deportista}`,
+    `${URLApiCotroller}/ObtenerInscripcionesXDeportista/${id_deportista}`,
     {
       token,
       mapper: mapInscripcionesXDeportista,
@@ -44,7 +48,7 @@ export async function ObtenerInscripcionesXDeportista(id_deportista, token) {
 }
 
 export async function ObtenerIdDeportista(legajo, token) {
-  return apiRequest(`/Deporte/ObtenerDeportistasXLegajo/${legajo}`, {
+  return apiRequest(`${URLApiCotroller}/ObtenerDeportistasXLegajo/${legajo}`, {
     token,
     mapper: mapDeportistaLegajo,
     allowEmpty: true,
@@ -53,7 +57,7 @@ export async function ObtenerIdDeportista(legajo, token) {
 }
 
 export async function ObtenerTorneosXDeporte(id_deporte, token) {
-  return apiRequest(`/Deporte/ObtenerTorneosXDeporte/${id_deporte}`, {
+  return apiRequest(`${URLApiCotroller}/ObtenerTorneosXDeporte/${id_deporte}`, {
     token,
     mapper: mapTorneo,
     allowEmpty: true,
@@ -100,27 +104,34 @@ export async function ObtenerHorariosDeportista(id_deportista, token) {
   };
 }
 
-export async function DesinscribirDeporte(id_inscripcion,token){
+export async function DesinscribirDeporte(id_inscripcion, token) {
   return apiDelete(
-    `/Deporte/EliminarInscripcionDeporte/${id_inscripcion}`,
+    `${URLApiCotroller}/EliminarInscripcionDeporte/${id_inscripcion}`,
     {
       token,
       mapper: mapResponseInscripcionDeporte,
-      allowEmpty:false,
+      allowEmpty: false,
       emptyMessage: "",
     },
   );
 }
 
-// CREAR DesinscribirDeporte con DELETE para manejar esto 
-export async function CrearInscripcionDeporte(id_deporte, id_deportista, token) {
+// CREAR DesinscribirDeporte con DELETE para manejar esto
+export async function CrearInscripcionDeporte(
+  id_deporte,
+  id_deportista,
+  token,
+) {
   return apiPost(
-    `/Deporte/CrearInscripcionDeporte/${id_deporte}/${id_deportista}`,
+    `${URLApiCotroller}/CrearInscripcionDeporte/${id_deporte}/${id_deportista}`,
     {
       token,
       mapper: mapResponseInscripcionDeporte,
-      allowEmpty:false,
+      allowEmpty: false,
       emptyMessage: "",
     },
   );
 }
+
+
+

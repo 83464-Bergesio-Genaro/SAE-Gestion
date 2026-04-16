@@ -107,7 +107,7 @@ export default function StudentSports() {
 
   const ObtenerIdDeportistaApi = async () => {
     try {
-      const data = await ObtenerIdDeportista(user.legajo, user.token);
+      const data = await ObtenerIdDeportista(user.email, user.token);
       setIdDeportista(data);
       return data;
     } catch (error) {
@@ -299,6 +299,7 @@ export default function StudentSports() {
         message: "Error al subir el archivo",
         severity: "error",
       });
+      console.error("Error al subir el archivo:", error);
     } finally {
       setLoading(false);
     }

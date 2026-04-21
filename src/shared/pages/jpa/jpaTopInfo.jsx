@@ -7,16 +7,11 @@ import SchoolIcon from "@mui/icons-material/School";
 import FactoryIcon from "@mui/icons-material/Factory";
 import "./jpa.css";
 import {
-  Box, 
-  Container,
   Typography,
   Card,
-  CardContent,
-  Grid,
-  Stack,
-  CardActionArea,
-  Link,
+  CardContent
 } from "@mui/material";
+import { HashLink as Link } from 'react-router-hash-link';
 import "./jpa.css";
 
 export default function JPAIntro(){
@@ -46,8 +41,8 @@ export default function JPAIntro(){
           {/* BOTTOM */}
           <div className="bottom-menu">
             <MenuCard item={{title: "Biblioteca",icon: MenuBookIcon,section: "info-biblioteca"}} />
-            <MenuCard item={{title: "Intercambios",icon: FlightIcon,section: "info-intercambios"}} />
-            <MenuCard item={{title: "Tutorías",icon: SchoolIcon,section: "info-tutorias"}} />
+            <MenuCard item={{title: "Congresos",icon: FlightIcon,section: "info-congresos"}} />
+            <MenuCard item={{title: "Tramites",icon: SchoolIcon,section: "info-tramites"}} />
             <MenuCard item={{title: "Visitas Tec.",icon: FactoryIcon,section: "info-visitas"}} />
           </div>
           
@@ -60,7 +55,7 @@ function MenuCard({item}) {
 
   return (
     <Card className="menu-card" sx={{ borderRadius: 3, backgroundColor: "#1f5e9c",height:"140px",boxShadow:"0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19)" }}>
-      <Link href={"#"+item.section} sx={{ color: "white", fontSize:"18px"}}>
+      <Link to={`/JPA#${item.section}`} sx={{ color: "white ", fontSize:"18px", textDecoration: "none !important" }}>
         <CardContent>
           <item.icon sx={{ fontSize: 60, mb: { xs: 0, md: 1 } }} />
           <Typography variant="h6">

@@ -10,6 +10,9 @@ export function EventoCard({ evento }) {
         backgroundColor: "white",
         color: "black",
         boxShadow: "0 8px 18px rgba(0,0,0,0.28)",
+        minWidth: 250,
+        maxWidth: 250,
+        minHeight: 400,
       }}
     >
       <CardContent
@@ -24,7 +27,7 @@ export function EventoCard({ evento }) {
           <Typography sx={{ fontSize: 22, fontWeight: 700 }}>
             {evento.fecha_evento}
           </Typography>
-          <Typography sx={{ fontSize: 40, fontWeight: 700 }}>
+          <Typography sx={{ fontSize: 34, fontWeight: 700 }}>
             {evento.horario_inicio}
           </Typography>
         </Box>

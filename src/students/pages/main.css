@@ -1,0 +1,20 @@
+.card-buttons {
+  width: 100%;
+  min-height: 32px;
+  transition: 0.2s;
+  cursor: pointer;
+  flex: 1;
+}
+
+.card-buttons:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-buttons-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}

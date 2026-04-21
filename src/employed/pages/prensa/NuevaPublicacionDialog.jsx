@@ -170,7 +170,7 @@ export default function NuevaPublicacionDialog({ state, actions }) {
                   }}
                 >
                   <Tab value="subir" label={PSN.tabUpload} />
-                  <Tab value="existente" label={PSN.tabExisting} />
+                  <Tab value="existente" label={PSN.tabExisting} /> 
                 </Tabs>
                 {docMode === "subir" ? (
                   <SAEButton variant="outlined" component="label" fullWidth startIcon={<CloudUploadIcon />}>

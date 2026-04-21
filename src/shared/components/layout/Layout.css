@@ -45,7 +45,7 @@
   font-weight: bold;
   justify-content: center;
 }
-.nav-links a h4 {
+.nav-links a h5 {
   align-self: center;
   margin: 0;
 }
@@ -71,7 +71,7 @@
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
-  width: 100% !important;
+  width: 30%;
 }
 .nav-logout:hover {
   opacity: 0.8;
@@ -103,7 +103,7 @@
     flex-direction: row;
     padding: 0px 0px 0px 40px;
     width: 100% !important;
-     height: 65px;
+    height: 65px;
   }
   .nav-logo {
     background-position: left;

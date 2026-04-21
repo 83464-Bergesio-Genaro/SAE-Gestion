@@ -1,56 +1,54 @@
 import { appConfig } from "../config/appConfig";
 
 export default async function ObtenerTokenJWT(legajo, dominio, password) {
-
   try {
-    const response = await fetch(`${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`, { headers: { "ngrok-skip-browser-warning": "true" } });
+    console.log(
+      `${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`,
+    );
+    const response = await fetch(
+      `${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`,
+      { headers: { "ngrok-skip-browser-warning": "true" } },
+    );
     switch (response.status) {
-
-        case 201:
-        {
-            const data = await response.json();
-            return { success: true, data };
-        }
-        case 204:
-
-          return {
-            success: false,
-            message: "Usuario no encontrado"
-          };
-
-        case 401:
-
-          return {
-            success: false,
-            message: "Credenciales incorrectas"
-          };
-
-        case 409:
-
-          return {
-            success: false,
-            message: "Conflicto en la sesión"
-          };
-
-        case 500:
-
-          return {
-            success: false,
-            message: "Error interno del servidor"
-          };
-
-        default:
-
-          return {
-            success: false,
-            message: "Respuesta desconocida"
-          };
+      case 201: {
+        const data = await response.json();
+        return { success: true, data };
       }
-    } catch (error) {
-        console.log("Error: "+error)
+      case 204:
         return {
           success: false,
-          message: "Error no contemplado"
+          message: "Usuario no encontrado",
+        };
+
+      case 401:
+        return {
+          success: false,
+          message: "Credenciales incorrectas",
+        };
+
+      case 409:
+        return {
+          success: false,
+          message: "Conflicto en la sesión",
+        };
+
+      case 500:
+        return {
+          success: false,
+          message: "Error interno del servidor",
+        };
+
+      default:
+        return {
+          success: false,
+          message: "Respuesta desconocida",
         };
     }
+  } catch (error) {
+    console.log("Error: " + error);
+    return {
+      success: false,
+      message: "Error no contemplado",
+    };
+  }
 }

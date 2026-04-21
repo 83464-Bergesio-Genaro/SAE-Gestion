@@ -1,3 +1,4 @@
+import "./index.css";
 import { useEffect } from "react";
 import { appConfig } from "./config/appConfig";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -17,6 +18,7 @@ import StudentSports from "./students/pages/sports/StudentSports";
 
 import Scholarships from "./students/pages/scholarships/Scholarships";
 import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
+
 import SharedJPASistemas from "./shared/pages/degrees/systems";
 import SharedJPAQuimica from "./shared/pages/degrees/chemical";
 import SharedJPACivil from "./shared/pages/degrees/civil";
@@ -26,9 +28,13 @@ import SharedJPAIndustrial from "./shared/pages/degrees/industrial";
 import SharedJPAMecanic from "./shared/pages/degrees/mecanic";
 import SharedJPAMetalurgic from "./shared/pages/degrees/metalurgic";
 import SharedJPAParticipar from "./shared/pages/jpa/participar";
+
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 import Prensa from "./shared/pages/prensa/Prensa";
+
+import JpaAdmin from "./employed/pages/jpa/jpaAdmin";
+import UsuariosAdmin from "./employed/pages/users/users";
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
 export default function App() {
@@ -94,6 +100,14 @@ export default function App() {
               }
             />
             <Route
+              path="/Gestion-JPA"
+              element={
+                <ProtectedRoute role={[2, 5]}>
+                  <JpaAdmin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/Gestion-Prensa"
               element={
                 <ProtectedRoute role={5}>
@@ -101,7 +115,14 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/Gestion-Usuarios"
+              element={
+                <ProtectedRoute role={[2, 5]}>
+                  <UsuariosAdmin />
+                </ProtectedRoute>
+              }
+            />
             {/* STUDENTS */}
             <Route
               path="/Principal"

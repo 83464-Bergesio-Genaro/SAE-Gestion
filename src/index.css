@@ -4,12 +4,13 @@
   font-family: var(--font);
 }
 body {
-  background: linear-gradient(135deg, #92E0DB 6.71%, #5B96CC 91.97%);
+  background: linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);
   width: 100%;
   margin: 0;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
 }
-
 
 :root {
   line-height: 1.5;
@@ -23,11 +24,11 @@ h1 {
   font-size: 2.5em;
   line-height: 1.1;
 }
-h2{
+h2 {
   font-size: 1.5em;
   line-height: 1;
 }
-h3{
+h3 {
   font-size: 1em;
   line-height: 0.5;
 }
@@ -35,15 +36,4 @@ h3{
 .main-content {
   width: 100%;
   min-height: 65vh; /* This makes the root at least 100% of the viewport height */
-}
-@media (min-width: 600px) and (max-width: 1300px){
-.main-content {
-  width: 100%;
-  min-height: 89vh; /* This makes the root at least 100% of the viewport height */
-}
-}
-@media (min-width: 1300px){
-  .main-content {
-    min-height: 87vh !important; /* This makes the root at least 100% of the viewport height */
-  }
 }

@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import SAEButton from "../../components/buttons/SAEButton";
 import SAETextField from "../../components/inputs/SAETextField";
+import SAESpinner from "../../components/spinner/SAESpinner";
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
 import utnLogo from "../../../assets/utn.png";
 
@@ -37,99 +38,16 @@ export default function ComponentLab() {
       </Typography>
       <Stack direction="row" flexWrap="wrap" gap={4} sx={{ mb: 5 }}>
         <Stack alignItems="center" gap={1}>
-          <Typography variant="caption" color="text.secondary">
-            Anillo + PNG L
-          </Typography>
-          <Box
-            sx={{
-              position: "relative",
-              width: 96,
-              height: 96,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            <CircularProgress size={96} thickness={3.8} />
-            <Box
-              component="img"
-              src={utnLogo}
-              alt="UTN"
-              sx={{
-                width: 44,
-                height: 44,
-                objectFit: "contain",
-                position: "absolute",
-                borderRadius: "50%",
-                bgcolor: "white",
-                p: 0.5,
-                boxShadow: 1,
-              }}
-            />
-          </Box>
+          <Typography variant="caption" color="text.secondary">Anillo + PNG L</Typography>
+          <SAESpinner size="L" />
         </Stack>
-
         <Stack alignItems="center" gap={1}>
-          <Typography variant="caption" color="text.secondary">
-            Anillo + PNG M
-          </Typography>
-          <Box
-            sx={{
-              position: "relative",
-              width: 96,
-              height: 96,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            <CircularProgress size={83} thickness={3.8} />
-            <Box
-              component="img"
-              src={utnLogo}
-              alt="UTN"
-              sx={{
-                width: 44,
-                height: 44,
-                objectFit: "contain",
-                position: "absolute",
-                borderRadius: "50%",
-                bgcolor: "white",
-                p: 0.5,
-                boxShadow: 1,
-              }}
-            />
-          </Box>
+          <Typography variant="caption" color="text.secondary">Anillo + PNG M</Typography>
+          <SAESpinner size="M" />
         </Stack>
-
         <Stack alignItems="center" gap={1}>
-          <Typography variant="caption" color="text.secondary">
-            Anillo + PNG S
-          </Typography>
-          <Box
-            sx={{
-              position: "relative",
-              width: 96,
-              height: 96,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            <CircularProgress size={76} thickness={3.8} />
-            <Box
-              component="img"
-              src={utnLogo}
-              alt="UTN"
-              sx={{
-                width: 44,
-                height: 44,
-                objectFit: "contain",
-                position: "absolute",
-                borderRadius: "50%",
-                bgcolor: "white",
-                p: 0.5,
-                boxShadow: 1,
-              }}
-            />
-          </Box>
+          <Typography variant="caption" color="text.secondary">Anillo + PNG S</Typography>
+          <SAESpinner size="S" />
         </Stack>
       </Stack>
       <Stack direction="row" flexWrap="wrap" gap={4} sx={{ mb: 5 }}>

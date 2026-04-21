@@ -236,10 +236,10 @@ export default function EmployedMain() {
     return (
         <Box
             sx={{
-                mt: "-90px",
-                pt: { xs: "114px", md: "130px" },
                 pb: 8,
-                minHeight: "calc(100vh - 90px)",
+                mt: "-90px",
+                pt: "90px",
+                minHeight: "100%",
                 bgcolor: "#f4f8fc",
             }}
         >

@@ -2,13 +2,15 @@ import { Box } from "@mui/material";
 import "./Layout.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import SessionExpiredDialog from "../SessionExpiredDialog";
 
 
 export default function MainLayout({ children }) {
   return (
-    <Box>
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Navbar />
-      <main className="main-content" style={{ marginTop: 90 }}>
+      <SessionExpiredDialog />
+      <main className="main-content" style={{ paddingTop: 90, flex: 1 }}>
         {children}
       </main>
       <Footer/>

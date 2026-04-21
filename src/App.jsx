@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { appConfig } from "./config/appConfig";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import { AuthProvider } from "./shared/auth/AuthContext";
 import ProtectedRoute from "./shared/auth/ProtectedRoute";
@@ -27,6 +27,7 @@ import SharedJPAMecanic from "./shared/pages/degrees/mecanic";
 import SharedJPAMetalurgic from "./shared/pages/degrees/metalurgic";
 import SharedJPAParticipar from "./shared/pages/jpa/participar";
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
+import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 import Prensa from "./shared/pages/prensa/Prensa";
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
@@ -39,7 +40,7 @@ export default function App() {
   }, []);
   return (
     <AuthProvider>
-      <HashRouter>
+      <BrowserRouter>
         <MainLayout>
           <Routes>
             {/* Public */}
@@ -85,6 +86,14 @@ export default function App() {
               }
             />
             <Route
+              path="/Gestion-Torneos/:id"
+              element={
+                <ProtectedRoute role={[2, 5]}>
+                  <TorneoDetalle />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/Gestion-Prensa"
               element={
                 <ProtectedRoute role={5}>
@@ -122,7 +131,7 @@ export default function App() {
             />
           </Routes>
         </MainLayout>
-      </HashRouter>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

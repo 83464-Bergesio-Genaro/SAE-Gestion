@@ -66,7 +66,7 @@ export const employedMenu = [
     color:"#56719a",
     image:"none"
   },
-    {
+  {
     label: "Becas",
     path: "/Gestion-Becas",
     color:"#3F76C8",

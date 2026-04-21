@@ -5,15 +5,15 @@ import { useAuth } from "../../auth/AuthContext";
 import { PopupError, PopUpWaiting } from "../../components/popUp/Popup";
 
 const carreras = [
-  { value: "sistemas", label: "Sistemas" },
-  { value: "electrica", label: "Electrica" },
-  { value: "electronica", label: "Electronica" },
-  { value: "mecanica", label: "Mecanica" },
-  { value: "metalurgica", label: "Metalurgica" },
-  { value: "quimica", label: "Quimica" },
-  { value: "industrial", label: "Industrial" },
-  { value: "civil", label: "Civil" },
-  { value: "frc", label: "Frc" },
+    {value:"sistemas",label:"Sistemas"},
+    {value:"electrica",label:"Electrica"},
+    {value:"electronica",label:"Electronica"},
+    {value:"mecanica",label:"Mecanica"},
+    {value:"metalurgica",label:"Metalurgica"},
+    {value:"quimica",label:"Quimica"},
+    {value:"industrial",label:"Industrial"},
+    {value:"civil",label:"Civil"},
+    {value:"frc",label:"FRC"}
 ];
 
 export default function Login() {

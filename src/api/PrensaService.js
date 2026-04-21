@@ -160,7 +160,7 @@ export async function descargarDocumentoPorId(idDocumento) {
 export async function ObtenerNoticiasPublicas(){
   try {
     const response = await fetch(`${appConfig.apiUrl}/api/Prensa/ListarPublicacionesActivas`, { headers: { "ngrok-skip-browser-warning": "true" } });
-
+  
     switch (response.status) {
 
       case 200:
@@ -169,6 +169,7 @@ export async function ObtenerNoticiasPublicas(){
         let  listaPublicaciones =data.map(mapPublicacionPublica);
         //Se ordena el listado obtenido de acuerdo a su prioridad
         listaPublicaciones=[...listaPublicaciones].sort((a, b) => b.prioridad - a.prioridad);
+        //console.log("Lista de publicaciones obtenida: ", listaPublicaciones);
         return {success:true,data:listaPublicaciones,message:""};
       }
       case 204:
@@ -224,8 +225,6 @@ export async function ObtenerNoticiasPublicas(){
 }
 
 export function getDownloadUrl(id){
-  console.log(`${appConfig.apiUrl}/api/Prensa/DescargarDocumentoXId/${id}`);
   return `${appConfig.apiUrl}/api/Prensa/DescargarDocumentoXId/${id}`;
-
 }
 

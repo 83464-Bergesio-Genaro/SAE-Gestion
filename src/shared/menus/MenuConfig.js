@@ -76,5 +76,17 @@ export const employedMenu = [
     path: "/Prensa",
     color:"#5E8ACC",
     image:"none"
+  },
+  {
+    label: "JPA",
+    path: "/Gestion-JPA",
+    color:"#e4f7d8",
+    image:"none"
+  },
+  {
+    label: "Empleados",
+    path: "/Gestion-Usuarios",
+    color:"#e4f7d8",
+    image:"none"
   }
 ];

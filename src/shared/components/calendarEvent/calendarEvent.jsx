@@ -11,11 +11,11 @@ export function CalendarEvent({ eventos }) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-  let itemsPerPage = 4;
+  let itemsPerPage = 3;
 
-  if (isMobile) itemsPerPage = 2;
+  if (isMobile) itemsPerPage = 1;
   else if (isTablet) itemsPerPage = 3;
-  else itemsPerPage = 4;
+  else itemsPerPage = 3;
   const totalPages = Math.ceil(eventos.length / itemsPerPage);
   const [page, setPage] = useState(0);
 
@@ -41,7 +41,8 @@ export function CalendarEvent({ eventos }) {
             margin: 4,
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 4,
+            justifyItems: "center",
+            gap: 4
           }}
         >
           {visibleItems.map((evento, index) => (

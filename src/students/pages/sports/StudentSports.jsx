@@ -239,7 +239,7 @@ export default function StudentSports() {
         }),
       );
     } catch (error) {
-      console.error("Error al traer Id Deportista:", error);
+      console.error("Error al traer Los Documentos del Deportista:", error);
     }
   };
 

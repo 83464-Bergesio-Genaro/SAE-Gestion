@@ -33,12 +33,6 @@ export const studentMenu = [
     color:"#184B97",
     image:"none"
   },
-    {
-    label: "Inicio",
-    path: "/Principal",
-    color:"#D98AC5",
-    image:"none"
-  },
   {
     label: "Deportes",
     path: "/Mis-Deportes",
@@ -76,6 +70,18 @@ export const employedMenu = [
     label: "Prensa",
     path: "/Prensa",
     color:"#5E8ACC",
+    image:"none"
+  },
+  {
+    label: "JPA",
+    path: "/Gestion-JPA",
+    color:"#e4f7d8",
+    image:"none"
+  },
+  {
+    label: "Empleados",
+    path: "/Gestion-Usuarios",
+    color:"#e4f7d8",
     image:"none"
   }
 ];

@@ -1,8 +1,13 @@
 html{
   scroll-behavior: smooth;
 }
+/*Yo se que te molesta esto Luis pero sino esto no me lo reconocia en el hashlink*/
+a{
+  text-decoration: none !important;
+  color:white;
+}
 a:hover{
-  text-decoration: none;
+  text-decoration: none !important;
 }
 .desktop-container{
     display: none;
@@ -100,13 +105,13 @@ a:hover{
   /*  FINAL GRILLA INTERACTIVA     */
 
 /*    SECCIONES     */
-.info-container{
-  padding: 10px 40px;
+.info-jpa-container{
+  padding: 40px;
   gap:10px;
   display: grid;
   place-items: center;  
 }
-.info-secciones{
+.info-jpa-secciones{
   margin: 0;
   display: grid;
   grid-template-columns: 1fr;
@@ -120,27 +125,27 @@ a:hover{
   min-height: 100px;
   padding: 0px 16px;
 }
-.info-content{
-  max-height: 40px; /* Initial height for the visible content */
+.info-jpa-content{
+  height: auto;
   transition: max-height 0.5s ease-out;
   align-items: center;
   text-align: center;
 }
-.info-content h2{
+.info-jpa-content h2{
   font-size: 22px;
 }
-.info-hidden, .info-hidden-left{
+.info-jpa-hidden, .info-jpa-hidden-left{
   font-size: 16px;
   text-align: left;
   opacity: 0;
   height: auto;
   transition: opacity 0.4s ease-out;
 }
-.info-secciones:hover .info-content {
-    max-height: 600px; /* A large enough value to accommodate the expanded content */
+.info-jpa-secciones:hover .info-jpa-content {
+    max-height: 800px; /* A large enough value to accommodate the expanded content */
 }
-.info-secciones:hover .info-content .info-hidden,
-.info-secciones:hover .info-content .info-hidden-left {
+.info-jpa-secciones:hover .info-jpa-content .info-jpa-hidden,
+.info-jpa-secciones:hover .info-jpa-content .info-jpa -hidden-left {
   opacity: 1; /* A large enough value to accommodate the expanded content */
   transition: opacity 0.1s ease-in;
   height: fit-content;
@@ -148,9 +153,7 @@ a:hover{
 
 /*  FINAL SECCIONES     */
 
-
-
-@media (min-width: 1200px){
+@media (min-width: 1024px){
   .mobile-container{
       display: none;
   }
@@ -206,11 +209,11 @@ a:hover{
   /*  FINAL GRILLA INTERACTIVA     */
 
   /*           SECCIONES           */
-  .info-container{
+  .info-jpa-container{
     row-gap: 40px;
-    padding: 70px 22vw;
+    padding: 70px;
   }
-  .info-secciones{
+  .info-jpa-secciones{
     scroll-margin-top: 100px;
     margin: 0;
     padding: 10px;
@@ -219,72 +222,46 @@ a:hover{
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
       transition: transform 0.3s ease-in-out;
   }
-  .info-secciones:hover{
+  .info-jpa-secciones:hover{
     transition: transform 0.3s  ease-in-out;
     transform: scale(1.03);
     opacity: 0.98;
   }
-  .info-content{
-    max-height: 500px; /* Initial height for the visible content */
+  .info-jpa-content{
+    min-height: 450px; /* Initial height for the visible content */
   }
-  .info-content h2{
+  .info-jpa-content h2{
     font-size: 30px;
   }
-  .info-hidden,
-  .info-hidden-left{
+  .info-jpa-hidden,
+  .info-jpa-hidden-left{
       opacity: 1; 
       display: grid;
       text-align: left;
       padding: 30px 20px;
-      font-size: 20px;
+      font-size: 1.35em;
+      min-height: 320px;
+      height: auto;
   }
-  .info-hidden{
-      grid-template-columns: 3fr 1fr;
+  .info-jpa-hidden{
+      grid-template-columns: 2fr 1fr;
   }
-  .info-hidden-left{
-      grid-template-columns: 1fr 3fr;
+  .info-jpa-hidden-left{
+      grid-template-columns: 1fr 2fr;
   }
-  .info-hidden-text{
+  .info-jpa-hidden-text{
     padding: 0px 30px;
   }
 
-  .info-visita-image,
-  .info-tuto-image,
-  .info-inter-image,
-  .info-becas-image,
-  .info-salud-image,
-  .info-depo-image,
-  .info-biblo-image{
+  .info-jpa-image{
       background-size: cover;
-      background-repeat: no-repeat;
+      background-repeat: no-repeat ;
       background-position: center;
-      width: 100%;
+      height: 100%;
       border-radius: 50px;     
   }
-
-    .info-visita-image{
-        background-image: url("../../../../public/images/infoSection/visitasFRC.jpg");
-    }
-    .info-tuto-image{
-        background-image: url("../../../../public/images/infoSection/tutoriasFRC.jpg");
-    }       
-    .info-inter-image{
-        background-image: url("../../../../public/images/infoSection/coruscant.webp");
-    }       
-    .info-becas-image{
-        background-image: url("../../../../public/images/infoSection/scholarshipsFRC.webp");
-    }    
-    .info-salud-image{
-        background-image: url("../../../../public/images/infoSection/saludFRC.jpg");
-    }
-    .info-depo-image{
-        background-image: url("../../../../public/images/infoSection/deportesFRC.jpg");
-    }
-    .info-biblo-image{
-        background-image: url("../../../../public/images/infoSection/biblotecaFRC.jpg");
-    }
-    .events-container{
-          padding: 70px 20vw;
+  .events-container{
+    padding: 70px 20vw;
     }
   /*  FINAL SECCIONES     */
 }

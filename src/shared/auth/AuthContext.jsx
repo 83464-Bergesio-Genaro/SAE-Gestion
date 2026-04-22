@@ -1,4 +1,4 @@
-import { createContext, useContext,useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import ObtenerTokenJWT from "../../api/AuthService";
 
 const AuthContext = createContext();
@@ -31,6 +31,22 @@ const [user, setUser] = useState(() => {
     return parsed;
     });
 
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const stored = localStorage.getItem("session");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Date.now() > parsed.expiration) {
+          setSessionExpired(true);
+        }
+      }
+    }, 300000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const login = async (legajo, dominio, password) => {
     
     const result = await ObtenerTokenJWT(legajo, dominio, password);
@@ -43,49 +59,40 @@ const [user, setUser] = useState(() => {
               email : result.data.legajo_armado??"",
               nombre: result.data.nombre_usuario??"",
               id_perfil: result.data.id_perfil??0,
-              expiration: Date.now() + 3600000
+              expiration: Date.now() + 300000
           };
 
           localStorage.setItem("session", JSON.stringify(session));
+          setUser(session);
+          setSessionExpired(false);
           return session;
       }
       return null;
-    /*let fakeUser;
-    if(password !== "1111"){
-        if (username === "empleado") {
-        fakeUser = {
-            id: 1,
-            nombre: "Empleado Demo",
-            legajo: "EMP001",
-            id_perfil: 1,
-            token: "token-empleado",
-            expiration:Date.now() + (30 * 60 * 1000)
-        };
-        } else {
-        fakeUser = {
-            id: 2,
-            nombre: "Alumno Demo",
-            legajo: "STU001",
-            id_perfil: 2,
-            token: "token-student",
-            expiration:Date.now() + (30 * 60 * 1000)
-        };
-        }
-        localStorage.setItem("session", JSON.stringify(fakeUser));
-        setUser(fakeUser);
-
-        return fakeUser;
-    }
-    else return null;*/
   };
+
+  const extendSession = () => {
+    const stored = localStorage.getItem("session");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const extended = {
+        ...parsed,
+        expiration: Date.now() + 300000
+      };
+      localStorage.setItem("session", JSON.stringify(extended));
+      setUser(extended);
+      setSessionExpired(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
+    setSessionExpired(false);
     localStorage.removeItem("session");
-    window.location.replace("/")
+    window.location.replace("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, extendSession, sessionExpired, setSessionExpired }}>
       {children}
     </AuthContext.Provider>
   );

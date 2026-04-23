@@ -8,6 +8,7 @@ import {
   Box,
   Grid,
   Dialog,
+  InputAdornment,
   Chip,
   DialogActions,
   DialogContent,
@@ -20,6 +21,8 @@ import {
 } from "@mui/material";
 import utnLogo from "../../../assets/utn.png";
 
+import { DataGrid } from "@mui/x-data-grid";
+
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
 
 import { FileUpload, Delete } from "@mui/icons-material";
@@ -28,19 +31,16 @@ import DeportesMasonry from "../../components/deportesMasonery";
 import JsonArrayDataGrid from "../../../shared/components/jsonArrayDataGrid/jsonArrayDataGrid";
 
 import {
-  ObtenerHorariosDeportista,
-  ObtenerIdDeportista,
-  ObtenerTorneosXDeporte,
-  CrearInscripcionDeporte,
-  DesinscribirDeporte,
-} from "../../../api/DeportesServices";
-
-import {
-  CrearDocumentoEstudiante,
-  DescargarDocumentacionXId,
-  EliminarDocumentoEstudiante,
-  ListarDocumentacionXLegajo,
-} from "../../../api/EstudianteService";
+  obtenerIdDeportista,
+  listarDocumentacionXLegajo,
+  obtenerHorariosDeportista,
+  obtenerTorneosXDeporte,
+  crearInscripcionDeporte,
+  eliminarInscripcionDeporte,
+  descargarDocumentacionXId,
+  crearDocumentoEstudiante,
+  eliminarDocumentoEstudiante,
+} from "../../../api/DeporteService";
 
 import {
   isPdfDocument,
@@ -50,12 +50,32 @@ import {
   INITIAL_PREVIEW,
 } from "./sports.utils";
 
-import { ObtenerTiposDocumento } from "../../../api/HerramientasService";
+import { obtenerTiposDocumento } from "../../../api/HerramientasService";
+import SearchIcon from "@mui/icons-material/Search";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
+import SAETextField from "../../../shared/components/inputs/SAETextField";
+
 import { SPORTS_STRINGS } from "./sports.strings";
+
+import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
+
 const C = SPORTS_STRINGS;
+
+function formatDate(isoString) {
+  if (!isoString) return "";
+  const d = new Date(isoString);
+  if (isNaN(d)) return isoString;
+  return d.toLocaleDateString("es-AR");
+}
+
+function formateBoolean(value) {
+  if (typeof value === "boolean") {
+    return value ? "Sí" : "No";
+  }
+  return value;
+}
 
 export default function StudentSports() {
   function closePreview() {
@@ -71,6 +91,7 @@ export default function StudentSports() {
       archivoNombre: "",
       formatoNombre: "{legajo}_AlumnoRegular",
       id_archivo: null,
+      extension: null,
     },
     {
       id_tipo_documento: null,
@@ -80,6 +101,7 @@ export default function StudentSports() {
       archivoNombre: "",
       formatoNombre: "{legajo}_DNI",
       id_archivo: null,
+      extension: null,
     },
     {
       id_tipo_documento: null,
@@ -89,15 +111,17 @@ export default function StudentSports() {
       archivoNombre: "",
       formatoNombre: "{legajo}_FichaMedica",
       id_archivo: null,
+      extension: null,
     },
   ]);
-
   const { user } = useAuth();
   const [deportista, setIdDeportista] = useState(null);
   const [openPopup, setOpenPopup] = useState(false);
   const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
   const [horariosDeportista, setHorariosDeportista] = useState([]);
   const [torneoDeportista, setTorneoDeportista] = useState([]);
+  const [busquedaTorneos, setBusquedaTorneos] = useState("");
+
   const [preview, setPreview] = useState(INITIAL_PREVIEW);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -107,7 +131,7 @@ export default function StudentSports() {
 
   const ObtenerIdDeportistaApi = async () => {
     try {
-      const data = await ObtenerIdDeportista(user.email, user.token);
+      const data = await obtenerIdDeportista(user.email);
       setIdDeportista(data);
       return data;
     } catch (error) {
@@ -123,9 +147,9 @@ export default function StudentSports() {
 
   const ObtenerHorariosDeportistaApi = async (deportista) => {
     try {
-      const data = await ObtenerHorariosDeportista(deportista.id, user.token);
-      setHorariosDeportista(data.horarios);
-      return data.horarios;
+      const data = await obtenerHorariosDeportista(deportista.id);
+      setHorariosDeportista(data);
+      return data;
     } catch (error) {
       console.error("Error al traer Horario Deportivos:", error);
       setSnackbar({
@@ -140,12 +164,17 @@ export default function StudentSports() {
   const ObtenerTorneosPorDeporte = async (deportesIds) => {
     try {
       const resultados = await Promise.all(
-        deportesIds.map((id) => ObtenerTorneosXDeporte(id, user.token)),
+        deportesIds.map((id) => obtenerTorneosXDeporte(id)),
       );
 
+      console.log("Resultados de torneos por deporte:", resultados);
+
       const torneos = resultados.flat();
+      console.log("Torneos obtenidos:", torneos);
+      console.log("Torneos obtenidos para cada deporte:", deportesIds);
 
       setTorneoDeportista(torneos);
+      return torneos;
     } catch (error) {
       console.error("Error al traer torneos:", error);
       setSnackbar({
@@ -158,25 +187,27 @@ export default function StudentSports() {
 
   const ObtenerTipoDocuemntos = async () => {
     try {
-      const data = await ObtenerTiposDocumento(user.token);
+      const data = await obtenerTiposDocumento();
 
       if (!data || data.length === 0) return;
 
-      const mapBackend = Object.fromEntries(
-        data.map((d) => [d.nombre.toLowerCase().trim(), [d.id, d.extension]]),
-      );
+      const docsConId = documentos.map((doc) => {
+        const match = data.find(
+          (d) =>
+            d.nombre.trim().toLowerCase() === doc.nombre.trim().toLowerCase(),
+        );
 
-      setDocumentos((prev) =>
-        prev.map((doc) => ({
+        if (!match) return doc;
+
+        return {
           ...doc,
-          id_tipo_documento: mapBackend[doc.nombre.toLowerCase().trim()]
-            ? mapBackend[doc.nombre.toLowerCase().trim()][0]
-            : null,
-          extension: mapBackend[doc.nombre.toLowerCase().trim()]
-            ? mapBackend[doc.nombre.toLowerCase().trim()][1]
-            : null,
-        })),
-      );
+          id_tipo_documento: match.id,
+          extension: match.extension,
+        };
+      });
+
+      setDocumentos(docsConId);
+      return docsConId;
     } catch (error) {
       console.error("Error al traer tipos de documentos:", error);
       setSnackbar({
@@ -186,6 +217,19 @@ export default function StudentSports() {
       });
     }
   };
+
+  const rowsTorneosFiltradas = useMemo(() => {
+    const term = busquedaTorneos.trim().toLowerCase();
+    if (!term) return torneoDeportista;
+    return torneoDeportista.filter((row) =>
+      [row.nombre_torneo, row.nombre_deporte, row.docente_responsable].some(
+        (v) =>
+          String(v ?? "")
+            .toLowerCase()
+            .includes(term),
+      ),
+    );
+  }, [torneoDeportista, busquedaTorneos]);
 
   async function handlePreview(id, nombre) {
     setPreview({
@@ -197,7 +241,7 @@ export default function StudentSports() {
       error: null,
     });
     try {
-      const data = await DescargarDocumentacionXId(id, user.token);
+      const data = await descargarDocumentacionXId(id);
       setPreview({
         open: true,
         loading: false,
@@ -215,29 +259,30 @@ export default function StudentSports() {
     }
   }
 
-  const ObtenerDocumentosEstudiante = async () => {
+  const ObtenerDocumentosEstudiante = async (documentosBase) => {
     try {
-      const data = await ListarDocumentacionXLegajo(user.email, user.token);
+      const data = await listarDocumentacionXLegajo(user.email);
+
       if (!data || data.length === 0) return;
-      setDocumentos((prev) =>
-        prev.map((doc) => {
-          const docBackend = data.find(
-            (d) =>
-              Number(d.documento?.id_tipo_documento) ===
-              Number(doc.id_tipo_documento),
-          );
 
-          if (!docBackend) return doc;
+      const actualizados = documentosBase.map((doc) => {
+        const docBackend = data.find(
+          (d) => Number(d.id_tipo_documento) === Number(doc.id_tipo_documento),
+        );
 
-          return {
-            ...doc,
-            subido: true,
-            archivo: docBackend.documento,
-            archivoNombre: docBackend.documento.nombre_documento,
-            id_archivo: docBackend.documento.id,
-          };
-        }),
-      );
+        if (!docBackend) return doc;
+
+        return {
+          ...doc,
+          subido: true,
+          archivo: docBackend,
+          archivoNombre: docBackend.nombre_documento,
+          id_archivo: docBackend.id,
+          extension: docBackend.extension ?? doc.extension,
+        };
+      });
+
+      setDocumentos(actualizados);
     } catch (error) {
       console.error("Error al traer Los Documentos del Deportista:", error);
     }
@@ -283,10 +328,9 @@ export default function StudentSports() {
     try {
       setLoading(true);
 
-      archivoGuardado = await CrearDocumentoEstudiante(
+      archivoGuardado = await crearDocumentoEstudiante(
         item.id_tipo_documento,
         archivoRenombrado,
-        user.token,
       );
       setSnackbar({
         open: true,
@@ -333,10 +377,10 @@ export default function StudentSports() {
         const idDeportista = await ObtenerIdDeportistaApi();
 
         // 2. Tipos de documentos
-        await ObtenerTipoDocuemntos();
+        const documentosConTipo = await ObtenerTipoDocuemntos();
 
         // 3. Documentos del estudiante
-        await ObtenerDocumentosEstudiante();
+        await ObtenerDocumentosEstudiante(documentosConTipo);
 
         // 4. Horarios del deportista
         let horDepor = [];
@@ -352,6 +396,8 @@ export default function StudentSports() {
               .map((h) => h.id_deporte),
           ),
         );
+
+        console.log("DeportesIds para obtener torneos:", deportesIds);
 
         if (deportesIds.length > 0) {
           await ObtenerTorneosPorDeporte(deportesIds);
@@ -377,7 +423,7 @@ export default function StudentSports() {
 
       setLoading(true);
 
-      await EliminarDocumentoEstudiante(item.id_archivo, user.token);
+      await eliminarDocumentoEstudiante(item.id_archivo);
 
       setSnackbar({
         open: true,
@@ -416,14 +462,10 @@ export default function StudentSports() {
 
       if (card.esta_inscripto) {
         // DESINSCRIBIR
-        await DesinscribirDeporte(card.id_inscripcion, user.token);
+        await eliminarInscripcionDeporte(card.id_inscripcion);
       } else {
         // INSCRIBIR
-        await CrearInscripcionDeporte(
-          card.id_deporte,
-          deportista.id,
-          user.token,
-        );
+        await crearInscripcionDeporte(card.id_deporte, deportista.id);
       }
       setSnackbar({
         open: true,
@@ -445,6 +487,59 @@ export default function StudentSports() {
       setLoading(false);
     }
   };
+
+  const torneosColumns = useMemo(
+    () => [
+      { field: "nombre_torneo", headerName: "Nombre", flex: 1, minWidth: 300 },
+      {
+        field: "fecha_inicio",
+        headerName: "Fecha Inicio",
+        flex: 1,
+        minWidth: 100,
+        valueFormatter: (v) => formatDate(v),
+      },
+      {
+        field: "fecha_fin",
+        headerName: "Fecha Fin",
+        flex: 1,
+        width: 100,
+        valueFormatter: (v) => formatDate(v),
+      },
+      {
+        field: "fecha_limite_inscripcion",
+        headerName: "Fecha Límite Inscripción",
+        flex: 1,
+        width: 100,
+        valueFormatter: (v) => formatDate(v),
+      },
+      {
+        field: "activo",
+        headerName: "Activo",
+        flex: 1,
+        maxWidth: 80,
+        valueFormatter: (v) => formateBoolean(v),
+      },
+      {
+        field: "nombre_deporte",
+        headerName: "Deporte",
+        flex: 1,
+        minWidth: 150,
+      },
+      {
+        field: "docente_responsable",
+        headerName: "Docente Responsable",
+        flex: 1,
+        minWidth: 200,
+      },
+      {
+        field: "cupo_jugadores",
+        headerName: "Cupo",
+        flex: 1,
+        maxWidth: 80,
+      },
+    ],
+    [],
+  );
 
   return (
     <Box
@@ -569,7 +664,7 @@ export default function StudentSports() {
         </Box>
         <Grid container spacing={2.5} sx={{ mt: 1 }}>
           {documentos.map((item) => (
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={4}>
               <Card
                 sx={{
                   minWidth: 357,
@@ -671,7 +766,6 @@ export default function StudentSports() {
             {C.sportsSubTitle}
           </Typography>
         </Box>
-
         {horariosDeportista.length > 0 && (
           <Card
             sx={{
@@ -701,7 +795,100 @@ export default function StudentSports() {
               </Typography>
             </Box>
 
-            <JsonArrayDataGrid data={torneoDeportista} />
+            <Card
+              x={{
+                borderRadius: 6,
+                boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+                overflow: "hidden",
+              }}
+            >
+              <Box sx={{ px: 3, py: 2.5 }}>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={1}
+                  justifyContent="flex-end"
+                  alignItems={{ sm: "center" }}
+                  backgroundColor="#ffffff"
+                >
+                  <SAETextField
+                    placeholder="Buscar torneo..."
+                    size="small"
+                    value={busquedaTorneos}
+                    onChange={(e) => setBusquedaTorneos(e.target.value)}
+                    sx={{
+                      width: { xs: "100%", sm: 260, md: 340 },
+                      "& .MuiOutlinedInput-root": {
+                        bgcolor: "rgba(243, 243, 243, 0.12)",
+                        color: "black",
+                        "& fieldset": { borderColor: "rgba(0, 0, 0, 0.3)" },
+                        "&:hover fieldset": {
+                          borderColor: "rgba(0, 0, 0, 0.6)",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "rgb(59, 101, 218)",
+                        },
+                      },
+                      "& input::placeholder": {
+                        color: "rgba(54, 54, 54, 0.7)",
+                        opacity: 1,
+                      },
+                      "& .MuiInputAdornment-root svg": {
+                        color: "rgba(0, 0, 0, 0.7)",
+                      },
+                    }}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                </Stack>
+              </Box>
+              <CardContent sx={{ p: 2 }}>
+                <Box sx={{ width: "100%" }}>
+                  <DataGrid
+                    rows={rowsTorneosFiltradas}
+                    columns={torneosColumns}
+                    autoHeight
+                    disableRowSelectionOnClick
+                    pageSizeOptions={[5, 10, 25]}
+                    initialState={{
+                      pagination: { paginationModel: { pageSize: 5 } },
+                    }}
+                    localeText={{ noRowsLabel: "No hay torneos activos" }}
+                    sx={{
+                      minWidth: 850, // Para que no se vea apretado en desktop
+                      "& .MuiDataGrid-columnHeaderTitle": {
+                        whiteSpace: "normal",
+                        lineHeight: "1.2",
+                        fontWeight: "bold",
+                      },
+                      borderRadius: 4,
+                    }}
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </>
+        )}
+        {horariosDeportista.length > 0 && (
+          <>
+            <Box sx={{ mt: 3, mb: 2 }}>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 800, color: "#123666" }}
+              >
+                {C.horariosTitle}
+              </Typography>
+              <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
+                {C.horariosSubTitle}
+              </Typography>
+            </Box>
+            <SportsCalendar />
           </>
         )}
 

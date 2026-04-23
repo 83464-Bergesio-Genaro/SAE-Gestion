@@ -14,6 +14,9 @@ export const SPORTS_STRINGS = {
   tournamnetsTitle: "Torneos",
   tournamnetsSubTitle: "Listado de torneos disponibles",
 
+  horariosTitle: "Horarios",
+  horariosSubTitle: "Horarios de todos los deportes",
+
   // Error messages
   errorLoadSports: "Error al cargar los deportes",
   errorCreateSport: "Error al crear el deporte",
@@ -39,6 +42,7 @@ export const SPORTS_STRINGS = {
   successUnsuscription: "Desinscripción realizada con éxito",
 
   deleteDocTitle: "Eliminar Documento",
-  deleteDocMessage:(nombreDoc) => `¿Estás seguro de que deseas eliminar ${nombreDoc}?`,
+  deleteDocMessage: (nombreDoc) =>
+    `¿Estás seguro de que deseas eliminar ${nombreDoc}?`,
   deleteDocButton: "Eliminar",
 };

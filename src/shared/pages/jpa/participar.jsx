@@ -184,8 +184,8 @@ export default function SharedJPAParticipar() {
     setCarrera(event.target.value);
   };
   return (
-    <>
-      <Container>
+    <Box p={4}>
+      <Container >
         <Grid container spacing={0}>
           <Paper
             style={{
@@ -500,6 +500,6 @@ export default function SharedJPAParticipar() {
           </SAEButton>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 }

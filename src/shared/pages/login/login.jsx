@@ -89,7 +89,6 @@ export default function Login() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          bgcolor: "#f4f8fc",
         }}
       >
         <Paper elevation={3} sx={{ p: 4, textAlign: "center", borderRadius: 3 }}>
@@ -110,6 +109,9 @@ export default function Login() {
         display: "flex", 
         flexDirection: "column",
         justifyContent: "center",
+        background:"linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%) !important;",
+        minHeight:"85vh",
+        marginTop:"-22px",
         pb: { xs: 4, md: 3 },
     }}>
       {/* Logo Header animado */}

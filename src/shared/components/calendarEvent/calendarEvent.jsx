@@ -38,7 +38,7 @@ export function CalendarEvent({ eventos }) {
       <Box sx={{ position: "relative" }}>
         <Box
           sx={{
-            margin: 4,
+            margin: 0,
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
             justifyItems: "center",

@@ -7,6 +7,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import FactoryIcon from "@mui/icons-material/Factory";
 import "./jpa.css";
 import {
+  Box,
   Typography,
   Card,
   CardContent
@@ -16,7 +17,17 @@ import "./jpa.css";
 
 export default function JPAIntro(){
     return(
-       <div className="home-grid">
+      <Box sx={{background:"linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);"}}>
+        <Typography variant="h2" align="center"
+          fontWeight="bold"
+          sx={{
+            fontSize:{xs:30,sm:34,md:46},
+            paddingTop:{xs:4}
+          }}>
+            BIENVENID@ A NUESTRA UNIVERSIDAD
+        </Typography>
+      
+       <Box className="home-grid">
 
           {/* VIDEO */}
           <div className="menu-container">
@@ -47,7 +58,8 @@ export default function JPAIntro(){
           </div>
           
 
-        </div>
+        </Box>
+      </Box>
     )
 }
 

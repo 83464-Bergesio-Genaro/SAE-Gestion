@@ -4,7 +4,6 @@
   font-family: var(--font);
 }
 body {
-  background: linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);
   width: 100%;
   margin: 0;
   transition:

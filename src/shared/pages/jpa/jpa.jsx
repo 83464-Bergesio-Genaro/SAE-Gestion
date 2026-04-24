@@ -1,4 +1,5 @@
 import {
+  Box,
   Typography
 } from "@mui/material";
 import "./jpa.css";
@@ -146,14 +147,8 @@ export default function JPA() {
   }, []);
 
   return (
-    <div>
-      <Typography variant="h2" 
-      align="center" 
-      fontSize="3em"
-      fontWeight="bold"
-      marginTop="140px">
-        ¡BIENVENID@ A NUESTRA UNIVERSIDAD!
-      </Typography>
+    <Box marginTop={"-22px"}>
+
       <JPAIntro></JPAIntro>
 
       <div className="mobile-container">
@@ -164,7 +159,7 @@ export default function JPA() {
         fontWeight="bold"
         sx={{
           fontSize:{xs:20,sm:24,md:46},
-          marginTop:{xs:4,sm:3,md:2},
+          marginTop:{xs:4,sm:3,md:4},
         }}>
           CONOCÉ NUESTRAS CARRERAS
       </Typography>
@@ -177,7 +172,7 @@ export default function JPA() {
           fontWeight="bold"
         sx={{
           fontSize:{xs:20,sm:24,md:46},
-          marginTop:{xs:4,sm:3,md:2},
+          marginTop:{xs:4,sm:3,md:4},
         }}>
             MAS INFORMACION
         </Typography>        
@@ -190,7 +185,7 @@ export default function JPA() {
         align="center"
         sx={{
           fontSize:{xs:20,sm:24,md:46},
-          marginTop:{xs:4,sm:3,md:2},
+          marginTop:{xs:4,sm:3,md:4},
         }}
         fontWeight="bold">
           CHARLAS Y EVENTOS
@@ -202,6 +197,6 @@ export default function JPA() {
 
       <br />
       <ParticipeButton/>
-    </div>
+    </Box>
   );
 }

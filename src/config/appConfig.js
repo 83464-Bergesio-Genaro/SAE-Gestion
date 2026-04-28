@@ -2,7 +2,7 @@ export const appConfig = {
 
   appName: import.meta.env.VITE_APP_NAME,
 
-  apiUrl: import.meta.env.VITE_API_URL,
+  apiUrl: import.meta.env.VITE_API_URL ?? "",
 
   sessionTimeout: Number(import.meta.env.VITE_SESSION_TIMEOUT),
   

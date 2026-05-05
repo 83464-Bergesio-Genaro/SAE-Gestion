@@ -33,7 +33,7 @@ import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 import Prensa from "./shared/pages/prensa/Prensa";
 
-import JpaAdmin from "./employed/pages/jpa/jpaAdmin";
+import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
 import UsuariosAdmin from "./employed/pages/users/users";
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
@@ -46,7 +46,7 @@ export default function App() {
   }, []);
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.VITE_BASE_PATH}>
         <MainLayout>
           <Routes>
             {/* Public */}
@@ -103,7 +103,7 @@ export default function App() {
               path="/Gestion-JPA"
               element={
                 <ProtectedRoute role={[2, 5]}>
-                  <JpaAdmin />
+                  <EmployedJPA />
                 </ProtectedRoute>
               }
             />

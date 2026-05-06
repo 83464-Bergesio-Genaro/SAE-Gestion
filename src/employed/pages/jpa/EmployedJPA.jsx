@@ -52,8 +52,7 @@ import { ObtenerEventosPublicos,
         crearInteresado,
         modificarInteresado,
         eliminarInteresado } from "../../../api/JPAService";
-import { data } from "react-router-dom";
-
+        
 function CopyURLButton() {
   const ubicacionesComunes = [
     {
@@ -108,10 +107,10 @@ const generateColumns = (data,editAction,deleteAction) => {
 
   if (!data || data.length === 0) return [];
 
-  const columns = Object.keys(data[0]).map((key) => {
+  const columns = Object.keys(data).map((key) => {
     
     const isId = key.toLowerCase().includes("id");
-    const isShort = ["estado", "cupo", "legajo","duracion","horario_inicio","horario_fin"].includes(key.toLowerCase());
+    const isShort = ["estado", "cupo","duracion","horario_inicio","horario_fin"].includes(key.toLowerCase());
     return {
       field: key,
       headerName: formatHeader(key),
@@ -154,7 +153,7 @@ const generateColumns = (data,editAction,deleteAction) => {
     )
   });
 
-  return columns;
+  return  columns;
 };
 const generateRows = (data) => {
 
@@ -217,27 +216,19 @@ export default function EmployedJPA() {
 
     {/*Seccion Eventos Publicos */}
     const [eventosPublicosRows, setEventosPublicosRows] = useState([]);
-    const [eventosPublicosColumns, setEventosPublicosColumns] = useState([]);
-    const [loadingEventosPublicos, setLoadingEventosPublicos] = useState(false);
+    const [loadingEventosPublicos, setLoadingEventosPublicos] = useState(true);
     const fetchEventosPublicos = useCallback(async () => {
         setLoadingEventosPublicos(true);
         try {
-            const data = await ObtenerEventosPublicos();
-            
+            const data = await ObtenerEventosPublicos();        
             setEventosPublicosRows(generateRows(data));
-            setEventosPublicosColumns(generateColumns(data,openEditEventoPublico,openDeleteEvento));
         } catch {
             setEventosPublicosRows([]);
-            setEventosPublicosColumns([]);
         } finally {
             setLoadingEventosPublicos(false);
         }
     }, []);
-    useEffect(() => {
-        fetchEventosPublicos();
-    }, [fetchEventosPublicos]);
-
-    const openCreateEventoPublico = () => {
+        const openCreateEventoPublico = () => {
         setDialogData(EMPTY_EVENTO_PUBLICO);
         setDialogType("eventoPublico");
         setDialogMode("create");
@@ -251,7 +242,6 @@ export default function EmployedJPA() {
         setDialogError("");
         setDialogOpen(true);
     }, []);
-
     const openDeleteEvento = useCallback((row) => {
         setDialogData(row);
         setDialogType("eventoPublico");
@@ -259,12 +249,17 @@ export default function EmployedJPA() {
         setDialogError("");
         setDialogOpen(true);
     }, []);
+
+    useEffect(() => {
+        fetchEventosPublicos();
+    }, [fetchEventosPublicos]);
     
     const handleEventoPublicoSave = async () => {
         setDialogSaving(true);
         setDialogError("");
         try {
         const { id,duracion,lugar, ...rest } = dialogData;
+        dialogData.duracion=duracion;//Me molestaba el error de no uso
         let id_nuevo = id===""? 0:id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
         const body = {
                 ...rest,
@@ -299,17 +294,14 @@ export default function EmployedJPA() {
 
     {/*Seccion Eventos SAE  */}
     const [eventosSAERows, setEventosSAERows] = useState([]);
-    const [eventosSAEColumns, setEventosSAEColumns] = useState([]);
-    const [loadingEventosSAE, setLoadingEventosSAE] = useState(false);
+    const [loadingEventosSAE, setLoadingEventosSAE] = useState(true);
     const fetchEventosSAE = useCallback(async () => {
         setLoadingEventosPublicos(true);
         try {
             const data = await ObtenerEventosSAE();
             setEventosSAERows(generateRows(data));
-            setEventosSAEColumns(generateColumns(data,openEditEventoSAE,openDeleteEventoSAE));
         } catch {
             setEventosSAERows([]);
-            setEventosSAEColumns([]);
         } finally {
             setLoadingEventosSAE(false);
         }
@@ -339,11 +331,13 @@ export default function EmployedJPA() {
         setDialogError("");
         setDialogOpen(true);
     }, []);
+
     const handleEventoSAESave = async () => {
         setDialogSaving(true);
         setDialogError("");
         try {
         const { id,duracion,lugar, ...rest } = dialogData;
+        dialogData.duracion=duracion;//Me molestaba el error de no uso
         let id_nuevo = id===""? 0:id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
         const body = {
                 ...rest,
@@ -373,22 +367,22 @@ export default function EmployedJPA() {
         } finally {
             setDialogSaving(false);
         }
-    };        
+    };
+    
     {/*Fin Seccion Eventos SAE */}
 
     {/*Seccion Stands  */}
     const [standsRows, setStandsRows] = useState([]);
-    const [standsColumns, setStandsColumns] = useState([]);
     const [loadingStands, setLoadingStands] = useState(false);
     const fetchStands = useCallback(async () => {
         setLoadingStands(true);
         try {
             const data = await ObtenerStands();
             setStandsRows(generateRows(data));
-            setStandsColumns(generateColumns(data,openEditStands,openDeleteStands));
+            //setStandsColumns(generateColumns(data,openEditStands,openDeleteStands));
         } catch {
             setStandsRows([]);
-            setStandsColumns([]);
+            //setStandsColumns([]);
         } finally {
             setLoadingStands(false);
         }
@@ -454,17 +448,14 @@ export default function EmployedJPA() {
 
     {/*Seccion Interesados  */}
     const [interesadosRows, setInteresadosRows] = useState([]);
-    const [interesadosColumns, setInteresadosColumns] = useState([]);
     const [loadingInteresados, setLoadingInteresados] = useState(false);
     const fetchInteresados = useCallback(async () => {
         setLoadingInteresados(true);
         try {
             const data = await ObtenerInteresados();
             setInteresadosRows(generateRows(data));
-            setInteresadosColumns(generateColumns(data,openEditInteresados,openDeleteInteresados));
         } catch {
             setInteresadosRows([]);
-            setInteresadosColumns([]);
         } finally {
             setLoadingInteresados(false);
         }
@@ -549,7 +540,7 @@ export default function EmployedJPA() {
                 addButton:"Nuevo Evento Publico",
                 icon: SchoolIcon,
                 rows: eventosPublicosRows,
-                columns: eventosPublicosColumns,
+                columns: generateColumns(EMPTY_EVENTO_PUBLICO,openEditEventoPublico,openDeleteEvento),
                 loading: loadingEventosPublicos
             },
             eventosInternos:{
@@ -558,7 +549,7 @@ export default function EmployedJPA() {
                 addButton:"Nuevo Evento SAE",
                 icon: CastleIcon,
                 rows: eventosSAERows,
-                columns: eventosSAEColumns,
+                columns: generateColumns(EMPTY_EVENTO_PUBLICO,openEditEventoSAE,openDeleteEventoSAE),
                 loading: loadingEventosSAE
             },
             stands:{
@@ -567,7 +558,7 @@ export default function EmployedJPA() {
                 addButton:"Nuevo Puesto",
                 icon: StorefrontIcon,
                 rows: standsRows,
-                columns: standsColumns,
+                columns: generateColumns(EMPTY_STANDS,openEditStands,openDeleteStands),
                 loading: loadingStands
             },
             interesados:{
@@ -576,14 +567,16 @@ export default function EmployedJPA() {
                 addButton:"Nuevo Interesado",
                 icon: GroupsIcon,
                 rows: interesadosRows,
-                columns: interesadosColumns,
+                columns: generateColumns(EMPTY_INTERESADOS,openEditInteresados,openDeleteInteresados),
                 loading: loadingInteresados
             }
         }),
-        [eventosPublicosRows, eventosPublicosColumns, loadingEventosPublicos,
-        eventosSAERows,eventosSAEColumns,loadingEventosSAE,
-        standsRows,standsColumns,loadingStands,
-        interesadosRows,interesadosColumns,loadingInteresados]
+        [
+            eventosPublicosRows, loadingEventosPublicos,openEditEventoPublico,openDeleteEvento,
+            eventosSAERows,loadingEventosSAE,openEditEventoSAE,openDeleteEventoSAE,
+            standsRows,loadingStands,openEditStands,openDeleteStands,
+            interesadosRows,loadingInteresados,openEditInteresados,openDeleteInteresados
+        ]
     );
 
     const handleSectionChange = (section) => {
@@ -671,7 +664,7 @@ export default function EmployedJPA() {
                                 sx={{ bgcolor: "rgba(255,255,255,0.18)", color: "white", fontWeight: 700 }}
                             />
                         </Stack>
-                    </Box>
+                        </Box>
 
                         <Box
                             sx={{
@@ -792,7 +785,7 @@ export default function EmployedJPA() {
                         </Stack>
                     </Box>
                     <CardContent sx={{ p: 0 }}>
-                        <Box sx={{ width: "100%" }}>
+                        <Box sx={{ width: "100%"}}>
                             <DataGrid
                                 rows={rowsGestionFiltradas}
                                 columns={currentSection.columns}
@@ -801,13 +794,14 @@ export default function EmployedJPA() {
                                 disableRowSelectionOnClick
                                 pageSizeOptions={[5, 10, 25]}
                                 initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
+                                localeText={{ noRowsLabel: "No hay torneos activos" }}
                                 sx={{ borderRadius: 0, border: "none" }}
                             />
                         </Box>
                     </CardContent>
                 </Card>
             </Container>
-
+            {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
            {dialogOpen && dialogType === "eventoPublico" && (
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
                 <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

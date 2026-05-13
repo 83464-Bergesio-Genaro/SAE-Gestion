@@ -1,6 +1,7 @@
 import { useMemo,useEffect, useState, useCallback  } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+    Autocomplete,
     Box,
     Grid,
     Container,
@@ -9,6 +10,7 @@ import {
     Card,
     CardContent,
     Chip,
+    TextField,
     InputAdornment,
     Dialog,
     DialogTitle,
@@ -21,6 +23,7 @@ import {
     Alert,
     Snackbar,
 } from "@mui/material";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PeopleIcon from "@mui/icons-material/People";
@@ -42,14 +45,16 @@ import { useAuth } from "../../../shared/auth/AuthContext";
 import { DataGrid } from "@mui/x-data-grid";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { ObtenerEmpleados,ObtenerUsuarios } from "../../../api/Empleado";
+import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario, ObtenerEmpleados,ObtenerUsuarios } from "../../../api/EmpleadoService";
+import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService";
+import EmployCalendar from "../jpa/EmployedCalendar";
 
 const secciones=[
     {   key: "empleados", 
         label: "Empleados"
     },
     {   key: "usuarios", 
-        label: "Usuarios Registrados"
+        label: "Estudiantes Registrados"
     }
 ];
 const formatTime = (time) => {
@@ -147,14 +152,19 @@ const EMPTY_USUARIO =
 {
     id: "",
     legajo: "",
+    nombre_usuario:"",
     id_perfil: "",
     activo: false 
 }
-
+export function GestionarHorariosDialog(){
+    return(<></>)
+}
 export default function AdminUsers() {
+
     const { user } = useAuth();
     const navigate = useNavigate();
 
+    const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMsg, setSnackbarMsg] = useState("");
 
@@ -181,7 +191,15 @@ export default function AdminUsers() {
     const openCreateEmpleados = () => {
         setDialogType("empleados");
         setDialogMode("create");
-        setDialogData({ ...EMPTY_EMPLEADO }); 
+        setDialogData({
+            id: "",
+            legajo: "",
+            nombre_empleado: "",
+            nombres: "",
+            apellidos: "",
+            activo: true,
+            id_perfil: "",
+            nombre_perfil: ""}); 
         setDialogError("");
 
         // 👇 asegurar que abre después
@@ -191,7 +209,15 @@ export default function AdminUsers() {
 
     };
     const openEditEmpleados = useCallback((row) => {
-        setDialogData(row);
+        setDialogData( {
+            id: row.id,
+            legajo: row.legajo,
+            nombre_empleado: row.nombre_empleado,
+            nombres: row.nombres,
+            apellidos: row.apellidos,
+            activo: row.activo,
+            id_perfil: row.id_perfil,
+            nombre_perfil: row.nombre_perfil});
         setDialogType("empleados");
         setDialogMode("edit");
         setDialogError("");
@@ -201,31 +227,25 @@ export default function AdminUsers() {
         setDialogSaving(true);
         setDialogError("");
         try {
-        const { id,duracion,lugar, ...rest } = dialogData;
-        dialogData.duracion=duracion;//Me molestaba el error de no uso
+        const { id, ...rest } = dialogData;
         let id_nuevo = id===""? 0:id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
         const body = {
-                ...rest,
-                    fecha_evento: dialogData.fecha_evento
-                    ? `${dialogData.fecha_evento}T00:00:00`:new Date(),
-                    id: id_nuevo,
-                    ubicacion: lugar,
-                    horario_inicio: formatTime(dialogData.horario_inicio),
-                    horario_fin: formatTime(dialogData.horario_fin),
-                    informacion_interna: false
+                    "id": id_nuevo,
+                    "legajo": dialogData.legajo,
+                    "nombre_usuario": dialogData.nombre_usuario,
+                    "id_perfil": dialogData.id_perfil,
+                    "activo": dialogData.activo
                 };
+
             if (dialogMode === "create") {
-                //await crearEvento(body);
+                await CrearEmpleado(body,dialogData.nombres,dialogData.apellidos);
             } else if(dialogMode === "edit") {
-                //await modificarEvento(dialogData.id, body);
-            }else{
-               // await eliminarEvento(dialogData.id);
+                await ModificarUsuario(dialogData.id, body);
             }
-            console.log(body);
             setDialogOpen(false);
             setDialogData(EMPTY_EMPLEADO);
             fetchEmpleados();
-            setSnackbarMsg(dialogMode === "create"? "Empleado creado!":(dialogMode === "edit")?"Empleado modificado correctamente":"Se elimino el evento correctamente");
+            setSnackbarMsg(dialogMode === "create"? "Empleado creado!":(dialogMode === "edit")?"Empleado modificado correctamente":"Se elimino el usuario correctamente");
             setSnackbarOpen(true);
         }
         catch (err) {
@@ -242,7 +262,8 @@ export default function AdminUsers() {
         setLoadingUsuarios(true);
         try {
             const data = await ObtenerUsuarios();
-            setUsuariosRows(generateRows(data));
+            let UserData=data.filter(item => item.id_perfil === 1 ); /* Solo estudiantes */
+            setUsuariosRows(generateRows(UserData));
         } catch {
             setUsuariosRows([]);
         } finally {
@@ -257,7 +278,16 @@ export default function AdminUsers() {
     const openCreateUsuarios = () => {
         setDialogType("usuarios");
         setDialogMode("create");
-        setDialogData({ ...EMPTY_USUARIO }); 
+        setDialogData({
+            id: "",
+            legajo: "",
+            nombre_usuario: "",
+            nombres: "",
+            apellidos: "",
+            id_perfil: 1, /* Por defecto se crean como estudiantes */
+            activo: true,
+            id_carrera: "",
+            nombre_carrera: ""}); 
         setDialogError("");
 
         // 👇 asegurar que abre después
@@ -267,7 +297,16 @@ export default function AdminUsers() {
 
     };
     const openEditUsuarios = useCallback((row) => {
-        setDialogData(row);
+        setDialogData( {
+            id: row.id,
+            legajo: row.legajo,
+            nombre_usuario: row.nombre_usuario,
+            nombres: row.nombres,
+            apellidos: row.apellidos,
+            id_perfil: row.id_perfil,
+            activo: row.activo,
+            id_carrera: row.id_carrera,
+            nombre_carrera: row.nombre_carrera});
         setDialogType("usuarios");
         setDialogMode("edit");
         setDialogError("");
@@ -277,30 +316,27 @@ export default function AdminUsers() {
         setDialogSaving(true);
         setDialogError("");
         try {
-        const { id,duracion,lugar, ...rest } = dialogData;
-        dialogData.duracion=duracion;//Me molestaba el error de no uso
+        const { id,lugar, ...rest } = dialogData;
         let id_nuevo = id===""? 0:id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
         const body = {
-                ...rest,
-                    fecha_evento: dialogData.fecha_evento
-                    ? `${dialogData.fecha_evento}T00:00:00`:new Date(),
-                    id: id_nuevo,
-                    ubicacion: lugar,
-                    horario_inicio: formatTime(dialogData.horario_inicio),
-                    horario_fin: formatTime(dialogData.horario_fin),
-                    informacion_interna: false
+                    "id": id_nuevo,
+                    "legajo": dialogData.legajo,
+                    "nombre_usuario": dialogData.nombre_usuario,
+                    "id_perfil": dialogData.id_perfil,
+                    "activo": dialogData.activo
                 };
+                console.log(body);
             if (dialogMode === "create") {
-                //await crearEvento(body);
+                await CrearRegistroUsuario(body,dialogData.nombres,dialogData.apellidos,dialogData.id_carrera);
             } else if(dialogMode === "edit") {
-                //await modificarEvento(dialogData.id, body);
+                await ModificarUsuario(body,dialogData.id);
             }else{
                // await eliminarEvento(dialogData.id);
             }
             console.log(body);
             setDialogOpen(false);
             setDialogData(EMPTY_USUARIO);
-            fetchEmpleados();
+            fetchUsuarios();
             setSnackbarMsg(dialogMode === "create"? "Usuario Registrado!":(dialogMode === "edit")?"El usuario fue modificado correctamente":"Se elimino el evento correctamente");
             setSnackbarOpen(true);
         }
@@ -317,6 +353,38 @@ export default function AdminUsers() {
     const [dialogData, setDialogData] = useState(EMPTY_EMPLEADO);
     const [dialogSaving, setDialogSaving] = useState(false);
     const [dialogError, setDialogError] = useState("");
+
+    const [perfiles, setPerfiles] = useState([]);
+    const fetchPerfiles= useCallback(async () => {
+        try {
+            const data = await obtenerPerfiles();  
+            setPerfiles(data);
+            
+        } catch {
+            setPerfiles([]);
+        } finally {
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchPerfiles();
+    }, [fetchPerfiles]);
+
+    const [carreras, setCarreras] = useState([]);
+    const fetchCarreras= useCallback(async () => {
+        try {
+            const data = await obtenerCarreras();  
+            setCarreras(data);
+            
+        } catch {
+            setCarreras([]);
+        } finally {
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchCarreras();
+    }, [fetchCarreras]);
 
     {/* Van por separado porque se va a realizar una operacion costosa por ende se empaquetan dentro del useMemo*/ }
     const sectionConfig = useMemo(
@@ -562,19 +630,62 @@ export default function AdminUsers() {
                                 disableRowSelectionOnClick
                                 pageSizeOptions={[5, 10, 25]}
                                 initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
-                                localeText={{ noRowsLabel: "No hay torneos activos" }}
+                                localeText={{ noRowsLabel: "Sin Registros" }}
                                 sx={{ borderRadius: 0, border: "none" }}
                             />
                         </Box>
                     </CardContent>
                 </Card>
+                <Card sx={{ borderRadius: 4, boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)", overflow: "hidden", mt: 3 }}>
+                    <Box
+                        sx={{
+                            background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+                            color: "white",
+                            px: 3,
+                            py: 2.5,
+                        }}
+                    >
+                        <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ sm: "center" }} justifyContent="space-between" spacing={2}>
+                            <Stack direction="row" alignItems="center" spacing={1.5}>
+                                <ScheduleIcon sx={{ fontSize: 32 }} />
+                                <Box>
+                                    <Typography variant="h6" fontWeight={700}>
+                                        Horarios Empleados
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ opacity: 0.85 }}>
+                                        Nuestros Horarios
+                                    </Typography>
+                                </Box>
+                            </Stack>
+                            <SAEButton
+                                variant="contained"
+                                startIcon={<ScheduleIcon />}
+                                onClick={() => setHorariosDialogOpen(true)}
+                                sx={{
+                                    whiteSpace: "nowrap",
+                                    bgcolor: "rgba(255,255,255,0.18)",
+                                    color: "white",
+                                    border: "1px solid rgba(255,255,255,0.4)",
+                                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+                                }}
+                            >
+                                Gestionar Horarios
+                            </SAEButton>
+                        </Stack>
+                    </Box>
+                </Card>
+                <EmployCalendar />
             </Container>
+            <GestionarHorariosDialog
+                open={horariosDialogOpen}
+                onClose={() => setHorariosDialogOpen(false)}
+            />
             {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
-           {dialogOpen && dialogType === "empleados" && (
+            {dialogOpen && dialogType === "empleados" && (
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
                 <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-                        { dialogMode === "create" ? "Nuevo Evento" : "Editar Evento"}
+                        { dialogMode === "create" ? "Nuevo Empleado" : "Editar Empleado"}
                     </Typography>
                     <IconButton onClick={() => setDialogOpen(false)} size="small">
                         <CloseIcon />
@@ -588,72 +699,109 @@ export default function AdminUsers() {
                             </Alert>
                         )}
                         <>
-                        <Grid container spacing={1} >
-                            <Grid size={{xs:12,md:3}} m={0}>
+                        {dialogMode === "edit" && (
+                            <Grid container spacing={1} >
+                                <Grid size={{xs:12,md:3}} m={0}>
+                                    <SAETextField
+                                        label="ID"
+                                        type="number"
+                                        fullWidth
+                                        value={dialogData.id}
+                                        onChange={(e) => handleDialogChange("id", e.target.value)}
+                                        disabled={true}
+                                    />     
+                                </Grid>
+                                <Grid size={{xs:12,md:9}} m={0}>
+                                    {console.log(dialogData)}
+                                    <SAETextField
+                                        label="Nombre Completo"
+                                        value={dialogData.nombre_empleado}
+                                        disabled={true}
+                                        onChange={(e) => handleDialogChange("nombre_empleado", e.target.value)}
+                                        fullWidth
+                                    />
+                                </Grid>
+                            </Grid>)}
+                        {dialogMode === "create" && (
+                            <>
+                            <Card sx={{ bgcolor: "rgba(235, 235, 41, 0.7)", border: "1px solid rgba(235, 41, 41, 0.1)" }}>
+                                <CardContent sx={{ p: 2 }}>
+                                    <Typography variant="subtitle2" color="textPrimary" fontWeight={600} gutterBottom>
+                                        ¡ATENCION! 
+                                        </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Al crear un nuevo empleado debe escribirse sin errores su legajo ya que esta sera la unica forma que pueda acceder a la aplicacion, debe contener el valor @utn.frc.edu.ar al final.
+                                        El nombre completo solo podra ser modificado por el usuario desde la aplicacion despues de creado.
+                                        <br/><br/>
+                                        Ademas desde esta pestaña solo se podran crear perfiles de empleados, comedor, salud y administrador.
+                                    </Typography>
+                                </CardContent>
+                            </Card>
                                 <SAETextField
-                                    label="ID"
-                                    type="number"
-                                    fullWidth
-                                    value={dialogData.id}
-                                    onChange={(e) => handleDialogChange("id", e.target.value)}
-                                    disabled={true}
-                                />     
-                            </Grid>
-                            <Grid size={{xs:12,md:9}} m={0}>
-                                <SAETextField
-                                    label="Encargado"
-                                    value={dialogData.encargado}
-                                    onChange={(e) => handleDialogChange("encargado", e.target.value)}
-                                    fullWidth
+                                label="Nombres"
+                                value={dialogData.nombres}
+                                onChange={(e) => handleDialogChange("nombres", e.target.value)}
+                                fullWidth
                                 />
-                            </Grid>
-                        </Grid>
-
-                        <SAETextField
-                            label="Nombre del Evento"
-                            value={dialogData.nombre_evento}
-                            onChange={(e) => handleDialogChange("nombre_evento", e.target.value)}
-                            fullWidth
-                        />
-                        <SAETextField
-                            label="URL Maps"
-                            value={dialogData.lugar}
-                            onChange={(e) => handleDialogChange("lugar", e.target.value)}
-                            fullWidth
-                        />
-
-                        <SAETextField
-                            label="Fecha del Evento"
-                            type="date"
-                            value={dialogData.fecha_evento}
-                            onChange={(e) => handleDialogChange("fecha_evento", e.target.value)}
-                            fullWidth
-                            slotProps={{ inputLabel: { shrink: true } }}
-                        />
-                        <Grid container spacing={1} >
-                            <Grid size={{xs:12,md:6}}>
-                                <SAETextField
-                                    label="Hora inicio"
-                                    type="time"
-                                    size="small"
-                                    value={dialogData?.horario_inicio?.split?.("hs")?.[0] || ""}
-                                    onChange={(e) => handleDialogChange("horario_inicio", e.target.value)}
-                                    slotProps={{ inputLabel: { shrink: true } }}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid size={{xs:12,md:6}}>
                             <SAETextField
-                                    label="Hora Fin"
-                                    type="time"
-                                    size="small"
-                                    value={dialogData?.horario_fin?.split?.("hs")?.[0] || ""}
-                                    onChange={(e) => handleDialogChange("horario_fin", e.target.value)}
-                                    slotProps={{ inputLabel: { shrink: true } }}
-                                    fullWidth
+                                label="Apellidos"
+                                value={dialogData.apellidos}
+                                onChange={(e) => handleDialogChange("apellidos", e.target.value)}
+                                fullWidth
                                 />
-                            </Grid>
-                        </Grid>
+                            <SAETextField
+                                label="Nombre de Usuario"
+                                value={dialogData.nombre_usuario}
+                                onChange={(e) => handleDialogChange("nombre_usuario", e.target.value)}
+                                fullWidth
+                                />
+                            </>
+                        )}
+                        <SAETextField
+                            label="Legajo"
+                            value={dialogData.legajo}
+                            disabled={dialogMode=== "create"? false:true}
+                            onChange={(e) => handleDialogChange("legajo", e.target.value)}
+                            fullWidth
+                        />
+                        <Autocomplete
+                            disablePortal
+                            options={perfiles}
+                            getOptionLabel={(option) => option.nombre}
+                               onChange={(event, newValue) => {
+                                // 'newValue' es el objeto completo del perfil seleccionado (o null)
+                                if (newValue) {
+                                    handleDialogChange("id_perfil", newValue.id);
+                                } else {
+                                    // Maneja el caso de que se borre la selección
+                                    handleDialogChange("id_perfil", null);
+                                }
+                            }}
+                            // Asegura que la comparación se haga por id
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            value={perfiles.find(perfil => perfil.id === dialogData.id_perfil)} // Pasa el objeto completo
+                            renderInput={(params) => 
+                            <TextField
+                                {...params}
+                                label="Perfil"
+                                inputProps={{
+                                    ...params.inputProps,
+                                    readOnly: true, // Esto evita la escritura
+                                }}
+                            />}
+                        />
+                        {dialogMode === "edit" && (
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={dialogData.activo}
+                                    onChange={(e) => handleDialogChange("activo", e.target.checked)}
+                                    color="primary"
+                                />
+                            }
+                            label={dialogData.activo ? "Desactivar Usuario" : "Activar Usuario"}
+                        />)}
+                        
                     </>             
                         
                     </Stack>
@@ -671,8 +819,147 @@ export default function AdminUsers() {
                         {dialogMode === "create" ? "Crear" :(dialogMode === "delete")? "Eliminar": "Guardar"}
                     </SAEButton>
                 </DialogActions>                
-            </Dialog>
+            </Dialog>            
             )}
+            {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
+            {dialogOpen && dialogType === "usuarios" && (
+            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
+                        { dialogMode === "create" ? "Nuevo Usuario" : "Editar Usuario"}
+                    </Typography>
+                    <IconButton onClick={() => setDialogOpen(false)} size="small">
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent dividers>
+                    <Stack spacing={2} sx={{ pt: 1 }}>
+                        {dialogError && (
+                            <Alert severity="error" onClose={() => setDialogError("")}>
+                                {dialogError}
+                            </Alert>
+                        )}
+                        <>
+                        {dialogMode === "edit" && (
+                            <Grid container spacing={1} >
+                                <Grid size={{xs:12,md:3}} m={0}>
+                                    <SAETextField
+                                        label="ID"
+                                        type="number"
+                                        fullWidth
+                                        value={dialogData.id}
+                                        onChange={(e) => handleDialogChange("id", e.target.value)}
+                                        disabled={true}
+                                    />     
+                                </Grid>
+                                <Grid size={{xs:12,md:9}} m={0}>
+                                    {console.log(dialogData)}
+                                    <SAETextField
+                                        label="Nombre Completo"
+                                        value={dialogData.nombre_usuario}
+                                        disabled={true}
+                                        onChange={(e) => handleDialogChange("nombre_usuario", e.target.value)}
+                                        fullWidth
+                                    />
+                                </Grid>
+                            </Grid>)}
+                        {dialogMode === "create" && (
+                            <>
+                            <Card sx={{ bgcolor: "rgba(235, 235, 41, 0.7)", border: "1px solid rgba(235, 41, 41, 0.1)" }}>
+                                <CardContent sx={{ p: 2 }}>
+                                    <Typography variant="subtitle2" color="textPrimary" fontWeight={600} gutterBottom>
+                                        ¡ATENCION! 
+                                        </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Al crear el usuario desde esta pestaña estamos creandolo como estudiante (id_perfil = 1) por lo que tendra restringido la vista de SAE
+                                        <br/><br/>
+                                        El nombre de Usuario sera su primer nombre a menos que lo cambie desde la pantalla de perfil, el legajo debe estar en su version completa incluyendo el @utn.frc.edu.ar al final, y el nombre completo se formara con los campos de nombres y apellidos.
+                                        <br/><br/>
+                                        El nombre completo solo podra ser modificado por el usuario desde la aplicacion despues de creado.
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                                <SAETextField
+                                label="Nombres"
+                                value={dialogData.nombres}
+                                onChange={(e) => handleDialogChange("nombres", e.target.value)}
+                                fullWidth
+                                />
+                            <SAETextField
+                                label="Apellidos"
+                                value={dialogData.apellidos}
+                                onChange={(e) => handleDialogChange("apellidos", e.target.value)}
+                                fullWidth
+                                />
+                                <Autocomplete
+                                disablePortal
+                                options={carreras}
+                                getOptionLabel={(option) => option.nombre}
+                                onChange={(event, newValue) => {
+                                    // 'newValue' es el objeto completo de la carrera seleccionada (o null)
+                                    if (newValue) {
+                                        handleDialogChange("id_carrera", newValue.id);
+                                    } else {
+                                        // Maneja el caso de que se borre la selección
+                                        handleDialogChange("id_carrera", null);
+                                    }
+                                }}
+                                // Asegura que la comparación se haga por id
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                value={carreras.find(carrera => carrera.id === dialogData.id_carrera)} // Pasa el objeto completo
+                                renderInput={(params) => 
+                                <TextField
+                                    {...params}
+                                    label="Carrera"
+                                    inputProps={{
+                                        ...params.inputProps,
+                                        readOnly: true, // Esto evita la escritura
+                                    }}
+                                />
+                            }
+                            />
+                        </>    
+                        )}
+                        <SAETextField
+                            label="Legajo"
+                            value={dialogData.legajo}
+                            disabled={dialogMode=== "create"? false:true}
+                            onChange={(e) => handleDialogChange("legajo", e.target.value)}
+                            fullWidth
+                        />
+                        
+                        {dialogMode === "edit" && (
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={dialogData.activo}
+                                    onChange={(e) => handleDialogChange("activo", e.target.checked)}
+                                    color="primary"
+                                />
+                            }
+                            label={dialogData.activo ? "Desactivar Usuario" : "Activar Usuario"}
+                        />)}
+                        
+                    </>             
+                        
+                    </Stack>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <SAEButton variant="outlined" onClick={() => setDialogOpen(false)} disabled={dialogSaving}>
+                        Cancelar
+                    </SAEButton>
+                    <SAEButton
+                        variant="contained"
+                        onClick={handleUsuariosSave}
+                        disabled={dialogSaving}
+                        startIcon={dialogSaving ? <CircularProgress size={16} color="inherit" /> : null}
+                    >
+                        {dialogMode === "create" ? "Crear" :(dialogMode === "delete")? "Eliminar": "Guardar"}
+                    </SAEButton>
+                </DialogActions>                
+            </Dialog>
+        )}
+        
             {/* MENSAJE DE EXITO */}
             <Snackbar
                 open={snackbarOpen}

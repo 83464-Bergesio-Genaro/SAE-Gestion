@@ -31,8 +31,7 @@ const gestionOptions = [
     name: "Becas",
     icon: Diversity3Icon,
     route: "/Mis-Becas",
-    descripcion: "",
-    disabled: true,
+    descripcion: "Gestiona tus inscripciones a las becas, consulta requisitos",
 
     roles: [1],
   },

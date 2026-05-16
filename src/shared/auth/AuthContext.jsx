@@ -59,7 +59,7 @@ const [user, setUser] = useState(() => {
               email : result.data.legajo_armado??"",
               nombre: result.data.nombre_usuario??"",
               id_perfil: result.data.id_perfil??0,
-              expiration: Date.now() + 300000
+              expiration: Date.now() + 30000000
           };
 
           localStorage.setItem("session", JSON.stringify(session));
@@ -76,7 +76,7 @@ const [user, setUser] = useState(() => {
       const parsed = JSON.parse(stored);
       const extended = {
         ...parsed,
-        expiration: Date.now() + 300000
+        expiration: Date.now() + 30000000
       };
       localStorage.setItem("session", JSON.stringify(extended));
       setUser(extended);

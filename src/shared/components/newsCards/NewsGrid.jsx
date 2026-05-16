@@ -1,9 +1,10 @@
-import { useMemo,useEffect, useState } from "react";
+import {useEffect, useState,useCallback } from "react";
 import SAEButton from "../buttons/SAEButton";
 import { Box,Grid, Card,CardMedia,CardContent,  Dialog,
   DialogTitle,
   DialogContent,
   CircularProgress,
+  Stack,
   List,
   ListItem,
   ListItemIcon,
@@ -20,11 +21,9 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import SettingsIcon from "@mui/icons-material/Settings";
-const PREVIEW_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "pdf"]);
+import utnLogo from "../../../assets/utn.png";
 
-function getDocumentId(doc) {
-  return doc?.id ?? doc?.id_documento ?? doc?.idDocumento ?? null;
-}
+const PREVIEW_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "pdf"]);
 
 function hasRealDocumentName(value) {
   if (!value) return false;
@@ -92,53 +91,101 @@ function getImageSource(doc) {
 }
 export default function NewsGrid() {
 
+    const [isLoading, setLoadingNews] = useState(true);
     const [newsList, setEventosJPA] = useState([]);
-      useEffect(() => {
-        const ObtenerEventosPublicosApi = async () => {
-          try {
-            const respuesta = await ObtenerNoticiasPublicas();
+    const fetchEventosPublicos = useCallback(async () => {
+        setLoadingNews(true);
+        try {
+            const respuesta = await ObtenerNoticiasPublicas();      
             if(respuesta?.success && respuesta?.data){
               setEventosJPA(respuesta?.data);
             }
-          } catch (error) {
-            console.error("Error al traer Eventos:", error);
-          }
-        };
-        ObtenerEventosPublicosApi();
-      }, []);
+        } catch {
+             setEventosJPA([]);
+        } finally {
+            setLoadingNews(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchEventosPublicos();
+    }, [fetchEventosPublicos]);
+
 
   return (
     <section className="news-section">
       <Typography variant="h2" textAlign="center" marginY={1} fontWeight={"bold"}>
         Novedades
       </Typography>
-      <div className="mobile-main-container">
-          <InfoSectionPhone information={newsList} />
-      </div>
-      <div className="desktop-main-container">
-          <InfoSectionWithId information={newsList} />
-      </div>
+      {isLoading && (
+        <Stack alignItems="center" gap={1}>
+          <Typography variant="caption" color="text.secondary">
+            Estamos Buscando Novedades
+          </Typography>
+          <Box
+            sx={{
+              position: "relative",
+              width: 96,
+              height: 96,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <CircularProgress size={79} thickness={3.8} />
+            <Box
+              component="img"
+              src={utnLogo}
+              alt="UTN girando"
+              sx={{
+                width: 40,
+                height: 40,
+                objectFit: "contain",
+                position: "absolute",
+                animation: "spinLogo 1.2s linear infinite",
+                "@keyframes spinLogo": {
+                  from: { transform: "rotate(0deg)" },
+                  to: { transform: "rotate(360deg)" },
+                },
+              }}
+            />
+          </Box>
+        </Stack>
+      )}
+      {(!isLoading  && newsList.length === 0)?
+        <>
+          <Box
+            sx={{
+              position: "relative",
+              width: 96,
+              height: 96,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <Typography variant="h3" color="text.secondary">
+              UPS! Parece que no hay nada nuevo
+            </Typography> 
+          </Box>
+    
+        </>
+        :
+        <>
+          <div className="mobile-main-container">
+            <InfoSectionPhone information={newsList} />
+          </div>
+          <div className="desktop-main-container">
+            <InfoSectionWithId information={newsList} />
+          </div>
+        </>
+        }
+
       
     </section>
   );
 }
 
-{/*
-  id, --usado
-  titulo,--usado
-  descripcion, --usado
-  fecha_inicio,--usado
-  fecha_vigencia,--dsc
-  prioridad,-dsc
-  no_dar_baja,--dsc
-  visualizaciones,--
-  portada, --usado
-  documentos, --ta
-  ruta_publicacion
- */}
+
 export function DocumentList(listadoDocumentos){
-    const [documentos, setDocumentos] = useState([]);
-    const [loadingDocs, setLoadingDocs] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewDoc, setPreviewDoc] = useState(null);
     const [previewDocName, setPreviewDocName] = useState("");
@@ -226,7 +273,7 @@ export function DocumentList(listadoDocumentos){
           link.remove();
           
         } catch (error) {
-          setPreviewError("No se pudo descargar el documento.");
+          setPreviewError(`No se pudo descargar el documento. ${error}`);
         }
       };
     return (
@@ -286,7 +333,7 @@ export function DocumentList(listadoDocumentos){
 }
 
 export function InfoSectionPhone({information}){
-    const [viewerMode, setViewerMode] = useState(null);
+
     return(
         <div className="info-container">     
             <Grid container spacing={5} size={12}>
@@ -312,7 +359,7 @@ export function InfoSectionPhone({information}){
 }
 
 export function InfoSectionWithId({information}){
-    const [viewerMode, setViewerMode] = useState(null);
+
     return(        
         <div className="info-container">
             

@@ -57,7 +57,7 @@ a:hover{
   display: grid;
   grid-template-columns: 1fr;
   row-gap: 20px;
-  padding: 40px;
+
 }
 .menu-container{
   background-color: black;
@@ -150,7 +150,10 @@ a:hover{
   transition: opacity 0.1s ease-in;
   height: fit-content;
 }
-
+.events-container{
+  background:linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);
+  padding-bottom: 30px;
+}
 /*  FINAL SECCIONES     */
 
 @media (min-width: 1024px){
@@ -261,7 +264,7 @@ a:hover{
       border-radius: 50px;     
   }
   .events-container{
-    padding: 70px 20vw;
+      padding: 70px 20vw;
     }
   /*  FINAL SECCIONES     */
 }

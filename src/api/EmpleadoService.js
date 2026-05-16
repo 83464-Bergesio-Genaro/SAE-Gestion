@@ -51,8 +51,8 @@ export async function ObtenerUsuarios(){
 export async function CrearEmpleado(body,nombres,apellidos){
     return RequestAPI(`/api/Empleados/CrearEmpleado?nombres=${encodeURIComponent(nombres)}&apellidos=${encodeURIComponent(apellidos)}`, "POST", body);
 }
-export async function ModificarUsuario(body,id){
-    return RequestAPI(`/api/Usuarios/ModificarUsuario/${encodeURIComponent(id)}`, "PUT", body);
+export async function ModificarUsuario(id,body){
+    return RequestAPI("/api/Usuarios/ModificarUsuario/"+encodeURIComponent(id), "PUT", body);
 }
 export async function CrearRegistroUsuario(body,nombres,apellidos,id_especialidad){
     return RequestAPI(`/api/Usuarios/CrearRegistroUsuario?nombres=${encodeURIComponent(nombres)}&apellidos=${encodeURIComponent(apellidos)}&id_especialidad=${encodeURIComponent(id_especialidad)}`, "POST", body);
@@ -61,5 +61,14 @@ export async function ObtenerHorarios(){
     return RequestAPI(`/api/Empleados/ObtenerHorarios/`, "GET");
 }
 export async function BuscarHorariosXEmpleado(id_empleado){
-    return RequestAPI(`/api/Empleados/BuscarHorariosXEmpleado/${encodeURIComponent(id_empleado)}`, "GET");
+    return RequestAPI(`/api/Empleados/ObtenerHorariosXEmpleado/${encodeURIComponent(id_empleado)}`, "GET");
+}
+export async function CrearHorarioEmpleado(body){
+    return RequestAPI("/api/Empleados/CrearHorario/", "POST", body);
+}
+export async function ModificarHorario(id,body){
+    return RequestAPI("/api/Empleados/ModificarHorario/"+encodeURIComponent(id), "PUT", body);
+}
+export async function EliminarHorario(id_horario){
+    return RequestAPI(`/api/Empleados/EliminarHorario/${encodeURIComponent(id_horario)}`, "DELETE");
 }

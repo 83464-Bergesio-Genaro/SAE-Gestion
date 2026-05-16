@@ -1,4 +1,4 @@
-import { useMemo,useEffect, useState, useCallback  } from "react";
+import { useMemo, useState  } from "react";
 import {
     Box,
     Typography,
@@ -11,11 +11,9 @@ import {
     Tooltip,
 } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
-import {ObtenerHorarios, BuscarHorariosXEmpleado } from "../../../api/EmpleadoService";
-import { ObtenerEmpleados } from "../../../api/EmpleadoService";
+import { AdminUsersProvider, useAdminUsers } from './AdminUsersContext'; 
 
-
-const HOUR_HEIGHT = 48; // px per hour
+const HOUR_HEIGHT = 36; // px per hour
 const START_HOUR = 8;//AM
 const END_HOUR = 22;//PM
 const TOTAL_HOURS = END_HOUR - START_HOUR; // 16
@@ -23,13 +21,19 @@ const TOTAL_HEIGHT = TOTAL_HOURS * HOUR_HEIGHT;
 const TIME_COL_WIDTH = 40; // px
 
 const DAYS = [
-    { label: "Lunes",     dia: 1 },
-    { label: "Martes",    dia: 2 },
-    { label: "Miércoles", dia: 3 },
-    { label: "Jueves",    dia: 4 },
-    { label: "Viernes",   dia: 5 }
+    { label: "Lunes",     value: 1 },
+    { label: "Martes",    value: 2 },
+    { label: "Miércoles", value: 3 },
+    { label: "Jueves",    value: 4 },
+    { label: "Viernes",   value: 5 }
 ];
-
+const EMPTY_FORM = {
+    id_empleado:"",
+    dia: 1,
+    hora_inicio: "",
+    hora_fin: "",
+    activo: true
+};
 const PALETTE = [
     "#1565C0",
     "#2E7D32",
@@ -43,14 +47,7 @@ const PALETTE = [
     "#00695C",
 ];
 
-const EMPTY_FORM = {
-    dia: 1,
-    hora_inicio: "",
-    hora_fin: "",
-    id_espacio_deportivo: "",
-    cuil_docente: "",
-    activo: true,
-};
+
 
 function parseMinutes(timeStr) {
     if (!timeStr) return 0;
@@ -68,14 +65,10 @@ function fmtTime(timeStr) {
     return timeStr.slice(0, 5);
 }
 
-function hasValidText(value) {
-    if (value === null || value === undefined) return false;
-    const text = String(value).trim();
-    return text !== "" && text !== "0";
-}
 
 /** Assigns col and numCols to each event so overlapping ones render side by side */
 function layoutEvents(events) {
+
     if (events.length === 0) return [];
     const sorted = events
         .map((ev) => ({ ...ev, _start: parseMinutes(ev.hora_inicio), _end: parseMinutes(ev.hora_fin) }))
@@ -97,119 +90,38 @@ function layoutEvents(events) {
 
 const WEEKEND = new Set([0, 6]); // dia values for Sat/Sun
 
-function HorarioFormFields({ form, onChange, espacios, empleados }) {
-    return (
-        <Stack spacing={1}>
-            <Stack direction="row" spacing={1} flexWrap="wrap">
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel>Día</InputLabel>
-                    <Select
-                        value={form.dia}
-                        label="Día"
-                        onChange={(e) => onChange("dia", e.target.value)}
-                    >
-                        {DIAS_OPTIONS.map((d) => (
-                            <MenuItem key={d.value} value={d.value}>{d.label}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                <SAETextField
-                    label="Hora inicio"
-                    type="time"
-                    size="small"
-                    value={form.hora_inicio}
-                    onChange={(e) => onChange("hora_inicio", e.target.value)}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={{ width: 130 }}
-                />
-                <SAETextField
-                    label="Hora fin"
-                    type="time"
-                    size="small"
-                    value={form.hora_fin}
-                    onChange={(e) => onChange("hora_fin", e.target.value)}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={{ width: 130 }}
-                />
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={form.activo}
-                            onChange={(e) => onChange("activo", e.target.checked)}
-                            size="small"
-                            color="primary"
-                        />
-                    }
-                    label="Activo"
-                    sx={{ ml: 0.5 }}
-                />
-            </Stack>
-            <Stack direction="row" spacing={1}>
-                <FormControl size="small" fullWidth>
-                    <InputLabel>Empleado</InputLabel>
-                    <Select
-                        value={form.id_empleado}
-                        label="Empleado"
-                        onChange={(e) => onChange("id_empleado", e.target.value)}
-                    >
-                        <MenuItem value=""><em>Sin asignar</em></MenuItem>
-                        {empleados.map((e) => (
-                            <MenuItem key={e.id} value={e.id}>{e.nombre}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-               
-            </Stack>
-        </Stack>
-    );
-}
+export function EmployedCalendar({ legajoEmpleado = null }){
+    const {
+            dialogError,
+            empleados,loadingEmpleados,
+            allHorarios,loadingHorarios,
+        } = useAdminUsers();
 
-export default function EmployCalendar(){
-    const [empleados, setEmpleados] = useState([]);
-    const [loadingEmpleados, setLoadingEmpleados] = useState(false);
+    const [manualSelected, setManualSelected] = useState(null);
 
-    const [allHorarios, setAllHorarios] = useState([]);
-    const [loadingHorarios, setLoadingHorarios]= useState(true);
+    const autoSelected = useMemo(() => {
 
-    const [error, setError] = useState("");
-    const [selected, setSelected] = useState(null); // null = todos
+        // Si no vino legajo
+        if (!legajoEmpleado) return null;
 
-   const fetchEmpleados = useCallback(async () => {
-        setLoadingEmpleados(true);
-        try {
-            const data = await ObtenerEmpleados();
-            setEmpleados(data);
-        } catch {
-            setEmpleados([]);
-        } finally {
-            setLoadingEmpleados(false);
-        }
-    }, []);
+        // Esperar fetch async
+        if (!empleados || empleados.length === 0) return null;
 
+        const empleadoEncontrado = empleados.find(
+            (e) => String(e.legajo) === String(legajoEmpleado)
+        );
 
-    {/*Esto produce dos cosas, uno que se pueda realizar efectivamente de manera asincronica y segundo que lo exporte para su uso cuando inicializa la pagina */}
-    useEffect(() => {
-        fetchEmpleados();
-    }, [fetchEmpleados]);
+        return empleadoEncontrado
+            ? empleadoEncontrado.id
+            : null; 
 
-       const fetchHorarios = useCallback(async () => {
-        setLoadingHorarios(true);
-        try {
-            const data = await ObtenerHorarios();
-            console.log(data);
-            
-        } catch {
-            setAllHorarios([]);
-        } finally {
-            setLoadingHorarios(false);
-        }
-    }, []);
+    }, [legajoEmpleado, empleados]);
 
-    useEffect(() => {
-        fetchHorarios();
-    }, [fetchHorarios]); 
+    // Valor final
+    const selected = autoSelected ?? manualSelected;
 
-
+    // Determina si el filtro debe ocultarse
+    const hasFixedEmployee = autoSelected !== null;
     const colorOf = useMemo(() => {
         const map = {};
         empleados.forEach((d, i) => { map[d.id] = PALETTE[i % PALETTE.length]; });
@@ -217,18 +129,31 @@ export default function EmployCalendar(){
     }, [empleados]);
 
     const visibleHorarios = useMemo(
-        () => (selected === null ? allHorarios : allHorarios.filter((h) => h.id_deporte === selected)),
+        
+        () => (selected === null ? allHorarios : allHorarios.filter((h) => h.id_empleado === selected)),
         [allHorarios, selected]
     );
 
     const byDay = useMemo(() => {
-            const map = Object.fromEntries(DAYS.map((d) => [d.dia, []]));
-            visibleHorarios.forEach((h) => {
-                if (map[h.dia] !== undefined) map[h.dia].push(h);
-            });
-            return Object.fromEntries(
-                Object.entries(map).map(([dia, evs]) => [dia, layoutEvents(evs)])
-            );
+    const map = DAYS.reduce((acc, day) => {
+        acc[day.value] = [];
+        return acc;
+    }, {});
+
+    // 2. Clasificar cada horario en su día correspondiente
+    visibleHorarios.forEach((horario) => {
+        if (map[horario.dia]) {
+        map[horario.dia].push(horario);
+        }
+    });
+
+    // 3. Aplicar la función de diseño (layoutEvents) a cada día
+    return Object.fromEntries(
+        Object.entries(map).map(([diaId, eventosDelDia]) => [
+        diaId,
+        layoutEvents(eventosDelDia)
+        ])
+    );
         }, [visibleHorarios]);
 
     const hourLabels = useMemo(
@@ -241,10 +166,10 @@ export default function EmployCalendar(){
             () => Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (i + 1) * HOUR_HEIGHT),
             []
         );
-    return (
-        <Box>
+        return (
+            <Box>
                 {/* Filter chips */}
-                <Card sx={{ borderRadius: 3, boxShadow: "0 18px 45px rgba(21,61,113,0.08)", mb: 2 }}>
+              {!hasFixedEmployee && (  <Card sx={{ borderRadius: 3, boxShadow: "0 18px 45px rgba(21,61,113,0.08)", mb: 2 }}>
                     <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
                         <Typography variant="subtitle2" sx={{ mb: 1, color: "#5a6f8f", fontWeight: 600, fontSize: "0.75rem" }}>
                             Filtrar por empleado
@@ -255,7 +180,7 @@ export default function EmployCalendar(){
                                 label="Todos los empleados"
                                 variant={selected === null ? "filled" : "outlined"}
                                 color={selected === null ? "primary" : "default"}
-                                onClick={() => setSelected(null)}
+                                onClick={() => setManualSelected(null)}
                                 sx={{ fontWeight: selected === null ? 700 : 400 }}
                             />
                             {empleados.map((e, i) => {
@@ -265,7 +190,7 @@ export default function EmployCalendar(){
                                     <Chip
                                         key={e.id}
                                         label={e.nombre_empleado}
-                                        onClick={() => setSelected(active ? null : e.id)}
+                                        onClick={() => setManualSelected(active ? null : e.id)}
                                         sx={{
                                             fontWeight: active ? 700 : 400,
                                             bgcolor: active ? c : "transparent",
@@ -303,6 +228,7 @@ export default function EmployCalendar(){
                         )}
                     </CardContent>
                 </Card>
+            )}
 
                 {loadingHorarios && (
                     <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -310,11 +236,11 @@ export default function EmployCalendar(){
                     </Box>
                 )}
 
-                {!loadingHorarios && error && (
-                    <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
+                {!loadingHorarios && dialogError && (
+                    <Alert severity="error" sx={{ mb: 3 }}>{dialogError}</Alert>
                 )}
 
-                {!loadingHorarios&& !loadingEmpleados && !error && (
+                {!loadingHorarios&& !loadingEmpleados && !dialogError && (
                     <Card sx={{ borderRadius: 4, boxShadow: "0 18px 45px rgba(21,61,113,0.08)", overflowX: "auto" }}>
                         <Box sx={{ minWidth: TIME_COL_WIDTH + DAYS.length * 90 }}>
 
@@ -333,12 +259,12 @@ export default function EmployCalendar(){
                                     <Box />
                                     {DAYS.map((day) => (
                                         <Box
-                                            key={day.dia}
+                                            key={day.value}
                                             sx={{
                                                 py: 1,
                                                 textAlign: "center",
                                                 borderLeft: "1px solid #dde6f5",
-                                                bgcolor: WEEKEND.has(day.dia) ? "#b2c7e71c" : "transparent",
+                                                bgcolor: WEEKEND.has(day.value) ? "#b2c7e71c" : "transparent",
                                             }}
                                         >
                                             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#153b6f", fontSize: "0.8rem" }}>
@@ -382,12 +308,12 @@ export default function EmployCalendar(){
                                     {/* Day columns */}
                                     {DAYS.map((day) => (
                                         <Box
-                                            key={day.dia}
+                                            key={day.value}
                                             sx={{
                                                 position: "relative",
                                                 height: TOTAL_HEIGHT,
                                                 borderLeft: "1px solid #dde6f5",
-                                                bgcolor: WEEKEND.has(day.dia) ? "#b2c7e71c" : "#fafcff",
+                                                bgcolor: WEEKEND.has(day.value) ? "#b2c7e71c" : "#fafcff",
                                             }}
                                         >
                                             {/* Hour grid lines */}
@@ -406,7 +332,8 @@ export default function EmployCalendar(){
                                             ))}
 
                                             {/* Events */}
-                                            {byDay[day.dia].map((ev) => {
+                                            {byDay[day.value].map((ev) => {
+
                                                 const startMin = parseMinutes(ev.hora_inicio);
                                                 const endMin   = parseMinutes(ev.hora_fin);
                                                 const top    = (startMin - START_HOUR * 60) * (HOUR_HEIGHT / 60);

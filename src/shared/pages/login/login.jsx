@@ -80,9 +80,19 @@ export default function Login() {
       handleLogin();
     }
   };
-
-  if (user && !isLoading) {
-    return (
+  return(
+    <Box sx={{ 
+        height: "100%",
+        mt:"-15px",
+        mb:"-20px",
+        minHeight:"88vh",
+        display: "flex", 
+        flexDirection: "column",
+        justifyContent: "center",
+        pb: { xs: 4, md: 3 },
+        background:"linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%)"
+    }}>
+      { user && !isLoading && (
       <Box
         sx={{
           display: "flex",
@@ -101,17 +111,9 @@ export default function Login() {
           </SAEButton>
         </Paper>
       </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ 
-        height: "100%",
-        display: "flex", 
-        flexDirection: "column",
-        justifyContent: "center",
-        pb: { xs: 4, md: 3 },
-    }}>
+      )}
+      {!user && (
+        <Box >
       {/* Logo Header animado */}
       <Box
         sx={{
@@ -283,5 +285,8 @@ export default function Login() {
         </DialogContent>
       </Dialog>
     </Box>
-  );
+      )}
+    </Box>
+    
+  )
 }

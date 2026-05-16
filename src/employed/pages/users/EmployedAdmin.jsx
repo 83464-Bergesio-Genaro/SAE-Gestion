@@ -1,5 +1,7 @@
-import { useMemo,useEffect, useState, useCallback  } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo,useState  } from 'react';
+import Diversity3Icon from '@mui/icons-material/Diversity3';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import { AdminUsersProvider, useAdminUsers } from './AdminUsersContext'; 
 import {
     Autocomplete,
     Box,
@@ -33,383 +35,60 @@ import AddIcon from "@mui/icons-material/Add";
 import CastleIcon from '@mui/icons-material/Castle';
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import Diversity3Icon from '@mui/icons-material/Diversity3';
 import SchoolIcon from "@mui/icons-material/School";
 import GroupsIcon from "@mui/icons-material/Groups";
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import SearchIcon from "@mui/icons-material/Search";
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useAuth } from "../../../shared/auth/AuthContext";
-import { DataGrid } from "@mui/x-data-grid";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario, ObtenerEmpleados,ObtenerUsuarios } from "../../../api/EmpleadoService";
-import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService";
-import EmployCalendar from "../jpa/EmployedCalendar";
-
-const secciones=[
-    {   key: "empleados", 
-        label: "Empleados"
-    },
-    {   key: "usuarios", 
-        label: "Estudiantes Registrados"
-    }
+import { DataGrid } from "@mui/x-data-grid";
+import { useNavigate } from "react-router-dom";
+import {EmployedCalendar} from "./EmployedCalendar";
+import GestionarHorariosDialog from "./HorariosDialog";
+const secciones = [
+    { key: "empleados", label: "Empleados" },
+    { key: "usuarios", label: "Estudiantes Registrados" }
 ];
-const formatTime = (time) => {
-    return time ? (time.endsWith("hs") ? time.replace("hs", ":00") : `${time}:00`) : time;
-};
-const formatHeader = (key) =>
-  key
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, l => l.toUpperCase());
-    
-const generateColumns = (data,editAction) => {
-
-  if (!data || data.length === 0) return [];
-
-  const columns = Object.keys(data).map((key) => {
-    
-    const isId = key.toLowerCase().includes("id");
-    const isShort = ["estado", "cupo","duracion","horario_inicio","horario_fin"].includes(key.toLowerCase());
-    if(key.toLowerCase() === "activo"){
-        return {
-            field: "activo",
-            headerName: "Estado",
-            align: "center" ,
-            headerAlign: "center" ,
-            width: 100,
-            renderCell: (params) => (
-                <Chip
-                    size="small"
-                    label={params.value ? "Activo" : "Inactivo"}
-                    color={params.value ? "success" : "default"}
-                />
-            )
-        }
-    }
-    else{
-        return {
-        field: key,
-        headerName: formatHeader(key),
-
-        flex: isId ? 0.3 : 1,
-        minWidth: isId? 50 : 150,
-        maxWidth: isId? 70: isShort ? 100 : NaN,
-        align: isId || isShort ? "center" : "left",
-        headerAlign: isId || isShort ? "center" : "left",
-        };
-    }
-
-
-  });
-
-  // 👉 columna de acciones
-  columns.push({
-    field: "actions",
-    headerName: "Acciones",
-    sortable: false,
-    filterable: false,
-    width: 100,
-    renderCell: (params) => (
-        <Box>
-            <IconButton
-                size="small"
-                color="primary"
-                title="Ver / Editar"
-                onClick={() => editAction(params.row)}
-            >
-                <EditIcon fontSize="small" />
-            </IconButton>               
-        </Box>  
-    )
-  });
-
-  return  columns;
-};
-const generateRows = (data) => {
-
-    return [...data]
-    .sort((a, b) => a.id - b.id)
-    .map((item, index) => ({
-        id: item.id || index,
-        ...item
-    }));
-
-};
-
-const EMPTY_EMPLEADO =    
-{
-    id: "",
-    legajo: "",
-    nombre_empleado: "",
-    id_perfil: 5,
-    nombre_perfil: "",
-    activo: true
-}
-const EMPTY_USUARIO = 
-{
-    id: "",
-    legajo: "",
-    nombre_usuario:"",
-    id_perfil: "",
-    activo: false 
-}
-export function GestionarHorariosDialog(){
-    return(<></>)
-}
-export default function AdminUsers() {
-
-    const { user } = useAuth();
+// 1. ESTE SUBCOMPONENTE SÍ PUEDE USAR EL HOOK (Porque está abajo del Provider)
+function EmployedAdminContent() {
     const navigate = useNavigate();
+    const { user } = useAuth();
 
-    const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMsg, setSnackbarMsg] = useState("");
+    const {
+            empleadosRows, empleadosColumns, loadingEmpleados, openCreateEmpleados,
+            usuariosRows, usuariosColumns, loadingUsuarios, openCreateUsuarios,
+            dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
+            horariosDialogOpen, setHorariosDialogOpen, snackbarOpen, setSnackbarOpen, snackbarMsg,setDialogError,handleUsuariosSave,handleEmpleadosSave,
+            carreras,perfiles
+    } = useAdminUsers();
 
-    {/*Seccion Empleados Activos  */}
-    const [empleadosRows, setEmpleadosRows] = useState([]);
-    const [loadingEmpleados, setLoadingEmpleados] = useState(false);
-
-    const fetchEmpleados = useCallback(async () => {
-        setLoadingEmpleados(true);
-        try {
-            const data = await ObtenerEmpleados();
-            setEmpleadosRows(generateRows(data));
-        } catch {
-            setEmpleadosRows([]);
-        } finally {
-            setLoadingEmpleados(false);
-        }
-    }, []);
-    {/*Esto produce dos cosas, uno que se pueda realizar efectivamente de manera asincronica y segundo que lo exporte para su uso cuando inicializa la pagina */}
-    useEffect(() => {
-        fetchEmpleados();
-    }, [fetchEmpleados]);
-
-    const openCreateEmpleados = () => {
-        setDialogType("empleados");
-        setDialogMode("create");
-        setDialogData({
-            id: "",
-            legajo: "",
-            nombre_empleado: "",
-            nombres: "",
-            apellidos: "",
-            activo: true,
-            id_perfil: "",
-            nombre_perfil: ""}); 
-        setDialogError("");
-
-        // 👇 asegurar que abre después
-        setTimeout(() => {
-            setDialogOpen(true);
-        }, 0);
-
-    };
-    const openEditEmpleados = useCallback((row) => {
-        setDialogData( {
-            id: row.id,
-            legajo: row.legajo,
-            nombre_empleado: row.nombre_empleado,
-            nombres: row.nombres,
-            apellidos: row.apellidos,
-            activo: row.activo,
-            id_perfil: row.id_perfil,
-            nombre_perfil: row.nombre_perfil});
-        setDialogType("empleados");
-        setDialogMode("edit");
-        setDialogError("");
-        setDialogOpen(true);
-    }, []);
-    const handleEmpleadosSave = async () => {
-        setDialogSaving(true);
-        setDialogError("");
-        try {
-        const { id, ...rest } = dialogData;
-        let id_nuevo = id===""? 0:id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
-        const body = {
-                    "id": id_nuevo,
-                    "legajo": dialogData.legajo,
-                    "nombre_usuario": dialogData.nombre_usuario,
-                    "id_perfil": dialogData.id_perfil,
-                    "activo": dialogData.activo
-                };
-
-            if (dialogMode === "create") {
-                await CrearEmpleado(body,dialogData.nombres,dialogData.apellidos);
-            } else if(dialogMode === "edit") {
-                await ModificarUsuario(dialogData.id, body);
-            }
-            setDialogOpen(false);
-            setDialogData(EMPTY_EMPLEADO);
-            fetchEmpleados();
-            setSnackbarMsg(dialogMode === "create"? "Empleado creado!":(dialogMode === "edit")?"Empleado modificado correctamente":"Se elimino el usuario correctamente");
-            setSnackbarOpen(true);
-        }
-        catch (err) {
-            setDialogError(err.message || "Ocurrió un error al guardar");
-        } finally {
-            setDialogSaving(false);
-        }
-    };   
-    {/*Seccion Usuarios */}
-    const [usuariosRows, setUsuariosRows] = useState([]);
-    const [loadingUsuarios, setLoadingUsuarios] = useState(false);
-
-    const fetchUsuarios = useCallback(async () => {
-        setLoadingUsuarios(true);
-        try {
-            const data = await ObtenerUsuarios();
-            let UserData=data.filter(item => item.id_perfil === 1 ); /* Solo estudiantes */
-            setUsuariosRows(generateRows(UserData));
-        } catch {
-            setUsuariosRows([]);
-        } finally {
-            setLoadingUsuarios(false);
-        }
-    }, []);
-    {/*Esto produce dos cosas, uno que se pueda realizar efectivamente de manera asincronica y segundo que lo exporte para su uso cuando inicializa la pagina */}
-    useEffect(() => {
-        fetchUsuarios();
-    }, [fetchUsuarios]);
-
-    const openCreateUsuarios = () => {
-        setDialogType("usuarios");
-        setDialogMode("create");
-        setDialogData({
-            id: "",
-            legajo: "",
-            nombre_usuario: "",
-            nombres: "",
-            apellidos: "",
-            id_perfil: 1, /* Por defecto se crean como estudiantes */
-            activo: true,
-            id_carrera: "",
-            nombre_carrera: ""}); 
-        setDialogError("");
-
-        // 👇 asegurar que abre después
-        setTimeout(() => {
-            setDialogOpen(true);
-        }, 0);
-
-    };
-    const openEditUsuarios = useCallback((row) => {
-        setDialogData( {
-            id: row.id,
-            legajo: row.legajo,
-            nombre_usuario: row.nombre_usuario,
-            nombres: row.nombres,
-            apellidos: row.apellidos,
-            id_perfil: row.id_perfil,
-            activo: row.activo,
-            id_carrera: row.id_carrera,
-            nombre_carrera: row.nombre_carrera});
-        setDialogType("usuarios");
-        setDialogMode("edit");
-        setDialogError("");
-        setDialogOpen(true);
-    }, []);
-    const handleUsuariosSave = async () => {
-        setDialogSaving(true);
-        setDialogError("");
-        try {
-        const { id,lugar, ...rest } = dialogData;
-        let id_nuevo = id===""? 0:id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
-        const body = {
-                    "id": id_nuevo,
-                    "legajo": dialogData.legajo,
-                    "nombre_usuario": dialogData.nombre_usuario,
-                    "id_perfil": dialogData.id_perfil,
-                    "activo": dialogData.activo
-                };
-                console.log(body);
-            if (dialogMode === "create") {
-                await CrearRegistroUsuario(body,dialogData.nombres,dialogData.apellidos,dialogData.id_carrera);
-            } else if(dialogMode === "edit") {
-                await ModificarUsuario(body,dialogData.id);
-            }else{
-               // await eliminarEvento(dialogData.id);
-            }
-            console.log(body);
-            setDialogOpen(false);
-            setDialogData(EMPTY_USUARIO);
-            fetchUsuarios();
-            setSnackbarMsg(dialogMode === "create"? "Usuario Registrado!":(dialogMode === "edit")?"El usuario fue modificado correctamente":"Se elimino el evento correctamente");
-            setSnackbarOpen(true);
-        }
-        catch (err) {
-            setDialogError(err.message || "Ocurrió un error al guardar");
-        } finally {
-            setDialogSaving(false);
-        }
-    };   
-    {/*Necesario para cargar los datos en el dialog (ALTA) */}
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogType, setDialogType] = useState("empleados"); 
-    const [dialogMode, setDialogMode] = useState("create");
-    const [dialogData, setDialogData] = useState(EMPTY_EMPLEADO);
-    const [dialogSaving, setDialogSaving] = useState(false);
-    const [dialogError, setDialogError] = useState("");
-
-    const [perfiles, setPerfiles] = useState([]);
-    const fetchPerfiles= useCallback(async () => {
-        try {
-            const data = await obtenerPerfiles();  
-            setPerfiles(data);
-            
-        } catch {
-            setPerfiles([]);
-        } finally {
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchPerfiles();
-    }, [fetchPerfiles]);
-
-    const [carreras, setCarreras] = useState([]);
-    const fetchCarreras= useCallback(async () => {
-        try {
-            const data = await obtenerCarreras();  
-            setCarreras(data);
-            
-        } catch {
-            setCarreras([]);
-        } finally {
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchCarreras();
-    }, [fetchCarreras]);
-
-    {/* Van por separado porque se va a realizar una operacion costosa por ende se empaquetan dentro del useMemo*/ }
     const sectionConfig = useMemo(
-         () => ({
-            empleados:{
-                title:"Empleados",
-                dialog:openCreateEmpleados,
-                addButton:"Nuevo Empleado",
+        () => ({
+            empleados: {
+                title: "Empleados",
+                dialog: openCreateEmpleados,
+                addButton: "Nuevo Empleado",
                 icon: Diversity3Icon,
                 rows: empleadosRows,
-                columns: generateColumns(EMPTY_EMPLEADO,openEditEmpleados),
+                columns: empleadosColumns,
                 loading: loadingEmpleados
             },
-            usuarios:{
-                title:"Usuarios",
-                dialog:openCreateUsuarios,
-                addButton:"Nuevo Usuario",
+            usuarios: {
+                title: "Estudiantes Registrados",
+                dialog: openCreateUsuarios,
+                addButton: "Nuevo Usuario",
                 icon: PersonAddAltIcon,
                 rows: usuariosRows,
-                columns: generateColumns(EMPTY_USUARIO,openEditUsuarios),
+                columns: usuariosColumns,
                 loading: loadingUsuarios
             }
         }),
-        [empleadosRows,loadingEmpleados,openEditEmpleados,
-            usuariosRows,loadingUsuarios,openEditUsuarios
+        [
+            empleadosRows, empleadosColumns, loadingEmpleados, openCreateEmpleados,
+            usuariosRows, usuariosColumns, loadingUsuarios, openCreateUsuarios
         ]
     );
 
@@ -674,12 +353,9 @@ export default function AdminUsers() {
                         </Stack>
                     </Box>
                 </Card>
-                <EmployCalendar />
+                <EmployedCalendar/>
             </Container>
-            <GestionarHorariosDialog
-                open={horariosDialogOpen}
-                onClose={() => setHorariosDialogOpen(false)}
-            />
+
             {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
             {dialogOpen && dialogType === "empleados" && (
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
@@ -712,7 +388,7 @@ export default function AdminUsers() {
                                     />     
                                 </Grid>
                                 <Grid size={{xs:12,md:9}} m={0}>
-                                    {console.log(dialogData)}
+  
                                     <SAETextField
                                         label="Nombre Completo"
                                         value={dialogData.nombre_empleado}
@@ -958,7 +634,11 @@ export default function AdminUsers() {
                     </SAEButton>
                 </DialogActions>                
             </Dialog>
-        )}
+            )}
+            <GestionarHorariosDialog
+                open={horariosDialogOpen}
+            />
+
         
             {/* MENSAJE DE EXITO */}
             <Snackbar
@@ -973,4 +653,14 @@ export default function AdminUsers() {
             </Snackbar>
         </Box>
     )
+}
+
+// 2. COMPONENTE PRINCIPAL (Exportado por defecto)
+// Este componente solo inicializa el Proveedor y llama al contenido interno
+export default function EmployedAdmin() {
+    return (
+        <AdminUsersProvider>
+            <EmployedAdminContent />
+        </AdminUsersProvider>
+    );
 }

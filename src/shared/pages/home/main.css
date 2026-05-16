@@ -1,14 +1,21 @@
-.home-container{
+.color-container{
+    background: linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);
     width: 100%;
-    padding: 0 15%;
+    min-height: 70vh;
+    padding: 30px 15%;
+
+}
+.image-container{
+    background-origin: content-box; 
     background: url("../../../../public/images/principal/PruebitaNoBG.png") 100% 0% / contain no-repeat content-box;
     background-position: right top;
 }
-
 @media (max-width: 750px){
-    .home-container{
-        padding: 0;
-        background-position: center center;
+    .color-container{
+        padding: 0 5%;
+    }
+    .image-container{
         background: url("../../../../public/images/principal/PruebitaOscuresidoNoBg.png") 50% 50% / contain no-repeat content-box;
-    }    
+        background-position: center center;
+    }
 }

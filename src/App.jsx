@@ -34,7 +34,8 @@ import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 import Prensa from "./shared/pages/prensa/Prensa";
 
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
-import UsuariosAdmin from "./employed/pages/users/users";
+import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
+import EmployedHealth from "./employed/pages/health/EmployedHealth";
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
 export default function App() {
@@ -108,6 +109,14 @@ export default function App() {
               }
             />
             <Route
+              path="/Gestion-Salud"
+              element={
+                <ProtectedRoute role={[2, 5]}>
+                  <EmployedHealth />
+                </ProtectedRoute>
+              }
+            />            
+            <Route
               path="/Gestion-Prensa"
               element={
                 <ProtectedRoute role={5}>
@@ -118,7 +127,7 @@ export default function App() {
             <Route
               path="/Gestion-Usuarios"
               element={
-                <ProtectedRoute role={[2, 5]}>
+                <ProtectedRoute role={5}>
                   <UsuariosAdmin />
                 </ProtectedRoute>
               }

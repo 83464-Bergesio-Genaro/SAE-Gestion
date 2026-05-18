@@ -18,7 +18,7 @@ import {
 import "./degrees.css";
 
 export default function SharedJPASistemas() {
-  const imageDirBanner = "/images/degrees/IngSistemasBanner.png";
+  const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngSistemasBanner.png`;
   const materias1Año = [
     "Análisis Matemático I",
     "Algebra y Geometría Analítica",

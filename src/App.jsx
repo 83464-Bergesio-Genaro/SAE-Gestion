@@ -36,6 +36,7 @@ import Prensa from "./shared/pages/prensa/Prensa";
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
 import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
 import EmployedHealth from "./employed/pages/health/EmployedHealth";
+import TurnBoardHealth from "./employed/pages/health/HealthTurns";
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
 export default function App() {
@@ -115,7 +116,15 @@ export default function App() {
                   <EmployedHealth />
                 </ProtectedRoute>
               }
-            />            
+            />
+            <Route
+              path="/Gestion-Salud/Turnos"
+              element={
+                <ProtectedRoute role={[2, 5]}>
+                  <TurnBoardHealth />
+                </ProtectedRoute>
+              }
+            />                        
             <Route
               path="/Gestion-Prensa"
               element={

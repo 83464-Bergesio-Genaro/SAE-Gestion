@@ -27,6 +27,7 @@ export async function RequestAPI(endpoint,action, body=null) {
     appConfig.apiUrl+ endpoint,
     getHeaders(action, body),
   ); 
+
   if(res.ok && action === "DELETE") return res; // Para DELETE no esperamos un body, por lo que no intentamos parsear la respuesta
   if(res.status === 204 && action === "GET") return []; // Para GET, si el status es 204 (No Content) devolvemos un array vacío para evitar errores al mapear la respuesta
   if (!res.ok) {
@@ -44,6 +45,9 @@ export async function RequestAPI(endpoint,action, body=null) {
 }
 export async function ObtenerEmpleados(){
     return RequestAPI('/api/Empleados/ObtenerEmpleados/',"GET");
+}
+export async function ObtenerUsuariosXLegajo(legajo){
+    return RequestAPI('/api/Usuarios/ObtenerUsuarioXlegajo/'+encodeURIComponent(legajo),"GET");
 }
 export async function ObtenerUsuarios(){
     return RequestAPI('/api/Usuarios/ObtenerUsuarios/',"GET");

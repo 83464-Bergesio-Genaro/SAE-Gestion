@@ -475,7 +475,7 @@ function EmployedAdminContent() {
                                     color="primary"
                                 />
                             }
-                            label={dialogData.activo ? "Desactivar Usuario" : "Activar Usuario"}
+                            label={dialogData.activo ? "Usuario Activo" : "Usuario NO Activo"}
                         />)}
                         
                     </>             
@@ -655,7 +655,6 @@ function EmployedAdminContent() {
     )
 }
 
-// 2. COMPONENTE PRINCIPAL (Exportado por defecto)
 // Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function EmployedAdmin() {
     return (

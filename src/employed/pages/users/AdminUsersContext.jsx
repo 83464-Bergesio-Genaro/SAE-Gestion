@@ -201,7 +201,7 @@ export const AdminUsersProvider = ({ children }) => {
                 legajo: dialogData.legajo,
                  nombre_usuario: dialogData.nombre_usuario || dialogData.nombre_empleado, 
                  id_perfil: dialogData.id_perfil,
-                  activo: dialogData.activo };
+                activo: dialogMode === "create"? true: dialogData.activo };//Cuando lo doy de alta siempre es activo
 
             if (dialogMode === "create") {
                 await CrearEmpleado(body, dialogData.nombres, dialogData.apellidos);

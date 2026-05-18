@@ -10,9 +10,11 @@ import {
     Alert,
     Tooltip,
 } from "@mui/material";
-import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 
-import { AdminUsersProvider, useAdminUsers } from './AdminUsersContext'; 
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+
+import { HealthUsersProvider, useHealthUser } from './HealthContext'; 
+
 
 const HOUR_HEIGHT = 36; // px per hour
 const START_HOUR = 8;//AM
@@ -29,12 +31,17 @@ const DAYS = [
     { label: "Viernes",   value: 5 }
 ];
 const EMPTY_FORM = {
-    id_empleado:"",
-    dia: 1,
+    id:"",
     hora_inicio: "",
     hora_fin: "",
-    activo: true
+    dia: 1,
+    cuil_especialista: null,
+    especialista: "",
+    activo: true,
+    id_especialidad:null,
+    nombre_especialidad:null,
 };
+
 const PALETTE = [
     "#1565C0",
     "#2E7D32",
@@ -47,8 +54,6 @@ const PALETTE = [
     "#4527A0",
     "#00695C",
 ];
-
-
 
 function parseMinutes(timeStr) {
     if (!timeStr) return 0;
@@ -66,8 +71,6 @@ function fmtTime(timeStr) {
     return timeStr.slice(0, 5);
 }
 
-
-/** Assigns col and numCols to each event so overlapping ones render side by side */
 function layoutEvents(events) {
 
     if (events.length === 0) return [];
@@ -91,48 +94,24 @@ function layoutEvents(events) {
 
 const WEEKEND = new Set([0, 6]); // dia values for Sat/Sun
 
-export function EmployedCalendar({ legajoEmpleado = null }){
+
+export function EmployedCalendar(){
     const {
-            dialogError,
-            empleados,loadingEmpleados,
-            allHorarios,loadingHorarios,
-        } = useAdminUsers();
+        selectedEmploy,setSelectedEmploy, personal,loadingPersonal,
+        allHorarios,loadingHorarios,
+        dialogError,
+        } = useHealthUser();
 
-    const [manualSelected, setManualSelected] = useState(null);
-
-    const autoSelected = useMemo(() => {
-
-        // Si no vino legajo
-        if (!legajoEmpleado) return null;
-
-        // Esperar fetch async
-        if (!empleados || empleados.length === 0) return null;
-
-        const empleadoEncontrado = empleados.find(
-            (e) => String(e.legajo) === String(legajoEmpleado)
-        );
-
-        return empleadoEncontrado
-            ? empleadoEncontrado.id
-            : null; 
-
-    }, [legajoEmpleado, empleados]);
-
-    // Valor final
-    const selected = autoSelected ?? manualSelected;
-
-    // Determina si el filtro debe ocultarse
-    const hasFixedEmployee = autoSelected !== null;
     const colorOf = useMemo(() => {
         const map = {};
-        empleados.forEach((d, i) => { map[d.id] = PALETTE[i % PALETTE.length]; });
+        personal.forEach((d, i) => { map[i] = PALETTE[i % PALETTE.length]; });
         return map;
-    }, [empleados]);
+    }, [personal]);
 
     const visibleHorarios = useMemo(
-        
-        () => (selected === null ? allHorarios : allHorarios.filter((h) => h.id_empleado === selected)),
-        [allHorarios, selected]
+ 
+        () => (selectedEmploy === null ? allHorarios : allHorarios.filter((h) => h.cuil_especialista === selectedEmploy.cuil)),
+        [allHorarios, selectedEmploy]
     );
 
     const byDay = useMemo(() => {
@@ -141,14 +120,12 @@ export function EmployedCalendar({ legajoEmpleado = null }){
         return acc;
     }, {});
 
-    // 2. Clasificar cada horario en su día correspondiente
     visibleHorarios.forEach((horario) => {
         if (map[horario.dia]) {
-        map[horario.dia].push(horario);
+            map[horario.dia].push(horario);
         }
     });
 
-    // 3. Aplicar la función de diseño (layoutEvents) a cada día
     return Object.fromEntries(
         Object.entries(map).map(([diaId, eventosDelDia]) => [
         diaId,
@@ -158,40 +135,41 @@ export function EmployedCalendar({ legajoEmpleado = null }){
         }, [visibleHorarios]);
 
     const hourLabels = useMemo(
-            () => Array.from({ length: TOTAL_HOURS }, (_, i) => START_HOUR + 1 + i),
-            []
-        );
-    
-        // hour grid line positions (i = 1 … TOTAL_HOURS-1, skip top/bottom edges)
-        const hourLineOffsets = useMemo(
-            () => Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (i + 1) * HOUR_HEIGHT),
-            []
-        );
+        () => Array.from({ length: TOTAL_HOURS }, (_, i) => START_HOUR + 1 + i),
+        []
+    );
+
+     // hour grid line positions (i = 1 … TOTAL_HOURS-1, skip top/bottom edges)
+    const hourLineOffsets = useMemo(
+        () => Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (i + 1) * HOUR_HEIGHT),
+        []
+    );
         return (
             <Box>
                 {/* Filter chips */}
-              {!hasFixedEmployee && (  <Card sx={{ borderRadius: 3, boxShadow: "0 18px 45px rgba(21,61,113,0.08)", mb: 2 }}>
+                <Card sx={{ borderRadius: 3, boxShadow: "0 18px 45px rgba(21,61,113,0.08)", mb: 2 }}>
                     <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
                         <Typography variant="subtitle2" sx={{ mb: 1, color: "#5a6f8f", fontWeight: 600, fontSize: "0.75rem" }}>
                             Filtrar por empleado
                         </Typography>
                         <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
                             <Chip
-                                icon={<SportsSoccerIcon />}
+                                icon={<MedicalServicesIcon />}
                                 label="Todos los empleados"
-                                variant={selected === null ? "filled" : "outlined"}
-                                color={selected === null ? "primary" : "default"}
-                                onClick={() => setManualSelected(null)}
-                                sx={{ fontWeight: selected === null ? 700 : 400 }}
+                                variant={selectedEmploy === null ? "filled" : "outlined"}
+                                color={selectedEmploy === null ? "primary" : "default"}
+                                onClick={() => setSelectedEmploy(null)}
+                                sx={{ fontWeight: selectedEmploy === null ? 700 : 400 }}
                             />
-                            {empleados.map((e, i) => {
+                            {personal.map((e, i) => {
                                 const c = PALETTE[i % PALETTE.length];
-                                const active = selected === e.id;
+                                const active = selectedEmploy === e.cuil;
+                                
                                 return (
                                     <Chip
-                                        key={e.id}
-                                        label={e.nombre_empleado}
-                                        onClick={() => setManualSelected(active ? null : e.id)}
+                                        key={i}
+                                        label={e.apellido +", "+e.nombre}
+                                        onClick={() => setSelectedEmploy(active ? null : e.cuil)}
                                         sx={{
                                             fontWeight: active ? 700 : 400,
                                             bgcolor: active ? c : "transparent",
@@ -207,10 +185,10 @@ export function EmployedCalendar({ legajoEmpleado = null }){
                         </Stack>
 
                         {/* Color legend */}
-                        {empleados.length > 0 && selected === null && (
+                        {personal.length > 0 && (
                             <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1, mt: 1.5, pt: 1.5, borderTop: "1px solid #e3eaf4" }}>
-                                {empleados.map((e, i) => (
-                                    <Stack key={e.id} direction="row" alignItems="center" spacing={0.6}>
+                                {personal.map((e, i) => (
+                                    <Stack key={e.cuil} direction="row" alignItems="center" spacing={0.6}>
                                         <Box
                                             sx={{
                                                 width: 12,
@@ -221,7 +199,8 @@ export function EmployedCalendar({ legajoEmpleado = null }){
                                             }}
                                         />
                                         <Typography variant="caption" sx={{ color: "#5a6f8f", fontSize: "0.72rem" }}>
-                                            {e.nombre_empleado}
+                                            {e.apellido+", "+e.nombre}
+                                            
                                         </Typography>
                                     </Stack>
                                 ))}
@@ -229,7 +208,6 @@ export function EmployedCalendar({ legajoEmpleado = null }){
                         )}
                     </CardContent>
                 </Card>
-            )}
 
                 {loadingHorarios && (
                     <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -241,7 +219,7 @@ export function EmployedCalendar({ legajoEmpleado = null }){
                     <Alert severity="error" sx={{ mb: 3 }}>{dialogError}</Alert>
                 )}
 
-                {!loadingHorarios&& !loadingEmpleados && !dialogError && (
+                {!loadingHorarios&& !loadingPersonal && !dialogError && (
                     <Card sx={{ borderRadius: 4, boxShadow: "0 18px 45px rgba(21,61,113,0.08)", overflowX: "auto" }}>
                         <Box sx={{ minWidth: TIME_COL_WIDTH + DAYS.length * 90 }}>
 
@@ -333,13 +311,13 @@ export function EmployedCalendar({ legajoEmpleado = null }){
                                             ))}
 
                                             {/* Events */}
-                                            {byDay[day.value].map((ev) => {
+                                            {byDay[day.value].map((ev,index) => {
 
                                                 const startMin = parseMinutes(ev.hora_inicio);
                                                 const endMin   = parseMinutes(ev.hora_fin);
                                                 const top    = (startMin - START_HOUR * 60) * (HOUR_HEIGHT / 60);
                                                 const height = Math.max((endMin - startMin) * (HOUR_HEIGHT / 60), 28);
-                                                const c      = colorOf[ev.id_empleado] || PALETTE[0];
+                                                const c      = colorOf[index] || PALETTE[0];
 
                                                 return (
                                                     <Tooltip
@@ -349,7 +327,7 @@ export function EmployedCalendar({ legajoEmpleado = null }){
                                                         title={
                                                             <Box sx={{ p: 0.5 }}>
                                                                 <Typography sx={{ fontWeight: 700, fontSize: "0.85rem", mb: 0.25 }}>
-                                                                    {ev.nombre_empleado_atencion}
+                                                                    {ev.especialista}
                                                                 </Typography>
                                                                 <Typography sx={{ fontSize: "0.75rem", mb: 0.25 }}>
                                                                     {fmtTime(ev.hora_inicio)} – {fmtTime(ev.hora_fin)}
@@ -386,7 +364,7 @@ export function EmployedCalendar({ legajoEmpleado = null }){
                                                                 sx={{ fontWeight: 700, display: "block", lineHeight: 1.3, fontSize: "0.7rem" }}
                                                                 noWrap
                                                             >
-                                                                {ev.nombre_empleado_atencion}
+                                                                 {ev.especialista}
                                                             </Typography>
                                                             {height > 38 && (
                                                                 <Typography

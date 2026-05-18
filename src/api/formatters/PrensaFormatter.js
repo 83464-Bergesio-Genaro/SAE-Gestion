@@ -1,3 +1,5 @@
+const baseUrl = import.meta.env.BASE_URL;
+
 export const mapPublicacionPublica = (publicacion) => ({
   id: publicacion.id,
   titulo: publicacion.titulo_publicacion,
@@ -32,10 +34,10 @@ function parseFiles(filesString){
   }
   else return [];
 }
-const imageStock = ["/images/principal/newsGeneric.webp"
-  ,"/images/carrousel/AuditorioUTN.jpeg"
-  ,"/images/carrousel/EntradaUTN.jpg"
-,"/images/carrousel/estacionamientoUTN.jpg"];
+const imageStock = [`${baseUrl}images/principal/newsGeneric.webp`
+  ,`${baseUrl}images/carrousel/AuditorioUTN.jpeg`
+  ,`${baseUrl}images/carrousel/EntradaUTN.jpg`
+,`${baseUrl}images/carrousel/estacionamientoUTN.jpg`];
 const imageFormats = ["jpg","jpeg","png","svg"];
 
 export function getFirstImage(filesString){

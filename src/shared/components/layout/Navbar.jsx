@@ -26,6 +26,7 @@ function getInitials(nombre = "") {
 }
 
 export default function Navbar() {
+  const baseUrl = import.meta.env.BASE_URL;
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -59,7 +60,7 @@ export default function Navbar() {
             component={Link}
             to="/"
             sx={{
-              backgroundImage: "url('/saeLogo.svg')",
+              backgroundImage: `url('${baseUrl}saeLogo.svg')`,
               backgroundSize: "contain",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "left center",

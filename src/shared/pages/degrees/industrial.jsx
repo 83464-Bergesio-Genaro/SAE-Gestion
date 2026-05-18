@@ -18,7 +18,7 @@ import {
 import "./degrees.css";
 
 export default function SharedJPAIndustrial() {
-  const imageDirBanner = "/images/degrees/IngIndustrialBanner.png";
+  const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngIndustrialBanner.png`;
 
   const materias1Año = [
     "Informática I",

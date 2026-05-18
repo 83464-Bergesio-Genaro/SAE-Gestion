@@ -66,6 +66,8 @@ function isoToInputDate(isoString) {
   return isoString.split("T")[0];
 }
 
+const baseUrl = import.meta.env.BASE_URL;
+
 function buildFormData(t) {
   return {
     id: t.id,
@@ -604,8 +606,8 @@ export default function TorneoDetalle() {
             py: { xs: 4, md: 5 },
             minHeight: 260,
             backgroundImage: torneo.activo
-              ? "linear-gradient(125deg, rgba(18,54,102,0.97) 0%, rgba(53,108,178,0.93) 58%, rgba(108,171,221,0.88) 100%), url('/images/varias/campus.jpg')"
-              : "linear-gradient(125deg, rgba(60,60,60,0.97) 0%, rgba(100,100,100,0.93) 58%, rgba(150,150,150,0.88) 100%), url('/images/varias/campus.jpg')",
+              ? `linear-gradient(125deg, rgba(18,54,102,0.97) 0%, rgba(53,108,178,0.93) 58%, rgba(108,171,221,0.88) 100%), url('${baseUrl}images/varias/campus.jpg')`
+              : `linear-gradient(125deg, rgba(60,60,60,0.97) 0%, rgba(100,100,100,0.93) 58%, rgba(150,150,150,0.88) 100%), url('${baseUrl}images/varias/campus.jpg')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             color: "white",

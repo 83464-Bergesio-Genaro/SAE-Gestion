@@ -22,7 +22,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SchoolIcon from "@mui/icons-material/School";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import { useAuth } from "../../../shared/auth/AuthContext";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import AddIcon from "@mui/icons-material/Add";
@@ -32,31 +32,122 @@ import { useNavigate } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 import { SectionGridCard } from "./becas.utils";
 import { createSectionConfig, becasGridConfig } from "./becas.configs";
-import {
-  datosProyectoData,
-  serviciosData,
-  becariosData,
-  becasPorLegajo,
-} from "./becas.data";
+
 import EditIcon from "@mui/icons-material/Edit";
+import {
+  ObtenerProyectosInvestigacion,
+  ObtenerBecariosCompleto,
+  ObtenerServiciosInternos,
+  CrearServicioInterno,
+  CrearProyectoInvestigacion,
+  EditarProyectoInvestigacion,
+  EditarServicioInterno,
+  ObtenerBecariosEconomicaXLegajo,
+  ObtenerBecariosServiciosXLegajo,
+  ObtenerBecariosInvestigacionXLegajo,
+  ObtenerBecariosXLegajo,
+  ObtenerUsuariosXLegajo,
+} from "../../../api/BecasService";
+
+const getFirstRecord = (value) => {
+  // Los endpoints pueden devolver un objeto, una lista o una respuesta vacía.
+  // El editor necesita siempre un objeto para poder pintar correctamente los campos.
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
+};
 
 async function handleBuscarBecario(legajo) {
-  console.log("Buscando becas para legajo", legajo);
+  console.log("Buscar becas para el legajo: ", legajo);
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  const [becasEconomicas, becasServicios, becasInvestigacion] =
+    await Promise.all([
+      ObtenerBecariosEconomicaXLegajo(legajo),
+      ObtenerBecariosServiciosXLegajo(legajo),
+      ObtenerBecariosInvestigacionXLegajo(legajo),
+    ]);
 
-  return becasPorLegajo[legajo] ?? [];
+  return [
+    {
+      tipo: "economica",
+      nombre: "Beca económica",
+      datos: getFirstRecord(becasEconomicas),
+    },
+    {
+      tipo: "servicio",
+      nombre: "Servicio interno",
+      datos: getFirstRecord(becasServicios),
+    },
+    {
+      tipo: "investigacion",
+      nombre: "Investigación",
+      datos: getFirstRecord(becasInvestigacion),
+    },
+  ].filter((beca) => Boolean(beca.datos));
+}
+
+async function handleBuscarBecarioPorLegajo(legajo) {
+  const becario = await ObtenerUsuariosXLegajo(String(legajo).trim());
+  return getFirstRecord(becario);
 }
 
 export default function EmployedScholarships() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const datosProyecto = datosProyectoData; // Importar los datos del proyecto desde el archivo de datos
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-  const datosServicios = serviciosData;
+  const fetchProyectosInvetigacion = useCallback(async () => {
+    setLoadingProyectos(true);
+    try {
+      const data = await ObtenerProyectosInvestigacion();
+      setProyectosRows(data);
+    } catch (err) {
+      setProyectosRows([]);
+      console.error("Error al cargar proyectos de investigación:", err);
+    } finally {
+      setLoadingProyectos(false);
+    }
+  }, []);
 
-  const datosBecarios = becariosData;
+  const fetchServiciosInternos = useCallback(async () => {
+    setLoadingServicios(true);
+    try {
+      const data = await ObtenerServiciosInternos();
+      setServiciosRows(data);
+    } catch (err) {
+      setServiciosRows([]);
+      console.error("Error al cargar servicios internos:", err);
+    } finally {
+      setLoadingServicios(false);
+    }
+  }, []);
+
+  const fetchBecariosCompleto = useCallback(async () => {
+    setLoadingBecarios(true);
+    try {
+      const data = await ObtenerBecariosCompleto();
+      setBecariosRows(data);
+    } catch (err) {
+      setBecariosRows([]);
+      console.error("Error al cargar becarios completos:", err);
+    } finally {
+      setLoadingBecarios(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProyectosInvetigacion();
+    fetchServiciosInternos();
+    fetchBecariosCompleto();
+  }, [
+    fetchProyectosInvetigacion,
+    fetchServiciosInternos,
+    fetchBecariosCompleto,
+  ]);
 
   const [proyectosRows, setProyectosRows] = useState([]);
   const [loadingProyectos, setLoadingProyectos] = useState(true);
@@ -70,21 +161,87 @@ export default function EmployedScholarships() {
   const [dialogSaving, setDialogSaving] = useState(false);
   const [dialogError, setDialogError] = useState("");
 
-  const handleDialogSave = () => {
-    setDialogSaving(true);
-    setDialogError("");
+  const [usuarioSelected, setUsuarioSelected] = useState(null);
+  const [loadingUsuario, setLoadingUsuario] = useState(false);
+
+  const fetchUsuariosXlegajo = async (legajo) => {
     try {
-      // Aquí iría la lógica para guardar los datos (crear o editar según dialogMode)
-    } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
+      setLoadingUsuario(true);
+
+      const usuario = await ObtenerUsuarioXLegajo(legajo);
+
+      if (!usuario) return;
+
+      setUsuarioSelected(usuario);
+
+      setDialogData((prev) => ({
+        ...prev,
+        legajo: usuario.legajo,
+        nombre_becario: usuario.nombre_usuario,
+      }));
+    } catch (error) {
+      console.error(error);
     } finally {
-      setDialogSaving(false);
+      setLoadingUsuario(false);
     }
   };
 
-  /*
-  Debo crear una seccion donde recupero todos los becarios
+  const handleDialogSave = async ({ cardKey, sectionKey, mode, data }) => {
+    var mensajeSnackbar = "La acción se realizó exitosamente";
+    try {
+      setDialogSaving(true);
+      setDialogError("");
 
+      switch (sectionKey) {
+        case "proyectos":
+          if (mode === "create") {
+            await CrearProyectoInvestigacion(data);
+            await fetchProyectosInvetigacion();
+            mensajeSnackbar = "Proyecto de investigación creado exitosamente";
+          }
+          if (mode === "edit") {
+            // Aquí iría la lógica para editar un proyecto de investigación
+            await EditarProyectoInvestigacion(data.id, data);
+            await fetchProyectosInvetigacion();
+            mensajeSnackbar = "Proyecto de investigación editado exitosamente";
+          }
+          break;
+        case "servicios":
+          if (mode === "create") {
+            await CrearServicioInterno(data);
+            await fetchServiciosInternos();
+            mensajeSnackbar = "Servicio interno creado exitosamente";
+          }
+          if (mode === "edit") {
+            await EditarServicioInterno(data.id, data);
+            await fetchServiciosInternos();
+            mensajeSnackbar = "Servicio interno editado exitosamente";
+          }
+          break;
+        // Aquí podrías agregar casos para otras cards como "proyectos" o "becarios"
+        default:
+          console.warn(
+            "No hay lógica de guardado definida para esta card:",
+            cardKey,
+          );
+      }
+    } catch (err) {
+      setDialogError(err.message || "Ocurrió un error al guardar");
+      setSnackbar({
+        open: true,
+        message: mensajeSnackbar,
+        severity: "error",
+      });
+    } finally {
+      setDialogSaving(false);
+      setSnackbar({
+        open: true,
+        message: mensajeSnackbar,
+        severity: "success",
+      });
+    }
+  };
+  /*
   Otra seccion donde estan los becarios nacionales 
     Con su situacion academica
   */
@@ -107,18 +264,6 @@ export default function EmployedScholarships() {
       loadingBecarios,
     ],
   );
-
-  useEffect(() => {
-    // Simular carga de datos para proyectos
-    setTimeout(() => {
-      setProyectosRows(datosProyecto);
-      setLoadingProyectos(false);
-      setServiciosRows(datosServicios);
-      setLoadingServicios(false);
-      setBecariosRows(datosBecarios);
-      setLoadingBecarios(false);
-    }, 1000);
-  }, []);
 
   return (
     <Box
@@ -238,8 +383,7 @@ export default function EmployedScholarships() {
           />
         </Box>
 
-        {/*Card de Configuracion*/}
-
+        {/* Cards de configuración y gestión de becarios */}
         {Object.entries(sectionConfig).map(([cardKey, card]) => (
           <SectionGridCard
             key={cardKey}
@@ -247,9 +391,25 @@ export default function EmployedScholarships() {
             card={card}
             onSave={handleDialogSave}
             onBecario={handleBuscarBecario}
-            becasGridConfig={becasGridConfig}
+            onBuscarBecario={handleBuscarBecarioPorLegajo}
+            becasGridConfig={becasGridConfig(serviciosRows, proyectosRows)}
           />
         ))}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );

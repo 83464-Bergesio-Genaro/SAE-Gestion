@@ -1,5 +1,5 @@
 import { useAuth } from "../../../shared/auth/AuthContext";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import utnLogo from "../../../assets/utn.png";
 import {
@@ -23,12 +23,12 @@ import {
   FormControlLabel,
   Divider,
   FormControl,
-  Input,
   InputLabel,
   Select,
   MenuItem,
   OutlinedInput,
-  CardHeader,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { SCHOLARSHIP_STRINGS } from "./scholarship.string";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
@@ -37,163 +37,389 @@ import SAESwitch from "../../../shared/components/buttons/SAESwitch";
 
 import {
   FileUpload,
-  Delete,
   AddCircleOutline,
   ExpandMore,
   Close,
-  Science,
-  SettingsAccessibility,
   AttachMoney,
+  Diversity3,
+  School,
 } from "@mui/icons-material";
-import { Form } from "react-router-dom";
+
+import {
+  ObtenerProyectosInvestigacion,
+  ObtenerServiciosInternos,
+  CrearBecarioEconomica,
+  CrearBecarioSAE,
+  CrearBecarioInvestigacion,
+  CrearBecarioServicio,
+  ObtenerBecariosXLegajo,
+  ObtenerBecariosEconomicaXLegajo,
+  ObtenerBecariosServiciosXLegajo,
+  ObtenerBecariosInvestigacionXLegajo,
+} from "../../../api/BecasService";
 
 const C = SCHOLARSHIP_STRINGS;
 
+/*
+  Componente Scholarships
+  -----------------------
+  Objetivo general:
+  - Mostrar las becas que ya solicitó el usuario logueado.
+  - Permitir solicitar una nueva beca.
+  - Crear primero el Becario SAE si todavía no existe.
+  - Crear después la beca específica: económica, servicio o investigación.
+  - Recargar la pantalla para que el usuario vea inmediatamente la nueva solicitud.
+
+*/
+
+// Centralizo los nombres de los tipos de beca para evitar strings repetidos en todo el componente.
+// Esto reduce errores por diferencias mínimas como mayúsculas, tildes o espacios.
+const TIPO_BECA = {
+  ECONOMICA: "Beca Economica",
+  SERVICIO: "Beca de Servicio",
+  INVESTIGACION: "Beca de Investigacion",
+};
+
+// Estados posibles que después se traducen a textos y colores de Chip.
+const ESTADO_BECA = {
+  SOLICITADO: "solicitado",
+  RECHAZADO: "rechazado",
+  ACEPTADO_INICIO: "aceptado_inicio",
+  ACEPTADO_PAGADO: "aceptado_pagado",
+  FIN_BECADO: "fin_becado",
+};
+
+// Devuelve cómo se debe mostrar visualmente el estado de una beca.
+// MUI usa "color" para pintar el Chip: warning, error, success, etc.
 const getEstadoBecaConfig = (estado) => {
   switch (estado) {
-    case "solicitado":
-      return {
-        label: "Solicitado",
-        color: "warning",
-      };
-
-    case "rechazado":
-      return {
-        label: "Rechazado",
-        color: "error",
-      };
-
-    case "aceptado_inicio":
-      return {
-        label: "Aceptado",
-        color: "info",
-      };
-
-    case "aceptado_pagado":
-      return {
-        label: "Pagado",
-        color: "success",
-      };
-
-    case "fin_becado":
-      return {
-        label: "Finalizado",
-        color: "secondary",
-      };
-
+    case ESTADO_BECA.SOLICITADO:
+      return { label: "Solicitado", color: "warning" };
+    case ESTADO_BECA.RECHAZADO:
+      return { label: "Rechazado", color: "error" };
+    case ESTADO_BECA.ACEPTADO_INICIO:
+      return { label: "Aceptado", color: "info" };
+    case ESTADO_BECA.ACEPTADO_PAGADO:
+      return { label: "Pagado", color: "success" };
+    case ESTADO_BECA.FIN_BECADO:
+      return { label: "Finalizado", color: "secondary" };
     default:
-      return {
-        label: estado,
-        color: "default",
-      };
+      return { label: estado || "Sin estado", color: "default" };
   }
 };
+
+// Devuelve el ícono correspondiente según el tipo de beca.
+// Así evitamos guardar JSX mezclado dentro de la respuesta original de la API.
+const getBecaIcon = (tipoBeca) => {
+  switch (tipoBeca) {
+    case TIPO_BECA.ECONOMICA:
+      return <AttachMoney fontSize="large" />;
+    case TIPO_BECA.SERVICIO:
+      return <Diversity3 fontSize="large" />;
+    case TIPO_BECA.INVESTIGACION:
+      return <School fontSize="large" />;
+    default:
+      return null;
+  }
+};
+
+// La API puede devolver {} cuando no hay beca.
+// Esta función confirma que la respuesta sea un objeto real y que tenga id.
+const isValidObjectResponse = (value) =>
+  Boolean(value && typeof value === "object" && value.id);
+
+// Formatea fechas para mostrarlas en pantalla.
+// Si la fecha viene vacía o inválida, muestra "-" para no romper el render.
+const formatDate = (dateValue) => {
+  if (!dateValue) return "-";
+
+  const date = new Date(dateValue);
+  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString();
+};
+
+// Arma el estado inicial del formulario.
+// Si ya existe un becario, precarga sus datos; si no, usa los datos del usuario logueado.
+// Además limpia tipoBeca y beca para que cada nueva solicitud arranque vacía.
+const getInitialFormBeca = (user, becarioActual = null) => ({
+  id: becarioActual?.id ?? 0,
+  legajo: becarioActual?.legajo ?? user?.email ?? "",
+  nombre_becario: becarioActual?.nombre_becario ?? user?.nombre ?? "",
+  alquila: becarioActual?.alquila ?? true,
+  fecha_solicitud: becarioActual?.fecha_solicitud ?? "",
+  aceptado_inicio: becarioActual?.aceptado_inicio ?? false,
+  puede_pagarle: becarioActual?.puede_pagarle ?? false,
+  activo: becarioActual?.activo ?? true,
+  anio_beca: becarioActual?.anio_beca ?? new Date().getFullYear(),
+  id_becario_previo: becarioActual?.id_becario_previo ?? null,
+  tipoBeca: "",
+  beca: null,
+});
 
 export default function Scholarships() {
   const { user } = useAuth();
 
-  const INITIAL_PREVIEW = {
+  // Mensaje flotante para informar éxito, advertencias o errores.
+  const [snackbar, setSnackbar] = useState({
     open: false,
-    loading: false,
-    title: "",
-    imageSrc: null,
-    isPdf: false,
-    error: null,
-  };
+    message: "",
+    severity: "success",
+  });
 
-  var becarioSAE = {
-    legajo: user.legajo,
-    alquila: false,
-    fechaSolicitud: "",
-    activo: null,
-    anioBeca: 2026,
-    idBecarioPrevio: null,
-    tipoBeca: "",
-    proyecto_investigacion: "",
-    servicio: "",
-    modulos_asignados: 0,
-    entrevista_realizada: false,
-    aceptado_inicio: null,
-    puedo_pagarle: null,
-  };
-
+  // Becario base del sistema SAE. Es distinto de la beca específica.
+  // Primero se necesita este registro para después crear económica/servicio/investigación.
+  const [becarioActual, setBecarioActual] = useState(null);
+  // Loading general de pantalla: se usa durante la carga inicial.
   const [loading, setLoading] = useState(true);
-  const [preview, setPreview] = useState(INITIAL_PREVIEW);
-  const [misBecas, setMisBecas] = useState([
-    {
-      tipoBeca: C.listaTiposBecas[0].nombre,
-      iconTipoBeca: C.listaTiposBecas[0].icon,
-      estado: "solicitado",
-      fechaSolicitud: "2026-05-12",
-      anioBeca: 2026,
-      proyecto_investigacion: "",
-      servicio: "",
-      modulos_asignados: 0,
-    },
-    {
-      tipoBeca: C.listaTiposBecas[2].nombre,
-      iconTipoBeca: C.listaTiposBecas[2].icon,
-      estado: "aceptado_inicio",
-      fechaSolicitud: "2026-05-12",
-      anioBeca: 2026,
-      proyecto_investigacion: "",
-      servicio: "SAE",
-      modulos_asignados: 2,
-    },
-    {
-      tipoBeca: C.listaTiposBecas[1].nombre,
-      iconTipoBeca: C.listaTiposBecas[1].icon,
-      estado: "aceptado_pagado",
-      fechaSolicitud: "2026-05-12",
-      anioBeca: 2026,
-      proyecto_investigacion: "Inteligencia Artificial",
-      servicio: "",
-      modulos_asignados: 3,
-    },
-  ]);
+  // Loading específico del formulario: se activa cuando el usuario toca Guardar.
+  const [saving, setSaving] = useState(false);
+  // Lista normalizada de becas para pintar las cards.
+  const [misBecas, setMisBecas] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-
   const [becaSeleccionada, setBecaSeleccionada] = useState(null);
+  // Estado del formulario del Dialog.
+  // Guarda datos del becario y también la beca/proyecto/servicio seleccionado.
+  const [formBeca, setFormBeca] = useState(() => getInitialFormBeca(user));
+  const [proyectosRows, setProyectosRows] = useState([]);
+  const [serviciosRows, setServiciosRows] = useState([]);
 
-  const [formBeca, setFormBeca] = useState(becarioSAE);
+  // Helper para no repetir setSnackbar en cada try/catch.
+  const showSnackbar = useCallback((message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  }, []);
 
+  // Carga los proyectos disponibles para la beca de investigación.
+  const cargarProyectosInvestigacion = useCallback(async () => {
+    try {
+      const data = await ObtenerProyectosInvestigacion();
+      setProyectosRows(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setProyectosRows([]);
+      console.error("Error al cargar proyectos de investigación:", err);
+    }
+  }, []);
+
+  // Carga los servicios disponibles para la beca de servicio.
+  const cargarServiciosInternos = useCallback(async () => {
+    try {
+      const data = await ObtenerServiciosInternos();
+      setServiciosRows(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setServiciosRows([]);
+      console.error("Error al cargar servicios internos:", err);
+    }
+  }, []);
+
+  // Normaliza las respuestas de la API porque vienen como objeto único o como {} cuando no existe beca.
+  const normalizarBecas = useCallback((economica, servicio, investigacion) => {
+    return [
+      isValidObjectResponse(economica) && {
+        ...economica,
+        tipoBeca: TIPO_BECA.ECONOMICA,
+        iconBeca: getBecaIcon(TIPO_BECA.ECONOMICA),
+        fechaSolicitud: economica.becario?.fecha_solicitud,
+        estado: ESTADO_BECA.SOLICITADO,
+      },
+      isValidObjectResponse(servicio) && {
+        ...servicio,
+        tipoBeca: TIPO_BECA.SERVICIO,
+        iconBeca: getBecaIcon(TIPO_BECA.SERVICIO),
+        fechaSolicitud: servicio.becario?.fecha_solicitud,
+        estado: ESTADO_BECA.SOLICITADO,
+        servicio: servicio.servicio?.nombre ?? servicio.servicio ?? "-",
+      },
+      isValidObjectResponse(investigacion) && {
+        ...investigacion,
+        tipoBeca: TIPO_BECA.INVESTIGACION,
+        iconBeca: getBecaIcon(TIPO_BECA.INVESTIGACION),
+        fechaSolicitud: investigacion.becario?.fecha_solicitud,
+        estado: ESTADO_BECA.SOLICITADO,
+        proyecto_investigacion:
+          investigacion.proyecto_investigacion?.nombre_proyecto_investigacion ??
+          investigacion.proyecto_investigacion?.centro_investigacion ??
+          "-",
+      },
+    ].filter(Boolean);
+  }, []);
+
+  // Carga el becario base y las becas asociadas al usuario logueado.
+  const cargarMisBecas = useCallback(async () => {
+    if (!user?.email) return;
+
+    try {
+      const becario = await ObtenerBecariosXLegajo(user.email);
+
+      if (!isValidObjectResponse(becario)) {
+        setBecarioActual(null);
+        setMisBecas([]);
+        return;
+      }
+
+      setBecarioActual(becario);
+
+      const [economica, servicio, investigacion] = await Promise.all([
+        ObtenerBecariosEconomicaXLegajo(user.email),
+        ObtenerBecariosServiciosXLegajo(user.email),
+        ObtenerBecariosInvestigacionXLegajo(user.email),
+      ]);
+
+      setMisBecas(normalizarBecas(economica, servicio, investigacion));
+    } catch (error) {
+      console.error("Error al cargar becario y becas", error);
+      setBecarioActual(null);
+      setMisBecas([]);
+      showSnackbar("No se pudieron cargar tus becas", "error");
+    }
+  }, [normalizarBecas, showSnackbar, user?.email]);
+
+  // Abre el Dialog para solicitar una beca nueva.
+  // Si ya existe Becario SAE, precarga sus datos; si no, usa datos del usuario logueado.
   const handleAgregarBeca = () => {
     setBecaSeleccionada(null);
-
-    setFormBeca(becarioSAE);
-
+    setFormBeca(getInitialFormBeca(user, becarioActual));
     setOpenDialog(true);
   };
 
+  // Cierra el Dialog, salvo que esté guardando.
+  // Esto evita que el usuario cierre el formulario en medio del POST.
   const handleCloseDialog = () => {
+    if (saving) return;
     setOpenDialog(false);
   };
 
+  // Maneja todos los cambios del formulario.
+  // Sirve tanto para inputs normales como para switches/checkboxes.
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
+
     setFormBeca((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+      // Si cambia el tipo de beca, limpio la selección asociada para evitar guardar un proyecto/servicio anterior.
+      ...(name === "tipoBeca" ? { beca: null } : {}),
     }));
   };
 
-  const handleGuardar = () => {
-    console.log(formBeca);
+  // Valida antes de pegarle a la API.
+  // Evita crear una beca sin tipo, o una beca de servicio/investigación sin selección asociada.
+  const validarFormulario = () => {
+    if (!formBeca.tipoBeca) {
+      showSnackbar("Seleccioná un tipo de beca", "warning");
+      return false;
+    }
 
-    setOpenDialog(false);
+    if (
+      (formBeca.tipoBeca === TIPO_BECA.INVESTIGACION ||
+        formBeca.tipoBeca === TIPO_BECA.SERVICIO) &&
+      !formBeca.beca?.id
+    ) {
+      showSnackbar("Seleccioná una opción para la beca", "warning");
+      return false;
+    }
+
+    return true;
   };
 
+  // Crea el Becario SAE base solo si todavía no existe.
+  // Devuelve siempre el becario que se debe usar para crear la beca específica.
+  const crearBecarioSiNoExiste = async () => {
+    if (becarioActual?.id) return becarioActual;
+
+    const payloadBecario = {
+      id: 0,
+      legajo: user.email,
+      nombre_becario: user.nombre,
+      alquila: formBeca.alquila,
+      fecha_solicitud: new Date().toISOString(),
+      aceptado_inicio: false,
+      puede_pagarle: false,
+      activo: true,
+      anio_beca: new Date().getFullYear(),
+      id_becario_previo: null,
+    };
+
+    const nuevoBecario = await CrearBecarioSAE(payloadBecario);
+    setBecarioActual(nuevoBecario);
+    return nuevoBecario;
+  };
+
+  // Crea la beca específica usando el ID real del Becario SAE.
+  // Importante: no usar formBeca.id porque puede estar en 0 si el becario se acaba de crear.
+  const crearBecaSegunTipo = async (becarioId) => {
+    switch (formBeca.tipoBeca) {
+      case TIPO_BECA.ECONOMICA:
+        await CrearBecarioEconomica(becarioId);
+        return "Se creó la beca económica correctamente";
+
+      case TIPO_BECA.INVESTIGACION:
+        await CrearBecarioInvestigacion(becarioId, formBeca.beca.id);
+        return "Se creó la beca de investigación correctamente";
+
+      case TIPO_BECA.SERVICIO:
+        await CrearBecarioServicio(becarioId, formBeca.beca.id);
+        return "Se creó la beca de servicio correctamente";
+
+      default:
+        throw new Error("Tipo de beca inválido");
+    }
+  };
+
+  // Acción principal del botón Guardar.
+  // Activa el mini loading del formulario, ejecuta el alta y recarga las cards.
+  const handleDialogSave = async () => {
+    if (!validarFormulario()) return;
+
+    try {
+      setSaving(true);
+
+      // Flujo de guardado:
+      // 1. Si no existe becario SAE, se crea primero.
+      // 2. Con el ID real del becario, se crea la beca específica seleccionada.
+      // 3. Se recarga la grilla para reflejar el nuevo estado.
+      const becario = await crearBecarioSiNoExiste();
+      const mensaje = await crearBecaSegunTipo(becario.id);
+
+      await cargarMisBecas();
+      setOpenDialog(false);
+      showSnackbar(mensaje, "success");
+    } catch (err) {
+      console.error("Error al crear la beca", err);
+      showSnackbar("Hubo un error al crear la beca", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Carga inicial de pantalla.
+  // Se ejecuta cuando aparece el usuario logueado y trae:
+  // - Proyectos de investigación
+  // - Servicios internos
+  // - Becario y becas ya solicitadas
   useEffect(() => {
-    if (!user) return;
+    if (!user?.email) return;
+
     const inicializarPantalla = async () => {
       try {
-        setLoading(false);
+        setLoading(true);
+
+        await Promise.all([
+          cargarProyectosInvestigacion(),
+          cargarServiciosInternos(),
+          cargarMisBecas(),
+        ]);
       } catch (error) {
         console.error("Error al cargar la pantalla de becas", error);
+      } finally {
+        setLoading(false);
       }
     };
+
     inicializarPantalla();
-  }, [user]);
+  }, [
+    user?.email,
+    cargarProyectosInvestigacion,
+    cargarServiciosInternos,
+    cargarMisBecas,
+  ]);
 
   return (
     <Box
@@ -205,11 +431,12 @@ export default function Scholarships() {
         bgcolor: "#f4f8fc",
       }}
     >
+      {/* Overlay de carga inicial de toda la pantalla. */}
       {loading && (
         <Box
           sx={{
             position: "fixed",
-            inset: 0, // top:0, left:0, right:0, bottom:0
+            inset: 0,
             backgroundColor: "rgba(0,0,0,0.6)",
             zIndex: 1300,
             display: "flex",
@@ -261,8 +488,6 @@ export default function Scholarships() {
             alignItems: "center",
             justifyContent: "space-between",
             gap: 3,
-            background:
-              "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%)",
             color: "white",
             backgroundImage:
               "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('/images/carrousel/EntradaUTN.jpg')",
@@ -309,6 +534,7 @@ export default function Scholarships() {
             }}
           />
         </Box>
+
         <Box sx={{ mt: 3 }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
             {C.documentationTitle}
@@ -317,12 +543,21 @@ export default function Scholarships() {
             {C.documentationSubtitle}
           </Typography>
         </Box>
+
+        {/* Cards de becas ya solicitadas por el usuario. */}
         <Grid container spacing={2.5} sx={{ mt: 1 }}>
           {misBecas.map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item.id}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              key={`${item.tipoBeca}-${item.id}`}
+            >
               <Card
                 sx={{
-                  minWidth: 357,
+                  minWidth: 350,
+                  maxWidth: { xs: "100%", sm: 400 },
                   height: "100%",
                   borderRadius: 4,
                   flexDirection: "column",
@@ -330,7 +565,6 @@ export default function Scholarships() {
                   border: "1px solid rgba(17, 53, 101, 0.08)",
                   transition:
                     "background-color 0.25s ease, border-color 0.25s ease",
-
                   "&:hover": {
                     backgroundColor: "#f1f5fb",
                     borderColor: "rgba(17, 53, 101, 0.2)",
@@ -356,62 +590,70 @@ export default function Scholarships() {
                       <Typography variant="h6">
                         <strong>{item.tipoBeca}</strong>
                       </Typography>
+                      {item.iconBeca}
+                    </Stack>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                      }}
+                    >
                       <Chip
                         label={getEstadoBecaConfig(item.estado).label}
                         color={getEstadoBecaConfig(item.estado).color}
-                        size="small"
+                        size="medium"
                       />
-                      {item.tipoBeca?.icon && <IconComponent color="primary" />}
-                    </Stack>
+                    </Box>
+
                     <Box
                       sx={{
                         display: "flex",
-                        justifyContent: "flex",
                         gap: 1,
                         alignItems: "center",
                         flexWrap: "wrap",
                         mt: 1,
                       }}
                     >
-                      <Typography variant="body1" color="text.prim">
-                        <strong>Fecha Solicitud :</strong>
+                      <Typography variant="body1" color="text.primary">
+                        <strong>Fecha Solicitud:</strong>
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
-                        {new Date(item.fechaSolicitud).toLocaleDateString()}
+                        {formatDate(item.fechaSolicitud)}
                       </Typography>
                     </Box>
 
                     <Box
                       sx={{
                         display: "flex",
-                        justifyContent: "flex",
                         gap: 1,
                         alignItems: "center",
                         flexWrap: "wrap",
                         mt: 1,
                       }}
                     >
-                      <Typography variant="body1" color="text.prim">
-                        <strong>Modulos Asignados :</strong>
+                      <Typography variant="body1" color="text.primary">
+                        <strong>Módulos Asignados:</strong>
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
-                        {item.modulos_asignados}
+                        {item.modulos_asignados ?? "-"}
                       </Typography>
                     </Box>
 
-                    {item.tipoBeca === "Beca de Investigacion" && (
+                    {item.tipoBeca === TIPO_BECA.INVESTIGACION && (
                       <Box
                         sx={{
                           display: "flex",
-                          justifyContent: "flex",
                           gap: 1,
                           alignItems: "center",
                           flexWrap: "wrap",
                           mt: 1,
                         }}
                       >
-                        <Typography variant="body1" color="text.prim">
-                          <strong>Proyecto :</strong>
+                        <Typography variant="body1" color="text.primary">
+                          <strong>Proyecto:</strong>
                         </Typography>
                         <Typography variant="body1" color="text.secondary">
                           {item.proyecto_investigacion}
@@ -419,33 +661,23 @@ export default function Scholarships() {
                       </Box>
                     )}
 
-                    {item.tipoBeca === "Beca de Servicio" && (
+                    {item.tipoBeca === TIPO_BECA.SERVICIO && (
                       <Box
                         sx={{
                           display: "flex",
-                          justifyContent: "flex",
                           gap: 1,
                           alignItems: "center",
                           flexWrap: "wrap",
                           mt: 1,
                         }}
                       >
-                        <Typography variant="body1" color="text.prim">
-                          <strong>Servicio :</strong>
+                        <Typography variant="body1" color="text.primary">
+                          <strong>Servicio:</strong>
                         </Typography>
                         <Typography variant="body1" color="text.secondary">
                           {item.servicio}
                         </Typography>
                       </Box>
-                    )}
-
-                    {item.tipoBeca === "Beca Economica" && (
-                      <Box
-                        sx={{
-                          mt: 1,
-                          minHeight: 22,
-                        }}
-                      />
                     )}
 
                     <Box
@@ -458,17 +690,15 @@ export default function Scholarships() {
                         mt: 1,
                       }}
                     >
-                      <SAEButton
-                        onClick={() =>
-                          handlePreview(item.id_archivo, item.archivoNombre)
-                        }
-                      >
+                      {/*
+                      <SAEButton onClick={() => handlePreview(item.id_archivo, item.archivoNombre)}>
                         {item.archivoNombre
                           ? item.archivoNombre.length > 23
-                            ? item.archivoNombre.slice(0, 23) + "..."
+                            ? `${item.archivoNombre.slice(0, 23)}...`
                             : item.archivoNombre
                           : ""}
                       </SAEButton>
+                      */}
 
                       <IconButton
                         component="label"
@@ -481,7 +711,7 @@ export default function Scholarships() {
                           type="file"
                           hidden
                           accept={item.extension}
-                          onChange={(e) => handleArchivoChange(e, item)}
+                          // onChange={(e) => handleArchivoChange(e, item)}
                         />
                       </IconButton>
                     </Box>
@@ -491,19 +721,19 @@ export default function Scholarships() {
             </Grid>
           ))}
 
-          {/* CARD AGREGAR */}
+          {/* Card especial para abrir el formulario de nueva solicitud. */}
           <Grid item xs={12} sm={6} md={4}>
             <Card
-              onClick={() => handleAgregarBeca(null)}
+              onClick={handleAgregarBeca}
               sx={{
-                minWidth: 357,
+                minWidth: 350,
+                maxWidth: { xs: "100%", sm: 400 },
                 height: "100%",
                 borderRadius: 4,
                 cursor: "pointer",
                 border: "2px dashed rgba(17, 53, 101, 0.25)",
                 backgroundColor: "#f8fbff",
                 transition: "all 0.25s ease",
-
                 "&:hover": {
                   backgroundColor: "#eef5ff",
                   borderColor: "primary.main",
@@ -523,11 +753,9 @@ export default function Scholarships() {
                 }}
               >
                 <AddCircleOutline color="primary" sx={{ fontSize: 60 }} />
-
                 <Typography variant="h6" textAlign="center">
                   {C.cardSolicitarTitle}
                 </Typography>
-
                 <Typography
                   variant="body2"
                   color="text.secondary"
@@ -540,6 +768,7 @@ export default function Scholarships() {
           </Grid>
         </Grid>
 
+        {/* Sección de preguntas frecuentes. */}
         <Box sx={{ mt: 4 }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
             {C.FAQTitle}
@@ -557,15 +786,12 @@ export default function Scholarships() {
                   borderRadius: 3,
                   boxShadow: "0 8px 24px rgba(21, 61, 113, 0.08)",
                   border: "1px solid rgba(17, 53, 101, 0.08)",
-                  "&:before": {
-                    display: "none",
-                  },
+                  "&:before": { display: "none" },
                 }}
               >
                 <AccordionSummary expandIcon={<ExpandMore />}>
                   <Typography fontWeight={600}>{faq.pregunta}</Typography>
                 </AccordionSummary>
-
                 <AccordionDetails>
                   <Typography color="text.secondary">
                     {faq.respuesta}
@@ -575,7 +801,8 @@ export default function Scholarships() {
             ))}
           </Box>
         </Box>
-        {/* Dialog de Agregar Beca  */}
+
+        {/* Dialog de alta/edición de beca. Actualmente se usa para solicitar una nueva beca. */}
         <Dialog
           open={openDialog}
           onClose={handleCloseDialog}
@@ -596,19 +823,48 @@ export default function Scholarships() {
             >
               {becaSeleccionada ? "Editar Beca" : "Solicitar Beca"}
             </Typography>
-            <IconButton onClick={handleCloseDialog} size="small">
+            <IconButton
+              onClick={handleCloseDialog}
+              size="small"
+              disabled={saving}
+            >
               <Close />
             </IconButton>
           </DialogTitle>
 
           <DialogContent
             sx={{
+              position: "relative",
               display: "flex",
               flexDirection: "column",
               gap: 2,
               pt: "16px !important",
             }}
           >
+            {/* Mini loading dentro del formulario mientras se guarda.
+                Bloquea visualmente el contenido y evita dobles clicks. */}
+            {saving && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1.5,
+                  bgcolor: "rgba(255,255,255,0.75)",
+                  backdropFilter: "blur(2px)",
+                }}
+              >
+                <CircularProgress size={36} />
+                <Typography variant="body2" color="text.secondary">
+                  Guardando solicitud...
+                </Typography>
+              </Box>
+            )}
+
             <Divider variant="middle" sx={{ mt: 0.5 }}>
               <Chip
                 label={C.DatosPersonales}
@@ -616,6 +872,7 @@ export default function Scholarships() {
                 sx={{ fontWeight: 700 }}
               />
             </Divider>
+
             <SAETextField
               fullWidth
               label="Legajo"
@@ -624,20 +881,21 @@ export default function Scholarships() {
               value={formBeca.legajo}
               onChange={handleChange}
             />
+
             <FormControlLabel
               control={
                 <SAESwitch
-                  size="small"
-                  checked={formBeca.alquila}
+                  size="medium"
+                  checked={Boolean(formBeca.alquila)}
                   name="alquila"
                   onChange={handleChange}
+                  disabled={saving}
                 />
               }
               label={C.alquilarTitle}
-              sx={{
-                "& .MuiFormControlLabel-label": { fontSize: "0.90rem" },
-              }}
+              sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.90rem" } }}
             />
+
             <Divider variant="middle" sx={{ mt: 0.5 }}>
               <Chip
                 label={C.TiposBecas}
@@ -646,7 +904,8 @@ export default function Scholarships() {
               />
             </Divider>
 
-            <FormControl fullWidth>
+            {/* Tipo de beca seleccionado. Al cambiarlo, se limpia formBeca.beca. */}
+            <FormControl fullWidth disabled={saving}>
               <InputLabel>Tipo Beca</InputLabel>
               <Select
                 value={formBeca.tipoBeca}
@@ -654,42 +913,46 @@ export default function Scholarships() {
                 name="tipoBeca"
                 input={<OutlinedInput label="Tipo Beca" />}
               >
-                {C.listaTiposBecas.map((name) => (
-                  <MenuItem key={name} value={name}>
-                    {name}
+                {C.listaTiposBecas.map((beca) => (
+                  <MenuItem key={beca.nombre} value={beca.nombre}>
+                    {beca.nombre}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            {formBeca.tipoBeca === "Beca de Investigacion" && (
-              <FormControl fullWidth>
-                <InputLabel>Proyecto Investigacion</InputLabel>
+
+            {/* Campo adicional obligatorio solo para beca de investigación. */}
+            {formBeca.tipoBeca === TIPO_BECA.INVESTIGACION && (
+              <FormControl fullWidth disabled={saving}>
+                <InputLabel>Proyecto Investigación</InputLabel>
                 <Select
-                  value={formBeca.proyecto_investigacion}
+                  value={formBeca.beca ?? ""}
                   onChange={handleChange}
-                  name="proyecto_investigacion"
-                  input={<OutlinedInput label="Proyecto Investigacion" />}
+                  name="beca"
+                  input={<OutlinedInput label="Proyecto Investigación" />}
                 >
-                  {C.listaProyectoInvestigacion.map((name) => (
-                    <MenuItem key={name} value={name}>
-                      {name}
+                  {proyectosRows.map((proyecto) => (
+                    <MenuItem key={proyecto.id} value={proyecto}>
+                      {proyecto.nombre_proyecto_investigacion}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             )}
-            {formBeca.tipoBeca === "Beca de Servicio" && (
-              <FormControl fullWidth>
+
+            {/* Campo adicional obligatorio solo para beca de servicio. */}
+            {formBeca.tipoBeca === TIPO_BECA.SERVICIO && (
+              <FormControl fullWidth disabled={saving}>
                 <InputLabel>Proyecto Servicio</InputLabel>
                 <Select
-                  value={formBeca.proyecto}
+                  value={formBeca.beca ?? ""}
                   onChange={handleChange}
-                  name="servicio"
+                  name="beca"
                   input={<OutlinedInput label="Proyecto Servicio" />}
                 >
-                  {C.listaProyectoServicio.map((name) => (
-                    <MenuItem key={name} value={name}>
-                      {name}
+                  {serviciosRows.map((servicio) => (
+                    <MenuItem key={servicio.id} value={servicio}>
+                      {servicio.nombre}
                     </MenuItem>
                   ))}
                 </Select>
@@ -698,13 +961,35 @@ export default function Scholarships() {
           </DialogContent>
 
           <DialogActions>
-            <SAEButton onClick={handleCloseDialog}>Cancelar</SAEButton>
-
-            <SAEButton variant="contained" onClick={handleGuardar}>
-              Guardar
+            <SAEButton onClick={handleCloseDialog} disabled={saving}>
+              Cancelar
+            </SAEButton>
+            <SAEButton
+              variant="contained"
+              onClick={handleDialogSave}
+              disabled={saving}
+            >
+              {saving ? "Guardando..." : "Guardar"}
             </SAEButton>
           </DialogActions>
         </Dialog>
+
+        {/* Mensaje final de éxito/error/advertencia. */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );

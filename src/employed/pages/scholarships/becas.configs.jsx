@@ -1,7 +1,8 @@
 import SchoolIcon from "@mui/icons-material/School";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import PersonIcon from "@mui/icons-material/Person";
-
+import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
+import PeopleIcon from "@mui/icons-material/People";
 const proyectosColumns = [
   {
     field: "id",
@@ -19,16 +20,11 @@ const proyectosColumns = [
     field: "activo",
     headerName: "Activo",
     width: 100,
-    defaultValue: "",
-    valueFormatter: (value) =>
-      value === true || value === "true" ? "Sí" : "No",
+    defaultValue: false,
+    valueFormatter: (value) => (value ? "Sí" : "No"),
     form: {
-      type: "select",
+      type: "switch",
       visible: true,
-      options: [
-        { value: "true", label: "Sí" },
-        { value: "false", label: "No" },
-      ],
     },
   },
   {
@@ -41,6 +37,8 @@ const proyectosColumns = [
       type: "text",
       visible: true,
       fullRow: true,
+      required: true,
+      requiredMessage: "El nombre del proyecto es obligatorio",
     },
   },
 
@@ -54,6 +52,8 @@ const proyectosColumns = [
       type: "text",
       visible: true,
       fullRow: true,
+      required: true,
+      requiredMessage: "El nombre del centro de investigación es obligatorio",
     },
   },
 ];
@@ -80,6 +80,8 @@ const serviciosColumns = [
       type: "text",
       visible: true,
       fullRow: true,
+      required: true,
+      requiredMessage: "El nombre del servicio es obligatorio",
     },
   },
   {
@@ -91,6 +93,8 @@ const serviciosColumns = [
     form: {
       type: "text",
       visible: true,
+      required: true,
+      requiredMessage: "El número de teléfono es obligatorio",
     },
   },
   {
@@ -102,6 +106,8 @@ const serviciosColumns = [
     form: {
       type: "text",
       visible: true,
+      required: true,
+      requiredMessage: "El número de teléfono interno es obligatorio",
     },
   },
   {
@@ -114,6 +120,8 @@ const serviciosColumns = [
       type: "email",
       visible: true,
       fullRow: true,
+      required: true,
+      requiredMessage: "El email institucional es obligatorio",
     },
   },
   {
@@ -152,6 +160,16 @@ const becariosColumns = [
     form: {
       type: "number",
       disabledOnEdit: true,
+      fullRow: true,
+    },
+  },
+  {
+    field: "legajo",
+    headerName: "Legajo",
+    form: {
+      type: "user-search",
+      visible: true,
+      fullRow: true,
     },
   },
 
@@ -159,44 +177,25 @@ const becariosColumns = [
     field: "activo",
     headerName: "Activo",
     width: 100,
-    defaultValue: "",
+    defaultValue: false,
 
-    valueFormatter: (value) =>
-      value === true || value === "true" ? "Sí" : "No",
+    valueFormatter: (value) => (value ? "Sí" : "No"),
     form: {
-      type: "select",
-      visible: true,
-      options: [
-        { value: "true", label: "Sí" },
-        { value: "false", label: "No" },
-      ],
-    },
-  },
-  {
-    field: "legajo",
-    headerName: "Legajo",
-    width: 150,
-    defaultValue: "",
-    form: {
-      type: "text",
+      type: "switch",
       visible: true,
     },
   },
+
   {
     field: "aceptado_inicio",
     headerName: "Aceptado al Inicio",
     minWidth: 170,
     flex: 1,
-    defaultValue: "",
-    valueFormatter: (value) =>
-      value === true || value === "true" ? "Sí" : "No",
+    defaultValue: false,
+    valueFormatter: (value) => (value ? "Sí" : "No"),
     form: {
-      type: "select",
+      type: "switch",
       visible: true,
-      options: [
-        { value: "true", label: "Sí" },
-        { value: "false", label: "No" },
-      ],
     },
   },
   {
@@ -204,16 +203,12 @@ const becariosColumns = [
     headerName: "Puede Pagarle",
     minWidth: 170,
     flex: 1,
-    defaultValue: "",
-    valueFormatter: (value) =>
-      value === true || value === "true" ? "Sí" : "No",
+    defaultValue: false,
+    valueFormatter: (value) => (value ? "Sí" : "No"),
     form: {
-      type: "select",
+      type: "switch",
       visible: true,
-      options: [
-        { value: "true", label: "Sí" },
-        { value: "false", label: "No" },
-      ],
+      fullRow: true,
     },
   },
 
@@ -226,6 +221,8 @@ const becariosColumns = [
     form: {
       type: "text",
       visible: true,
+      required: true,
+      requiredMessage: "El año de la beca es obligatorio",
     },
   },
   {
@@ -276,7 +273,7 @@ export const createSectionConfig = ({
       servicios: {
         title: "Gestión Servicios Internos",
         tabTitle: "Servicios",
-        icon: FitnessCenterIcon,
+        icon: PrivacyTipIcon,
         rows: serviciosRows,
         columns: serviciosColumns,
         loading: loadingServicios,
@@ -296,7 +293,7 @@ export const createSectionConfig = ({
       becarios: {
         title: "Gestión Becarios",
         tabTitle: "Becarios",
-        icon: PersonIcon,
+        icon: PeopleIcon,
         rows: becariosRows,
         columns: becariosColumns,
         loading: loadingBecarios,
@@ -311,7 +308,7 @@ export const createSectionConfig = ({
   },
 });
 
-export const becasGridConfig = {
+export const becasGridConfig = (serviciosRows, proyectosRows) => ({
   economica: {
     columns: [
       {
@@ -336,6 +333,8 @@ export const becasGridConfig = {
         form: {
           type: "number",
           visible: true,
+          min: 0,
+          max: 3,
         },
       },
     ],
@@ -343,13 +342,19 @@ export const becasGridConfig = {
   investigacion: {
     columns: [
       {
-        field: "id_proyecto_investigacion",
+        // Usá acá el nombre real de la FK que devuelve/espera tu API.
+        // Si tu backend usa otro campo, cambiá solo este field.
+        field: "proyecto_investigacion.id",
         headerName: "Proyecto de Investigación",
         width: 70,
-        defaultValue: "0",
+        defaultValue: "",
         form: {
-          type: "number",
+          type: "select",
           visible: true,
+          options: proyectosRows,
+          value: "id",
+          label: "nombre_proyecto_investigacion",
+          fullRow: true,
         },
       },
       {
@@ -360,20 +365,28 @@ export const becasGridConfig = {
         form: {
           type: "number",
           visible: true,
+          min: 0,
+          max: 3,
         },
       },
     ],
   },
-  servicios: {
+  servicio: {
     columns: [
       {
-        field: "id_Servicio",
+        // Usá acá el nombre real de la FK que devuelve/espera tu API.
+        // Si tu backend usa otro campo, cambiá solo este field.
+        field: "servicio.id",
         headerName: "Servicio",
         width: 70,
-        defaultValue: "0",
+        defaultValue: "",
         form: {
-          type: "number",
+          type: "select",
           visible: true,
+          options: serviciosRows,
+          value: "id",
+          label: "nombre",
+          fullRow: true,
         },
       },
       {
@@ -384,8 +397,10 @@ export const becasGridConfig = {
         form: {
           type: "number",
           visible: true,
+          min: 0,
+          max: 3,
         },
       },
     ],
   },
-};
+});

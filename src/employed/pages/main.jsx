@@ -92,7 +92,7 @@ const gestionOptions = [
     {
         name: "Gestión Salud",
         icon: LocalHospitalIcon,
-        disabled: true,
+        route: "/Gestion-Salud",
         roles: [2, 5],
     },
     {
@@ -119,13 +119,13 @@ const reportOptions = [
     {
         name: "Reporte Prensa",
         icon: AssessmentIcon,
-        route: "/Prensa",
+        disabled: true,
         roles: [2, 5],
     },
     {
         name: "Reporte JPA",
         icon: GroupsIcon,
-        route: "/JPA",
+        disabled: true,
         roles: [2, 5],
     },
     {

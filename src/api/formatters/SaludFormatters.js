@@ -29,22 +29,22 @@ export const mapHorarioSalud = (horario) => ({
 });
 
 export const mapEstado = (turno) => ({
-  id_estado: turno.id,
+  id_estado_turno: turno.id,
   estado_turno: turno.estado_turno
 });
 
 export const mapTurnos = (turno) => ({
   id: turno.id,
   cuil_medico: turno.cuil_medico,
-  especialista: turno.especialista,
+  especialista: turno.especialista.replace(",",""),
   legajo: turno.legajo,
-  paciente: turno.paciente,
-  fecha_solicitud: turno.fecha_solicitud,
-  fecha_atencion:turno.fecha_atencion,
+  paciente: turno.paciente.replace(",",""),
+  fecha_solicitud: removerHoras(turno.fecha_solicitud),
+  fecha_atencion:removerHoras(turno.fecha_atencion),
   hora_atencion: turno.hora_atencion,
   asunto: turno.asunto,
   id_estado_turno: turno.estadosTurno.id,
-  estado: turno.estadosTurno.nombre
+  estado: turno.estadosTurno.estado_turno
 });
 
 function removerHoras(isoString) {

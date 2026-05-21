@@ -109,11 +109,10 @@ export function EmployedCalendar(){
     }, [personal]);
 
     const visibleHorarios = useMemo(
- 
-        () => (selectedEmploy === null ? allHorarios : allHorarios.filter((h) => h.cuil_especialista === selectedEmploy.cuil)),
+        
+        () => (selectedEmploy === null ? allHorarios : allHorarios.filter((h) => h.cuil_especialista === selectedEmploy)),
         [allHorarios, selectedEmploy]
     );
-
     const byDay = useMemo(() => {
     const map = DAYS.reduce((acc, day) => {
         acc[day.value] = [];
@@ -163,7 +162,7 @@ export function EmployedCalendar(){
                             />
                             {personal.map((e, i) => {
                                 const c = PALETTE[i % PALETTE.length];
-                                const active = selectedEmploy === e.cuil;
+                                const active = selectedEmploy?.cuil === e.cuil;
                                 
                                 return (
                                     <Chip

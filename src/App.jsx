@@ -35,8 +35,11 @@ import Prensa from "./shared/pages/prensa/Prensa";
 
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
 import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
+
 import EmployedHealth from "./employed/pages/health/EmployedHealth";
 import TurnBoardHealth from "./employed/pages/health/HealthTurns";
+import StudentHealth from "./shared/pages/health/healthStudent";
+
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
 export default function App() {
@@ -168,6 +171,15 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/Mi-Salud"
+              element={
+                <ProtectedRoute role={1}>
+                  <StudentHealth />
+                </ProtectedRoute>
+              }
+            />            
           </Routes>
         </MainLayout>
       </BrowserRouter>

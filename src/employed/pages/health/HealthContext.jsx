@@ -5,8 +5,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 
-import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as ModificarCurso, ModificaEspecialidad, ModificarPersonal, ObtenerCursosMedicos, ObtenerEspecialidades ,ObtenerEstadosTurno, ObtenerPersonalMedico, EliminarCursoMedico, ObtenerHorariosCompleto, ObtenerHorariosXCUIL, CrearHorario, ModificarHorario, EliminarHorario, ObtenerTurnos, RegistrarFalta, ObtenerFaltasXCUIL, CrearTurnos} from "../../../api/SaludService";
-import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado} from '../../../api/formatters/SaludFormatters';
+import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as ModificarCurso, ModificaEspecialidad, ModificarPersonal, ObtenerCursosMedicos, ObtenerEspecialidades ,ObtenerEstadosTurno, ObtenerPersonalMedico, EliminarCursoMedico, ObtenerHorariosCompleto, ObtenerHorariosXCUIL, CrearHorario, ModificarHorario, EliminarHorario, ObtenerTurnos, RegistrarFalta, ObtenerFaltasXCUIL, CrearTurnos, ModificarTurno, ObtenerTurnosActivos, ObtenerTurnosFinalizados, ObtenerTurnosCancelados} from "../../../api/SaludService";
+import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos} from '../../../api/formatters/SaludFormatters';
 import { Try } from '@mui/icons-material';
 import { ObtenerUsuariosXLegajo } from '../../../api/EmpleadoService';
 
@@ -207,6 +207,7 @@ export const HealthUsersProvider = ({ children }) => {
     const fetchEstadosTurno= useCallback(async () => {
         try {
             const data = await ObtenerEstadosTurno();  
+  
             setEstados(data.map(mapEstado));
         } catch {
             setEstados([]);
@@ -225,7 +226,12 @@ export const HealthUsersProvider = ({ children }) => {
     const [finalizadoTurnos, setFinalizadoTurnos] = useState([]);//ID:3
     const [canceladoTurnos, setCanceladoTurnos] = useState([]);//ID:4
     const [reprogramadoTurnos, setReprogramadoTurnos] = useState([]);//ID:5
-    const [laodingTurnos, setLoadingTurnos]  = useState(false);
+    const [loadingTurnos, setLoadingTurnos]  = useState(false);
+
+    //Para visuaizar los turnos pasados
+    const [loadingNoActivos,setLoadingNoActivos] = useState(false);
+    const [noActivosRows, setNoActivosRows] = useState([]);
+    const noActivosColumns = useMemo(() => buildColumns(EMPTY_TURNO, null,null), []);
 
     const openCreateTurnos = useCallback(() => {
         setUsuarioSelected(null);
@@ -243,10 +249,59 @@ export const HealthUsersProvider = ({ children }) => {
         setDialogOpen(true);
     }, []);
 
-    const fetchTurnosMedicos= useCallback(async () => {
+    const fetchTurnosFinalizados = useCallback(async () => {
+        setLoadingNoActivos(true);
+        try {
+            let data = await ObtenerTurnosFinalizados();
+            setNoActivosRows(generateRows(data.map(mapTurnos)));
+        } catch {
+            setNoActivosRows([]);
+        }
+        finally{
+            setLoadingNoActivos(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchTurnosFinalizados();
+    }, [fetchTurnosFinalizados]);
+
+    const fetchTurnosCancelados = useCallback(async () => {
+
+        try {
+            let data = await ObtenerTurnosCancelados(); 
+            setNoActivosRows(generateRows(data.map(mapTurnos)));
+        } catch {
+            setNoActivosRows([]);
+        }
+        finally{
+            setLoadingNoActivos(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchTurnosCancelados();
+    }, [fetchTurnosCancelados]);
+
+    const openShowNoActivos = useCallback((type) => {
+        setLoadingNoActivos(true);
+        setNoActivosRows([]);
+        if(type === "cancelados")fetchTurnosCancelados();
+        else fetchTurnosFinalizados();
+        
+        setDialogMode("show");
+        setDialogType(type);
+        setDialogError("");
+        setTimeout(() => setDialogOpen(true), 0);
+    }, [fetchTurnosCancelados,fetchTurnosFinalizados]);
+
+
+    const fetchTurnosMedicos = useCallback(async () => {
         setLoadingTurnos(true);
         try {
-            const data = await ObtenerTurnos();  
+            let data = await ObtenerTurnosActivos();  
+            data = data.map(mapTurnos);
+
             setAllTurnos(data);
 
             // 1. Crear arrays temporales vacíos
@@ -255,16 +310,16 @@ export const HealthUsersProvider = ({ children }) => {
             const enCurso = [];
             const finalizados = [];
             const cancelados = [];
-            const reprogramados = [];
+            const reprogramados = [];//No los deberia setear a finalizado y cancelado
 
             data.forEach(turno => {
                 // Reemplaza 'turno.idEstado' por la propiedad real de tu objeto (ej. turno.estadoId)
                 switch (turno.id_estado_turno) {
                     case 0: pendientes.push(turno); break;
                     case 1: asignados.push(turno); break;
-                    case 2: enCurso.push(turno); break;
-                    case 3: finalizados.push(turno); break;
-                    case 4: cancelados.push(turno); break;
+                    case 2: cancelados.push(turno); break;
+                    case 3: enCurso.push(turno); break;
+                    case 4: finalizados.push(turno); break;
                     case 5: reprogramados.push(turno); break;
                     default: break; // Por si llega un ID desconocido
                 }
@@ -293,52 +348,6 @@ export const HealthUsersProvider = ({ children }) => {
         fetchTurnosMedicos();
     }, [fetchTurnosMedicos]);
 
-    const handleTurnosSave = async () => {
-        setDialogSaving(true);
-        setDialogError("");
-        try {
-            if(dialogMode === "create" && !usuarioSelected){
-                setDialogError("Sin paciente asignado");
-                return;
-            }
-            const { id } = dialogData;
-            let id_nuevo = id === "" ? 0 : id;
-            const hoy = new Date();
-            const ISO = hoy.toLocaleDateString('sv-SE'); // 'sv-SE' devuelve siempre "AAAA-MM-DD"
-
-            const body = {
-                    id: id_nuevo,
-                    cuil_medico: dialogData.cuil,
-                    especialista: "Se define con el cuil",
-                    legajo:dialogMode === "create" ? usuarioSelected.legajo : dialogData.legajo, //Si es creacion debemos buscar antes a la persona
-                    paciente: dialogMode === "create" ? usuarioSelected.nombre_usuario : dialogData.paciente,
-
-                    fecha_solicitud:dialogMode === "create" ? `${ISO}T00:00:00`
-                    :( dialogData.fecha_solicitud
-                    ? `${dialogData.fecha_solicitud}T00:00:00`:new Date()),
-
-                    fecha_atencion: dialogData.fecha_atencion
-                    ? `${dialogData.fecha_atencion}T00:00:00`:new Date(),
-
-                    hora_atencion: dialogData.hora_atencion,
-                    asunto: dialogData.asunto,
-                    id_estado_turno:dialogData.id_estado,
-                    estado: "indiferente"
-                };
-
-            await CrearTurnos(body);
-            setDialogOpen(false);
-            setDialogData(EMPTY_TURNO);
-            fetchTurnosMedicos();
-            setSnackbarMsg(dialogMode === "create" ? "Turno Creado!":"Turno Actualizado!");
-            setSnackbarOpen(true);
-        } catch (err) {
-            setDialogError(err.message || "Ocurrió un error al guardar");
-        } finally {
-            setDialogSaving(false);
-        }
-    };
-
     const [usuarioSelected,setUsuarioSelected] = useState(null);
     const [loadingUsuario,setLoadingUsuario] = useState(false);
 
@@ -365,6 +374,248 @@ export const HealthUsersProvider = ({ children }) => {
     }, [])
     
     useEffect(() => { fetchUsuariosXlegajo(); }, [fetchUsuariosXlegajo]);
+
+    // SON LAS FUNCIONES PARA EL CONTRO LE TURNOS
+
+    // Envolvemos handleValidation en useCallback para que no cambie en cada render
+    const handleValidation = useCallback(() => {
+        if (dialogData.id_estado_turno >= 0 && dialogMode) {
+            if (dialogMode === "edit" && (!dialogData?.id || dialogData.id < 0)) return false;
+            if (dialogData?.legajo?.trim() === "" || dialogData?.asunto?.trim() === "") return false;
+
+            // Validaciones para estados específicos (Asignado, En Curso, Finalizado, Reprogramado)
+            if ([1, 2, 3, 5].includes(dialogData.id_estado_turno)) {
+                if (!dialogData?.cuil_medico?.trim() || !dialogData?.fecha_atencion?.trim() || !dialogData?.hora_atencion?.trim()) {
+                    return false; 
+                }
+            }
+            return true;
+        }
+        return false;
+    }, [dialogData, dialogMode]);
+
+     const handleTurnosChangeState = useCallback(async (id_turno_raw, id_estado_nuevo) => {
+        setDialogError("");
+        
+        // 1. Forzar que el ID sea siempre numérico para evitar fallas de tipos
+        const id_turno = Number(id_turno_raw);
+
+        try {
+            const foundTurn = allTurnos.find(item => item.id === id_turno);
+
+            // Validaciones iniciales
+            if (!foundTurn || foundTurn.id_estado_turno === id_estado_nuevo ) return;
+
+            const nombreActual = estadosTurno.find(item => item.id_estado_turno === id_estado_nuevo);
+  
+            // 2. Construir el objeto de actualización de forma INMUTABLE (con copia)
+            const turnoActualizado = { 
+                ...foundTurn, 
+                id_estado_turno: id_estado_nuevo,
+                estado:nombreActual.estado_turno
+            };
+
+            const body = {
+                id: id_turno,
+                cuil_medico: foundTurn.cuil_medico,
+                especialista: "Se define con el cuil",
+                legajo: foundTurn.legajo,
+                paciente: foundTurn.paciente,
+                fecha_solicitud: foundTurn.fecha_solicitud ? `${foundTurn.fecha_solicitud}T00:00:00` : new Date(),
+                fecha_atencion: foundTurn.fecha_atencion ? `${foundTurn.fecha_atencion}T00:00:00` : new Date(),
+                hora_atencion: foundTurn.hora_atencion?.trim() === "" ? null : foundTurn.hora_atencion?.trim(),
+                asunto: foundTurn.asunto,
+                estadosTurno: {
+                    id: id_estado_nuevo,
+                    estado_turno: "indiferente"
+                }
+            };
+            
+            // Helper corregido para usar comparaciones numéricas estrictas (id_turno)
+            const actualizarListaPorEstado = (estado, operacion, turno) => {
+                const selector = operacion === 'sacar' 
+                    ? prev => prev.filter(t => t.id !== id_turno) 
+                    : prev => [...prev, turno];
+
+                switch (estado) {
+                    case 0: setPendienteTurnos(selector); break;
+                    case 1: setAsignadosTurnos(selector); break;
+                    case 2: setCanceladoTurnos(selector); break;
+                    case 3: setEnCursoTurnos(selector); break;
+                    case 4: setFinalizadoTurnos(selector); break;
+                    case 5: setReprogramadoTurnos(selector); break;
+                    default: console.warn(`Estado no reconocido: ${estado}`);
+                }
+            };
+
+            const estadoAnterior = foundTurn.id_estado_turno;
+
+            // 3. CAMBIO VISUAL OPTIMISTA (Usando el objeto inmutable nuevo)
+            actualizarListaPorEstado(estadoAnterior, 'sacar');
+            actualizarListaPorEstado(id_estado_nuevo, 'agregar', turnoActualizado);
+            
+            // Actualizar la lista global en memoria
+            setAllTurnos(prev => prev.map(t => t.id === id_turno ? turnoActualizado : t));
+
+            // 4. PETICIÓN A LA API
+            try {
+                await ModificarTurno(id_turno, body);
+                setSnackbarMsg("Turno Actualizado!");
+                setSnackbarOpen(true);
+            } catch {
+                
+                // REVERTIMOS SI FALLA LA API (Devolvemos el foundTurn original)
+                actualizarListaPorEstado(id_estado_nuevo, 'sacar');
+                actualizarListaPorEstado(estadoAnterior, 'agregar', foundTurn);
+                setAllTurnos(prev => prev.map(t => t.id === id_turno ? foundTurn : t));
+                
+                setSnackbarMsg("Error al guardar en el servidor. El cambio fue revertido.");
+                setSnackbarOpen(true);
+            }            
+        } catch (err) {
+            setDialogError(err.message || "Ocurrió un error al guardar");
+        } 
+    }, [
+        allTurnos,
+        estadosTurno,
+        setPendienteTurnos, 
+        setAsignadosTurnos, 
+        setEnCursoTurnos, 
+        setFinalizadoTurnos, 
+        setCanceladoTurnos, 
+        setReprogramadoTurnos, 
+        setAllTurnos, 
+        setSnackbarMsg, 
+        setSnackbarOpen
+    ]);
+    const handleTurnosSave = useCallback(async () => {
+        setDialogSaving(true);
+        setDialogError("");
+
+        try {
+            if (dialogMode === "create" && !usuarioSelected) {
+                setDialogError("Sin paciente asignado");
+                setDialogSaving(false);
+                return;
+            }
+            if (dialogData.id_estado_turno === 1 && !handleValidation()) {
+                setDialogError("Faltan valores");
+                setDialogSaving(false);
+                return;
+            }
+
+            const id_nuevo = dialogData.id === "" ? 0 : Number(dialogData.id);
+            const hoy = new Date();
+            const ISO = hoy.toLocaleDateString('sv-SE');
+
+            // Construcción del objeto que se enviará al servidor
+            const body = {
+                id: id_nuevo,
+                cuil_medico: dialogData.cuil_medico?.trim() === "" ? null:dialogData.cuil_medico,
+                especialista: "Se define con el cuil",
+                legajo: dialogMode === "create" ? usuarioSelected.legajo : dialogData.legajo,
+                paciente: dialogMode === "create" ? usuarioSelected.nombre_usuario : dialogData.paciente,
+                fecha_solicitud: dialogMode === "create" ? `${ISO}T00:00:00` : (dialogData.fecha_solicitud ? `${dialogData.fecha_solicitud}T00:00:00` : new Date()),
+                fecha_atencion: dialogData.fecha_atencion ? `${dialogData.fecha_atencion}T00:00:00` : null,
+                hora_atencion: dialogData.hora_atencion.trim() === "" ? null : dialogData.hora_atencion.trim(),
+                asunto: dialogData.asunto,
+                estadosTurno: {
+                    id: dialogData.id_estado_turno,
+                    estado_turno: "indiferente"
+                }
+            };
+            
+            // Helper para inyectar/remover turnos de los estados locales de React
+            const actualizarListaPorEstado = (estado, operacion, turno) => {
+                const selector = operacion === 'sacar' 
+                    ? prev => prev.filter(t => t.id !== turno.id) 
+                    : prev => [...prev, turno];
+
+                switch (estado) {
+                    case 0: setPendienteTurnos(selector); break;
+                    case 1: setAsignadosTurnos(selector); break;
+                    case 2: setCanceladoTurnos(selector); break;
+                    case 3: setEnCursoTurnos(selector); break;
+                    case 4: setFinalizadoTurnos(selector); break;
+                    case 5: setReprogramadoTurnos(selector); break;
+                    default: console.warn(`Estado no reconocido: ${estado}`);
+                }
+            };
+
+            if (dialogMode === "create") {
+                // 1. Guardamos en la base de datos primero (para obtener el ID real que autogenera el backend)
+                const respuestaBackend = await CrearTurnos(body);
+                
+                // Si tu backend retorna el objeto creado con su ID, usalo. Si no, usa el body.
+                const turnoCreadoCompleto = respuestaBackend?.data || { ...body, id: respuestaBackend?.id || Date.now() };
+                turnoCreadoCompleto.id_estado_turno = dialogData.id_estado_turno; // Asegurar propiedad para lógica local
+
+                // 2. Insertamos en el estado local de React de forma instantánea sin hacer FETCH
+                actualizarListaPorEstado(dialogData.id_estado_turno, 'agregar', turnoCreadoCompleto);
+                setAllTurnos(prev => [...prev, turnoCreadoCompleto]);
+
+            } else if (dialogMode === "edit") {
+               
+                // En edición conocemos el ID anterior, buscamos el estado viejo antes de actualizarlo
+                const turnoPrevio = allTurnos.find(t => t.id === id_nuevo);
+                const estadoAnterior = turnoPrevio ? turnoPrevio.id_estado_turno : dialogData.id_estado_turno;
+
+                const nombreActual = estadosTurno.find(item => item.id_estado_turno === dialogData.id_estado_turno);
+                const turnoModificadoCompleto = { ...dialogData,
+                id_estado_turno: dialogData.id_estado_turno,
+                estado:nombreActual.estado_turno};
+
+                // 1. Actualización en memoria (Sacamos del estado viejo, agregamos al nuevo)
+                actualizarListaPorEstado(estadoAnterior, 'sacar', { id: id_nuevo });
+                actualizarListaPorEstado(dialogData.id_estado_turno, 'agregar', turnoModificadoCompleto);
+                setAllTurnos(prev => prev.map(t => t.id === id_nuevo ? turnoModificadoCompleto : t));
+
+                // 2. Guardamos en la base de datos en segundo plano
+                try {
+                    await ModificarTurno(id_nuevo, body);
+                } catch (apiError) {
+                    console.error("Error al modificar, revirtiendo estado...", apiError);
+                    // Si la API falla, hacemos el rollback (retorno al estado original en UI)
+                    actualizarListaPorEstado(dialogData.id_estado_turno, 'sacar', { id: id_nuevo });
+                    if (turnoPrevio) {
+                        actualizarListaPorEstado(estadoAnterior, 'agregar', turnoPrevio);
+                        setAllTurnos(prev => prev.map(t => t.id === id_nuevo ? turnoPrevio : t));
+                    }
+                    throw apiError; // Lanza el error al catch principal para disparar el DialogError
+                }
+            }
+
+            // Éxito: Limpieza de formulario y feedback visual
+            setDialogOpen(false);
+            setDialogData(EMPTY_TURNO);
+            setSnackbarMsg(dialogMode === "create" ? "Turno Creado!" : "Turno Actualizado!");
+            setSnackbarOpen(true);
+
+        } catch (err) {
+            setDialogError(err.message || "Ocurrió un error al guardar");
+        } finally {
+            setDialogSaving(false);
+        }
+    }, [
+        dialogMode, 
+        dialogData, 
+        usuarioSelected, 
+        allTurnos,
+        estadosTurno,
+        handleValidation, 
+        setPendienteTurnos,
+        setAsignadosTurnos,
+        setEnCursoTurnos,
+        setFinalizadoTurnos,
+        setCanceladoTurnos,
+        setReprogramadoTurnos,
+        setAllTurnos,
+        setDialogOpen,
+        setDialogData,
+        setSnackbarMsg,
+        setSnackbarOpen
+    ]);
+
 
     // SECCION ESPECIALIDADES
     const [especialidades,setEspecialidades] = useState([]);
@@ -808,9 +1059,14 @@ export const HealthUsersProvider = ({ children }) => {
             cuilFaltas, SetCuilFaltas,faltasRows,faltasColumns,loadingFaltas,
             // ABM de Turnos
             estadosTurno,
-            allTurnos,pendienteTurnos,asignadoTurnos,enCursoTurnos,finalizadoTurnos,canceladoTurnos,reprogramadoTurnos,laodingTurnos,//Listados de turnos
-            openCreateTurnos,openEditTurnos,handleTurnosSave,//Operaciones
+            pendienteTurnos,asignadoTurnos,enCursoTurnos,reprogramadoTurnos,loadingTurnos,noActivosRows,noActivosColumns,
+            //Probablemente no se usen
+            finalizadoTurnos,canceladoTurnos,//Listados de turnos
+
+            openCreateTurnos,openEditTurnos,handleTurnosSave,handleTurnosChangeState ,//Operaciones
             setUsuarioSelected,usuarioSelected,loadingUsuario,fetchUsuariosXlegajo, //Usuarios para nuevo turno
+
+            fetchTurnosFinalizados,fetchTurnosCancelados,loadingNoActivos,openShowNoActivos, // Para los turnos que esten ya finalizados o cancelados
             // ABM de Especialidades
             especialidades,especialidadesActivas,especialidadesRows,especialidadesColumns,loadingEspecialidades,openCreateEspecialidades,openEditEspecialidades,handleEspecialidadesSave,
             //ABM de Personal

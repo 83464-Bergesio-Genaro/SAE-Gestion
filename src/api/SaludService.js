@@ -70,7 +70,6 @@ export async function CrearCurso(body){
   return RequestAPI("/api/Salud/CrearCursoMedico/", "POST", body);
 }
 export async function ModificarCurso(id,body){
-  console.log(body);
     return RequestAPI('/api/Salud/ModificarCursoMedicos/'+encodeURIComponent(id), "PUT", body);
 }
 export async function EliminarCursoMedico(id){
@@ -106,9 +105,30 @@ export async function ObtenerEstadosTurno(){
     return RequestAPI('/api/Salud/ObtenerEstadosTurno/',"GET");
 }
 // TURNO MEDICOS
+
+export async function ObtenerTurnosEstudiante(legajo){
+    return RequestAPI('/api/Salud/ObtenerTurnosXLegajo/'+encodeURIComponent(legajo),"GET");
+}
+//ALL
 export async function ObtenerTurnos(){
     return RequestAPI('/api/Salud/ObtenerTurnosMedicos/',"GET");
 }
+//Estados 0,1,3,5
+export async function ObtenerTurnosActivos(){
+    return RequestAPI('/api/Salud/ObtenerTurnosMedicosActivos/',"GET");
+}
+
+//Estado 4
+export async function ObtenerTurnosFinalizados(){
+    return RequestAPI('/api/Salud/ObtenerTurnosMedicosFinalizados/',"GET");
+}
+//Estado 2
+export async function ObtenerTurnosCancelados(){
+    return RequestAPI('/api/Salud/ObtenerTurnosMedicosCancelado/',"GET");
+}
 export async function CrearTurnos(body){
     return RequestAPI('/api/Salud/CrearTurnoMedico/', "POST", body);
+}
+export async function ModificarTurno(id,body){
+    return RequestAPI('/api/Salud/ModificarTurnoMedico/'+encodeURIComponent(id), "PUT", body);
 }

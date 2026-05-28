@@ -483,7 +483,7 @@ export function TurnGrid(){
     const [isDragOver, setIsDragOver] = useState(false);
 
     const {
-        handleTurnosChangeState,openShowNoActivos
+        handleTurnosChangeState,openShowNoActivos,loadingTurnos
     } = useHealthUser();
 
     const handleDrop = useCallback(async (e, nuevoEstado) => {
@@ -582,20 +582,13 @@ export function TurnGrid(){
           }}
         >
           
-          {listadoTurnos && listadoTurnos.length === 0  && estadoActual !== 2 && estadoActual !== 4 &&(
+          {loadingTurnos && listadoTurnos  &&(
             <Grid width={"100%"} container alignItems="center" justifyContent="center">
-                <Typography 
-                    variant="h6" 
-                    fontWeight={700}
-                    marginY={2}
-                    textAlign="center"
-                >
-                    SIN TURNOS EN ESTE ESTADO
-                </Typography>
+                <SAESpinner></SAESpinner>
             </Grid>
 
           )}
-          {
+          {!loadingTurnos && listadoTurnos && estadoActual !== 2 && estadoActual !== 4 &&
           //ESTAS SON LAS TARJETAS QUE VES ADENTRO DEL COMPONENTE
           listadoTurnos.map((turno) => (
             <Card 

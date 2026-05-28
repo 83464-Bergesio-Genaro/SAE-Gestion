@@ -43,6 +43,9 @@ export async function RequestAPI(endpoint,action, body=null) {
   return res.json();
 }
 // ESPECIALIDADES
+export async function ObtenerEspecialidadesActivas(){
+    return RequestAPI('/api/Salud/ObtenerEspecialidadesActivas/',"GET");
+}
 export async function ObtenerEspecialidades(){
     return RequestAPI('/api/Salud/ObtenerEspecialidadesCompleto/',"GET");
 }

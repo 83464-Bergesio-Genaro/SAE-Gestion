@@ -25,7 +25,8 @@ export const mapHorarioSalud = (horario) => ({
   especialista : horario.especialista.replace(",",""),
   activo: true,
   id_especialidad:horario.especialidad.id,
-  nombre_especialidad:horario.especialidad.nombre
+  nombre_especialidad:horario.especialidad.nombre,
+  descripcion_especialidad:horario.especialidad.descripcion
 });
 
 export const mapEstado = (turno) => ({

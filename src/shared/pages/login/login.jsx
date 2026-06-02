@@ -12,10 +12,13 @@ import {
   Typography,
   MenuItem,
   Alert,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import SAEButton from "../../components/buttons/SAEButton";
 import SAETextField from "../../components/inputs/SAETextField";
 import SAESpinner from "../../components/spinner/SAESpinner";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const carreras = [
   { value: "sistemas", label: "Sistemas" },
@@ -33,11 +36,15 @@ export default function Login() {
   const baseUrl = import.meta.env.BASE_URL;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = useState({ legajo: false, password: false });
+  const [fieldErrors, setFieldErrors] = useState({
+    legajo: false,
+    password: false,
+  });
   const { logout, login, user } = useAuth();
   const [legajo, setLegajo] = useState("");
   const [dominio, setDominio] = useState("sistemas");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!validateForm()) return;
@@ -102,11 +109,21 @@ export default function Login() {
           minHeight: "100vh",
         }}
       >
-        <Paper elevation={3} sx={{ p: 4, textAlign: "center", borderRadius: 3 }}>
-          <Typography variant="h5" sx={{ mb: 3, fontWeight: "bold", color: "#153b6f" }}>
+        <Paper
+          elevation={3}
+          sx={{ p: 4, textAlign: "center", borderRadius: 3 }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ mb: 3, fontWeight: "bold", color: "#153b6f" }}
+          >
             Ya hay una sesión activa
           </Typography>
-          <SAEButton variant="contained" onClick={logout} sx={{ minWidth: 150 }}>
+          <SAEButton
+            variant="contained"
+            onClick={logout}
+            sx={{ minWidth: 150 }}
+          >
             Cerrar Sesión
           </SAEButton>
         </Paper>
@@ -153,7 +170,8 @@ export default function Login() {
             width: { xs: 85, md: 115 },
             height: { xs: 85, md: 115 },
             opacity: 0,
-            animation: "spinIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards",
+            animation:
+              "spinIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards",
             "@keyframes spinIn": {
               from: { opacity: 0, transform: "rotate(-360deg) scale(0.4)" },
               to: { opacity: 1, transform: "rotate(0deg) scale(1)" },
@@ -205,11 +223,19 @@ export default function Login() {
           <Stack spacing={2.5}>
             {/* Email Field */}
             <Box>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems="center">
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                alignItems="center"
+              >
                 <SAETextField
                   placeholder="Legajo"
                   value={legajo}
-                  onChange={(e) => { setLegajo(e.target.value); setFieldErrors((f) => ({ ...f, legajo: false })); setError(""); }}
+                  onChange={(e) => {
+                    setLegajo(e.target.value);
+                    setFieldErrors((f) => ({ ...f, legajo: false }));
+                    setError("");
+                  }}
                   onKeyPress={handleKeyPress}
                   disabled={isLoading}
                   size="small"
@@ -217,7 +243,9 @@ export default function Login() {
                   error={fieldErrors.legajo}
                   sx={{ flex: 1 }}
                 />
-                <Typography sx={{ fontWeight: 600, color: "#5a6f8f", px: 1 }}>@</Typography>
+                <Typography sx={{ fontWeight: 600, color: "#5a6f8f", px: 1 }}>
+                  @
+                </Typography>
                 <SAETextField
                   select
                   value={dominio}
@@ -241,15 +269,31 @@ export default function Login() {
 
             {/* Password Field */}
             <SAETextField
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Contraseña"
               value={password}
-              onChange={(e) => { setPassword(e.target.value); setFieldErrors((f) => ({ ...f, password: false })); setError(""); }}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setFieldErrors((f) => ({ ...f, password: false }));
+                setError("");
+              }}
               onKeyPress={handleKeyPress}
               disabled={isLoading}
               size="small"
               fullWidth
               error={fieldErrors.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             {/* Login Button */}
@@ -278,10 +322,24 @@ export default function Login() {
         </Paper>
       </Container>
 
-      <Dialog open={isLoading} slotProps={{ paper: { sx: { borderRadius: 3, p: 2 } } }}>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, px: 5, py: 3 }}>
+      <Dialog
+        open={isLoading}
+        slotProps={{ paper: { sx: { borderRadius: 3, p: 2 } } }}
+      >
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            px: 5,
+            py: 3,
+          }}
+        >
           <SAESpinner size="M" />
-          <Typography sx={{ color: "#5a6f8f", fontWeight: 500 }}>Ingresando...</Typography>
+          <Typography sx={{ color: "#5a6f8f", fontWeight: 500 }}>
+            Ingresando...
+          </Typography>
         </DialogContent>
       </Dialog>
     </Box>

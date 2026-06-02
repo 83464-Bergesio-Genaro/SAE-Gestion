@@ -27,7 +27,8 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import emailjs from "@emailjs/browser";
 import { useState, useRef } from "react";
 import SAEButton from "../../components/buttons/SAEButton";
-import checkImage from "../../../../public/images/logos/comprobado.png";
+
+const checkImage = `${import.meta.env.BASE_URL}images/logos/comprobado.png`;
 
 export default function SharedJPAParticipar() {
   const colectivos = [
@@ -184,8 +185,8 @@ export default function SharedJPAParticipar() {
     setCarrera(event.target.value);
   };
   return (
-    <>
-      <Container>
+    <Box p={4}>
+      <Container >
         <Grid container spacing={0}>
           <Paper
             style={{
@@ -500,6 +501,6 @@ export default function SharedJPAParticipar() {
           </SAEButton>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 }

@@ -31,3 +31,21 @@ export async function obtenerTiposDocumento() {
   if (!res.ok) throw new Error(`Error ${res.status}`);
   return res.json();
 }
+
+export async function obtenerPerfiles() {
+  const res = await fetch(
+    `${appConfig.apiUrl}/api/Herramientas/ObtenerPerfiles`,
+    getHeaders("GET"),
+  );
+  
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  return res.json();
+}
+export async function obtenerCarreras() {
+  const res = await fetch(
+    `${appConfig.apiUrl}/api/Herramientas/ObtenerCarreras`,
+    getHeaders("GET"),
+  );
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  return res.json();
+}

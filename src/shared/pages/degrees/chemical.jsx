@@ -18,7 +18,7 @@ import {
 import "./degrees.css";
 
 export default function SharedJPAQuimica() {
-  const imageDirBanner = "/images/degrees/IngQuimicaBanner.png";
+  const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngQuimicaBanner.png`;
   const materias1Año = [
     "Integración I",
     "Álgebra y geometría analítica",

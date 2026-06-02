@@ -18,7 +18,7 @@ import {
 import "./degrees.css";
 
 export default function SharedJPAElectrical() {
-  const imageDirBanner = "/images/degrees/IngElectronicaBanner.png";
+  const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngElectronicaBanner.png`;
 
   const materias1Año = [
     "Fundamentos de Informática",

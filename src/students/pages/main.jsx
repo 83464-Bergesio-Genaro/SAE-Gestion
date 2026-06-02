@@ -129,6 +129,7 @@ function DashboardCard({ item, onClick }) {
 }
 
 export default function StudentMain() {
+  const baseUrl = import.meta.env.BASE_URL;
   const { user } = useAuth();
 
   const visibleGestion = useMemo(
@@ -207,7 +208,7 @@ export default function StudentMain() {
               "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%)",
             color: "white",
             backgroundImage:
-              "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('/images/carrousel/EntradaUTN.jpg')",
+              `linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('${baseUrl}images/carrousel/EntradaUTN.jpg')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -262,7 +263,7 @@ export default function StudentMain() {
               width: 220,
               height: 220,
               borderRadius: "32px",
-              backgroundImage: "url('/images/principal/logoUTNrotado.png')",
+              backgroundImage: `url('${baseUrl}images/principal/logoUTNrotado.png')`,
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
               backgroundSize: "contain",

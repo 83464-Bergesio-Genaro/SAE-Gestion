@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import ObtenerTokenJWT from "../../api/AuthService";
-
+import {appConfig} from "../../config/appConfig"
 const AuthContext = createContext();
 
 async function hashPassword(password) {
@@ -59,7 +59,7 @@ const [user, setUser] = useState(() => {
               email : result.data.legajo_armado??"",
               nombre: result.data.nombre_usuario??"",
               id_perfil: result.data.id_perfil??0,
-              expiration: Date.now() + 30000000
+              expiration: Date.now() + appConfig.sessionTimeout
           };
 
           localStorage.setItem("session", JSON.stringify(session));
@@ -76,7 +76,7 @@ const [user, setUser] = useState(() => {
       const parsed = JSON.parse(stored);
       const extended = {
         ...parsed,
-        expiration: Date.now() + 30000000
+        expiration: Date.now() + appConfig.sessionTimeout
       };
       localStorage.setItem("session", JSON.stringify(extended));
       setUser(extended);
@@ -88,7 +88,7 @@ const [user, setUser] = useState(() => {
     setUser(null);
     setSessionExpired(false);
     localStorage.removeItem("session");
-    window.location.replace("/login");
+    globalThis.location.replace(`${import.meta.env.BASE_URL}login`);
   };
 
   return (

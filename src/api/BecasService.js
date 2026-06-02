@@ -16,12 +16,13 @@ function getToken() {
 function getHeaders(method, body) {
   const token = getToken();
   const headers = {
-    "Content-Type": "application/json",
     "ngrok-skip-browser-warning": "true",
   };
+  if (!(body instanceof FormData)) headers["Content-Type"] = "application/json";
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const options = { method, headers };
-  if (body) options.body = JSON.stringify(body);
+  if (body)
+    options.body = body instanceof FormData ? body : JSON.stringify(body);
   return options;
 }
 
@@ -143,5 +144,77 @@ export async function CrearBecarioServicio(id_becario, id_servicio) {
   return RequestAPI(
     `/api/Beca/CrearBecarioServicio/${encodeURIComponent(id_becario)}/${encodeURIComponent(id_servicio)}`,
     "POST",
+  );
+}
+
+export async function listarDocumentacionXLegajo(legajo) {
+  return RequestAPI(
+    `/api/Estudiante/ListarDocumentacionXLegajo/${encodeURIComponent(legajo)}`,
+    "GET",
+  );
+}
+
+export async function descargarDocumentacionXId(id) {
+  const res = await fetch(
+    `${appConfig.apiUrl}/api/Estudiante/DescargarDocumentacionXId/${encodeURIComponent(id)}`,
+    getHeaders("GET"),
+  );
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+
+  const contentType = (res.headers.get("Content-Type") || "").toLowerCase();
+
+  if (contentType.includes("application/json")) {
+    return res.json();
+  }
+
+  if (
+    contentType.startsWith("image/") ||
+    contentType.includes("application/pdf")
+  ) {
+    const blob = await res.blob();
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    const disposition = res.headers.get("Content-Disposition") || "";
+    const fileNameMatch = disposition.match(
+      /filename\*?=(?:UTF-8''|"?)([^";]+)/i,
+    );
+    const fileName = fileNameMatch?.[1]
+      ? decodeURIComponent(fileNameMatch[1].replace(/"/g, ""))
+      : "documento";
+    const extension = contentType.includes("application/pdf")
+      ? "pdf"
+      : contentType.split("/")[1] || "jpg";
+
+    return {
+      id,
+      nombre_documento: fileName,
+      datos_documento: dataUrl,
+      extension,
+    };
+  }
+
+  throw new Error("Formato de respuesta no soportado");
+}
+
+export async function crearDocumentoEstudiante(id_tipo_documento, archivo) {
+  const body = new FormData();
+  body.append("archivo", archivo);
+
+  return RequestAPI(
+    `/api/Estudiante/CrearDocumentoEstudiante/${encodeURIComponent(id_tipo_documento)}`,
+    "POST",
+    body,
+  );
+}
+
+export async function eliminarDocumentoEstudiante(id_documento) {
+  return RequestAPI(
+    `/api/Estudiante/EliminarDocumentoEstudiante/${encodeURIComponent(id_documento)}`,
+    "DELETE",
   );
 }

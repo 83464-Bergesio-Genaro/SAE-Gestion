@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  DialogContentText,
   FormControlLabel,
   Divider,
   FormControl,
@@ -34,29 +35,47 @@ import { SCHOLARSHIP_STRINGS } from "./scholarship.string";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAESwitch from "../../../shared/components/buttons/SAESwitch";
-
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   FileUpload,
   AddCircleOutline,
   ExpandMore,
-  Close,
+  Delete,
   AttachMoney,
   Diversity3,
   School,
 } from "@mui/icons-material";
 
+import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import ScholarshipsForm from "./scholarshipsForm";
+
 import {
-  ObtenerProyectosInvestigacion,
-  ObtenerServiciosInternos,
-  CrearBecarioEconomica,
-  CrearBecarioSAE,
-  CrearBecarioInvestigacion,
-  CrearBecarioServicio,
   ObtenerBecariosXLegajo,
   ObtenerBecariosEconomicaXLegajo,
   ObtenerBecariosServiciosXLegajo,
   ObtenerBecariosInvestigacionXLegajo,
+  listarDocumentacionXLegajo,
+  descargarDocumentacionXId,
+  eliminarDocumentoEstudiante,
+  crearDocumentoEstudiante,
 } from "../../../api/BecasService";
+
+import { obtenerTiposDocumento } from "../../../api/HerramientasService";
+
+import {
+  INITIAL_PREVIEW,
+  isPdfDocument,
+  MAX_SIZE_BYTES,
+  MAX_SIZE_MB,
+  construirNombre,
+  obtenerApellidoDesdeNombre,
+  obtenerCarreraDesdeEmail,
+} from "./scholarship.utils";
+import {
+  REQUERID_DOCUMENTS,
+  ECONOMIC_DOCUMENTS,
+  ECONOMIC_OPTIONAL_DOCUMENTS,
+} from "./scholarship.configs";
 
 const C = SCHOLARSHIP_STRINGS;
 
@@ -137,27 +156,12 @@ const formatDate = (dateValue) => {
   return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString();
 };
 
-// Arma el estado inicial del formulario.
-// Si ya existe un becario, precarga sus datos; si no, usa los datos del usuario logueado.
-// Además limpia tipoBeca y beca para que cada nueva solicitud arranque vacía.
-const getInitialFormBeca = (user, becarioActual = null) => ({
-  id: becarioActual?.id ?? 0,
-  legajo: becarioActual?.legajo ?? user?.email ?? "",
-  nombre_becario: becarioActual?.nombre_becario ?? user?.nombre ?? "",
-  alquila: becarioActual?.alquila ?? true,
-  fecha_solicitud: becarioActual?.fecha_solicitud ?? "",
-  aceptado_inicio: becarioActual?.aceptado_inicio ?? false,
-  puede_pagarle: becarioActual?.puede_pagarle ?? false,
-  activo: becarioActual?.activo ?? true,
-  anio_beca: becarioActual?.anio_beca ?? new Date().getFullYear(),
-  id_becario_previo: becarioActual?.id_becario_previo ?? null,
-  tipoBeca: "",
-  beca: null,
-});
-
 export default function Scholarships() {
+  function closePreview() {
+    setPreview((prev) => ({ ...prev, open: false }));
+  }
   const { user } = useAuth();
-
+  const perfilIncompleto = user?.datosCompletos === false;
   // Mensaje flotante para informar éxito, advertencias o errores.
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -170,17 +174,20 @@ export default function Scholarships() {
   const [becarioActual, setBecarioActual] = useState(null);
   // Loading general de pantalla: se usa durante la carga inicial.
   const [loading, setLoading] = useState(true);
-  // Loading específico del formulario: se activa cuando el usuario toca Guardar.
-  const [saving, setSaving] = useState(false);
   // Lista normalizada de becas para pintar las cards.
   const [misBecas, setMisBecas] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [becaSeleccionada, setBecaSeleccionada] = useState(null);
-  // Estado del formulario del Dialog.
-  // Guarda datos del becario y también la beca/proyecto/servicio seleccionado.
-  const [formBeca, setFormBeca] = useState(() => getInitialFormBeca(user));
-  const [proyectosRows, setProyectosRows] = useState([]);
-  const [serviciosRows, setServiciosRows] = useState([]);
+  const [documentos, setDocumentos] = useState(REQUERID_DOCUMENTS); // lista general de documentos cargados
+  const [documentosEconomica, setDocumentosEconomica] = useState(
+    ECONOMIC_DOCUMENTS.concat(ECONOMIC_OPTIONAL_DOCUMENTS),
+  ); // documentos específicos para beca económica
+
+  const [preview, setPreview] = useState(INITIAL_PREVIEW);
+
+  const [cbu, setCbu] = useState("");
+
+  const [openPopup, setOpenPopup] = useState(false);
+  const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
 
   // Helper para no repetir setSnackbar en cada try/catch.
   const showSnackbar = useCallback((message, severity = "success") => {
@@ -188,28 +195,64 @@ export default function Scholarships() {
   }, []);
 
   // Carga los proyectos disponibles para la beca de investigación.
-  const cargarProyectosInvestigacion = useCallback(async () => {
-    try {
-      const data = await ObtenerProyectosInvestigacion();
-      setProyectosRows(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setProyectosRows([]);
-      console.error("Error al cargar proyectos de investigación:", err);
-    }
-  }, []);
-
-  // Carga los servicios disponibles para la beca de servicio.
-  const cargarServiciosInternos = useCallback(async () => {
-    try {
-      const data = await ObtenerServiciosInternos();
-      setServiciosRows(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setServiciosRows([]);
-      console.error("Error al cargar servicios internos:", err);
-    }
-  }, []);
 
   // Normaliza las respuestas de la API porque vienen como objeto único o como {} cuando no existe beca.
+  const cargarTiposDocumento = useCallback(async () => {
+    try {
+      const data = await obtenerTiposDocumento();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error("Error al obtener tipos de documento", error);
+      return [];
+    }
+  }, []);
+
+  const subirDocumentoEstudiante = useCallback(
+    async (idTipoDocumento, archivo) => {
+      const documentoGuardado = await crearDocumentoEstudiante(
+        idTipoDocumento,
+        archivo,
+      );
+
+      setDocumentos((prev) =>
+        prev.map((doc) =>
+          Number(doc.id_tipo_documento) === Number(idTipoDocumento)
+            ? {
+                ...doc,
+                archivo: documentoGuardado.archivo,
+                archivoNombre:
+                  documentoGuardado.nombre_completo_documento ??
+                  documentoGuardado.nombre_documento,
+                subido: true,
+                id_archivo: documentoGuardado.id,
+                extension: documentoGuardado.extension ?? doc.extension,
+              }
+            : doc,
+        ),
+      );
+
+      setDocumentosEconomica((prev) =>
+        prev.map((doc) =>
+          Number(doc.id_tipo_documento) === Number(idTipoDocumento)
+            ? {
+                ...doc,
+                archivo: documentoGuardado.archivo,
+                archivoNombre:
+                  documentoGuardado.nombre_completo_documento ??
+                  documentoGuardado.nombre_documento,
+                subido: true,
+                id_archivo: documentoGuardado.id,
+                extension: documentoGuardado.extension ?? doc.extension,
+              }
+            : doc,
+        ),
+      );
+
+      return documentoGuardado;
+    },
+    [],
+  );
+
   const normalizarBecas = useCallback((economica, servicio, investigacion) => {
     return [
       isValidObjectResponse(economica) && {
@@ -271,129 +314,279 @@ export default function Scholarships() {
     }
   }, [normalizarBecas, showSnackbar, user?.email]);
 
+  const handleArchivoChange = async (e, item) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const extensionArchivo = `.${file.name.split(".").pop().toLowerCase()}`;
+
+    const extensionesPermitidas = item.extension
+      .split(",")
+      .map((ext) => ext.trim().toLowerCase());
+
+    if (!extensionesPermitidas.includes(extensionArchivo)) {
+      alert(`Solo se permiten archivos: ${item.extension}`);
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_SIZE_BYTES) {
+      alert(`El archivo no puede superar los ${MAX_SIZE_MB} MB.`);
+      e.target.value = "";
+      return;
+    }
+
+    const nuevoNombre = construirNombre(
+      item.formatoNombre,
+      {
+        legajo: user.legajo,
+        apellido: obtenerApellidoDesdeNombre(user.nombre),
+        carrera: obtenerCarreraDesdeEmail(user.email),
+      },
+      extensionArchivo,
+    );
+
+    const archivoRenombrado = new File([file], nuevoNombre, {
+      type: file.type,
+      lastModified: file.lastModified,
+    });
+
+    let archivoGuardado;
+
+    try {
+      setLoading(true);
+      archivoGuardado = await crearDocumentoEstudiante(
+        item.id_tipo_documento,
+        archivoRenombrado,
+      );
+      setSnackbar({
+        open: true,
+        message: "Archivo subido con éxito",
+        severity: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: "Error al subir el archivo",
+        severity: "error",
+      });
+      console.error("Error al subir el archivo:", error);
+    } finally {
+      setLoading(false);
+    }
+
+    setDocumentos((prev) =>
+      prev.map((doc) =>
+        Number(doc.id_tipo_documento) === Number(item.id_tipo_documento)
+          ? {
+              ...doc,
+              archivo: archivoGuardado,
+              archivoNombre: archivoGuardado.nombre_documento,
+              subido: true,
+              id_archivo: archivoGuardado.id,
+            }
+          : doc,
+      ),
+    );
+
+    setDocumentosEconomica((prev) =>
+      prev.map((doc) =>
+        Number(doc.id_tipo_documento) === Number(item.id_tipo_documento)
+          ? {
+              ...doc,
+              archivo: archivoGuardado,
+              archivoNombre: archivoGuardado.nombre_documento,
+              subido: true,
+              id_archivo: archivoGuardado.id,
+            }
+          : doc,
+      ),
+    );
+    e.target.value = "";
+  };
+
+  const handleCbuChange = (e) => setCbu(e.target.value);
+
+  const hasEconomica = misBecas.some((b) => b.tipoBeca === TIPO_BECA.ECONOMICA);
+
   // Abre el Dialog para solicitar una beca nueva.
   // Si ya existe Becario SAE, precarga sus datos; si no, usa datos del usuario logueado.
   const handleAgregarBeca = () => {
-    setBecaSeleccionada(null);
-    setFormBeca(getInitialFormBeca(user, becarioActual));
     setOpenDialog(true);
   };
 
-  // Cierra el Dialog, salvo que esté guardando.
-  // Esto evita que el usuario cierre el formulario en medio del POST.
-  const handleCloseDialog = () => {
-    if (saving) return;
-    setOpenDialog(false);
-  };
-
-  // Maneja todos los cambios del formulario.
-  // Sirve tanto para inputs normales como para switches/checkboxes.
-  const handleChange = (e) => {
-    const { name, value, checked, type } = e.target;
-
-    setFormBeca((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-      // Si cambia el tipo de beca, limpio la selección asociada para evitar guardar un proyecto/servicio anterior.
-      ...(name === "tipoBeca" ? { beca: null } : {}),
-    }));
-  };
-
-  // Valida antes de pegarle a la API.
-  // Evita crear una beca sin tipo, o una beca de servicio/investigación sin selección asociada.
-  const validarFormulario = () => {
-    if (!formBeca.tipoBeca) {
-      showSnackbar("Seleccioná un tipo de beca", "warning");
-      return false;
-    }
-
-    if (
-      (formBeca.tipoBeca === TIPO_BECA.INVESTIGACION ||
-        formBeca.tipoBeca === TIPO_BECA.SERVICIO) &&
-      !formBeca.beca?.id
-    ) {
-      showSnackbar("Seleccioná una opción para la beca", "warning");
-      return false;
-    }
-
-    return true;
-  };
-
-  // Crea el Becario SAE base solo si todavía no existe.
-  // Devuelve siempre el becario que se debe usar para crear la beca específica.
-  const crearBecarioSiNoExiste = async () => {
-    if (becarioActual?.id) return becarioActual;
-
-    const payloadBecario = {
-      id: 0,
-      legajo: user.email,
-      nombre_becario: user.nombre,
-      alquila: formBeca.alquila,
-      fecha_solicitud: new Date().toISOString(),
-      aceptado_inicio: false,
-      puede_pagarle: false,
-      activo: true,
-      anio_beca: new Date().getFullYear(),
-      id_becario_previo: null,
-    };
-
-    const nuevoBecario = await CrearBecarioSAE(payloadBecario);
-    setBecarioActual(nuevoBecario);
-    return nuevoBecario;
-  };
-
-  // Crea la beca específica usando el ID real del Becario SAE.
-  // Importante: no usar formBeca.id porque puede estar en 0 si el becario se acaba de crear.
-  const crearBecaSegunTipo = async (becarioId) => {
-    switch (formBeca.tipoBeca) {
-      case TIPO_BECA.ECONOMICA:
-        await CrearBecarioEconomica(becarioId);
-        return "Se creó la beca económica correctamente";
-
-      case TIPO_BECA.INVESTIGACION:
-        await CrearBecarioInvestigacion(becarioId, formBeca.beca.id);
-        return "Se creó la beca de investigación correctamente";
-
-      case TIPO_BECA.SERVICIO:
-        await CrearBecarioServicio(becarioId, formBeca.beca.id);
-        return "Se creó la beca de servicio correctamente";
-
-      default:
-        throw new Error("Tipo de beca inválido");
-    }
-  };
-
-  // Acción principal del botón Guardar.
-  // Activa el mini loading del formulario, ejecuta el alta y recarga las cards.
-  const handleDialogSave = async () => {
-    if (!validarFormulario()) return;
-
+  async function handleDelete(item) {
     try {
-      setSaving(true);
+      setOpenPopup(false);
 
-      // Flujo de guardado:
-      // 1. Si no existe becario SAE, se crea primero.
-      // 2. Con el ID real del becario, se crea la beca específica seleccionada.
-      // 3. Se recarga la grilla para reflejar el nuevo estado.
-      const becario = await crearBecarioSiNoExiste();
-      const mensaje = await crearBecaSegunTipo(becario.id);
+      setLoading(true);
 
-      await cargarMisBecas();
-      setOpenDialog(false);
-      showSnackbar(mensaje, "success");
-    } catch (err) {
-      console.error("Error al crear la beca", err);
-      showSnackbar("Hubo un error al crear la beca", "error");
+      await eliminarDocumentoEstudiante(item.id_archivo);
+
+      setSnackbar({
+        open: true,
+        message: C.docEliminado,
+        severity: "success",
+      });
+
+      setDocumentos((prev) =>
+        prev.map((doc) =>
+          Number(doc.id_tipo_documento) === Number(item.id_tipo_documento)
+            ? {
+                ...doc,
+                archivo: null,
+                archivoNombre: "",
+                subido: false,
+                id_archivo: null,
+              }
+            : doc,
+        ),
+      );
+
+      setDocumentosEconomica((prev) =>
+        prev.map((doc) =>
+          Number(doc.id_tipo_documento) === Number(item.id_tipo_documento)
+            ? {
+                ...doc,
+                archivo: null,
+                archivoNombre: "",
+                subido: false,
+                id_archivo: null,
+              }
+            : doc,
+        ),
+      );
+    } catch (error) {
+      console.error("Error al eliminar el documento:", error);
+      setSnackbar({
+        open: true,
+        message: C.docEliminadoError,
+        severity: "error",
+      });
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
-  };
+  }
+
+  async function handlePreview(id, nombre) {
+    setPreview({
+      open: true,
+      loading: true,
+      title: nombre,
+      imageSrc: null,
+      isPdf: false,
+      error: null,
+    });
+    try {
+      const data = await descargarDocumentacionXId(id);
+      setPreview({
+        open: true,
+        loading: false,
+        title: nombre,
+        imageSrc: data.datos_documento,
+        isPdf: isPdfDocument(data),
+        error: null,
+      });
+    } catch {
+      setPreview((prev) => ({
+        ...prev,
+        loading: false,
+        error: "No se pudo cargar el documento",
+      }));
+    }
+  }
+
+  async function DeleteDocument(document) {
+    setOpenPopup(true);
+    setDocumentoAEliminar(document);
+  }
+
+  const asignarTiposADocumentos = useCallback((documentosBase, tipos) => {
+    return documentosBase.map((doc) => {
+      const match = tipos.find(
+        (d) =>
+          d.nombre.trim().toLowerCase() === doc.nombre.trim().toLowerCase(),
+      );
+
+      if (!match) return doc;
+
+      return {
+        ...doc,
+        id_tipo_documento: match.id,
+        extension: match.extension,
+      };
+    });
+  }, []);
+
+  const asignarArchivosADocumentos = useCallback(
+    (documentosBase, documentosSubidos) => {
+      return documentosBase.map((doc) => {
+        const documentFound = documentosSubidos.find(
+          (item) =>
+            Number(item.id_tipo_documento) === Number(doc.id_tipo_documento),
+        );
+        if (!documentFound) return doc;
+
+        return {
+          ...doc,
+          archivo: documentFound.archivo,
+          archivoNombre: documentFound.nombre_documento,
+          subido: true,
+          id_archivo: documentFound.id,
+          extension: documentFound.extension,
+        };
+      });
+    },
+    [],
+  );
+
+  const ObtenerTipoDocumentos = useCallback(async () => {
+    try {
+      const data = await cargarTiposDocumento();
+      if (!data || data.length === 0) return;
+
+      let docsConId = [];
+
+      setDocumentos((prev) => {
+        docsConId = asignarTiposADocumentos(prev, data);
+
+        return docsConId;
+      });
+
+      setDocumentosEconomica((prev) => asignarTiposADocumentos(prev, data));
+
+      return docsConId;
+    } catch (error) {
+      console.error("Error al obtener tipos de documento", error);
+      return [];
+    }
+  }, [asignarTiposADocumentos, cargarTiposDocumento]);
+
+  const ObtenerDocumentosEstudiante = useCallback(
+    async (documentosBase) => {
+      try {
+        const data = await listarDocumentacionXLegajo(user?.email);
+        if (!data || data.length === 0) return;
+
+        setDocumentos((prev) =>
+          asignarArchivosADocumentos(
+            documentosBase.length > 0 ? documentosBase : prev,
+            data,
+          ),
+        );
+
+        setDocumentosEconomica((prev) =>
+          asignarArchivosADocumentos(prev, data),
+        );
+      } catch (error) {
+        console.error("Error al obtener documentos del estudiante", error);
+      }
+    },
+    [asignarArchivosADocumentos, user?.email],
+  );
 
   // Carga inicial de pantalla.
   // Se ejecuta cuando aparece el usuario logueado y trae:
-  // - Proyectos de investigación
-  // - Servicios internos
-  // - Becario y becas ya solicitadas
   useEffect(() => {
     if (!user?.email) return;
 
@@ -401,11 +594,11 @@ export default function Scholarships() {
       try {
         setLoading(true);
 
-        await Promise.all([
-          cargarProyectosInvestigacion(),
-          cargarServiciosInternos(),
-          cargarMisBecas(),
-        ]);
+        await cargarMisBecas();
+
+        const documentosConTipo = await ObtenerTipoDocumentos();
+
+        await ObtenerDocumentosEstudiante(documentosConTipo);
       } catch (error) {
         console.error("Error al cargar la pantalla de becas", error);
       } finally {
@@ -416,9 +609,9 @@ export default function Scholarships() {
     inicializarPantalla();
   }, [
     user?.email,
-    cargarProyectosInvestigacion,
-    cargarServiciosInternos,
     cargarMisBecas,
+    ObtenerTipoDocumentos,
+    ObtenerDocumentosEstudiante,
   ]);
 
   return (
@@ -544,30 +737,200 @@ export default function Scholarships() {
           </Typography>
         </Box>
 
+        {perfilIncompleto && (
+          <Box
+            sx={{
+              mt: 3,
+              p: 2.5,
+              borderRadius: 3,
+              bgcolor: "#fff8e1",
+              border: "1px solid",
+              borderColor: "#ffecb3",
+              color: "#665c00",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <WarningAmberIcon sx={{ color: "#f9a825" }} />
+              <Typography variant="h6" fontWeight={700}>
+                Advertencia
+              </Typography>
+            </Box>
+            <Typography sx={{ mt: 1 }}>
+              Para solicitar la beca debe completar los datos en la sección de
+              Perfil.
+            </Typography>
+            <Box sx={{ mt: 1 }}>
+              <SAEButton
+                variant="contained"
+                onClick={() => (window.location.href = "/perfil")}
+              >
+                Ir a Perfil
+              </SAEButton>
+            </Box>
+          </Box>
+        )}
+
         {/* Cards de becas ya solicitadas por el usuario. */}
-        <Grid container spacing={2.5} sx={{ mt: 1 }}>
-          {misBecas.map((item) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={4}
-              key={`${item.tipoBeca}-${item.id}`}
-            >
+        <Box sx={{ position: "relative", mt: 1 }}>
+          <Grid container spacing={2.5}>
+            {misBecas.map((item) => (
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={`${item.tipoBeca}-${item.id}`}
+              >
+                <Card
+                  sx={{
+                    minWidth: 350,
+                    maxWidth: { xs: "100%", sm: 400 },
+                    height: "100%",
+                    borderRadius: 4,
+                    flexDirection: "column",
+                    boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
+                    border: "1px solid rgba(17, 53, 101, 0.08)",
+                    transition:
+                      "background-color 0.25s ease, border-color 0.25s ease",
+                    "&:hover": {
+                      backgroundColor: "#f1f5fb",
+                      borderColor: "rgba(17, 53, 101, 0.2)",
+                    },
+                  }}
+                >
+                  <CardContent
+                    sx={{
+                      pt: 2,
+                      pl: 3,
+                      pr: 3,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                    }}
+                  >
+                    <Stack sx={{ height: "100%" }}>
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
+                        <Typography variant="h6">
+                          <strong>{item.tipoBeca}</strong>
+                        </Typography>
+                        {item.iconBeca}
+                      </Stack>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <Chip
+                          label={getEstadoBecaConfig(item.estado).label}
+                          color={getEstadoBecaConfig(item.estado).color}
+                          size="medium"
+                        />
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          mt: 1,
+                        }}
+                      >
+                        <Typography variant="body1" color="text.primary">
+                          <strong>Fecha Solicitud:</strong>
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                          {formatDate(item.fechaSolicitud)}
+                        </Typography>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          mt: 1,
+                        }}
+                      >
+                        <Typography variant="body1" color="text.primary">
+                          <strong>Módulos Asignados:</strong>
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                          {item.modulos_asignados ?? "-"}
+                        </Typography>
+                      </Box>
+
+                      {item.tipoBeca === TIPO_BECA.INVESTIGACION && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            mt: 1,
+                          }}
+                        >
+                          <Typography variant="body1" color="text.primary">
+                            <strong>Proyecto:</strong>
+                          </Typography>
+                          <Typography variant="body1" color="text.secondary">
+                            {item.proyecto_investigacion}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {item.tipoBeca === TIPO_BECA.SERVICIO && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            mt: 1,
+                          }}
+                        >
+                          <Typography variant="body1" color="text.primary">
+                            <strong>Servicio:</strong>
+                          </Typography>
+                          <Typography variant="body1" color="text.secondary">
+                            {item.servicio}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+
+            {/* Card especial para abrir el formulario de nueva solicitud. */}
+            <Grid item xs={12} sm={6} md={4}>
               <Card
+                onClick={!perfilIncompleto ? handleAgregarBeca : undefined}
                 sx={{
                   minWidth: 350,
                   maxWidth: { xs: "100%", sm: 400 },
                   height: "100%",
                   borderRadius: 4,
-                  flexDirection: "column",
-                  boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
-                  border: "1px solid rgba(17, 53, 101, 0.08)",
-                  transition:
-                    "background-color 0.25s ease, border-color 0.25s ease",
+                  cursor: perfilIncompleto ? "not-allowed" : "pointer",
+                  pointerEvents: perfilIncompleto ? "none" : "auto",
+                  border: "2px dashed rgba(17, 53, 101, 0.25)",
+                  backgroundColor: "#f8fbff",
+                  transition: "all 0.25s ease",
                   "&:hover": {
-                    backgroundColor: "#f1f5fb",
-                    borderColor: "rgba(17, 53, 101, 0.2)",
+                    backgroundColor: perfilIncompleto ? "#f8fbff" : "#eef5ff",
+                    borderColor: perfilIncompleto
+                      ? "rgba(17, 53, 101, 0.25)"
+                      : "primary.main",
                   },
                 }}
               >
@@ -576,197 +939,385 @@ export default function Scholarships() {
                     pt: 2,
                     pl: 3,
                     pr: 3,
+                    gap: 2,
+                    height: "100%",
                     display: "flex",
                     flexDirection: "column",
-                    gap: 2,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: 220,
                   }}
                 >
-                  <Stack sx={{ height: "100%" }}>
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
+                  <AddCircleOutline color="primary" sx={{ fontSize: 60 }} />
+                  <Typography variant="h6" textAlign="center">
+                    {C.cardSolicitarTitle}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    textAlign="center"
+                  >
+                    {C.cardSolicitarSubtitle}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          {perfilIncompleto && (
+            <Box
+              role="alert"
+              aria-live="polite"
+              sx={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 1,
+                borderRadius: 3,
+                bgcolor: "rgba(255,255,255,0.6)",
+                backdropFilter: "blur(4px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                p: 3,
+                pointerEvents: "auto",
+              }}
+            >
+              <Typography textAlign="center" sx={{ color: "text.disabled" }}>
+                Para solicitar la beca debe completar los datos en la sección de
+                Perfil.
+              </Typography>
+            </Box>
+          )}
+        </Box>
+
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
+            Mis Documentos
+          </Typography>
+          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
+            {C.documentationSubtitle}
+          </Typography>
+        </Box>
+        {perfilIncompleto && (
+          <Box
+            sx={{
+              mt: 3,
+              p: 2.5,
+              borderRadius: 3,
+              bgcolor: "#fff8e1",
+              border: "1px solid",
+              borderColor: "#ffecb3",
+              color: "#665c00",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <WarningAmberIcon sx={{ color: "#f9a825" }} />
+              <Typography variant="h6" fontWeight={700}>
+                Advertencia
+              </Typography>
+            </Box>
+            <Typography sx={{ mt: 1 }}>
+              Para solicitar la beca debe completar los datos en la sección de
+              Perfil.
+            </Typography>
+            <Box sx={{ mt: 1 }}>
+              <SAEButton
+                variant="contained"
+                onClick={() => (window.location.href = "/perfil")}
+              >
+                Ir a Perfil
+              </SAEButton>
+            </Box>
+          </Box>
+        )}
+        {/* Sección: Mis Documentos */}
+        <Box sx={{ mt: 4, position: "relative" }}>
+          {perfilIncompleto && (
+            <Box
+              role="alert"
+              aria-live="polite"
+              sx={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 1,
+                borderRadius: 3,
+                bgcolor: "rgba(255,255,255,0.6)",
+                backdropFilter: "blur(4px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                p: 3,
+                pointerEvents: "auto",
+              }}
+            >
+              <Typography textAlign="center" sx={{ color: "text.disabled" }}>
+                Para solicitar la beca debe completar los datos en la sección de
+                Perfil.{" "}
+              </Typography>
+            </Box>
+          )}
+          <Grid container spacing={2.5} sx={{ mt: 1 }}>
+            {documentos.map((item) => (
+              <Grid item xs={12} sm={6} md={4} key={item.id}>
+                <Card
+                  sx={{
+                    maxWidth: 357,
+                    minWidth: 357,
+                    height: "100%",
+                    borderRadius: 4,
+                    flexDirection: "column",
+                    boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
+                    border: "1px solid rgba(17, 53, 101, 0.08)",
+                    transition:
+                      "background-color 0.25s ease, border-color 0.25s ease",
+
+                    "&:hover": {
+                      backgroundColor: "#f1f5fb", // un tono más oscuro que el fondo actual
+                      borderColor: "rgba(17, 53, 101, 0.2)",
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Stack sx={{ height: "100%" }}>
                       <Typography variant="h6">
-                        <strong>{item.tipoBeca}</strong>
+                        <strong>{item.nombre}</strong>
                       </Typography>
-                      {item.iconBeca}
-                    </Stack>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 1,
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <Chip
-                        label={getEstadoBecaConfig(item.estado).label}
-                        color={getEstadoBecaConfig(item.estado).color}
-                        size="medium"
-                      />
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 1,
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        mt: 1,
-                      }}
-                    >
-                      <Typography variant="body1" color="text.primary">
-                        <strong>Fecha Solicitud:</strong>
-                      </Typography>
-                      <Typography variant="body1" color="text.secondary">
-                        {formatDate(item.fechaSolicitud)}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 1,
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        mt: 1,
-                      }}
-                    >
-                      <Typography variant="body1" color="text.primary">
-                        <strong>Módulos Asignados:</strong>
-                      </Typography>
-                      <Typography variant="body1" color="text.secondary">
-                        {item.modulos_asignados ?? "-"}
-                      </Typography>
-                    </Box>
-
-                    {item.tipoBeca === TIPO_BECA.INVESTIGACION && (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          gap: 1,
-                          alignItems: "center",
-                          flexWrap: "wrap",
-                          mt: 1,
-                        }}
+                      <Box sx={{ flexGrow: 1, mt: 1 }} />
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
                       >
-                        <Typography variant="body1" color="text.primary">
-                          <strong>Proyecto:</strong>
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                          {item.proyecto_investigacion}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {item.tipoBeca === TIPO_BECA.SERVICIO && (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          gap: 1,
-                          alignItems: "center",
-                          flexWrap: "wrap",
-                          mt: 1,
-                        }}
+                        <Chip
+                          label={
+                            !item.subido
+                              ? C.docStateNotUploaded
+                              : C.docStataUplodaded
+                          }
+                          color={!item.subido ? "grey" : "success"}
+                        />
+                      </Stack>
+                      <SAEButton
+                        onClick={() =>
+                          handlePreview(item.id_archivo, item.archivoNombre)
+                        }
                       >
-                        <Typography variant="body1" color="text.primary">
-                          <strong>Servicio:</strong>
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                          {item.servicio}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        gap: 1,
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        mt: 1,
-                      }}
-                    >
-                      {/*
-                      <SAEButton onClick={() => handlePreview(item.id_archivo, item.archivoNombre)}>
                         {item.archivoNombre
-                          ? item.archivoNombre.length > 23
-                            ? `${item.archivoNombre.slice(0, 23)}...`
+                          ? item.archivoNombre.length > 35
+                            ? item.archivoNombre.slice(0, 35) + "..."
                             : item.archivoNombre
                           : ""}
                       </SAEButton>
-                      */}
-
-                      <IconButton
-                        component="label"
-                        size="small"
-                        color="primary"
-                        disabled={item.subido}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          gap: 1,
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          mt: 1,
+                        }}
                       >
-                        <FileUpload />
-                        <input
-                          type="file"
-                          hidden
-                          accept={item.extension}
-                          // onChange={(e) => handleArchivoChange(e, item)}
-                        />
-                      </IconButton>
-                    </Box>
+                        <IconButton
+                          component="label"
+                          size="small"
+                          color="primary"
+                          disabled={item.subido}
+                        >
+                          <FileUpload />
+                          <input
+                            type="file"
+                            hidden
+                            accept={item.extension}
+                            onChange={(e) => handleArchivoChange(e, item)}
+                          />
+                        </IconButton>
+
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled={!item.subido}
+                          onClick={() => DeleteDocument(item)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+
+            <Grid item xs={12} sm={12} md={4}>
+              <Card
+                sx={{
+                  minWidth: 357,
+                  height: "100%",
+                  borderRadius: 4,
+                  flexDirection: "column",
+                  boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
+                  border: "1px solid rgba(17, 53, 101, 0.08)",
+                  transition:
+                    "background-color 0.25s ease, border-color 0.25s ease",
+
+                  "&:hover": {
+                    backgroundColor: "#f1f5fb", // un tono más oscuro que el fondo actual
+                    borderColor: "rgba(17, 53, 101, 0.2)",
+                  },
+                }}
+              >
+                <CardContent
+                  sx={{
+                    p: 3,
+                  }}
+                >
+                  <Stack sx={{ height: "100%" }}>
+                    <Typography variant="h6">
+                      <strong>CBU</strong>
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Ingresá tu CBU para pagos.
+                    </Typography>
+                    <Box sx={{ flexGrow: 1, mt: 1 }} />
+                    {!perfilIncompleto && (
+                      <SAETextField
+                        fullWidth
+                        label="CBU"
+                        value={cbu}
+                        onChange={handleCbuChange}
+                      />
+                    )}
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
-          ))}
-
-          {/* Card especial para abrir el formulario de nueva solicitud. */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Card
-              onClick={handleAgregarBeca}
-              sx={{
-                minWidth: 350,
-                maxWidth: { xs: "100%", sm: 400 },
-                height: "100%",
-                borderRadius: 4,
-                cursor: "pointer",
-                border: "2px dashed rgba(17, 53, 101, 0.25)",
-                backgroundColor: "#f8fbff",
-                transition: "all 0.25s ease",
-                "&:hover": {
-                  backgroundColor: "#eef5ff",
-                  borderColor: "primary.main",
-                  transform: "translateY(-2px)",
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                  minHeight: 220,
-                }}
-              >
-                <AddCircleOutline color="primary" sx={{ fontSize: 60 }} />
-                <Typography variant="h6" textAlign="center">
-                  {C.cardSolicitarTitle}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  textAlign="center"
-                >
-                  {C.cardSolicitarSubtitle}
-                </Typography>
-              </CardContent>
-            </Card>
           </Grid>
-        </Grid>
+
+          {/* Mini-sección: documentos de beca económica */}
+          {hasEconomica && (
+            <Box sx={{ mt: 2 }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 800, color: "#123666" }}
+              >
+                Documentos - Beca Económica
+              </Typography>
+              <Box sx={{ mt: 4, position: "relative" }}>
+                <Grid container spacing={2.5} sx={{ mt: 1 }}>
+                  {documentosEconomica.map((item) => (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      md={4}
+                      key={item.id_tipo_documento ?? item.id ?? item.nombre}
+                    >
+                      <Card
+                        sx={{
+                          maxWidth: 357,
+                          minWidth: 357,
+                          height: "100%",
+                          borderRadius: 4,
+                          flexDirection: "column",
+                          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
+                          border: "1px solid rgba(17, 53, 101, 0.08)",
+                          transition:
+                            "background-color 0.25s ease, border-color 0.25s ease",
+
+                          "&:hover": {
+                            backgroundColor: "#f1f5fb", // un tono más oscuro que el fondo actual
+                            borderColor: "rgba(17, 53, 101, 0.2)",
+                          },
+                        }}
+                      >
+                        <CardContent sx={{ p: 3 }}>
+                          <Stack sx={{ height: "100%" }}>
+                            <Typography variant="h6">
+                              <strong>{item.nombre}</strong>
+                            </Typography>
+                            <Box sx={{ flexGrow: 1, mt: 1 }} />
+                            <Stack
+                              direction="row"
+                              justifyContent="space-between"
+                              alignItems="center"
+                            >
+                              <Chip
+                                label={
+                                  !item.subido
+                                    ? C.docStateNotUploaded
+                                    : C.docStataUplodaded
+                                }
+                                color={!item.subido ? "grey" : "success"}
+                              />
+                              <Chip
+                                label={
+                                  item.required == true
+                                    ? "Requerido!"
+                                    : "Opcional"
+                                }
+                                color={
+                                  item.required == true ? "error" : "warning"
+                                }
+                              />
+                            </Stack>
+                            <SAEButton
+                              onClick={() =>
+                                handlePreview(
+                                  item.id_archivo,
+                                  item.archivoNombre,
+                                )
+                              }
+                            >
+                              {item.archivoNombre
+                                ? item.archivoNombre.length > 35
+                                  ? item.archivoNombre.slice(0, 35) + "..."
+                                  : item.archivoNombre
+                                : ""}
+                            </SAEButton>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: 1,
+                                alignItems: "center",
+                                flexWrap: "wrap",
+                                mt: 1,
+                              }}
+                            >
+                              <IconButton
+                                component="label"
+                                size="small"
+                                color="primary"
+                                disabled={item.subido}
+                              >
+                                <FileUpload />
+                                <input
+                                  type="file"
+                                  hidden
+                                  accept={item.extension}
+                                  onChange={(e) => handleArchivoChange(e, item)}
+                                />
+                              </IconButton>
+
+                              <IconButton
+                                size="small"
+                                color="error"
+                                disabled={!item.subido}
+                                onClick={() => DeleteDocument(item)}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Box>
+                          </Stack>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            </Box>
+          )}
+        </Box>
 
         {/* Sección de preguntas frecuentes. */}
         <Box sx={{ mt: 4 }}>
@@ -802,177 +1353,49 @@ export default function Scholarships() {
           </Box>
         </Box>
 
-        {/* Dialog de alta/edición de beca. Actualmente se usa para solicitar una nueva beca. */}
-        <Dialog
+        <ScholarshipsForm
           open={openDialog}
-          onClose={handleCloseDialog}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="span"
-              sx={{ fontWeight: "bold" }}
-            >
-              {becaSeleccionada ? "Editar Beca" : "Solicitar Beca"}
-            </Typography>
-            <IconButton
-              onClick={handleCloseDialog}
-              size="small"
-              disabled={saving}
-            >
-              <Close />
-            </IconButton>
-          </DialogTitle>
+          onClose={() => setOpenDialog(false)}
+          user={user}
+          becarioActual={becarioActual}
+          setBecarioActual={setBecarioActual}
+          cargarMisBecas={cargarMisBecas}
+          cargarTiposDocumento={cargarTiposDocumento}
+          subirDocumentoEstudiante={subirDocumentoEstudiante}
+          documentos={documentos}
+          documentosEconomica={documentosEconomica}
+          handlePreview={handlePreview}
+          showSnackbar={showSnackbar}
+        />
 
-          <DialogContent
-            sx={{
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              pt: "16px !important",
-            }}
-          >
-            {/* Mini loading dentro del formulario mientras se guarda.
-                Bloquea visualmente el contenido y evita dobles clicks. */}
-            {saving && (
-              <Box
-                sx={{
-                  position: "absolute",
-                  inset: 0,
-                  zIndex: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1.5,
-                  bgcolor: "rgba(255,255,255,0.75)",
-                  backdropFilter: "blur(2px)",
-                }}
-              >
-                <CircularProgress size={36} />
-                <Typography variant="body2" color="text.secondary">
-                  Guardando solicitud...
-                </Typography>
-              </Box>
-            )}
+        <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
+          <DialogTitle>{C.deleteDocTitle}</DialogTitle>
 
-            <Divider variant="middle" sx={{ mt: 0.5 }}>
-              <Chip
-                label={C.DatosPersonales}
-                size="small"
-                sx={{ fontWeight: 700 }}
-              />
-            </Divider>
-
-            <SAETextField
-              fullWidth
-              label="Legajo"
-              name="legajo"
-              disabled
-              value={formBeca.legajo}
-              onChange={handleChange}
-            />
-
-            <FormControlLabel
-              control={
-                <SAESwitch
-                  size="medium"
-                  checked={Boolean(formBeca.alquila)}
-                  name="alquila"
-                  onChange={handleChange}
-                  disabled={saving}
-                />
-              }
-              label={C.alquilarTitle}
-              sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.90rem" } }}
-            />
-
-            <Divider variant="middle" sx={{ mt: 0.5 }}>
-              <Chip
-                label={C.TiposBecas}
-                size="small"
-                sx={{ fontWeight: 700 }}
-              />
-            </Divider>
-
-            {/* Tipo de beca seleccionado. Al cambiarlo, se limpia formBeca.beca. */}
-            <FormControl fullWidth disabled={saving}>
-              <InputLabel>Tipo Beca</InputLabel>
-              <Select
-                value={formBeca.tipoBeca}
-                onChange={handleChange}
-                name="tipoBeca"
-                input={<OutlinedInput label="Tipo Beca" />}
-              >
-                {C.listaTiposBecas.map((beca) => (
-                  <MenuItem key={beca.nombre} value={beca.nombre}>
-                    {beca.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Campo adicional obligatorio solo para beca de investigación. */}
-            {formBeca.tipoBeca === TIPO_BECA.INVESTIGACION && (
-              <FormControl fullWidth disabled={saving}>
-                <InputLabel>Proyecto Investigación</InputLabel>
-                <Select
-                  value={formBeca.beca ?? ""}
-                  onChange={handleChange}
-                  name="beca"
-                  input={<OutlinedInput label="Proyecto Investigación" />}
-                >
-                  {proyectosRows.map((proyecto) => (
-                    <MenuItem key={proyecto.id} value={proyecto}>
-                      {proyecto.nombre_proyecto_investigacion}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-
-            {/* Campo adicional obligatorio solo para beca de servicio. */}
-            {formBeca.tipoBeca === TIPO_BECA.SERVICIO && (
-              <FormControl fullWidth disabled={saving}>
-                <InputLabel>Proyecto Servicio</InputLabel>
-                <Select
-                  value={formBeca.beca ?? ""}
-                  onChange={handleChange}
-                  name="beca"
-                  input={<OutlinedInput label="Proyecto Servicio" />}
-                >
-                  {serviciosRows.map((servicio) => (
-                    <MenuItem key={servicio.id} value={servicio}>
-                      {servicio.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
+          <DialogContent>
+            <DialogContentText>
+              {C.deleteDocMessage(documentoAEliminar?.nombre_documento)}
+            </DialogContentText>
           </DialogContent>
 
           <DialogActions>
-            <SAEButton onClick={handleCloseDialog} disabled={saving}>
-              Cancelar
-            </SAEButton>
             <SAEButton
-              variant="contained"
-              onClick={handleDialogSave}
-              disabled={saving}
+              onClick={() => handleDelete(documentoAEliminar)}
+              autoFocus
             >
-              {saving ? "Guardando..." : "Guardar"}
+              {C.deleteDocButton}
             </SAEButton>
           </DialogActions>
         </Dialog>
+
+        <DocumentPreviewDialog
+          open={preview.open}
+          onClose={closePreview}
+          title={preview.title}
+          imageSrc={preview.imageSrc}
+          isPdf={preview.isPdf}
+          loading={preview.loading}
+          error={preview.error}
+        />
 
         {/* Mensaje final de éxito/error/advertencia. */}
         <Snackbar

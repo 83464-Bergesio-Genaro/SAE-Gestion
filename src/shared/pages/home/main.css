@@ -7,15 +7,13 @@
 }
 .image-container{
     background-origin: content-box; 
-    background: url("../../../../public/images/principal/PruebitaNoBG.png") 100% 0% / contain no-repeat content-box;
+    background: url("/images/principal/PruebitaNoBG.png") 100% 0% / contain no-repeat content-box;
     background-position: right top;
 }
 @media (max-width: 750px){
-    .color-container{
-        padding: 0 5%;
-    }
-    .image-container{
-        background: url("../../../../public/images/principal/PruebitaOscuresidoNoBg.png") 50% 50% / contain no-repeat content-box;
+    .home-container{
+        padding: 0;
         background-position: center center;
-    }
+        background: url("/images/principal/PruebitaOscuresidoNoBg.png") 50% 50% / contain no-repeat content-box;
+    }    
 }

@@ -4,13 +4,14 @@ import SAEButton from "../../components/buttons/SAEButton";
 import NewsGrid from "../../components/newsCards/NewsGrid";
 import "./main.css";
 
-
 export default function Main(){
   return(
-  <div>
-    <Box className="color-container" marginTop={{xs:"-15px"}} marginBottom={{xs:2}}>
-      <Box className="image-container">
-        <Grid container xs={12} md={6} sx={{justifyContent: "center",minHeight: "50vh",paddingTop:{xs:"2vh",sm:"4vh",md:"10vh"}  }} >
+    <div>
+      <Box sx={{
+        background:"linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);",
+        marginTop:"-22px"}}>
+      <Box className="home-container" paddingY={{xs:8,sm:8,md:8}}  >
+        <Grid container xs={12} md={6} sx={{justifyContent: "center",minHeight: "50vh",paddingTop:{xs:"2vh",sm:"4vh",md:"6vh"}  }} >
           <Grid container size={12} spacing={4} xs={12} md={12} >
             
             <Typography variant="h2" 
@@ -67,8 +68,9 @@ export default function Main(){
           </Grid>
         </Grid>
       </Box>
+      
     </Box>
     <NewsGrid />
-  </div>
+    </div>
   );
 }

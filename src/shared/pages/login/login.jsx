@@ -30,6 +30,7 @@ const carreras = [
 ];
 
 export default function Login() {
+  const baseUrl = import.meta.env.BASE_URL;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({ legajo: false, password: false });
@@ -44,9 +45,9 @@ export default function Login() {
     const session = await login(legajo, dominio, password);
     if (session) {
       if (session.id_perfil !== 1) {
-        window.location.replace("/Inicio");
+        globalThis.location.replace(`${baseUrl}Inicio`);
       } else {
-        window.location.replace("/Principal");
+        globalThis.location.replace(`${baseUrl}Principal`);
       }
     } else {
       setIsLoading(false);
@@ -99,7 +100,6 @@ export default function Login() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          bgcolor: "#f4f8fc",
         }}
       >
         <Paper elevation={3} sx={{ p: 4, textAlign: "center", borderRadius: 3 }}>
@@ -129,7 +129,7 @@ export default function Login() {
         {/* Fondo utnBackLogo.svg - fade in */}
         <Box
           component="img"
-          src="/images/principal/utnBackLogo.svg"
+          src={`${baseUrl}images/principal/utnBackLogo.svg`}
           alt=""
           sx={{
             position: "absolute",
@@ -146,7 +146,7 @@ export default function Login() {
         {/* Logo UTN rotado - gira hasta posición */}
         <Box
           component="img"
-          src="/images/principal/logoUTNrotado.png"
+          src={`${baseUrl}images/principal/logoUTNrotado.png`}
           alt="UTN Logo"
           sx={{
             position: "absolute",

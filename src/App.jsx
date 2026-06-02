@@ -43,6 +43,8 @@ import StudentHealth from "./shared/pages/health/healthStudent";
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
 export default function App() {
+  const routerBaseName = import.meta.env.BASE_URL;
+
   useEffect(() => {
     const themeColors = appConfig.themes["light"];
     Object.keys(themeColors).forEach((key) => {
@@ -51,7 +53,7 @@ export default function App() {
   }, []);
   return (
     <AuthProvider>
-      <BrowserRouter basename={import.meta.env.VITE_BASE_PATH}>
+      <BrowserRouter basename={routerBaseName}>
         <MainLayout>
           <Routes>
             {/* Public */}

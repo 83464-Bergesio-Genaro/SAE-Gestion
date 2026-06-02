@@ -161,6 +161,7 @@ a:hover{
       display: none;
   }
   .desktop-container{
+    background:linear-gradient(135deg, #92c1e0 6.71%, #5b96cc 91.97%);
     margin-top: 50px;
     display: grid;
 }
@@ -172,6 +173,7 @@ a:hover{
     row-gap: 22px;
     column-gap: 6px;
     padding: 70px;
+    padding-top: 20px;
   }
 
   /* VIDEO */

@@ -1,21 +1,23 @@
+const baseUrl = import.meta.env.BASE_URL;
+
 export const sharedMenu = [
   {
     label: "Inicio",
     path: "/",
     color: "#FFFFFF",
-    image: "/images/navbar/estacionamientoUTN.jpg",
+    image: `${baseUrl}images/navbar/estacionamientoUTN.jpg`,
   },
   {
     label: "Estudiar en la UTN",
     path: "/JPA",
     color: "#BAE6FF",
-    image: "/images/navbar/IngresoUTN.png",
+    image: `${baseUrl}images/navbar/IngresoUTN.png`,
   },
   {
     label: "Iniciar Sesion",
     path: "/login",
     color: "#E5EAFF",
-    image: "/images/navbar/inchaUTN.png",
+    image: `${baseUrl}images/navbar/inchaUTN.png`,
   },
 ];
 

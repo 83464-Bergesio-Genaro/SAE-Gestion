@@ -11,7 +11,7 @@
     background-position: right top;
 }
 @media (max-width: 750px){
-    .home-container{
+    .image-container{
         padding: 0;
         background-position: center center;
         background: url("/images/principal/PruebitaOscuresidoNoBg.png") 50% 50% / contain no-repeat content-box;

@@ -18,7 +18,7 @@ import {
 import "./degrees.css";
 
 export default function SharedJPACivil() {
-  const imageDirBanner = "/images/degrees/IngCivilBanner.png";
+  const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngCivilBanner.png`;
   const materias1Año = [
     "Análisis Matemático I",
     "Algebra y Geometría Analítica",

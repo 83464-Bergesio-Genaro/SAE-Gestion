@@ -88,7 +88,7 @@ const [user, setUser] = useState(() => {
     setUser(null);
     setSessionExpired(false);
     localStorage.removeItem("session");
-    window.location.replace("/login");
+    globalThis.location.replace(`${import.meta.env.BASE_URL}login`);
   };
 
   return (

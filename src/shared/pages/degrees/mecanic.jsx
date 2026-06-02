@@ -18,7 +18,7 @@ import {
 import "./degrees.css";
 
 export default function SharedJPAMecanic() {
-  const imageDirBanner = "/images/degrees/IngMecanicaBanner.png";
+  const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngMecanicaBanner.png`;
 
   const materias1Año = [
     "Mecánica I",

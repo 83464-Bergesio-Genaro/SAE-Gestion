@@ -8,26 +8,32 @@ import FactoryIcon from "@mui/icons-material/Factory";
 import "./jpa.css";
 import {
   Box,
-  Typography,
   Card,
-  CardContent
+  CardContent,
+  Typography
 } from "@mui/material";
 import { HashLink as Link } from 'react-router-hash-link';
 import "./jpa.css";
 
 export default function JPAIntro(){
     return(
-      <Box sx={{background:"linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);"}}>
-        <Typography variant="h2" align="center"
-          fontWeight="bold"
-          sx={{
-            fontSize:{xs:30,sm:34,md:46},
-            paddingTop:{xs:4}
-          }}>
-            BIENVENID@ A NUESTRA UNIVERSIDAD
-        </Typography>
+      <Box 
+      pb={{xs:"40px",md:"30px"}}
+      pt={{xs:"0px"}}
+      px={{xs:"40px"}}
+        sx ={{
+          background:"linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);"
+        }}>
+           <Typography variant="h2" 
+            align="center" 
+            fontSize={{xs:"3em",sm:"3.6em", lg:"4em"}}
+            fontWeight="bold"
+            marginTop={{xs:"100px", lg:"140px"}}>
+              ¡BIENVENID@ A NUESTRA UNIVERSIDAD!
+            </Typography>
       
-       <Box className="home-grid">
+
+       <div className="home-grid">
 
           {/* VIDEO */}
           <div className="menu-container">
@@ -58,8 +64,8 @@ export default function JPAIntro(){
           </div>
           
 
+        </div>
         </Box>
-      </Box>
     )
 }
 

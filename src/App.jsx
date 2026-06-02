@@ -34,7 +34,12 @@ import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 import Prensa from "./shared/pages/prensa/Prensa";
 
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
-import UsuariosAdmin from "./employed/pages/users/users";
+import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
+
+import EmployedHealth from "./employed/pages/health/EmployedHealth";
+import TurnBoardHealth from "./employed/pages/health/HealthTurns";
+import StudentHealth from "./shared/pages/health/healthStudent";
+
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
 export default function App() {
@@ -110,6 +115,22 @@ export default function App() {
               }
             />
             <Route
+              path="/Gestion-Salud"
+              element={
+                <ProtectedRoute role={[2, 5]}>
+                  <EmployedHealth />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/Gestion-Salud/Turnos"
+              element={
+                <ProtectedRoute role={[2, 5]}>
+                  <TurnBoardHealth />
+                </ProtectedRoute>
+              }
+            />                        
+            <Route
               path="/Gestion-Prensa"
               element={
                 <ProtectedRoute role={5}>
@@ -120,7 +141,7 @@ export default function App() {
             <Route
               path="/Gestion-Usuarios"
               element={
-                <ProtectedRoute role={[2, 5]}>
+                <ProtectedRoute role={5}>
                   <UsuariosAdmin />
                 </ProtectedRoute>
               }
@@ -152,6 +173,15 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/Mi-Salud"
+              element={
+                <ProtectedRoute role={1}>
+                  <StudentHealth />
+                </ProtectedRoute>
+              }
+            />            
           </Routes>
         </MainLayout>
       </BrowserRouter>

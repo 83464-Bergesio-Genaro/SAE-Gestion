@@ -1,6 +1,6 @@
 import {
-  Box,
-  Typography
+  Typography,
+  Box
 } from "@mui/material";
 import "./jpa.css";
 import InteractiveGrid from "../../components/galleryZoomGrid/galleryZoomGrid";
@@ -149,7 +149,14 @@ export default function JPA() {
   }, []);
 
   return (
-    <Box marginTop={"-22px"}>
+    <Box sx={{ 
+          height: "100%",
+          mt:"-90px",
+          mb:"-30px",
+          display: "flex", 
+          flexDirection: "column",
+          justifyContent: "center",
+        }}>
 
       <JPAIntro></JPAIntro>
 
@@ -161,7 +168,7 @@ export default function JPA() {
         fontWeight="bold"
         sx={{
           fontSize:{xs:20,sm:24,md:46},
-          marginTop:{xs:4,sm:3,md:4},
+          marginTop:{xs:4,sm:3,md:8},
         }}>
           CONOCÉ NUESTRAS CARRERAS
       </Typography>
@@ -181,19 +188,19 @@ export default function JPA() {
         <InfoSectionWithId information={information} />
       </div>
       
-
-        <Typography  
-        variant="h3" 
-        align="center"
-        sx={{
-          fontSize:{xs:20,sm:24,md:46},
-          marginTop:{xs:4,sm:3,md:4},
-        }}
-        fontWeight="bold">
-          CHARLAS Y EVENTOS
-        </Typography>
         <div className="events-container">
-              <CalendarEvent eventos={eventosJPA} />
+          <Typography  
+            variant="h3" 
+            align="center"
+            sx={{
+            fontSize:{xs:20,sm:24,md:46},
+            marginTop:{xs:4,sm:3,md:2},
+            }}
+            fontWeight="bold">
+            CHARLAS Y EVENTOS
+          </Typography>
+          
+          <CalendarEvent eventos={eventosJPA} />
         </div>
 
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Box,
@@ -22,6 +22,8 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import { useAuth } from "../../shared/auth/AuthContext";
 import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
 import { ObtenerEventosPublicos } from "../../api/JPAService";
+import { EmployedCalendar } from "./users/employedCalendar";
+import { AdminUsersProvider } from "./users/AdminUsersContext";
 
 const fallbackEventos = [
     {
@@ -90,7 +92,7 @@ const gestionOptions = [
     {
         name: "Gestión Salud",
         icon: LocalHospitalIcon,
-        disabled: true,
+        route: "/Gestion-Salud",
         roles: [2, 5],
     },
     {
@@ -117,13 +119,13 @@ const reportOptions = [
     {
         name: "Reporte Prensa",
         icon: AssessmentIcon,
-        route: "/Prensa",
+        disabled: true,
         roles: [2, 5],
     },
     {
         name: "Reporte JPA",
         icon: GroupsIcon,
-        route: "/JPA",
+        disabled: true,
         roles: [2, 5],
     },
     {
@@ -224,16 +226,6 @@ export default function EmployedMain() {
         cargarEventos();
     }, []);
 
-    const visibleGestion = useMemo(
-        () => gestionOptions.filter((item) => item.roles.includes(user?.id_perfil)),
-        [user?.id_perfil],
-    );
-
-    const visibleReportes = useMemo(
-        () => reportOptions.filter((item) => item.roles.includes(user?.id_perfil)),
-        [user?.id_perfil],
-    );
-
     return (
         <Box
             sx={{
@@ -308,49 +300,50 @@ export default function EmployedMain() {
                         }}
                     />
                 </Box>
+                {user.id_perfil ===5 && (
+                <>
+                    <Box sx={{ mt: 5 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
+                            Gestión General
+                        </Typography>
+                        <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
+                            Módulos operativos principales para el trabajo diario del equipo.
+                        </Typography>
 
-                <Box sx={{ mt: 5 }}>
-                    <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-                        Gestión General
-                    </Typography>
-                    <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-                        Módulos operativos principales para el trabajo diario del equipo.
-                    </Typography>
+                        <Grid container spacing={2.5} sx={{ mt: 1 }}>
+                            {gestionOptions.map((item) => (
+                                <Grid key={item.name} item xs={12} sm={6} lg={4}>
+                                    <DashboardCard item={item} onClick={() => navigate(item.route)} />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
 
-                    <Grid container spacing={2.5} sx={{ mt: 1 }}>
-                        {visibleGestion.map((item) => (
-                            <Grid key={item.name} item xs={12} sm={6} lg={4}>
-                                <DashboardCard item={item} onClick={() => navigate(item.route)} />
-                            </Grid>
-                        ))}
-                    </Grid>
-                </Box>
+                    <Box sx={{ mt: 6 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
+                            Estadísticas y Reportes
+                        </Typography>
+                        <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
+                            Accesos rápidos para consulta, seguimiento y publicación de información.
+                        </Typography>
 
+                        <Grid container spacing={2.5} sx={{ mt: 1 }}>
+                            {reportOptions.map((item) => (
+                                <Grid key={item.name} item xs={12} sm={6} lg={4}>
+                                    <DashboardCard item={item} onClick={() => navigate(item.route)} />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                 </>
+                )}
                 <Box sx={{ mt: 6 }}>
                     <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-                        Estadísticas y Reportes
+                        Eventos y Horarios
                     </Typography>
                     <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-                        Accesos rápidos para consulta, seguimiento y publicación de información.
+                        Permite visualizar tus horarios y los eventos proximos
                     </Typography>
-
-                    <Grid container spacing={2.5} sx={{ mt: 1 }}>
-                        {visibleReportes.map((item) => (
-                            <Grid key={item.name} item xs={12} sm={6} lg={4}>
-                                <DashboardCard item={item} onClick={() => navigate(item.route)} />
-                            </Grid>
-                        ))}
-                    </Grid>
-                </Box>
-
-                <Box sx={{ mt: 6 }}>
-                    <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-                        Agenda de eventos
-                    </Typography>
-                    <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-                        Vista resumida de actividades y eventos para la coordinación general.
-                    </Typography>
-
                     <Box
                         sx={{
                             mt: 3,
@@ -360,8 +353,23 @@ export default function EmployedMain() {
                             boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
                         }}
                     >
+                        <AdminUsersProvider>
+                            <EmployedCalendar legajoEmpleado={user.email} />
+                        </AdminUsersProvider>
+                    </Box>
+                    <Box
+                        sx={{
+                            mt: 3,
+                            p: { xs: 1.5, md: 2.5 },
+                            borderRadius: 6,
+                            bgcolor: "white",
+                            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+                        }}
+                    >
+ 
                         <CalendarEvent eventos={eventos} />
                     </Box>
+
                 </Box>
             </Container>
         </Box>

@@ -15,8 +15,8 @@ import SharedJPAIndustrial from "./shared/pages/degrees/industrial";
 import SharedJPAMecanic from "./shared/pages/degrees/mecanic";
 import SharedJPAMetalurgic from "./shared/pages/degrees/metalurgic";
 import SharedJPAParticipar from "./shared/pages/jpa/participar";
-import Prensa from "./shared/pages/prensa/prensa";
-import ComponentLab from "./shared/pages/lab/componentLab";
+import Prensa from "./shared/pages/prensa/Prensa";
+import ComponentLab from "./shared/pages/lab/ComponentLab";
 
 import EmployedMain from "./employed/pages/main";
 import EmployedSports from "./employed/pages/sports/EmployedSports";

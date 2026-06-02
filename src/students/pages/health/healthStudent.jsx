@@ -53,7 +53,7 @@ import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 
 import { DataGrid } from "@mui/x-data-grid";
-import { HealthUsersProvider, useHealthUser } from './HealthContext'; 
+import { HealthUsersProvider, useHealthUser } from './healthContext'; 
 
 const PALETTE = [
     "#8A8A8A",//Pendiente

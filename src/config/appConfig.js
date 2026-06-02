@@ -1,8 +1,22 @@
+const normalizeBasePath = (value = "") => {
+  const trimmed = String(value).trim();
+
+  if (!trimmed || trimmed === "/") {
+    return "";
+  }
+
+  return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
+};
+
 export const appConfig = {
 
   appName: import.meta.env.VITE_APP_NAME,
 
-  apiUrl: import.meta.env.VITE_API_URL ?? "",
+  apiUrl: normalizeBasePath(
+    import.meta.env.VITE_API_BASE_PATH ??
+      import.meta.env.VITE_API_URL ??
+      import.meta.env.BASE_URL,
+  ),
 
   sessionTimeout: Number(import.meta.env.VITE_SESSION_TIMEOUT),
   

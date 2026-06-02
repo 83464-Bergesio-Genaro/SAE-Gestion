@@ -55,4 +55,13 @@ export const SCHOLARSHIP_STRINGS = {
     "Servicio Comunitario",
     "Servicio de Apoyo Académico",
   ],
+
+  // Document State Label
+  docStataUplodaded: "Subido",
+  docStateNotUploaded: "No subido",
+
+  deleteDocTitle: "Eliminar Documento",
+  deleteDocMessage: (nombreDoc) =>
+    `¿Estás seguro de que deseas eliminar ${nombreDoc}?`,
+  deleteDocButton: "Eliminar",
 };

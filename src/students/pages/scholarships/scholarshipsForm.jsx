@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   CircularProgress,
@@ -8,26 +8,16 @@ import {
   DialogActions,
   Divider,
   Chip,
-  FormControl,
   Grid,
   IconButton,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Select,
+  Autocomplete,
   Typography,
-  Card,
-  CardContent,
   Stack,
 } from "@mui/material";
-import {
-  Close,
-  FileUpload,
-  Delete,
-  AddCircleOutline,
-} from "@mui/icons-material";
+import { Close, AddCircleOutline } from "@mui/icons-material";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
+import ScholarshipDocumentCard from "./ScholarshipDocumentCard";
 import { SCHOLARSHIP_STRINGS } from "./scholarship.string";
 import {
   ObtenerProyectosInvestigacion,
@@ -37,56 +27,31 @@ import {
   CrearBecarioInvestigacion,
   CrearBecarioServicio,
 } from "../../../api/BecasService";
-import {
-  TIPO_BECA,
-  PERSONAL_FIELDS,
-  ECONOMIC_DOCUMENTS,
-  ECONOMIC_OPTIONAL_DOCUMENTS,
-} from "./scholarship.configs";
+import { TIPO_BECA, PERSONAL_FIELDS } from "./scholarship.configs";
 import {
   MAX_SIZE_BYTES,
   MAX_SIZE_MB,
   construirNombre,
-  obtenerApellidoDesdeNombre,
-  obtenerCarreraDesdeEmail,
+  firstNonEmptyText,
+  getErrorMessage,
+  getDocumentDisplayName,
+  hasDocumentFile,
+  isSelectedFile,
+  normalizeText,
+  obtenerLegajoDesdeEmail,
 } from "./scholarship.utils";
 
 const C = SCHOLARSHIP_STRINGS;
 
 const DEFAULT_ACCEPTED_EXTENSIONS = ".pdf,.jpg,.jpeg,.png";
 
-const normalizeText = (value = "") =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
-
-const firstNonEmptyText = (...values) =>
-  values.find((value) => String(value ?? "").trim()) ?? "";
-
 const getDocumentKey = (documento) =>
   documento.id ?? documento.id_tipo_documento ?? documento.nombre;
 
-const isSelectedFile = (archivo) =>
-  typeof File !== "undefined" && archivo instanceof File;
+const isEconomicOptionalDocument = (documento) => documento.required === false;
 
-const getDocumentPreviewId = (documento) =>
-  documento.id_archivo ?? documento.id_documento ?? documento.id ?? null;
-
-const getDocumentDisplayName = (documento) =>
-  firstNonEmptyText(
-    documento.archivoNombre,
-    documento.nombre_completo_documento,
-    documento.nombre_documento,
-  );
-
-const isEconomicOptionalDocument = (documento) =>
-  ECONOMIC_OPTIONAL_DOCUMENTS.some(
-    (optionalDocument) =>
-      getDocumentKey(optionalDocument) === getDocumentKey(documento),
-  );
-
+// Une la configuracion local con tipos/archivos de la API y conserva el estado
+// previo para no perder archivos elegidos ni opcionales ya visibles.
 const buildDocumentsFromConfig = (
   documentsConfig,
   tiposDocumento = [],
@@ -111,15 +76,37 @@ const buildDocumentsFromConfig = (
 
     return {
       ...documentConfig,
-      archivo: previousDocument?.archivo ?? null,
+      archivo: previousDocument?.archivo ?? documentConfig.archivo ?? null,
       archivoNombre: firstNonEmptyText(
         previousDocument?.archivoNombre,
+        documentConfig.archivoNombre,
+        documentConfig.nombre_completo_documento,
+        documentConfig.nombre_documento,
         uploadedDocument?.nombre_completo_documento,
         uploadedDocument?.nombre_documento,
       ),
-      subido: Boolean(previousDocument?.archivo || uploadedDocument),
-      id_archivo: uploadedDocument?.id ?? previousDocument?.id_archivo ?? null,
-      id_tipo_documento: documentType?.id ?? documentType?.id_tipo_documento,
+      subido: Boolean(
+        previousDocument?.archivo ||
+        documentConfig.subido ||
+        documentConfig.archivoNombre ||
+        uploadedDocument,
+      ),
+      id_archivo:
+        uploadedDocument?.id ??
+        previousDocument?.id_archivo ??
+        documentConfig.id_archivo ??
+        null,
+      id_tipo_documento:
+        documentType?.id ??
+        documentType?.id_tipo_documento ??
+        documentConfig.id_tipo_documento,
+      visible: Boolean(
+        documentConfig.required ||
+        previousDocument?.visible ||
+        previousDocument?.archivoNombre ||
+        documentConfig.archivoNombre ||
+        uploadedDocument,
+      ),
       extension:
         documentType?.extension ??
         uploadedDocument?.extension ??
@@ -128,37 +115,6 @@ const buildDocumentsFromConfig = (
     };
   });
 };
-
-const getInitialFormBeca = (user, becarioActual = null) => ({
-  id: becarioActual?.id ?? 0,
-  legajo:
-    user?.DatosCompletos?.legajo ?? becarioActual?.legajo ?? user?.email ?? "",
-  nombre_becario:
-    becarioActual?.nombre_becario ??
-    user?.DatosCompletos?.nombre ??
-    user?.nombre ??
-    "",
-  nombre: user?.DatosCompletos?.nombre ?? user?.nombre ?? "",
-  apellido: user?.DatosCompletos?.apellido ?? "",
-  dni: user?.DatosCompletos?.dni ?? user?.dni ?? "",
-  fechaNacimiento:
-    user?.DatosCompletos?.FechaNacimiento ??
-    user?.DatosCompletos?.fechaNacimiento ??
-    "",
-  telefono: user?.DatosCompletos?.Telefono ?? user?.telefono ?? "",
-  email: user?.DatosCompletos?.mail ?? user?.email ?? "",
-  domicilio: user?.DatosCompletos?.Domicilio ?? user?.domicilio ?? "",
-  alquila: becarioActual?.alquila ?? true,
-  fecha_solicitud: becarioActual?.fecha_solicitud ?? "",
-  aceptado_inicio: becarioActual?.aceptado_inicio ?? false,
-  puede_pagarle: becarioActual?.puede_pagarle ?? false,
-  activo: becarioActual?.activo ?? true,
-  anio_beca: becarioActual?.anio_beca ?? new Date().getFullYear(),
-  id_becario_previo: becarioActual?.id_becario_previo ?? null,
-  tipoBeca: "",
-  beca: null,
-  descripcionSituacion: "",
-});
 
 export default function ScholarshipsForm({
   open,
@@ -170,29 +126,107 @@ export default function ScholarshipsForm({
   cargarTiposDocumento,
   subirDocumentoEstudiante,
   documentos = [],
-  documentosEconomica: documentosEconomicaBase = ECONOMIC_DOCUMENTS,
+  documentosEconomica: documentosEconomicaBase = [],
   handlePreview,
+  handleDeleteDocument,
   showSnackbar,
 }) {
-  const [formBeca, setFormBeca] = useState(() =>
-    getInitialFormBeca(user, becarioActual),
+  const datosCompletos = user?.DatosCompletos;
+  const userLegajo = datosCompletos?.legajo;
+  const userNombreCompleto = datosCompletos?.nombre;
+  const userApellido = datosCompletos?.apellido;
+  const userDniCompleto = datosCompletos?.dni;
+  const userFechaNacimiento =
+    datosCompletos?.FechaNacimiento ?? datosCompletos?.fechaNacimiento;
+  const userTelefonoCompleto = datosCompletos?.Telefono;
+  const userMailCompleto = datosCompletos?.mail;
+  const userDomicilioCompleto = datosCompletos?.Domicilio;
+  const userEmail = user?.email;
+  const userNombre = user?.nombre;
+  const userDni = user?.dni;
+  const userTelefono = user?.telefono;
+  const userDomicilio = user?.domicilio;
+  const becarioId = becarioActual?.id;
+  const becarioLegajo = becarioActual?.legajo;
+  const becarioNombre = becarioActual?.nombre_becario;
+  const becarioAlquila = becarioActual?.alquila;
+  const becarioFechaSolicitud = becarioActual?.fecha_solicitud;
+  const becarioAceptadoInicio = becarioActual?.aceptado_inicio;
+  const becarioPuedePagarle = becarioActual?.puede_pagarle;
+  const becarioActivo = becarioActual?.activo;
+  const becarioAnioBeca = becarioActual?.anio_beca;
+  const becarioPrevioId = becarioActual?.id_becario_previo;
+
+  // Base del formulario: perfil completo, becario existente y usuario logueado,
+  // en ese orden de prioridad.
+  const initialFormBeca = useMemo(
+    () => ({
+      id: becarioId ?? 0,
+      legajo: userLegajo ?? becarioLegajo ?? userEmail ?? "",
+      nombre_becario: becarioNombre ?? userNombreCompleto ?? userNombre ?? "",
+      nombre: userNombreCompleto ?? userNombre ?? "",
+      apellido: userApellido ?? "",
+      dni: userDniCompleto ?? userDni ?? "",
+      fechaNacimiento: userFechaNacimiento ?? "",
+      telefono: userTelefonoCompleto ?? userTelefono ?? "",
+      email: userMailCompleto ?? userEmail ?? "",
+      domicilio: userDomicilioCompleto ?? userDomicilio ?? "",
+      alquila: becarioAlquila ?? true,
+      fecha_solicitud: becarioFechaSolicitud ?? "",
+      aceptado_inicio: becarioAceptadoInicio ?? false,
+      puede_pagarle: becarioPuedePagarle ?? false,
+      activo: becarioActivo ?? true,
+      anio_beca: becarioAnioBeca ?? new Date().getFullYear(),
+      id_becario_previo: becarioPrevioId ?? null,
+      tipoBeca: "",
+      beca: null,
+      descripcionSituacion: "",
+    }),
+    [
+      userLegajo,
+      becarioLegajo,
+      userEmail,
+      becarioNombre,
+      userNombreCompleto,
+      userNombre,
+      becarioId,
+      userApellido,
+      userDniCompleto,
+      userDni,
+      userFechaNacimiento,
+      userTelefonoCompleto,
+      userTelefono,
+      userMailCompleto,
+      userDomicilioCompleto,
+      userDomicilio,
+      becarioAlquila,
+      becarioFechaSolicitud,
+      becarioAceptadoInicio,
+      becarioPuedePagarle,
+      becarioActivo,
+      becarioAnioBeca,
+      becarioPrevioId,
+    ],
   );
+  const [formBeca, setFormBeca] = useState(initialFormBeca);
   const [saving, setSaving] = useState(false);
   const [proyectosRows, setProyectosRows] = useState([]);
   const [serviciosRows, setServiciosRows] = useState([]);
   const [tiposDocumento, setTiposDocumento] = useState([]);
   const [documentosRequeridos, setDocumentosRequeridos] = useState([]);
   const [documentosEconomica, setDocumentosEconomica] = useState([]);
+  const [uploadingDocumentoId, setUploadingDocumentoId] = useState(null);
   const [documentoEconomicoOpcionalId, setDocumentoEconomicoOpcionalId] =
     useState("");
 
+  // Combos dependientes del tipo de beca. Se cargan al abrir el dialog para no
+  // pedir datos mientras el formulario esta cerrado.
   const cargarProyectosInvestigacion = useCallback(async () => {
     try {
       const data = await ObtenerProyectosInvestigacion();
       setProyectosRows(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch {
       setProyectosRows([]);
-      console.error("Error al cargar proyectos de investigación:", err);
     }
   }, []);
 
@@ -200,9 +234,8 @@ export default function ScholarshipsForm({
     try {
       const data = await ObtenerServiciosInternos();
       setServiciosRows(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch {
       setServiciosRows([]);
-      console.error("Error al cargar servicios internos:", err);
     }
   }, []);
 
@@ -210,87 +243,74 @@ export default function ScholarshipsForm({
     try {
       const data = await cargarTiposDocumento();
       setTiposDocumento(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch {
       setTiposDocumento([]);
-      console.error("Error al cargar tipos de documento:", err);
     }
   }, [cargarTiposDocumento]);
 
   useEffect(() => {
     if (!open) return;
-    setFormBeca(getInitialFormBeca(user, becarioActual));
-    setDocumentosRequeridos(documentos);
+    setFormBeca(initialFormBeca);
 
     cargarProyectosInvestigacion();
     cargarServiciosInternos();
     cargarTiposDocumentoFormulario();
   }, [
     open,
-    user,
-    becarioActual,
-    documentos,
+    initialFormBeca,
     cargarProyectosInvestigacion,
     cargarServiciosInternos,
     cargarTiposDocumentoFormulario,
   ]);
 
+  // Los requeridos vienen resueltos por Scholarships. El form los copia para
+  // poder reflejar cargas y borrados sin mutar props.
   useEffect(() => {
     if (!open) return;
     setDocumentosRequeridos(documentos);
   }, [documentos, open]);
 
+  // Los documentos economicos dependen del tipo seleccionado. Se reconstruyen
+  // mezclando configuracion, tipos de documento y archivos ya subidos.
   useEffect(() => {
     setDocumentosEconomica((prev) =>
       formBeca.tipoBeca === TIPO_BECA.ECONOMICA
-        ? [
-            ...buildDocumentsFromConfig(
-              documentosEconomicaBase,
-              tiposDocumento,
-              prev,
-              documentos,
-            ),
-            ...buildDocumentsFromConfig(
-              prev.filter(
-                (doc) =>
-                  !documentosEconomicaBase.some(
-                    (baseDocument) =>
-                      getDocumentKey(baseDocument) === getDocumentKey(doc),
-                  ),
-              ),
-              tiposDocumento,
-              prev,
-              documentos,
-            ),
-          ]
+        ? buildDocumentsFromConfig(
+            documentosEconomicaBase,
+            tiposDocumento,
+            prev,
+            documentos,
+          )
         : [],
     );
   }, [formBeca.tipoBeca, tiposDocumento, documentos, documentosEconomicaBase]);
 
-  const documentosEconomicosOpcionalesDisponibles =
-    ECONOMIC_OPTIONAL_DOCUMENTS.filter(
-      (documento) =>
-        !documentosEconomica.some(
-          (doc) => getDocumentKey(doc) === getDocumentKey(documento),
-        ),
-    );
+  const documentosEconomicaVisibles = documentosEconomica.filter(
+    (documento) =>
+      documento.required ||
+      documento.visible ||
+      Boolean(getDocumentDisplayName(documento)),
+  );
 
+  const documentosEconomicosOpcionalesDisponibles = documentosEconomica.filter(
+    (documento) =>
+      isEconomicOptionalDocument(documento) &&
+      !documento.visible &&
+      !getDocumentDisplayName(documento),
+  );
+
+  // Agregar un opcional solo lo vuelve visible: el documento ya existe en la
+  // lista base, asi evitamos duplicados.
   const handleAgregarDocumentoEconomico = () => {
     if (!documentoEconomicoOpcionalId) return;
 
-    const documentoConfig = ECONOMIC_OPTIONAL_DOCUMENTS.find(
-      (documento) => getDocumentKey(documento) === documentoEconomicoOpcionalId,
+    setDocumentosEconomica((prev) =>
+      prev.map((documento) =>
+        getDocumentKey(documento) === documentoEconomicoOpcionalId
+          ? { ...documento, visible: true }
+          : documento,
+      ),
     );
-
-    if (!documentoConfig) return;
-
-    const [documentoNuevo] = buildDocumentsFromConfig(
-      [documentoConfig],
-      tiposDocumento,
-      [],
-      documentos,
-    );
-
-    setDocumentosEconomica((prev) => [...prev, documentoNuevo]);
     setDocumentoEconomicoOpcionalId("");
   };
 
@@ -309,7 +329,14 @@ export default function ScholarshipsForm({
     }));
   };
 
-  const handleDocumentoChange = (e, documentoId, documentos, setDocumentos) => {
+  // Carga inmediata del archivo: valida formato y tamano, renombra segun
+  // formatoNombre, sube por el metodo del padre y actualiza la card local.
+  const handleDocumentoChange = async (
+    e,
+    documentoId,
+    documentos,
+    setDocumentos,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -327,7 +354,7 @@ export default function ScholarshipsForm({
 
     if (!extensionesPermitidas.includes(extensionArchivo)) {
       showSnackbar(
-        `Solo se permiten archivos: ${selectedDocument.extension}`,
+        C.uploadAllowedExtensions(selectedDocument.extension),
         "warning",
       );
       e.target.value = "";
@@ -335,10 +362,7 @@ export default function ScholarshipsForm({
     }
 
     if (file.size > MAX_SIZE_BYTES) {
-      showSnackbar(
-        `El archivo no puede superar los ${MAX_SIZE_MB} MB.`,
-        "warning",
-      );
+      showSnackbar(C.uploadMaxSize(MAX_SIZE_MB), "warning");
       e.target.value = "";
       return;
     }
@@ -347,13 +371,9 @@ export default function ScholarshipsForm({
       ? construirNombre(
           selectedDocument.formatoNombre,
           {
-            legajo: formBeca.legajo ?? user?.legajo ?? user?.email,
-            apellido:
-              formBeca.apellido ||
-              obtenerApellidoDesdeNombre(
-                formBeca.nombre_becario || formBeca.nombre || user?.nombre,
-              ),
-            carrera: obtenerCarreraDesdeEmail(formBeca.email || user?.email),
+            legajo: obtenerLegajoDesdeEmail(
+              formBeca.legajo ?? user?.legajo ?? user?.email,
+            ),
           },
           extensionArchivo,
         )
@@ -364,22 +384,51 @@ export default function ScholarshipsForm({
       lastModified: file.lastModified,
     });
 
-    setDocumentos((prev) =>
-      prev.map((doc) =>
-        getDocumentKey(doc) === documentoId
-          ? {
-              ...doc,
-              archivo: archivoRenombrado,
-              archivoNombre: nombreArchivo,
-              subido: true,
-            }
-          : doc,
-      ),
-    );
-    e.target.value = "";
+    if (!selectedDocument.id_tipo_documento) {
+      showSnackbar(C.documentTypeNotFound(selectedDocument.nombre), "error");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingDocumentoId(documentoId);
+
+      const documentoGuardado = await subirDocumentoEstudiante(
+        selectedDocument.id_tipo_documento,
+        archivoRenombrado,
+      );
+
+      setDocumentos((prev) =>
+        prev.map((doc) =>
+          getDocumentKey(doc) === documentoId
+            ? {
+                ...doc,
+                archivo: documentoGuardado.archivo,
+                archivoNombre:
+                  documentoGuardado.nombre_completo_documento ??
+                  documentoGuardado.nombre_documento ??
+                  nombreArchivo,
+                subido: true,
+                visible: true,
+                id_archivo: documentoGuardado.id,
+                extension: documentoGuardado.extension ?? doc.extension,
+              }
+            : doc,
+        ),
+      );
+
+      showSnackbar(C.uploadSuccess, "success");
+    } catch (error) {
+      console.error("Error al subir el archivo:", error);
+      showSnackbar(getErrorMessage(error, C.uploadError), "error");
+    } finally {
+      setUploadingDocumentoId(null);
+      e.target.value = "";
+    }
   };
 
-  const handleDocumentoDelete = (documentoId, setDocumentos) => {
+  // Limpieza solo local para archivos que todavia no tienen id en base.
+  const clearDocumentoLocal = (documentoId, setDocumentos) => {
     setDocumentos((prev) =>
       prev.map((doc) =>
         getDocumentKey(doc) === documentoId
@@ -388,26 +437,56 @@ export default function ScholarshipsForm({
               archivo: null,
               archivoNombre: "",
               subido: false,
+              id_archivo: null,
             }
           : doc,
       ),
     );
   };
 
+  // Si el documento ya esta guardado delega al padre para confirmar y borrar en
+  // base; si no, limpia el estado local.
+  const handleDocumentoDelete = (item, setDocumentos) => {
+    if (item.id_archivo) {
+      handleDeleteDocument?.(item);
+      return;
+    }
+
+    clearDocumentoLocal(getDocumentKey(item), setDocumentos);
+  };
+
   const handleDocumentoEconomicoDelete = (item) => {
+    if (item.id_archivo) {
+      handleDeleteDocument?.(item);
+      return;
+    }
+
     if (isEconomicOptionalDocument(item)) {
       setDocumentosEconomica((prev) =>
-        prev.filter((doc) => getDocumentKey(doc) !== getDocumentKey(item)),
+        prev.map((doc) =>
+          getDocumentKey(doc) === getDocumentKey(item)
+            ? {
+                ...doc,
+                archivo: null,
+                archivoNombre: "",
+                subido: false,
+                id_archivo: null,
+                visible: false,
+              }
+            : doc,
+        ),
       );
       return;
     }
 
-    handleDocumentoDelete(getDocumentKey(item), setDocumentosEconomica);
+    clearDocumentoLocal(getDocumentKey(item), setDocumentosEconomica);
   };
 
+  // Reglas previas al guardado: tipo de beca, opcion asociada, documentos
+  // obligatorios y descripcion economica cuando corresponde.
   const validarFormulario = () => {
     if (!formBeca.tipoBeca) {
-      showSnackbar("Seleccioná un tipo de beca", "warning");
+      showSnackbar(C.validationSelectScholarshipType, "warning");
       return false;
     }
 
@@ -416,18 +495,20 @@ export default function ScholarshipsForm({
         formBeca.tipoBeca === TIPO_BECA.SERVICIO) &&
       !formBeca.beca?.id
     ) {
-      showSnackbar("Seleccioná una opción para la beca", "warning");
+      showSnackbar(C.validationSelectScholarshipOption, "warning");
       return false;
     }
 
     const documentosFaltantes = [
       ...documentosRequeridos,
-      ...documentosEconomica,
+      ...documentosEconomicaVisibles,
     ].filter((doc) => (doc.required ?? true) && !doc.archivo && !doc.subido);
 
     if (documentosFaltantes.length > 0) {
       showSnackbar(
-        `Adjuntá: ${documentosFaltantes.map((doc) => doc.nombre).join(", ")}`,
+        C.validationAttachDocuments(
+          documentosFaltantes.map((doc) => doc.nombre).join(", "),
+        ),
         "warning",
       );
       return false;
@@ -437,23 +518,25 @@ export default function ScholarshipsForm({
       formBeca.tipoBeca === TIPO_BECA.ECONOMICA &&
       !formBeca.descripcionSituacion.trim()
     ) {
-      showSnackbar("Describí tu situación económica", "warning");
+      showSnackbar(C.validationDescribeEconomicSituation, "warning");
       return false;
     }
 
     return true;
   };
 
+  // Respaldo para archivos seleccionados localmente que no pasaron por la carga
+  // inmediata antes de guardar la solicitud.
   const subirDocumentosRequeridos = async () => {
     const documentosConArchivo = [
       ...documentosRequeridos,
-      ...documentosEconomica,
+      ...documentosEconomicaVisibles,
     ].filter((doc) => isSelectedFile(doc.archivo));
 
     await Promise.all(
       documentosConArchivo.map((doc) => {
         if (!doc.id_tipo_documento) {
-          throw new Error(`No se encontró el tipo de documento: ${doc.nombre}`);
+          throw new Error(C.documentTypeNotFound(doc.nombre));
         }
 
         return subirDocumentoEstudiante(doc.id_tipo_documento, doc.archivo);
@@ -461,15 +544,20 @@ export default function ScholarshipsForm({
     );
   };
 
+  // La beca especifica necesita un becario SAE. Si existe se reutiliza; si no,
+  // se crea antes de avanzar.
   const crearBecarioSiNoExiste = async () => {
     if (becarioActual?.id) return becarioActual;
+
+    const fechaSolicitudOriginal =
+      becarioFechaSolicitud ?? formBeca.fecha_solicitud ?? null;
 
     const payloadBecario = {
       id: 0,
       legajo: user.email,
       nombre_becario: user.nombre,
       alquila: formBeca.alquila,
-      fecha_solicitud: new Date().toISOString(),
+      fecha_solicitud: fechaSolicitudOriginal,
       aceptado_inicio: false,
       puede_pagarle: false,
       activo: true,
@@ -482,22 +570,26 @@ export default function ScholarshipsForm({
     return nuevoBecario;
   };
 
+  // Cada tipo de beca usa un endpoint distinto, pero devuelve un mensaje comun
+  // para mostrar al final del guardado.
   const crearBecaSegunTipo = async (becarioId) => {
     switch (formBeca.tipoBeca) {
       case TIPO_BECA.ECONOMICA:
         await CrearBecarioEconomica(becarioId);
-        return "Se creó la beca económica correctamente";
+        return C.createEconomicScholarshipSuccess;
       case TIPO_BECA.INVESTIGACION:
         await CrearBecarioInvestigacion(becarioId, formBeca.beca.id);
-        return "Se creó la beca de investigación correctamente";
+        return C.createInvestigationScholarshipSuccess;
       case TIPO_BECA.SERVICIO:
         await CrearBecarioServicio(becarioId, formBeca.beca.id);
-        return "Se creó la beca de servicio correctamente";
+        return C.createServiceScholarshipSuccess;
       default:
-        throw new Error("Tipo de beca inválido");
+        throw new Error(C.invalidScholarshipType);
     }
   };
 
+  // Flujo completo del boton Guardar: valida, crea/reutiliza becario, crea la
+  // beca, sube pendientes, refresca Scholarships y cierra el dialog.
   const handleDialogSave = async () => {
     if (!validarFormulario()) return;
 
@@ -511,7 +603,7 @@ export default function ScholarshipsForm({
       showSnackbar(mensaje, "success");
     } catch (err) {
       console.error("Error al crear la beca", err);
-      showSnackbar("Hubo un error al crear la beca", "error");
+      showSnackbar(C.createScholarshipError, "error");
     } finally {
       setSaving(false);
     }
@@ -527,7 +619,7 @@ export default function ScholarshipsForm({
         }}
       >
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          Solicitar Beca
+          {C.cardSolicitarTitle}
         </Typography>
         <IconButton onClick={handleClose} size="small" disabled={saving}>
           <Close />
@@ -560,7 +652,7 @@ export default function ScholarshipsForm({
           >
             <CircularProgress size={36} />
             <Typography variant="body2" color="text.secondary">
-              Guardando solicitud...
+              {C.savingRequest}
             </Typography>
           </Box>
         )}
@@ -594,56 +686,65 @@ export default function ScholarshipsForm({
           <Chip label={C.TiposBecas} size="small" sx={{ fontWeight: 700 }} />
         </Divider>
 
-        <FormControl fullWidth disabled={saving}>
-          <InputLabel>Tipo Beca</InputLabel>
-          <Select
-            value={formBeca.tipoBeca}
-            onChange={handleChange}
-            name="tipoBeca"
-            input={<OutlinedInput label="Tipo Beca" />}
-          >
-            {C.listaTiposBecas.map((beca) => (
-              <MenuItem key={beca.nombre} value={beca.nombre}>
-                {beca.nombre}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Autocomplete
+          fullWidth
+          disabled={saving}
+          options={C.listaTiposBecas}
+          value={
+            C.listaTiposBecas.find(
+              (beca) => beca.nombre === formBeca.tipoBeca,
+            ) ?? null
+          }
+          getOptionLabel={(option) => option.nombre ?? ""}
+          isOptionEqualToValue={(option, value) =>
+            option.nombre === value.nombre
+          }
+          onChange={(_, value) =>
+            setFormBeca((prev) => ({
+              ...prev,
+              tipoBeca: value?.nombre ?? "",
+              beca: null,
+            }))
+          }
+          renderInput={(params) => (
+            <SAETextField {...params} label={C.tipoBecaLabel} />
+          )}
+        />
 
         {formBeca.tipoBeca === TIPO_BECA.INVESTIGACION && (
-          <FormControl fullWidth disabled={saving}>
-            <InputLabel>Proyecto Investigación</InputLabel>
-            <Select
-              value={formBeca.beca ?? ""}
-              onChange={handleChange}
-              name="beca"
-              input={<OutlinedInput label="Proyecto Investigación" />}
-            >
-              {proyectosRows.map((proyecto) => (
-                <MenuItem key={proyecto.id} value={proyecto}>
-                  {proyecto.nombre_proyecto_investigacion}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            fullWidth
+            disabled={saving}
+            options={proyectosRows}
+            value={formBeca.beca ?? null}
+            getOptionLabel={(option) =>
+              option.nombre_proyecto_investigacion ?? ""
+            }
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            onChange={(_, value) =>
+              setFormBeca((prev) => ({ ...prev, beca: value }))
+            }
+            renderInput={(params) => (
+              <SAETextField {...params} label={C.proyectoInvestigacionLabel} />
+            )}
+          />
         )}
 
         {formBeca.tipoBeca === TIPO_BECA.SERVICIO && (
-          <FormControl fullWidth disabled={saving}>
-            <InputLabel>Área</InputLabel>
-            <Select
-              value={formBeca.beca ?? ""}
-              onChange={handleChange}
-              name="beca"
-              input={<OutlinedInput label="Área" />}
-            >
-              {serviciosRows.map((servicio) => (
-                <MenuItem key={servicio.id} value={servicio}>
-                  {servicio.nombre}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            fullWidth
+            disabled={saving}
+            options={serviciosRows}
+            value={formBeca.beca ?? null}
+            getOptionLabel={(option) => option.nombre ?? ""}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            onChange={(_, value) =>
+              setFormBeca((prev) => ({ ...prev, beca: value }))
+            }
+            renderInput={(params) => (
+              <SAETextField {...params} label={C.areaLabel} />
+            )}
+          />
         )}
 
         {formBeca.tipoBeca === TIPO_BECA.ECONOMICA && (
@@ -651,7 +752,7 @@ export default function ScholarshipsForm({
             fullWidth
             multiline
             minRows={4}
-            label="Describe tu situación económica"
+            label={C.descripcionSituacionLabel}
             name="descripcionSituacion"
             value={formBeca.descripcionSituacion}
             onChange={handleChange}
@@ -662,7 +763,7 @@ export default function ScholarshipsForm({
         {documentosRequeridos.length > 0 && (
           <Divider variant="middle" sx={{ mt: 0.5 }}>
             <Chip
-              label="Documentos Requeridos"
+              label={C.requiredDocumentsTitle}
               size="small"
               sx={{ fontWeight: 700 }}
             />
@@ -673,129 +774,37 @@ export default function ScholarshipsForm({
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {documentosRequeridos.map((item) => (
               <Grid item xs={12} sm={12} key={getDocumentKey(item)}>
-                <Card
-                  sx={{
-                    height: "100%",
-                    borderRadius: 4,
-                    maxWidth: 357,
-                    minWidth: 357,
-                    flexDirection: "column",
-                    boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
-                    border: "1px solid rgba(17, 53, 101, 0.08)",
-                    transition:
-                      "background-color 0.25s ease, border-color 0.25s ease",
-
-                    "&:hover": {
-                      backgroundColor: "#f1f5fb", // un tono más oscuro que el fondo actual
-                      borderColor: "rgba(17, 53, 101, 0.2)",
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Stack sx={{ height: "100%" }}>
-                      <Typography variant="h6">
-                        <strong>{item.nombre}</strong>
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Formatos permitidos: {item.extension}
-                      </Typography>
-                      <Box sx={{ flexGrow: 1, mt: 1 }} />
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Chip
-                          label={
-                            !item.subido
-                              ? C.docStateNotUploaded
-                              : C.docStataUplodaded
-                          }
-                          color={!item.subido ? "grey" : "success"}
-                        />
-                      </Stack>
-                      {getDocumentPreviewId(item) ? (
-                        <SAEButton
-                          onClick={() =>
-                            handlePreview?.(
-                              getDocumentPreviewId(item),
-                              getDocumentDisplayName(item),
-                            )
-                          }
-                          sx={{ flex: 1, minWidth: 0 }}
-                        >
-                          {getDocumentDisplayName(item).length > 35
-                            ? `${getDocumentDisplayName(item).slice(0, 35)}...`
-                            : getDocumentDisplayName(item)}
-                        </SAEButton>
-                      ) : (
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ flex: 1, minWidth: 0 }}
-                          noWrap
-                        >
-                          {getDocumentDisplayName(item) || "Sin archivo"}
-                        </Typography>
-                      )}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          gap: 1,
-                          alignItems: "center",
-                          flexWrap: "wrap",
-                          mt: 1,
-                        }}
-                      >
-                        <IconButton
-                          component="label"
-                          size="small"
-                          color="primary"
-                          disabled={item.subido}
-                        >
-                          <FileUpload />
-                          <input
-                            type="file"
-                            hidden
-                            accept={item.extension}
-                            onChange={(e) =>
-                              handleDocumentoChange(
-                                e,
-                                getDocumentKey(item),
-                                documentosRequeridos,
-                                setDocumentosRequeridos,
-                              )
-                            }
-                          />
-                        </IconButton>
-
-                        <IconButton
-                          size="small"
-                          color="error"
-                          disabled={!item.subido}
-                          onClick={() =>
-                            handleDocumentoDelete(
-                              getDocumentKey(item),
-                              setDocumentosRequeridos,
-                            )
-                          }
-                        >
-                          <Delete />
-                        </IconButton>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
+                <ScholarshipDocumentCard
+                  documento={item}
+                  notUploadedLabel={C.docStateNotUploaded}
+                  uploadedLabel={C.docStataUplodaded}
+                  onPreview={handlePreview}
+                  onFileChange={(event, documento) =>
+                    handleDocumentoChange(
+                      event,
+                      getDocumentKey(documento),
+                      documentosRequeridos,
+                      setDocumentosRequeridos,
+                    )
+                  }
+                  onDelete={(documento) =>
+                    handleDocumentoDelete(documento, setDocumentosRequeridos)
+                  }
+                  uploadDisabled={
+                    item.subido || uploadingDocumentoId === getDocumentKey(item)
+                  }
+                  deleteDisabled={!item.subido}
+                  showRequirement
+                />
               </Grid>
             ))}
           </Grid>
         )}
 
-        {documentosEconomica.length > 0 && (
+        {documentosEconomicaVisibles.length > 0 && (
           <Divider variant="middle" sx={{ mt: 0.5 }}>
             <Chip
-              label="Documentos de Beca Economica"
+              label={C.economicDocumentsTitle}
               size="small"
               sx={{ fontWeight: 700 }}
             />
@@ -805,29 +814,33 @@ export default function ScholarshipsForm({
         {formBeca.tipoBeca === TIPO_BECA.ECONOMICA &&
           documentosEconomicosOpcionalesDisponibles.length > 0 && (
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-              <FormControl fullWidth disabled={saving}>
-                <InputLabel>Agregar documento si corresponde</InputLabel>
-                <Select
-                  value={documentoEconomicoOpcionalId}
-                  onChange={(e) =>
-                    setDocumentoEconomicoOpcionalId(e.target.value)
-                  }
-                  input={
-                    <OutlinedInput label="Agregar documento si corresponde" />
-                  }
-                >
-                  {documentosEconomicosOpcionalesDisponibles.map(
-                    (documento) => (
-                      <MenuItem
-                        key={getDocumentKey(documento)}
-                        value={getDocumentKey(documento)}
-                      >
-                        {documento.nombre}
-                      </MenuItem>
-                    ),
-                  )}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                fullWidth
+                disabled={saving}
+                options={documentosEconomicosOpcionalesDisponibles}
+                value={
+                  documentosEconomicosOpcionalesDisponibles.find(
+                    (documento) =>
+                      getDocumentKey(documento) ===
+                      documentoEconomicoOpcionalId,
+                  ) ?? null
+                }
+                getOptionLabel={(option) => option.nombre ?? ""}
+                isOptionEqualToValue={(option, value) =>
+                  getDocumentKey(option) === getDocumentKey(value)
+                }
+                onChange={(_, value) =>
+                  setDocumentoEconomicoOpcionalId(
+                    value ? getDocumentKey(value) : "",
+                  )
+                }
+                renderInput={(params) => (
+                  <SAETextField
+                    {...params}
+                    label={C.addOptionalEconomicDocumentLabel}
+                  />
+                )}
+              />
               <SAEButton
                 variant="contained"
                 onClick={handleAgregarDocumentoEconomico}
@@ -835,134 +848,37 @@ export default function ScholarshipsForm({
                 startIcon={<AddCircleOutline />}
                 sx={{ minWidth: { sm: 150 } }}
               >
-                Agregar
+                {C.addButton}
               </SAEButton>
             </Stack>
           )}
 
-        {documentosEconomica.length > 0 && (
+        {documentosEconomicaVisibles.length > 0 && (
           <Grid container spacing={2.5} sx={{ mt: 1 }}>
-            {documentosEconomica.map((item) => (
+            {documentosEconomicaVisibles.map((item) => (
               <Grid item xs={12} sm={12} key={getDocumentKey(item)}>
-                <Card
-                  sx={{
-                    height: "100%",
-                    borderRadius: 4,
-                    maxWidth: 357,
-                    minWidth: 357,
-                    flexDirection: "column",
-                    boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
-                    border: "1px solid rgba(17, 53, 101, 0.08)",
-                    transition:
-                      "background-color 0.25s ease, border-color 0.25s ease",
-
-                    "&:hover": {
-                      backgroundColor: "#f1f5fb",
-                      borderColor: "rgba(17, 53, 101, 0.2)",
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Stack sx={{ height: "100%" }}>
-                      <Typography variant="h6">
-                        <strong>{item.nombre}</strong>
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Formatos permitidos: {item.extension}
-                      </Typography>
-                      <Box sx={{ flexGrow: 1, mt: 1 }} />
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Chip
-                          label={
-                            !item.subido
-                              ? C.docStateNotUploaded
-                              : C.docStataUplodaded
-                          }
-                          color={!item.subido ? "grey" : "success"}
-                        />
-
-                        <Chip
-                          label={
-                            item.required == true ? "Requerido!" : "Opcional"
-                          }
-                          color={item.required == true ? "error" : "warning"}
-                        />
-                      </Stack>
-                      {getDocumentPreviewId(item) ? (
-                        <SAEButton
-                          onClick={() =>
-                            handlePreview?.(
-                              getDocumentPreviewId(item),
-                              getDocumentDisplayName(item),
-                            )
-                          }
-                          sx={{ flex: 1, minWidth: 0 }}
-                        >
-                          {getDocumentDisplayName(item).length > 35
-                            ? `${getDocumentDisplayName(item).slice(0, 35)}...`
-                            : getDocumentDisplayName(item)}
-                        </SAEButton>
-                      ) : (
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ flex: 1, minWidth: 0, mt: 1 }}
-                          noWrap
-                        >
-                          {getDocumentDisplayName(item) || "Sin archivo"}
-                        </Typography>
-                      )}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          gap: 1,
-                          alignItems: "center",
-                          flexWrap: "wrap",
-                          mt: 1,
-                        }}
-                      >
-                        <IconButton
-                          component="label"
-                          size="small"
-                          color="primary"
-                          disabled={item.subido}
-                        >
-                          <FileUpload />
-                          <input
-                            type="file"
-                            hidden
-                            accept={item.extension}
-                            onChange={(e) =>
-                              handleDocumentoChange(
-                                e,
-                                getDocumentKey(item),
-                                documentosEconomica,
-                                setDocumentosEconomica,
-                              )
-                            }
-                          />
-                        </IconButton>
-
-                        <IconButton
-                          size="small"
-                          color="error"
-                          disabled={
-                            !isEconomicOptionalDocument(item) &&
-                            !isSelectedFile(item.archivo)
-                          }
-                          onClick={() => handleDocumentoEconomicoDelete(item)}
-                        >
-                          <Delete />
-                        </IconButton>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
+                <ScholarshipDocumentCard
+                  documento={item}
+                  notUploadedLabel={C.docStateNotUploaded}
+                  uploadedLabel={C.docStataUplodaded}
+                  onPreview={handlePreview}
+                  onFileChange={(event, documento) =>
+                    handleDocumentoChange(
+                      event,
+                      getDocumentKey(documento),
+                      documentosEconomica,
+                      setDocumentosEconomica,
+                    )
+                  }
+                  onDelete={handleDocumentoEconomicoDelete}
+                  uploadDisabled={
+                    item.subido || uploadingDocumentoId === getDocumentKey(item)
+                  }
+                  deleteDisabled={
+                    !isEconomicOptionalDocument(item) && !hasDocumentFile(item)
+                  }
+                  showRequirement
+                />
               </Grid>
             ))}
           </Grid>
@@ -971,14 +887,14 @@ export default function ScholarshipsForm({
 
       <DialogActions>
         <SAEButton onClick={handleClose} disabled={saving}>
-          Cancelar
+          {C.cancelButton}
         </SAEButton>
         <SAEButton
           variant="contained"
           onClick={handleDialogSave}
           disabled={saving}
         >
-          {saving ? "Guardando..." : "Guardar"}
+          {saving ? C.savingButton : C.saveButton}
         </SAEButton>
       </DialogActions>
     </Dialog>

@@ -20,27 +20,16 @@ export const PERSONAL_FIELDS = [
   { name: "legajo", label: "Legajo", type: "text" },
 ];
 
-export const GENERIC_DOCUMENTS = [
-  {
-    id: "cbu",
-    nombre: "Comprobante de CBU",
-    required: true,
-  },
-  {
-    id: "ddjj",
-    nombre: "Declaracion Jurada",
-    required: true,
-  },
-];
-
+// Documentos comunes a cualquier solicitud de beca.
 export const REQUERID_DOCUMENTS = [
   {
     id_tipo_documento: null,
     nombre: "Comprobante de CBU",
+    descripcion: "Constancia bancaria donde figure tu CBU para pagos.",
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_CBU",
+    formatoNombre: "{legajo}_CBU",
     id_archivo: null,
     extension: null,
     required: true,
@@ -48,59 +37,66 @@ export const REQUERID_DOCUMENTS = [
   {
     id_tipo_documento: null,
     nombre: "Declaracion Jurada",
+    descripcion: "Formulario firmado con la informacion declarada para la solicitud.",
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_DDJJ",
+    formatoNombre: "{legajo}_DDJJ",
     id_archivo: null,
     extension: null,
     required: true,
   },
 ];
 
+// Documentos especificos para la beca economica. Los opcionales se muestran
+// solo cuando el usuario los agrega o cuando ya tienen un archivo cargado.
 export const ECONOMIC_DOCUMENTS = [
   {
     nombre: "DNI Grupo Familiar",
+    descripcion: "DNI de las personas que integran tu grupo familiar.",
     required: true,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_DNI_FAMILIAR",
+    formatoNombre: "{legajo}_DNI_FAMILIAR",
     id_archivo: null,
   },
   {
     nombre: "Comprobante Ingresos Mensuales",
+    descripcion: "Recibos de sueldo, monotributo, jubilacion u otros ingresos del hogar.",
     required: true,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_INGRESOS_MENSUALES",
+    formatoNombre: "{legajo}_INGRESOS_MENSUALES",
     id_archivo: null,
   },
   {
     nombre: "Factura Servicio",
+    descripcion: "Factura reciente de luz, gas, agua, internet u otro servicio del domicilio.",
     required: true,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_FACTURAS_SERVICIOS",
+    formatoNombre: "{legajo}_FACTURAS_SERVICIOS",
     id_archivo: null,
   },
   {
     nombre: "Impuesto Inmobiliario",
+    descripcion: "Comprobante del impuesto inmobiliario de la vivienda familiar.",
     required: true,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_IMPUESTO_INMOBILIARIO",
+    formatoNombre: "{legajo}_IMPUESTO_INMOBILIARIO",
     id_archivo: null,
   },
 ];
@@ -108,90 +104,62 @@ export const ECONOMIC_DOCUMENTS = [
 export const ECONOMIC_OPTIONAL_DOCUMENTS = [
   {
     nombre: "Constancia de Desocupado",
+    descripcion: "Constancia emitida por ANSES si algun integrante no tiene empleo.",
     required: false,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_CONSTANCIA_DESOCUPADO",
+    formatoNombre: "{legajo}_CONSTANCIA_DESOCUPADO",
     id_archivo: null,
   },
   {
     nombre: "Libreta Casamiento o Partida Hermanos",
+    descripcion: "Documentacion que acredite hermanos menores a cargo del grupo familiar.",
     required: false,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_HERMANOS_MENORES",
+    formatoNombre: "{legajo}_HERMANOS_MENORES",
     id_archivo: null,
   },
   {
     nombre: "Libreta Casamiento y Partida Hijos",
+    descripcion: "Documentacion que acredite conyuge o hijos a cargo.",
     required: false,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_FAMILIA_CASADO_HIJOS",
+    formatoNombre: "{legajo}_FAMILIA_CASADO_HIJOS",
     id_archivo: null,
   },
   {
     nombre: "Contrato Alquiler y Pago",
+    descripcion: "Contrato de alquiler y comprobante del ultimo pago realizado.",
     required: false,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_CONTRATO_ALQUILER",
+    formatoNombre: "{legajo}_CONTRATO_ALQUILER",
     id_archivo: null,
   },
   {
     nombre: "Pago Credito Hipotecario",
+    descripcion: "Comprobante del pago mensual del credito hipotecario.",
     required: false,
     extension: null,
     id_tipo_documento: null,
     subido: false,
     archivo: null,
     archivoNombre: "",
-    formatoNombre: "{Apellido}_{legajo}_{carrera}_CREDITO_HIPOTECARIO",
+    formatoNombre: "{legajo}_CREDITO_HIPOTECARIO",
     id_archivo: null,
   },
 ];
-
-export const DOCUMENTS_BY_TIPO_BECA = {
-  [TIPO_BECA.ECONOMICA]: REQUERID_DOCUMENTS,
-  [TIPO_BECA.SERVICIO]: REQUERID_DOCUMENTS,
-  [TIPO_BECA.INVESTIGACION]: REQUERID_DOCUMENTS,
-};
-
-export const TIPO_BECA_FIELDS = {
-  [TIPO_BECA.INVESTIGACION]: {
-    type: "select",
-    label: "Proyecto Investigacion",
-    field: "beca",
-    optionsSource: "proyectosRows",
-    valueProp: "id",
-    labelProp: "nombre_proyecto_investigacion",
-    fullRow: true,
-  },
-  [TIPO_BECA.SERVICIO]: {
-    type: "select",
-    label: "Area",
-    field: "beca",
-    optionsSource: "serviciosRows",
-    valueProp: "id",
-    labelProp: "nombre",
-    fullRow: true,
-  },
-  [TIPO_BECA.ECONOMICA]: {
-    type: "textarea",
-    label: "Describe tu situacion economica",
-    field: "descripcionSituacion",
-    minRows: 4,
-  },
-};

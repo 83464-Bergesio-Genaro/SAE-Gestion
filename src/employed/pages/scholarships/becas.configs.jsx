@@ -3,6 +3,9 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import PersonIcon from "@mui/icons-material/Person";
 import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import PeopleIcon from "@mui/icons-material/People";
+
+// Cada columna cumple doble funcion: configura el DataGrid y tambien define
+// como debe renderizarse ese campo dentro del dialog generico.
 const proyectosColumns = [
   {
     field: "id",
@@ -166,6 +169,8 @@ const becariosColumns = [
   {
     field: "legajo",
     headerName: "Legajo",
+    minWidth: 100,
+    flex: 1,
     form: {
       type: "user-search",
       visible: true,
@@ -176,9 +181,9 @@ const becariosColumns = [
   {
     field: "activo",
     headerName: "Activo",
-    width: 100,
+    minWidth: 100,
     defaultValue: false,
-
+    flex: 1,
     valueFormatter: (value) => (value ? "Sí" : "No"),
     form: {
       type: "switch",
@@ -189,7 +194,7 @@ const becariosColumns = [
   {
     field: "aceptado_inicio",
     headerName: "Aceptado al Inicio",
-    minWidth: 170,
+    minWidth: 100,
     flex: 1,
     defaultValue: false,
     valueFormatter: (value) => (value ? "Sí" : "No"),
@@ -201,7 +206,7 @@ const becariosColumns = [
   {
     field: "puede_pagarle",
     headerName: "Puede Pagarle",
-    minWidth: 170,
+    minWidth: 100,
     flex: 1,
     defaultValue: false,
     valueFormatter: (value) => (value ? "Sí" : "No"),
@@ -215,7 +220,7 @@ const becariosColumns = [
   {
     field: "anio_beca",
     headerName: "Año de Beca",
-    minWidth: 170,
+    minWidth: 100,
     flex: 1,
     defaultValue: "",
     form: {
@@ -238,12 +243,164 @@ const becariosColumns = [
   },
 ];
 
+export const REQUERID_DOCUMENTS = [
+  {
+    id_tipo_documento: null,
+    nombre: "Comprobante de CBU",
+    descripcion: "Constancia bancaria donde figure tu CBU para pagos.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_CBU",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+  {
+    id_tipo_documento: null,
+    nombre: "Declaracion Jurada",
+    descripcion:
+      "Formulario firmado con la informacion declarada para la solicitud.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_DDJJ",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+];
+
+// Documentos especificos para la beca economica. Los opcionales se muestran
+// solo cuando el usuario los agrega o cuando ya tienen un archivo cargado.
+export const ECONOMIC_DOCUMENTS = [
+  {
+    nombre: "DNI Grupo Familiar",
+    descripcion: "DNI de las personas que integran tu grupo familiar.",
+    required: true,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_DNI_FAMILIAR",
+    id_archivo: null,
+  },
+  {
+    nombre: "Comprobante Ingresos Mensuales",
+    descripcion:
+      "Recibos de sueldo, monotributo, jubilacion u otros ingresos del hogar.",
+    required: true,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_INGRESOS_MENSUALES",
+    id_archivo: null,
+  },
+  {
+    nombre: "Factura Servicio",
+    descripcion:
+      "Factura reciente de luz, gas, agua, internet u otro servicio del domicilio.",
+    required: true,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_FACTURAS_SERVICIOS",
+    id_archivo: null,
+  },
+  {
+    nombre: "Impuesto Inmobiliario",
+    descripcion:
+      "Comprobante del impuesto inmobiliario de la vivienda familiar.",
+    required: true,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_IMPUESTO_INMOBILIARIO",
+    id_archivo: null,
+  },
+];
+
+export const ECONOMIC_OPTIONAL_DOCUMENTS = [
+  {
+    nombre: "Constancia de Desocupado",
+    descripcion:
+      "Constancia emitida por ANSES si algun integrante no tiene empleo.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_CONSTANCIA_DESOCUPADO",
+    id_archivo: null,
+  },
+  {
+    nombre: "Libreta Casamiento o Partida Hermanos",
+    descripcion:
+      "Documentacion que acredite hermanos menores a cargo del grupo familiar.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_HERMANOS_MENORES",
+    id_archivo: null,
+  },
+  {
+    nombre: "Libreta Casamiento y Partida Hijos",
+    descripcion: "Documentacion que acredite conyuge o hijos a cargo.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_FAMILIA_CASADO_HIJOS",
+    id_archivo: null,
+  },
+  {
+    nombre: "Contrato Alquiler y Pago",
+    descripcion:
+      "Contrato de alquiler y comprobante del ultimo pago realizado.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_CONTRATO_ALQUILER",
+    id_archivo: null,
+  },
+  {
+    nombre: "Pago Credito Hipotecario",
+    descripcion: "Comprobante del pago mensual del credito hipotecario.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_CREDITO_HIPOTECARIO",
+    id_archivo: null,
+  },
+];
+
 export const createEmptyObject = (columns) =>
   columns.reduce((acc, column) => {
     acc[column.field] = column.defaultValue;
     return acc;
   }, {});
 
+// Arma las cards/secciones que consume SectionGridCard. El componente no conoce
+// entidades concretas; solo lee esta configuracion.
 export const createSectionConfig = ({
   proyectosRows,
   loadingProyectos,
@@ -308,6 +465,8 @@ export const createSectionConfig = ({
   },
 });
 
+// Configuracion de los formularios embebidos para editar/ver la beca asociada a
+// un becario. Recibe rows actuales para llenar selects de servicios/proyectos.
 export const becasGridConfig = (serviciosRows, proyectosRows) => ({
   economica: {
     columns: [

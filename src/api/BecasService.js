@@ -124,8 +124,16 @@ export async function ObtenerUsuariosXLegajo(legajo) {
   );
 }
 export async function CrearBecarioSAE(body) {
-  console.log(body);
   return RequestAPI(`/api/Beca/CrearBecarioSAE`, "POST", body);
+}
+
+export async function EditarBecarioSAE(id, body) {
+  console.log("Editando becario SAE con ID:", id, "y body:", body);
+  return RequestAPI(
+    `/api/Beca/ModificarBecarioSAE/${encodeURIComponent(id)}`,
+    "PUT",
+    body,
+  );
 }
 
 export async function CrearBecarioEconomica(id_becario) {
@@ -134,16 +142,42 @@ export async function CrearBecarioEconomica(id_becario) {
     "POST",
   );
 }
+
+export async function EditarBecarioEconomica(id, body) {
+  return RequestAPI(
+    `/api/Beca/ModificarBecarioEconomica/${encodeURIComponent(id)}`,
+    "PUT",
+    body,
+  );
+}
+
 export async function CrearBecarioInvestigacion(id_becario, id_proyecto) {
   return RequestAPI(
     `/api/Beca/CrearBecarioInvestigacion/${encodeURIComponent(id_becario)}/${encodeURIComponent(id_proyecto)}`,
     "POST",
   );
 }
+
+export async function EditarBecarioInvestigacion(id, body) {
+  return RequestAPI(
+    `/api/Beca/ModificarBecarioInvestigacion/${encodeURIComponent(id)}`,
+    "PUT",
+    body,
+  );
+}
+
 export async function CrearBecarioServicio(id_becario, id_servicio) {
   return RequestAPI(
     `/api/Beca/CrearBecarioServicio/${encodeURIComponent(id_becario)}/${encodeURIComponent(id_servicio)}`,
     "POST",
+  );
+}
+
+export async function EditarBecarioServicio(id, body) {
+  return RequestAPI(
+    `/api/Beca/ModificarBecarioServicio/${encodeURIComponent(id)}`,
+    "PUT",
+    body,
   );
 }
 

@@ -518,13 +518,15 @@ export function SectionGridCard({
     view: currentSection?.actionButton?.textView,
   };
 
-  const getDialogDataFromRow = (row) =>
+  const getDialogDataFromRow = (row = {}) =>
     currentSection.columns
       .filter((col) => col.form !== false)
       .reduce((acc, col) => {
-        acc[col.field] = row?.[col.field] ?? col.defaultValue ?? "";
+        if (acc[col.field] === undefined) {
+          acc[col.field] = col.defaultValue ?? "";
+        }
         return acc;
-      }, {});
+      }, cloneValue(row ?? {}));
 
   const resetDocumentosBecario = () => {
     setDocumentosBecario({ comunes: [], economica: [] });
@@ -759,7 +761,6 @@ export function SectionGridCard({
 
   async function openEdit(row, tabTitle) {
     const parsedData = getDialogDataFromRow(row);
-
     setDialogData(parsedData);
     setOriginalDialogData(cloneValue(parsedData));
     setDialogMode("edit");
@@ -880,7 +881,6 @@ export function SectionGridCard({
     try {
       setDialogSaving(true);
       setDialogError("");
-
       await onSave?.({
         cardKey,
         sectionKey: activeSection,

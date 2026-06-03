@@ -1,8 +1,8 @@
 .color-container{
     background: linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%);
     width: 100%;
-    min-height: 70vh;
-    padding: 30px 15%;
+    min-height: 70vh !important;
+    padding: 50px 15%;
 
 }
 .image-container{
@@ -11,6 +11,9 @@
     background-position: right top;
 }
 @media (max-width: 750px){
+.color-container{
+    min-height: 30vh !important;
+}
     .image-container{
         padding: 0;
         background-position: center center;

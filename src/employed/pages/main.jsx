@@ -22,7 +22,7 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import { useAuth } from "../../shared/auth/AuthContext";
 import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
 import { ObtenerEventosPublicos } from "../../api/JPAService";
-import { EmployedCalendar } from "./users/employedCalendar";
+import { EmployedCalendar } from "./users/EmployedCalendar";
 import { AdminUsersProvider } from "./users/AdminUsersContext";
 
 const fallbackEventos = [

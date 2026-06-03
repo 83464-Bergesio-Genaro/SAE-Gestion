@@ -25,12 +25,12 @@ import {
   Snackbar,
 } from "@mui/material";
 import { useAuth } from "../../../shared/auth/AuthContext";
-import { useState,useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAESpinner from "../../components/spinner/SAESpinner";
+import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AddIcon from "@mui/icons-material/Add";
@@ -53,7 +53,7 @@ import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 
 import { DataGrid } from "@mui/x-data-grid";
-import { HealthUsersProvider, useHealthUser } from './HealthContext'; 
+import { HealthUsersProvider, useHealthUser } from './healthContext'; 
 
 const PALETTE = [
     "#8A8A8A",//Pendiente

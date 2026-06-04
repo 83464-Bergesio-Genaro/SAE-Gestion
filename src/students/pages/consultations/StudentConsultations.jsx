@@ -28,6 +28,8 @@ import {
   SAE_EMAIL,
 } from "../../../shared/pages/consultations/consultations.config";
 
+import HeaderPage from "../../components/headerPage";
+
 const isValidEmail = (value) =>
   /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value.trim());
 
@@ -72,9 +74,17 @@ export default function StudentConsultations() {
   };
 
   return (
-    <Box sx={{ mt: "-90px", pt: "120px", pb: 8, bgcolor: "#f4f8fc", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        mt: "-90px",
+        pt: { xs: "114px", md: "130px" },
+        pb: 8,
+        minHeight: "calc(100vh - 90px)",
+        bgcolor: "#f4f8fc",
+      }}
+    >
       <Container maxWidth="xl">
-        <Box
+        {/* <Box
           sx={{
             borderRadius: 5,
             p: { xs: 3, md: 5 },
@@ -91,15 +101,30 @@ export default function StudentConsultations() {
           <Typography sx={{ mt: 1, maxWidth: 700 }}>
             Encontrá respuestas rápidas o escribinos para recibir ayuda personalizada.
           </Typography>
+        </Box> */}
+
+        <HeaderPage
+          title="Consultas SAE"
+          description="Encontrá respuestas rápidas o escribinos para recibir ayuda personalizada."
+          backgroundImage="images/carrousel/AuditorioUTN.jpeg"
+          icon={<ContactSupportIcon />}
+        />
+
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
+            Preguntas frecuentes
+          </Typography>
+          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
+            Las Preguntas frecuentes
+          </Typography>
         </Box>
 
-        <Typography variant="h4" fontWeight={800} color="#123666" sx={{ mt: 5 }}>
-          Preguntas frecuentes
-        </Typography>
         <Grid container spacing={2.5} sx={{ mt: 1 }}>
           {CONSULTATION_FAQS.map((faq) => (
             <Grid key={faq.id} size={{ xs: 12, md: 6 }}>
-              <Card sx={{ height: "100%", borderRadius: 4, overflow: "hidden" }}>
+              <Card
+                sx={{ height: "100%", borderRadius: 4, overflow: "hidden" }}
+              >
                 <Box
                   sx={{
                     height: 150,
@@ -115,7 +140,9 @@ export default function StudentConsultations() {
                       <Typography fontWeight={700}>{faq.question}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <Typography color="text.secondary">{faq.answer}</Typography>
+                      <Typography color="text.secondary">
+                        {faq.answer}
+                      </Typography>
                       <SAEButton
                         endIcon={<OpenInNewIcon />}
                         onClick={() => navigate(faq.link)}
@@ -131,7 +158,12 @@ export default function StudentConsultations() {
           ))}
         </Grid>
 
-        <Typography variant="h4" fontWeight={800} color="#123666" sx={{ mt: 5 }}>
+        <Typography
+          variant="h4"
+          fontWeight={800}
+          color="#123666"
+          sx={{ mt: 5 }}
+        >
           Más respuestas rápidas
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1, mb: 2 }}>
@@ -169,25 +201,61 @@ export default function StudentConsultations() {
               Enviar una consulta
             </Typography>
             <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
-              Se abrirá tu aplicación de correo con el mensaje preparado para {SAE_EMAIL}.
+              Se abrirá tu aplicación de correo con el mensaje preparado para{" "}
+              {SAE_EMAIL}.
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <SAETextField fullWidth required label="Nombre" name="nombre" value={form.nombre} onChange={handleChange} />
+                  <SAETextField
+                    fullWidth
+                    required
+                    label="Nombre"
+                    name="nombre"
+                    value={form.nombre}
+                    onChange={handleChange}
+                  />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <SAETextField fullWidth required type="email" label="Correo" name="email" value={form.email} onChange={handleChange} />
+                  <SAETextField
+                    fullWidth
+                    required
+                    type="email"
+                    label="Correo"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                  />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <SAETextField fullWidth required label="Asunto" name="asunto" value={form.asunto} onChange={handleChange} />
+                  <SAETextField
+                    fullWidth
+                    required
+                    label="Asunto"
+                    name="asunto"
+                    value={form.asunto}
+                    onChange={handleChange}
+                  />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <SAETextField fullWidth required multiline minRows={5} label="Consulta" name="mensaje" value={form.mensaje} onChange={handleChange} />
+                  <SAETextField
+                    fullWidth
+                    required
+                    multiline
+                    minRows={5}
+                    label="Consulta"
+                    name="mensaje"
+                    value={form.mensaje}
+                    onChange={handleChange}
+                  />
                 </Grid>
               </Grid>
               <Stack direction="row" justifyContent="flex-end" sx={{ mt: 3 }}>
-                <SAEButton type="submit" variant="contained" endIcon={<SendIcon />}>
+                <SAEButton
+                  type="submit"
+                  variant="contained"
+                  endIcon={<SendIcon />}
+                >
                   Preparar correo
                 </SAEButton>
               </Stack>
@@ -196,7 +264,11 @@ export default function StudentConsultations() {
         </Card>
       </Container>
 
-      <Snackbar open={Boolean(toast)} autoHideDuration={4000} onClose={() => setToast("")}>
+      <Snackbar
+        open={Boolean(toast)}
+        autoHideDuration={4000}
+        onClose={() => setToast("")}
+      >
         <Alert severity="warning" variant="filled" onClose={() => setToast("")}>
           {toast}
         </Alert>

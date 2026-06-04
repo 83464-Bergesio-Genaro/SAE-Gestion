@@ -71,6 +71,9 @@ import {
   ECONOMIC_OPTIONAL_DOCUMENTS,
 } from "./scholarship.configs";
 
+import HeaderPage from "../../components/headerPage";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
+
 const C = SCHOLARSHIP_STRINGS;
 
 const REQUIRED_PROFILE_FIELDS = [
@@ -292,37 +295,40 @@ export default function Scholarships() {
   }, []);
 
   // Carga el becario base y las becas asociadas al usuario logueado.
-  const cargarMisBecas = useCallback(async ({ showLoading = true } = {}) => {
-    if (!user?.email) return;
+  const cargarMisBecas = useCallback(
+    async ({ showLoading = true } = {}) => {
+      if (!user?.email) return;
 
-    try {
-      if (showLoading) setLoadingScholarships(true);
-      const becario = await ObtenerBecariosXLegajo(user.email);
+      try {
+        if (showLoading) setLoadingScholarships(true);
+        const becario = await ObtenerBecariosXLegajo(user.email);
 
-      if (!isValidObjectResponse(becario)) {
+        if (!isValidObjectResponse(becario)) {
+          setBecarioActual(null);
+          setMisBecas([]);
+          return;
+        }
+
+        setBecarioActual(becario);
+
+        const [economica, servicio, investigacion] = await Promise.all([
+          ObtenerBecariosEconomicaXLegajo(user.email),
+          ObtenerBecariosServiciosXLegajo(user.email),
+          ObtenerBecariosInvestigacionXLegajo(user.email),
+        ]);
+
+        setMisBecas(normalizarBecas(economica, servicio, investigacion));
+      } catch (error) {
+        console.error("Error al cargar becario y becas", error);
         setBecarioActual(null);
         setMisBecas([]);
-        return;
+        showSnackbar(C.loadScholarshipsError, "error");
+      } finally {
+        if (showLoading) setLoadingScholarships(false);
       }
-
-      setBecarioActual(becario);
-
-      const [economica, servicio, investigacion] = await Promise.all([
-        ObtenerBecariosEconomicaXLegajo(user.email),
-        ObtenerBecariosServiciosXLegajo(user.email),
-        ObtenerBecariosInvestigacionXLegajo(user.email),
-      ]);
-
-      setMisBecas(normalizarBecas(economica, servicio, investigacion));
-    } catch (error) {
-      console.error("Error al cargar becario y becas", error);
-      setBecarioActual(null);
-      setMisBecas([]);
-      showSnackbar(C.loadScholarshipsError, "error");
-    } finally {
-      if (showLoading) setLoadingScholarships(false);
-    }
-  }, [normalizarBecas, showSnackbar, user?.email]);
+    },
+    [normalizarBecas, showSnackbar, user?.email],
+  );
 
   // Carga directa desde "Mis Documentos". El formulario usa el mismo servicio,
   // pero maneja su propio estado local mientras el dialog esta abierto.
@@ -633,7 +639,7 @@ export default function Scholarships() {
       }}
     >
       <Container maxWidth="xl">
-        <Box
+        {/* <Box
           sx={{
             overflow: "hidden",
             borderRadius: 6,
@@ -689,7 +695,13 @@ export default function Scholarships() {
               filter: "drop-shadow(0 18px 35px rgba(0,0,0,0.22))",
             }}
           />
-        </Box>
+        </Box> */}
+        <HeaderPage
+          title={C.bigTitle}
+          description={C.bigSubtitle}
+          backgroundImage="images/carrousel/EntradaUTN.jpg"
+          icon={<Diversity3Icon />}
+        />
 
         <Box sx={{ mt: 3 }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>

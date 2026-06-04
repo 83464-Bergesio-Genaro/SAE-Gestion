@@ -36,6 +36,9 @@ import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
 import { SportsProvider } from "./SportsContext";
 import { useSportsContext } from "./useSportsContext";
 
+import HeaderPage from "../../components/headerPage";
+import SportsHandballIcon from "@mui/icons-material/SportsHandball";
+
 const C = SPORTS_STRINGS;
 
 function StudentSportsContent() {
@@ -77,7 +80,7 @@ function StudentSportsContent() {
       }}
     >
       <Container maxWidth="xl">
-        <Box
+        {/* <Box
           sx={{
             overflow: "hidden",
             borderRadius: 6,
@@ -134,7 +137,15 @@ function StudentSportsContent() {
               filter: "drop-shadow(0 18px 35px rgba(0,0,0,0.22))",
             }}
           />
-        </Box>
+        </Box> */}
+
+        <HeaderPage
+          title={C.bigTitle}
+          description={C.bigSubtitle}
+          backgroundImage="images/carrousel/EntradaUTN.jpg"
+          icon={<SportsHandballIcon />}
+        />
+
         <Box sx={{ mt: 3 }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
             {C.documentationTitle}

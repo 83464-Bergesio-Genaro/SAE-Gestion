@@ -7,7 +7,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { Delete, FileUpload } from "@mui/icons-material";
+import { Delete, FileUpload, OpenInNew } from "@mui/icons-material";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import {
   getDocumentDisplayName,
@@ -90,6 +90,23 @@ export default function ScholarshipDocumentCard({
           <Typography variant="caption" color="text.secondary">
             {description}
           </Typography>
+
+          {documento.externalUrl && (
+            <SAEButton
+              component="a"
+              href={documento.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              endIcon={<OpenInNew />}
+              sx={{
+                alignSelf: "flex-start",
+                minWidth: 0,
+                px: 0,
+              }}
+            >
+              {documento.externalUrlLabel || "Abrir documento"}
+            </SAEButton>
+          )}
 
           {/* Si existe id de archivo permite previsualizar; si no, muestra estado vacio. */}
           {previewId ? (

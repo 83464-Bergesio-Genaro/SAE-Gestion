@@ -130,17 +130,18 @@ export default function ScholarshipsForm({
   handlePreview,
   handleDeleteDocument,
   showSnackbar,
+  perfilCompleto,
+  camposPerfilFaltantes = [],
 }) {
-  const datosCompletos = user?.DatosCompletos;
-  const userLegajo = datosCompletos?.legajo;
-  const userNombreCompleto = datosCompletos?.nombre;
-  const userApellido = datosCompletos?.apellido;
-  const userDniCompleto = datosCompletos?.dni;
-  const userFechaNacimiento =
-    datosCompletos?.FechaNacimiento ?? datosCompletos?.fechaNacimiento;
-  const userTelefonoCompleto = datosCompletos?.Telefono;
-  const userMailCompleto = datosCompletos?.mail;
-  const userDomicilioCompleto = datosCompletos?.Domicilio;
+  const datosPerfil = user?.datosPerfil ?? {};
+  const userLegajo = datosPerfil.legajo;
+  const userNombreCompleto = datosPerfil.nombres;
+  const userApellido = datosPerfil.apellidos;
+  const userDniCompleto = datosPerfil.dni;
+  const userFechaNacimiento = datosPerfil.fecha_nacimiento;
+  const userTelefonoCompleto = datosPerfil.telefono;
+  const userMailCompleto = datosPerfil.email;
+  const userDomicilioCompleto = datosPerfil.direccion;
   const userEmail = user?.email;
   const userNombre = user?.nombre;
   const userDni = user?.dni;
@@ -591,6 +592,14 @@ export default function ScholarshipsForm({
   // Flujo completo del boton Guardar: valida, crea/reutiliza becario, crea la
   // beca, sube pendientes, refresca Scholarships y cierra el dialog.
   const handleDialogSave = async () => {
+    if (!perfilCompleto) {
+      showSnackbar(
+        `Completá tu perfil antes de solicitar una beca. Faltan: ${camposPerfilFaltantes.join(", ")}.`,
+        "warning",
+      );
+      return;
+    }
+
     if (!validarFormulario()) return;
 
     try {
@@ -667,7 +676,10 @@ export default function ScholarshipsForm({
 
         <Grid container spacing={2}>
           {PERSONAL_FIELDS.map((field) => (
-            <Grid item key={field.name} xs={12} sm={field.fullWidth ? 12 : 6}>
+            <Grid
+              key={field.name}
+              size={{ xs: 12, sm: 6, md: field.md ?? 6 }}
+            >
               <SAETextField
                 fullWidth
                 label={field.label}
@@ -675,8 +687,13 @@ export default function ScholarshipsForm({
                 disabled
                 type={field.type}
                 InputLabelProps={field.InputLabelProps}
-                value={formBeca[field.name] ?? ""}
-                onChange={handleChange}
+                value={datosPerfil[field.name] ?? ""}
+                sx={{
+                  "& .MuiInputBase-input.Mui-disabled": {
+                    WebkitTextFillColor: "rgba(0, 0, 0, 0.75)",
+                    textOverflow: "ellipsis",
+                  },
+                }}
               />
             </Grid>
           ))}

@@ -15,32 +15,21 @@ import {
   AccordionSummary,
   AccordionDetails,
   Chip,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   DialogContentText,
-  FormControlLabel,
-  Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  OutlinedInput,
   Snackbar,
   Alert,
 } from "@mui/material";
 import { SCHOLARSHIP_STRINGS } from "./scholarship.string";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAESwitch from "../../../shared/components/buttons/SAESwitch";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
-  FileUpload,
   AddCircleOutline,
   ExpandMore,
-  Delete,
   AttachMoney,
   Diversity3,
   School,
@@ -48,6 +37,7 @@ import {
 
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
 import ScholarshipsForm from "./scholarshipsForm";
+import ScholarshipDocumentCard from "./ScholarshipDocumentCard";
 
 import {
   ObtenerBecariosXLegajo,
@@ -64,14 +54,21 @@ import { obtenerTiposDocumento } from "../../../api/HerramientasService";
 
 import {
   INITIAL_PREVIEW,
+  asignarArchivosADocumentos,
+  asignarTiposADocumentos,
+  formatDate,
+  getEstadoBecaConfig,
+  getEstadoBecaDesdeBecario,
+  getErrorMessage,
+  isValidObjectResponse,
   isPdfDocument,
   MAX_SIZE_BYTES,
   MAX_SIZE_MB,
   construirNombre,
-  obtenerApellidoDesdeNombre,
-  obtenerCarreraDesdeEmail,
+  obtenerLegajoDesdeEmail,
 } from "./scholarship.utils";
 import {
+  TIPO_BECA,
   REQUERID_DOCUMENTS,
   ECONOMIC_DOCUMENTS,
   ECONOMIC_OPTIONAL_DOCUMENTS,
@@ -91,44 +88,8 @@ const C = SCHOLARSHIP_STRINGS;
 
 */
 
-// Centralizo los nombres de los tipos de beca para evitar strings repetidos en todo el componente.
-// Esto reduce errores por diferencias mínimas como mayúsculas, tildes o espacios.
-const TIPO_BECA = {
-  ECONOMICA: "Beca Economica",
-  SERVICIO: "Beca de Servicio",
-  INVESTIGACION: "Beca de Investigacion",
-};
-
-// Estados posibles que después se traducen a textos y colores de Chip.
-const ESTADO_BECA = {
-  SOLICITADO: "solicitado",
-  RECHAZADO: "rechazado",
-  ACEPTADO_INICIO: "aceptado_inicio",
-  ACEPTADO_PAGADO: "aceptado_pagado",
-  FIN_BECADO: "fin_becado",
-};
-
-// Devuelve cómo se debe mostrar visualmente el estado de una beca.
-// MUI usa "color" para pintar el Chip: warning, error, success, etc.
-const getEstadoBecaConfig = (estado) => {
-  switch (estado) {
-    case ESTADO_BECA.SOLICITADO:
-      return { label: "Solicitado", color: "warning" };
-    case ESTADO_BECA.RECHAZADO:
-      return { label: "Rechazado", color: "error" };
-    case ESTADO_BECA.ACEPTADO_INICIO:
-      return { label: "Aceptado", color: "info" };
-    case ESTADO_BECA.ACEPTADO_PAGADO:
-      return { label: "Pagado", color: "success" };
-    case ESTADO_BECA.FIN_BECADO:
-      return { label: "Finalizado", color: "secondary" };
-    default:
-      return { label: estado || "Sin estado", color: "default" };
-  }
-};
-
-// Devuelve el ícono correspondiente según el tipo de beca.
-// Así evitamos guardar JSX mezclado dentro de la respuesta original de la API.
+// Devuelve el icono visual para cada tipo de beca sin mezclar JSX dentro de la
+// respuesta normalizada de la API.
 const getBecaIcon = (tipoBeca) => {
   switch (tipoBeca) {
     case TIPO_BECA.ECONOMICA:
@@ -140,20 +101,6 @@ const getBecaIcon = (tipoBeca) => {
     default:
       return null;
   }
-};
-
-// La API puede devolver {} cuando no hay beca.
-// Esta función confirma que la respuesta sea un objeto real y que tenga id.
-const isValidObjectResponse = (value) =>
-  Boolean(value && typeof value === "object" && value.id);
-
-// Formatea fechas para mostrarlas en pantalla.
-// Si la fecha viene vacía o inválida, muestra "-" para no romper el render.
-const formatDate = (dateValue) => {
-  if (!dateValue) return "-";
-
-  const date = new Date(dateValue);
-  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString();
 };
 
 export default function Scholarships() {
@@ -185,6 +132,7 @@ export default function Scholarships() {
   const [preview, setPreview] = useState(INITIAL_PREVIEW);
 
   const [cbu, setCbu] = useState("");
+  const [cbuGuardado, setCbuGuardado] = useState(false);
 
   const [openPopup, setOpenPopup] = useState(false);
   const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
@@ -197,6 +145,8 @@ export default function Scholarships() {
   // Carga los proyectos disponibles para la beca de investigación.
 
   // Normaliza las respuestas de la API porque vienen como objeto único o como {} cuando no existe beca.
+  // Trae tipos de documento para completar id_tipo_documento y extension en las
+  // configuraciones locales.
   const cargarTiposDocumento = useCallback(async () => {
     try {
       const data = await obtenerTiposDocumento();
@@ -207,6 +157,8 @@ export default function Scholarships() {
     }
   }, []);
 
+  // Metodo compartido con ScholarshipsForm. Guarda en base y sincroniza las dos
+  // listas locales porque un tipo de documento puede verse en mas de una seccion.
   const subirDocumentoEstudiante = useCallback(
     async (idTipoDocumento, archivo) => {
       const documentoGuardado = await crearDocumentoEstudiante(
@@ -253,6 +205,8 @@ export default function Scholarships() {
     [],
   );
 
+  // Cada endpoint devuelve una forma distinta. Aca se arma una lista unica para
+  // renderizar las cards de "Mis Becas".
   const normalizarBecas = useCallback((economica, servicio, investigacion) => {
     return [
       isValidObjectResponse(economica) && {
@@ -260,26 +214,27 @@ export default function Scholarships() {
         tipoBeca: TIPO_BECA.ECONOMICA,
         iconBeca: getBecaIcon(TIPO_BECA.ECONOMICA),
         fechaSolicitud: economica.becario?.fecha_solicitud,
-        estado: ESTADO_BECA.SOLICITADO,
+        estado: getEstadoBecaDesdeBecario(economica.becario),
       },
       isValidObjectResponse(servicio) && {
         ...servicio,
         tipoBeca: TIPO_BECA.SERVICIO,
         iconBeca: getBecaIcon(TIPO_BECA.SERVICIO),
         fechaSolicitud: servicio.becario?.fecha_solicitud,
-        estado: ESTADO_BECA.SOLICITADO,
-        servicio: servicio.servicio?.nombre ?? servicio.servicio ?? "-",
+        estado: getEstadoBecaDesdeBecario(servicio.becario),
+        servicio:
+          servicio.servicio?.nombre ?? servicio.servicio ?? C.emptyValue,
       },
       isValidObjectResponse(investigacion) && {
         ...investigacion,
         tipoBeca: TIPO_BECA.INVESTIGACION,
         iconBeca: getBecaIcon(TIPO_BECA.INVESTIGACION),
         fechaSolicitud: investigacion.becario?.fecha_solicitud,
-        estado: ESTADO_BECA.SOLICITADO,
+        estado: getEstadoBecaDesdeBecario(investigacion.becario),
         proyecto_investigacion:
           investigacion.proyecto_investigacion?.nombre_proyecto_investigacion ??
           investigacion.proyecto_investigacion?.centro_investigacion ??
-          "-",
+          C.emptyValue,
       },
     ].filter(Boolean);
   }, []);
@@ -310,10 +265,12 @@ export default function Scholarships() {
       console.error("Error al cargar becario y becas", error);
       setBecarioActual(null);
       setMisBecas([]);
-      showSnackbar("No se pudieron cargar tus becas", "error");
+      showSnackbar(C.loadScholarshipsError, "error");
     }
   }, [normalizarBecas, showSnackbar, user?.email]);
 
+  // Carga directa desde "Mis Documentos". El formulario usa el mismo servicio,
+  // pero maneja su propio estado local mientras el dialog esta abierto.
   const handleArchivoChange = async (e, item) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -325,13 +282,13 @@ export default function Scholarships() {
       .map((ext) => ext.trim().toLowerCase());
 
     if (!extensionesPermitidas.includes(extensionArchivo)) {
-      alert(`Solo se permiten archivos: ${item.extension}`);
+      alert(C.uploadAllowedExtensions(item.extension));
       e.target.value = "";
       return;
     }
 
     if (file.size > MAX_SIZE_BYTES) {
-      alert(`El archivo no puede superar los ${MAX_SIZE_MB} MB.`);
+      alert(C.uploadMaxSize(MAX_SIZE_MB));
       e.target.value = "";
       return;
     }
@@ -339,9 +296,7 @@ export default function Scholarships() {
     const nuevoNombre = construirNombre(
       item.formatoNombre,
       {
-        legajo: user.legajo,
-        apellido: obtenerApellidoDesdeNombre(user.nombre),
-        carrera: obtenerCarreraDesdeEmail(user.email),
+        legajo: obtenerLegajoDesdeEmail(user.legajo ?? user.email),
       },
       extensionArchivo,
     );
@@ -361,18 +316,23 @@ export default function Scholarships() {
       );
       setSnackbar({
         open: true,
-        message: "Archivo subido con éxito",
+        message: C.uploadSuccess,
         severity: "success",
       });
     } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error al subir el archivo",
+        message: getErrorMessage(error, C.uploadError),
         severity: "error",
       });
       console.error("Error al subir el archivo:", error);
     } finally {
       setLoading(false);
+    }
+
+    if (!archivoGuardado) {
+      e.target.value = "";
+      return;
     }
 
     setDocumentos((prev) =>
@@ -405,7 +365,19 @@ export default function Scholarships() {
     e.target.value = "";
   };
 
-  const handleCbuChange = (e) => setCbu(e.target.value);
+  const handleCbuChange = (e) => {
+    setCbu(e.target.value.replace(/\D/g, "").slice(0, 22));
+  };
+
+  const handleGuardarCbu = () => {
+    if (cbu.length !== 22) {
+      showSnackbar(C.cbuInvalid, "warning");
+      return;
+    }
+
+    setCbuGuardado(true);
+    showSnackbar(C.cbuSavedSuccess, "success");
+  };
 
   const hasEconomica = misBecas.some((b) => b.tipoBeca === TIPO_BECA.ECONOMICA);
 
@@ -415,6 +387,8 @@ export default function Scholarships() {
     setOpenDialog(true);
   };
 
+  // Borra despues de confirmar en el dialog. Si la API responde bien, limpia el
+  // documento en ambas listas para mantener la pantalla sincronizada.
   async function handleDelete(item) {
     try {
       setOpenPopup(false);
@@ -468,6 +442,7 @@ export default function Scholarships() {
     }
   }
 
+  // Descarga el archivo por id y delega la visualizacion al dialog compartido.
   async function handlePreview(id, nombre) {
     setPreview({
       open: true,
@@ -491,55 +466,18 @@ export default function Scholarships() {
       setPreview((prev) => ({
         ...prev,
         loading: false,
-        error: "No se pudo cargar el documento",
+        error: C.previewLoadError,
       }));
     }
   }
 
+  // Solo abre la confirmacion; la eliminacion real ocurre en handleDelete.
   async function DeleteDocument(document) {
     setOpenPopup(true);
     setDocumentoAEliminar(document);
   }
 
-  const asignarTiposADocumentos = useCallback((documentosBase, tipos) => {
-    return documentosBase.map((doc) => {
-      const match = tipos.find(
-        (d) =>
-          d.nombre.trim().toLowerCase() === doc.nombre.trim().toLowerCase(),
-      );
-
-      if (!match) return doc;
-
-      return {
-        ...doc,
-        id_tipo_documento: match.id,
-        extension: match.extension,
-      };
-    });
-  }, []);
-
-  const asignarArchivosADocumentos = useCallback(
-    (documentosBase, documentosSubidos) => {
-      return documentosBase.map((doc) => {
-        const documentFound = documentosSubidos.find(
-          (item) =>
-            Number(item.id_tipo_documento) === Number(doc.id_tipo_documento),
-        );
-        if (!documentFound) return doc;
-
-        return {
-          ...doc,
-          archivo: documentFound.archivo,
-          archivoNombre: documentFound.nombre_documento,
-          subido: true,
-          id_archivo: documentFound.id,
-          extension: documentFound.extension,
-        };
-      });
-    },
-    [],
-  );
-
+  // Primer paso de documentos: cruzar configuracion local con tipos reales.
   const ObtenerTipoDocumentos = useCallback(async () => {
     try {
       const data = await cargarTiposDocumento();
@@ -560,8 +498,10 @@ export default function Scholarships() {
       console.error("Error al obtener tipos de documento", error);
       return [];
     }
-  }, [asignarTiposADocumentos, cargarTiposDocumento]);
+  }, [cargarTiposDocumento]);
 
+  // Segundo paso de documentos: marcar como subidos los archivos que ya existen
+  // para el legajo del estudiante.
   const ObtenerDocumentosEstudiante = useCallback(
     async (documentosBase) => {
       try {
@@ -582,11 +522,11 @@ export default function Scholarships() {
         console.error("Error al obtener documentos del estudiante", error);
       }
     },
-    [asignarArchivosADocumentos, user?.email],
+    [user?.email],
   );
 
-  // Carga inicial de pantalla.
-  // Se ejecuta cuando aparece el usuario logueado y trae:
+  // Carga inicial: becario/becas, tipos de documento y archivos del estudiante.
+  // El orden importa porque los archivos se asignan usando id_tipo_documento.
   useEffect(() => {
     if (!user?.email) return;
 
@@ -653,7 +593,7 @@ export default function Scholarships() {
             <Box
               component="img"
               src={utnLogo}
-              alt="UTN girando"
+              alt={C.utnLogoAlt}
               sx={{
                 width: 125,
                 height: 125,
@@ -752,19 +692,16 @@ export default function Scholarships() {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
               <WarningAmberIcon sx={{ color: "#f9a825" }} />
               <Typography variant="h6" fontWeight={700}>
-                Advertencia
+                {C.incompleteProfileTitle}
               </Typography>
             </Box>
-            <Typography sx={{ mt: 1 }}>
-              Para solicitar la beca debe completar los datos en la sección de
-              Perfil.
-            </Typography>
+            <Typography sx={{ mt: 1 }}>{C.incompleteProfileMessage}</Typography>
             <Box sx={{ mt: 1 }}>
               <SAEButton
                 variant="contained"
                 onClick={() => (window.location.href = "/perfil")}
               >
-                Ir a Perfil
+                {C.incompleteProfileButton}
               </SAEButton>
             </Box>
           </Box>
@@ -845,7 +782,7 @@ export default function Scholarships() {
                         }}
                       >
                         <Typography variant="body1" color="text.primary">
-                          <strong>Fecha Solicitud:</strong>
+                          <strong>{C.requestedDateLabel}</strong>
                         </Typography>
                         <Typography variant="body1" color="text.secondary">
                           {formatDate(item.fechaSolicitud)}
@@ -862,10 +799,10 @@ export default function Scholarships() {
                         }}
                       >
                         <Typography variant="body1" color="text.primary">
-                          <strong>Módulos Asignados:</strong>
+                          <strong>{C.assignedModulesLabel}</strong>
                         </Typography>
                         <Typography variant="body1" color="text.secondary">
-                          {item.modulos_asignados ?? "-"}
+                          {item.modulos_asignados ?? C.emptyValue}
                         </Typography>
                       </Box>
 
@@ -880,7 +817,7 @@ export default function Scholarships() {
                           }}
                         >
                           <Typography variant="body1" color="text.primary">
-                            <strong>Proyecto:</strong>
+                            <strong>{C.projectLabel}</strong>
                           </Typography>
                           <Typography variant="body1" color="text.secondary">
                             {item.proyecto_investigacion}
@@ -899,7 +836,7 @@ export default function Scholarships() {
                           }}
                         >
                           <Typography variant="body1" color="text.primary">
-                            <strong>Servicio:</strong>
+                            <strong>{C.serviceLabel}</strong>
                           </Typography>
                           <Typography variant="body1" color="text.secondary">
                             {item.servicio}
@@ -983,8 +920,7 @@ export default function Scholarships() {
               }}
             >
               <Typography textAlign="center" sx={{ color: "text.disabled" }}>
-                Para solicitar la beca debe completar los datos en la sección de
-                Perfil.
+                {C.incompleteProfileMessage}
               </Typography>
             </Box>
           )}
@@ -992,7 +928,7 @@ export default function Scholarships() {
 
         <Box sx={{ mt: 3 }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            Mis Documentos
+            {C.myDocumentsTitle}
           </Typography>
           <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
             {C.documentationSubtitle}
@@ -1013,19 +949,16 @@ export default function Scholarships() {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
               <WarningAmberIcon sx={{ color: "#f9a825" }} />
               <Typography variant="h6" fontWeight={700}>
-                Advertencia
+                {C.incompleteProfileTitle}
               </Typography>
             </Box>
-            <Typography sx={{ mt: 1 }}>
-              Para solicitar la beca debe completar los datos en la sección de
-              Perfil.
-            </Typography>
+            <Typography sx={{ mt: 1 }}>{C.incompleteProfileMessage}</Typography>
             <Box sx={{ mt: 1 }}>
               <SAEButton
                 variant="contained"
                 onClick={() => (window.location.href = "/perfil")}
               >
-                Ir a Perfil
+                {C.incompleteProfileButton}
               </SAEButton>
             </Box>
           </Box>
@@ -1051,108 +984,42 @@ export default function Scholarships() {
               }}
             >
               <Typography textAlign="center" sx={{ color: "text.disabled" }}>
-                Para solicitar la beca debe completar los datos en la sección de
-                Perfil.{" "}
+                {C.incompleteProfileMessage}
               </Typography>
             </Box>
           )}
           <Grid container spacing={2.5} sx={{ mt: 1 }}>
             {documentos.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.id}>
-                <Card
-                  sx={{
-                    maxWidth: 357,
-                    minWidth: 357,
-                    height: "100%",
-                    borderRadius: 4,
-                    flexDirection: "column",
-                    boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
-                    border: "1px solid rgba(17, 53, 101, 0.08)",
-                    transition:
-                      "background-color 0.25s ease, border-color 0.25s ease",
-
-                    "&:hover": {
-                      backgroundColor: "#f1f5fb", // un tono más oscuro que el fondo actual
-                      borderColor: "rgba(17, 53, 101, 0.2)",
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Stack sx={{ height: "100%" }}>
-                      <Typography variant="h6">
-                        <strong>{item.nombre}</strong>
-                      </Typography>
-                      <Box sx={{ flexGrow: 1, mt: 1 }} />
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Chip
-                          label={
-                            !item.subido
-                              ? C.docStateNotUploaded
-                              : C.docStataUplodaded
-                          }
-                          color={!item.subido ? "grey" : "success"}
-                        />
-                      </Stack>
-                      <SAEButton
-                        onClick={() =>
-                          handlePreview(item.id_archivo, item.archivoNombre)
-                        }
-                      >
-                        {item.archivoNombre
-                          ? item.archivoNombre.length > 35
-                            ? item.archivoNombre.slice(0, 35) + "..."
-                            : item.archivoNombre
-                          : ""}
-                      </SAEButton>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          gap: 1,
-                          alignItems: "center",
-                          flexWrap: "wrap",
-                          mt: 1,
-                        }}
-                      >
-                        <IconButton
-                          component="label"
-                          size="small"
-                          color="primary"
-                          disabled={item.subido}
-                        >
-                          <FileUpload />
-                          <input
-                            type="file"
-                            hidden
-                            accept={item.extension}
-                            onChange={(e) => handleArchivoChange(e, item)}
-                          />
-                        </IconButton>
-
-                        <IconButton
-                          size="small"
-                          color="error"
-                          disabled={!item.subido}
-                          onClick={() => DeleteDocument(item)}
-                        >
-                          <Delete />
-                        </IconButton>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={item.id_tipo_documento ?? item.id ?? item.nombre}
+              >
+                <ScholarshipDocumentCard
+                  documento={item}
+                  notUploadedLabel={C.docStateNotUploaded}
+                  uploadedLabel={C.docStataUplodaded}
+                  onPreview={handlePreview}
+                  onFileChange={(event, documento) =>
+                    handleArchivoChange(event, documento)
+                  }
+                  onDelete={DeleteDocument}
+                  uploadDisabled={item.subido}
+                  deleteDisabled={!item.subido}
+                  showRequirement
+                />
               </Grid>
             ))}
 
-            <Grid item xs={12} sm={12} md={4}>
+            <Grid item xs={12}>
               <Card
                 sx={{
-                  minWidth: 357,
+                  width: "100%",
+                  minWidth: 0,
                   height: "100%",
+                  display: "flex",
                   borderRadius: 4,
                   flexDirection: "column",
                   boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
@@ -1169,23 +1036,47 @@ export default function Scholarships() {
                 <CardContent
                   sx={{
                     p: 3,
+                    display: "flex",
+                    flexDirection: "column",
+                    flexGrow: 1,
                   }}
                 >
-                  <Stack sx={{ height: "100%" }}>
+                  <Stack sx={{ minHeight: 180, flexGrow: 1 }}>
                     <Typography variant="h6">
-                      <strong>CBU</strong>
+                      <strong>{C.cbuTitle}</strong>
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Ingresá tu CBU para pagos.
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 2 }}
+                    >
+                      {C.cbuDescription}
                     </Typography>
+
+                    <SAETextField
+                      fullWidth
+                      label={C.cbuLabel}
+                      value={cbu}
+                      onChange={handleCbuChange}
+                      disabled={cbuGuardado}
+                      inputProps={{
+                        inputMode: "numeric",
+                        maxLength: 22,
+                        pattern: "[0-9]*",
+                      }}
+                    />
                     <Box sx={{ flexGrow: 1, mt: 1 }} />
                     {!perfilIncompleto && (
-                      <SAETextField
-                        fullWidth
-                        label="CBU"
-                        value={cbu}
-                        onChange={handleCbuChange}
-                      />
+                      <Stack spacing={1.25} sx={{ mt: 1, width: "100%" }}>
+                        <SAEButton
+                          variant="contained"
+                          onClick={handleGuardarCbu}
+                          disabled={cbu.length !== 22 || cbuGuardado}
+                          sx={{ mt: "auto", width: "100%" }}
+                        >
+                          {C.cbuSaveButton}
+                        </SAEButton>
+                      </Stack>
                     )}
                   </Stack>
                 </CardContent>
@@ -1200,7 +1091,7 @@ export default function Scholarships() {
                 variant="h6"
                 sx={{ fontWeight: 800, color: "#123666" }}
               >
-                Documentos - Beca Económica
+                {C.economicScholarshipDocumentsTitle}
               </Typography>
               <Box sx={{ mt: 4, position: "relative" }}>
                 <Grid container spacing={2.5} sx={{ mt: 1 }}>
@@ -1212,105 +1103,19 @@ export default function Scholarships() {
                       md={4}
                       key={item.id_tipo_documento ?? item.id ?? item.nombre}
                     >
-                      <Card
-                        sx={{
-                          maxWidth: 357,
-                          minWidth: 357,
-                          height: "100%",
-                          borderRadius: 4,
-                          flexDirection: "column",
-                          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
-                          border: "1px solid rgba(17, 53, 101, 0.08)",
-                          transition:
-                            "background-color 0.25s ease, border-color 0.25s ease",
-
-                          "&:hover": {
-                            backgroundColor: "#f1f5fb", // un tono más oscuro que el fondo actual
-                            borderColor: "rgba(17, 53, 101, 0.2)",
-                          },
-                        }}
-                      >
-                        <CardContent sx={{ p: 3 }}>
-                          <Stack sx={{ height: "100%" }}>
-                            <Typography variant="h6">
-                              <strong>{item.nombre}</strong>
-                            </Typography>
-                            <Box sx={{ flexGrow: 1, mt: 1 }} />
-                            <Stack
-                              direction="row"
-                              justifyContent="space-between"
-                              alignItems="center"
-                            >
-                              <Chip
-                                label={
-                                  !item.subido
-                                    ? C.docStateNotUploaded
-                                    : C.docStataUplodaded
-                                }
-                                color={!item.subido ? "grey" : "success"}
-                              />
-                              <Chip
-                                label={
-                                  item.required == true
-                                    ? "Requerido!"
-                                    : "Opcional"
-                                }
-                                color={
-                                  item.required == true ? "error" : "warning"
-                                }
-                              />
-                            </Stack>
-                            <SAEButton
-                              onClick={() =>
-                                handlePreview(
-                                  item.id_archivo,
-                                  item.archivoNombre,
-                                )
-                              }
-                            >
-                              {item.archivoNombre
-                                ? item.archivoNombre.length > 35
-                                  ? item.archivoNombre.slice(0, 35) + "..."
-                                  : item.archivoNombre
-                                : ""}
-                            </SAEButton>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "flex-end",
-                                gap: 1,
-                                alignItems: "center",
-                                flexWrap: "wrap",
-                                mt: 1,
-                              }}
-                            >
-                              <IconButton
-                                component="label"
-                                size="small"
-                                color="primary"
-                                disabled={item.subido}
-                              >
-                                <FileUpload />
-                                <input
-                                  type="file"
-                                  hidden
-                                  accept={item.extension}
-                                  onChange={(e) => handleArchivoChange(e, item)}
-                                />
-                              </IconButton>
-
-                              <IconButton
-                                size="small"
-                                color="error"
-                                disabled={!item.subido}
-                                onClick={() => DeleteDocument(item)}
-                              >
-                                <Delete />
-                              </IconButton>
-                            </Box>
-                          </Stack>
-                        </CardContent>
-                      </Card>
+                      <ScholarshipDocumentCard
+                        documento={item}
+                        notUploadedLabel={C.docStateNotUploaded}
+                        uploadedLabel={C.docStataUplodaded}
+                        onPreview={handlePreview}
+                        onFileChange={(event, documento) =>
+                          handleArchivoChange(event, documento)
+                        }
+                        onDelete={DeleteDocument}
+                        uploadDisabled={item.subido}
+                        deleteDisabled={!item.subido}
+                        showRequirement
+                      />
                     </Grid>
                   ))}
                 </Grid>
@@ -1353,6 +1158,7 @@ export default function Scholarships() {
           </Box>
         </Box>
 
+        {/* El form recibe documentos y callbacks; Scholarships conserva la fuente de verdad. */}
         <ScholarshipsForm
           open={openDialog}
           onClose={() => setOpenDialog(false)}
@@ -1365,6 +1171,7 @@ export default function Scholarships() {
           documentos={documentos}
           documentosEconomica={documentosEconomica}
           handlePreview={handlePreview}
+          handleDeleteDocument={DeleteDocument}
           showSnackbar={showSnackbar}
         />
 
@@ -1373,7 +1180,10 @@ export default function Scholarships() {
 
           <DialogContent>
             <DialogContentText>
-              {C.deleteDocMessage(documentoAEliminar?.nombre_documento)}
+              {C.deleteDocMessage(
+                documentoAEliminar?.nombre_documento ??
+                  documentoAEliminar?.archivoNombre,
+              )}
             </DialogContentText>
           </DialogContent>
 

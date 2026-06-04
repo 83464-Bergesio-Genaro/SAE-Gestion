@@ -7,26 +7,26 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 
 import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as ModificarCurso, ModificaEspecialidad, ModificarPersonal, ObtenerCursosMedicos, ObtenerEspecialidades ,ObtenerEstadosTurno, ObtenerPersonalMedico, EliminarCursoMedico, ObtenerHorariosCompleto, ObtenerHorariosXCUIL, CrearHorario, ModificarHorario, EliminarHorario, ObtenerTurnos, RegistrarFalta, ObtenerFaltasXCUIL, CrearTurnos, ModificarTurno, ObtenerTurnosActivos, ObtenerTurnosFinalizados, ObtenerTurnosCancelados, ObtenerTurnosEstudiante, ObtenerEspecialidadesActivas} from "../../../api/SaludService";
 import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos} from '../../../api/formatters/SaludFormatters';
-import { Try } from '@mui/icons-material';
+
 import { ObtenerUsuariosXLegajo } from '../../../api/EmpleadoService';
 
 
 const HealthUserContext = createContext();
 
-    const EMPTY_TURNO =
-    {
-      id: 0,
-      cuil_medico: "",
-      especialista: "",
-      legajo: "",
-      paciente: "",
-      fecha_solicitud: "",
-      fecha_atencion: "",
-      hora_atencion: "",
-      asunto: "",
-      id_estado_turno: 0,
-      estado: ""
-    }
+const EMPTY_TURNO =
+{
+    id: 0,
+    cuil_medico: "",
+    especialista: "",
+    legajo: "",
+    paciente: "",
+    fecha_solicitud: "",
+    fecha_atencion: "",
+    hora_atencion: "",
+    asunto: "",
+    id_estado_turno: 0,
+    estado: ""
+}
  // FUNCIONES PARA LA GRILLA (SE PODRIA PONER TODO EN UN SOLO ARCHIVO)
 const formatHeader = (key) =>
     key
@@ -147,8 +147,6 @@ const generateRows = (data) => {
         };
     });
 };
-// CONTEXTO
-const HealthContext = createContext();
 
 export const HealthUsersProvider = ({ children }) => {
     const DAYS = [

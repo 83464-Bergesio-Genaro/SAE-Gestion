@@ -1,3 +1,15 @@
+export const mapEstudiante = (estudiante) => ({
+  legajo: estudiante.legajo,
+  nombres: estudiante.nombres,
+  apellidos: estudiante.apellidos,
+  email: estudiante.email,
+  telefono: estudiante.telefono,
+  fecha_nacimiento: removerHoras(estudiante.fecha_nacimiento),
+  cuil: estudiante.cuil,
+  dni: estudiante.dni,
+  direccion: estudiante.direccion
+});
+
 export const mapResponseCrearDocumento = (ResponseCrearDocumento) => ({
   id: ResponseCrearDocumento.id,
   legajo: ResponseCrearDocumento.legajo,
@@ -26,3 +38,9 @@ const mapResponseDocumento = (ResponseDocumento) => ({
   extension: ResponseDocumento.extension,
   ruta: ResponseDocumento.ruta,
 });
+
+function removerHoras(isoString) {
+    if (!isoString) return "";  
+    const [year, month, day] = (isoString.split("T")[0]).split("-");
+    return year+'-'+month+'-'+day;
+}

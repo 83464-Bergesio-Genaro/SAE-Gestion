@@ -104,7 +104,7 @@ export default function Navbar() {
                     </Typography>
                   </Box>
                   <Divider />
-                  <MenuItem onClick={handleMenuClose}>Perfil</MenuItem>
+                  <MenuItem onClick={() => { handleMenuClose(); navigate("Mi-Perfil"); }} >Perfil</MenuItem>
                   <MenuItem onClick={() => { handleMenuClose(); logout(); }}>Cerrar Sesión</MenuItem>
                 </Menu>
               </>

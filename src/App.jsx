@@ -32,6 +32,7 @@ import StudentMain from "./students/pages/main";
 import StudentSports from "./students/pages/sports/StudentSports";
 import Scholarships from "./students/pages/scholarships/Scholarships";
 import StudentHealth from "./students/pages/health/healthStudent";
+import MyProfile from './students/pages/profile/Profile';
 
 import ProtectedRoute from "./shared/auth/ProtectedRoute"; 
 
@@ -220,6 +221,14 @@ export default function App() {
           element: (
             <ProtectedRoute role={1}>
               <StudentHealth />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: "Mi-Perfil",
+          element: (
+            <ProtectedRoute role={1}>
+              <MyProfile />
             </ProtectedRoute>
           )
         }

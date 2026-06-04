@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
     if (result.success && result.data) {
       const session = {
         token: result.data.token ?? "",
-        legajo: (result.data.legajo_armado ?? "").split("@")[0],
+        legajo: (result.data.legajo_armado ?? ""),
         email: result.data.legajo_armado ?? "",
         nombre: result.data.nombre_usuario ?? "",
         id_perfil: result.data.id_perfil ?? 0,

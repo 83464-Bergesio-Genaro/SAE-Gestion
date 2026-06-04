@@ -8,18 +8,19 @@ import {
   Typography,
 } from "@mui/material";
 import { Delete, FileUpload, OpenInNew } from "@mui/icons-material";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import {
-  getDocumentDisplayName,
-  getDocumentPreviewId,
-} from "./scholarship.utils";
-import { SCHOLARSHIP_STRINGS } from "./scholarship.string";
+import SAEButton from "../buttons/SAEButton";
 
-const C = SCHOLARSHIP_STRINGS;
+const getDocumentPreviewId = (documento) =>
+  documento.id_archivo ?? documento.id_documento ?? documento.id ?? null;
 
-// Card reutilizable para documentos de becas. No sabe como se guarda ni como se
-// borra: solo recibe callbacks para delegar esas acciones al contenedor.
-export default function ScholarshipDocumentCard({
+const getDocumentDisplayName = (documento) =>
+  [
+    documento.archivoNombre,
+    documento.nombre_completo_documento,
+    documento.nombre_documento,
+  ].find((value) => typeof value === "string" && value.trim()) ?? "";
+
+export default function DocumentCard({
   documento,
   onFileChange,
   onDelete,
@@ -28,13 +29,19 @@ export default function ScholarshipDocumentCard({
   deleteDisabled = false,
   showRequirement = false,
   showActions = true,
-  notUploadedLabel = C.docStateNotUploaded,
-  uploadedLabel = C.docStataUplodaded,
+  notUploadedLabel = "No subido",
+  uploadedLabel = "Subido",
+  requiredLabel = "Requerido",
+  optionalLabel = "Opcional",
+  withoutFileLabel = "Sin archivo",
 }) {
   const previewId = getDocumentPreviewId(documento);
   const displayName = getDocumentDisplayName(documento);
   const description =
-    documento.descripcion || C.docAllowedFormats(documento.extension);
+    documento.descripcion ||
+    (documento.extension
+      ? `Formatos permitidos: ${documento.extension}`
+      : withoutFileLabel);
 
   return (
     <Card
@@ -79,7 +86,7 @@ export default function ScholarshipDocumentCard({
             {showRequirement && (
               <Chip
                 variant={!documento.required ? "outlined" : "filled"}
-                label={documento.required ? C.docRequired : C.docOptional}
+                label={documento.required ? requiredLabel : optionalLabel}
                 color={documento.required ? "error" : "warning"}
               />
             )}
@@ -98,17 +105,12 @@ export default function ScholarshipDocumentCard({
               target="_blank"
               rel="noopener noreferrer"
               endIcon={<OpenInNew />}
-              sx={{
-                alignSelf: "flex-start",
-                minWidth: 0,
-                px: 0,
-              }}
+              sx={{ alignSelf: "flex-start", minWidth: 0, px: 0 }}
             >
               {documento.externalUrlLabel || "Abrir documento"}
             </SAEButton>
           )}
 
-          {/* Si existe id de archivo permite previsualizar; si no, muestra estado vacio. */}
           {previewId ? (
             <SAEButton
               onClick={() => onPreview?.(previewId, displayName)}
@@ -138,7 +140,7 @@ export default function ScholarshipDocumentCard({
               }}
             >
               <Typography variant="body2" noWrap>
-                {displayName || C.docWithoutFile}
+                {displayName || withoutFileLabel}
               </Typography>
             </Box>
           )}

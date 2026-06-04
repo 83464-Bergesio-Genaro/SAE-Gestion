@@ -11,6 +11,7 @@ import {
     Tooltip,
 } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { obtenerDeportesActivos, obtenerHorariosXDeporte } from "../../../api/DeporteService";
 
 const HOUR_HEIGHT = 32; // px per hour
@@ -95,7 +96,7 @@ async function fetchHorarios(deps) {
     return results.flat();
 }
 
-export default function SportsCalendar() {
+export default function SportsCalendar({ subscribedSportIds = null }) {
     const [deportes, setDeportes]       = useState([]);
     const [allHorarios, setAllHorarios] = useState([]);
     const [loading, setLoading]         = useState(true);
@@ -129,10 +130,22 @@ export default function SportsCalendar() {
         return map;
     }, [deportes]);
 
-    const visibleHorarios = useMemo(
-        () => (selected === null ? allHorarios : allHorarios.filter((h) => h.id_deporte === selected)),
-        [allHorarios, selected]
+    const subscribedIds = useMemo(
+        () => new Set((subscribedSportIds ?? []).map(Number)),
+        [subscribedSportIds]
     );
+
+    const visibleHorarios = useMemo(() => {
+        if (selected === "mine") {
+            return allHorarios.filter((horario) =>
+                subscribedIds.has(Number(horario.id_deporte))
+            );
+        }
+
+        return selected === null
+            ? allHorarios
+            : allHorarios.filter((horario) => horario.id_deporte === selected);
+    }, [allHorarios, selected, subscribedIds]);
 
     const byDay = useMemo(() => {
         const map = Object.fromEntries(DAYS.map((d) => [d.dia, []]));
@@ -173,6 +186,16 @@ export default function SportsCalendar() {
                                 onClick={() => setSelected(null)}
                                 sx={{ fontWeight: selected === null ? 700 : 400 }}
                             />
+                            {subscribedSportIds !== null && (
+                                <Chip
+                                    icon={<EventAvailableIcon />}
+                                    label="Mis horarios"
+                                    variant={selected === "mine" ? "filled" : "outlined"}
+                                    color={selected === "mine" ? "primary" : "default"}
+                                    onClick={() => setSelected(selected === "mine" ? null : "mine")}
+                                    sx={{ fontWeight: selected === "mine" ? 700 : 400 }}
+                                />
+                            )}
                             {deportes.map((d, i) => {
                                 const c = PALETTE[i % PALETTE.length];
                                 const active = selected === d.id;

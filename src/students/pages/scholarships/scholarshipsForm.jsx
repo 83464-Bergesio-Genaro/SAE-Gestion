@@ -17,7 +17,7 @@ import {
 import { Close, AddCircleOutline } from "@mui/icons-material";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import ScholarshipDocumentCard from "./ScholarshipDocumentCard";
+import DocumentCard from "../../../shared/components/documents/DocumentCard";
 import { SCHOLARSHIP_STRINGS } from "./scholarship.string";
 import {
   ObtenerProyectosInvestigacion,
@@ -791,7 +791,7 @@ export default function ScholarshipsForm({
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {documentosRequeridos.map((item) => (
               <Grid item xs={12} sm={12} key={getDocumentKey(item)}>
-                <ScholarshipDocumentCard
+                <DocumentCard
                   documento={item}
                   notUploadedLabel={C.docStateNotUploaded}
                   uploadedLabel={C.docStataUplodaded}
@@ -874,7 +874,7 @@ export default function ScholarshipsForm({
           <Grid container spacing={2.5} sx={{ mt: 1 }}>
             {documentosEconomicaVisibles.map((item) => (
               <Grid item xs={12} sm={12} key={getDocumentKey(item)}>
-                <ScholarshipDocumentCard
+                <DocumentCard
                   documento={item}
                   notUploadedLabel={C.docStateNotUploaded}
                   uploadedLabel={C.docStataUplodaded}

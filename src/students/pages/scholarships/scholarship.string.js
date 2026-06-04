@@ -10,31 +10,6 @@ export const SCHOLARSHIP_STRINGS = {
   documentationTitle: "Mis Becas",
   documentationSubtitle:
     "Aquí podrás ver las becas a las que estás inscripto, el estado de cada una y la documentación requerida para cada una.",
-  FAQTitle: "Preguntas Frecuentes",
-  FAQSubtitle:
-    "¿Tenés dudas sobre las becas? Acá te dejamos las preguntas más frecuentes y sus respuestas.",
-  faqsBecas: [
-    {
-      pregunta: "¿Cómo solicito una beca?",
-      respuesta:
-        "Para solicitar una beca, ingresá a la sección de becas, completá la información requerida y adjuntá la documentación correspondiente.",
-    },
-    {
-      pregunta: "¿Qué documentación debo presentar?",
-      respuesta:
-        "La documentación puede variar según el tipo de beca, pero normalmente se solicita DNI, certificado de alumno regular y documentación respaldatoria.",
-    },
-    {
-      pregunta: "¿Puedo modificar la documentación después de subirla?",
-      respuesta:
-        "Si la documentación todavía no fue evaluada, podés eliminar el archivo cargado y volver a subir uno nuevo.",
-    },
-    {
-      pregunta: "¿Cómo sé si mi beca fue aprobada?",
-      respuesta:
-        "El estado de la solicitud se mostrará dentro de la sección de becas. También podrías recibir una notificación cuando haya novedades.",
-    },
-  ],
   cardSolicitarTitle: "Solicitar Beca",
   cardSolicitarSubtitle: "Solicita una nueva beca",
   alquilarTitle: "Alquila?",

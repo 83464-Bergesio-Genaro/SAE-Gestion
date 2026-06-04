@@ -51,6 +51,12 @@ export const studentMenu = [
     path: "/Prensa",
     color:"#5E8ACC",
     image:"none"
+  },
+  {
+    label: "Consultas",
+    path: "/Consultas",
+    color: "#6B76A8",
+    image: "none",
   }
 ];
 
@@ -96,6 +102,12 @@ export const employedMenu = [
     path: "/Gestion-Usuarios",
     color:"#e4f7d8",
     image:"none"
+  },
+  {
+    label: "Consultas",
+    path: "/Gestion-Consultas",
+    color: "#6B76A8",
+    image: "none",
   }
 ];
 
@@ -141,5 +153,11 @@ export const adminMenu = [
     path: "/Gestion-Usuarios",
     color:"#e4f7d8",
     image:"none"
+  },
+  {
+    label: "Consultas",
+    path: "/Gestion-Consultas",
+    color: "#6B76A8",
+    image: "none",
   }
 ];

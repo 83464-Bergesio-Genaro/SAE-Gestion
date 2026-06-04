@@ -54,8 +54,7 @@ const gestionOptions = [
     name: "Consultas",
     icon: HelpIcon,
     route: "/Consultas",
-    descripcion: "",
-    disabled: true,
+    descripcion: "Encontrá respuestas frecuentes o comunicate con la SAE",
 
     roles: [1],
   },

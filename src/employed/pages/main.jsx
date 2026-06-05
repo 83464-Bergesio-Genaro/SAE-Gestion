@@ -19,6 +19,7 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import ExploreIcon from "@mui/icons-material/Explore";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import { useAuth } from "../../shared/auth/AuthContext";
 import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
 import { ObtenerEventosPublicos } from "../../api/JPAService";
@@ -93,6 +94,12 @@ const gestionOptions = [
         name: "Gestión Salud",
         icon: LocalHospitalIcon,
         route: "/Gestion-Salud",
+        roles: [2, 5],
+    },
+    {
+        name: "Gestión Consultas",
+        icon: ContactSupportIcon,
+        route: "/Gestion-Consultas",
         roles: [2, 5],
     },
     {

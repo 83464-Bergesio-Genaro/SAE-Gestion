@@ -35,7 +35,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import ScholarshipDocumentCard from "../../../students/pages/scholarships/ScholarshipDocumentCard";
+import DocumentCard from "../../../shared/components/documents/DocumentCard";
 import {
   ECONOMIC_DOCUMENTS,
   ECONOMIC_OPTIONAL_DOCUMENTS,
@@ -1308,7 +1308,7 @@ export function SectionGridCard({
                         }}
                       >
                         {documentosBecaActiva.map((documento) => (
-                          <ScholarshipDocumentCard
+                          <DocumentCard
                             key={
                               documento.id_tipo_documento ??
                               documento.id ??

@@ -11,8 +11,8 @@ import {
 } from "@mui/material";
 import { useAuth } from "../../shared/auth/AuthContext";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
-import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
+import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import HelpIcon from "@mui/icons-material/Help";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import { useNavigate } from "react-router-dom";
@@ -44,19 +44,17 @@ const gestionOptions = [
     roles: [1],
   },
   {
-    name: "Cursos",
-    icon: LocalLibraryIcon,
-    route: "/Mis-Cursos",
-    disabled: true,
-    descripcion: "",
+    name: "Salud",
+    icon: HealthAndSafetyIcon,
+    route: "/Mi-Salud",
+    descripcion: "Consulta servicios de salud y gestiona tus turnos médicos",
     roles: [1],
   },
   {
     name: "Consultas",
     icon: HelpIcon,
     route: "/Consultas",
-    descripcion: "",
-    disabled: true,
+    descripcion: "Encontrá respuestas frecuentes o comunicate con la SAE",
 
     roles: [1],
   },

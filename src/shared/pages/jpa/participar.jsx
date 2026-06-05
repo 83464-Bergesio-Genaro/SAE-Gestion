@@ -24,9 +24,9 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 
-import emailjs from "@emailjs/browser";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import SAEButton from "../../components/buttons/SAEButton";
+import { sendJPAEmailForm } from "../../services/EmailService";
 
 const checkImage = `${import.meta.env.BASE_URL}images/logos/comprobado.png`;
 
@@ -137,36 +137,17 @@ export default function SharedJPAParticipar() {
   };
 
   //Envio Mail
-  const form = useRef();
   const [visitDate, setVisitDate] = useState(null);
 
   const sendEmail = (e) => {
     e.preventDefault();
-    console.log("------------------------------");
-    console.log(e.currentTarget);
 
-    emailjs
-      .sendForm("service_3pfadf8", "template_4lgixnl", e.currentTarget, {
-        publicKey: "HPmcidnqVsJvSzXbn",
-      })
+    sendJPAEmailForm(e.currentTarget)
       .then(() => {
         setDialog(true);
-        console.log("Pass..");
       })
       .catch((error) => {
-        console.log("FAILED...", error.text);
-      });
-
-    emailjs
-      .sendForm("service_3pfadf8", "template_q5q7k6a", e.currentTarget, {
-        publicKey: "HPmcidnqVsJvSzXbn",
-      })
-      .then(() => {
-        setDialog(true);
-        console.log("Pass..");
-      })
-      .catch((error) => {
-        console.log("FAILED...", error.text);
+        console.error("Error al enviar email:", error);
       });
   };
   //fin mail
@@ -186,7 +167,7 @@ export default function SharedJPAParticipar() {
   };
   return (
     <Box p={4}>
-      <Container >
+      <Container>
         <Grid container spacing={0}>
           <Paper
             style={{
@@ -257,6 +238,12 @@ export default function SharedJPAParticipar() {
                   <form onSubmit={sendEmail}>
                     <input
                       type="hidden"
+                      name="subject"
+                      value="Participación JPA - Colegio/Municipio/ONG"
+                    />
+
+                    <input
+                      type="hidden"
                       name="form_type"
                       value="Colegio / Municipio / ONG"
                     />
@@ -324,8 +311,14 @@ export default function SharedJPAParticipar() {
                   </form>
                 </TabPanel>
                 <TabPanel value="2" style={{ padding: 0 }}>
-                  <form ref={form} onSubmit={sendEmail}>
+                  <form onSubmit={sendEmail}>
                     <input type="hidden" name="form_type" value="Empresas" />
+                    <input
+                      type="hidden"
+                      name="subject"
+                      value="Participación JPA - Empresas"
+                    />
+
                     <Grid container spacing={2} p={2}>
                       <Grid size={{ xs: 12 }}>
                         <TextField
@@ -378,8 +371,13 @@ export default function SharedJPAParticipar() {
                   </form>
                 </TabPanel>
                 <TabPanel value="3" style={{ padding: 0 }}>
-                  <form ref={form} onSubmit={sendEmail}>
+                  <form onSubmit={sendEmail}>
                     <input type="hidden" name="form_type" value="Estudiantes" />
+                    <input
+                      type="hidden"
+                      name="subject"
+                      value="Participación JPA - Estudiantes"
+                    />
                     <Grid container spacing={2} p={2}>
                       <Grid size={{ xs: 12 }}>
                         <TextField

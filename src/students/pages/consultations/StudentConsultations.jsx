@@ -27,6 +27,7 @@ import {
   QUICK_CONSULTATION_FAQS,
   SAE_EMAIL,
 } from "../../../shared/pages/consultations/consultations.config";
+import { sendConsultationEmail } from "../../../shared/services/EmailService";
 
 import HeaderPage from "../../components/headerPage";
 
@@ -37,20 +38,24 @@ export default function StudentConsultations() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const baseUrl = import.meta.env.BASE_URL;
-  const [toast, setToast] = useState("");
+  const [toast, setToast] = useState({
+    message: "",
+    severity: "warning",
+  });
+  const [sending, setSending] = useState(false);
   const [form, setForm] = useState({
-    nombre: user?.nombre ?? "",
-    email: user?.email ?? "",
-    asunto: "",
-    mensaje: "",
+    user_name: user?.nombre ?? "",
+    user_email: user?.email ?? "",
+    subject: "",
+    message: "",
   });
 
   const invalidFields = useMemo(() => {
     const fields = [];
-    if (!form.nombre.trim()) fields.push("nombre");
-    if (!isValidEmail(form.email)) fields.push("email");
-    if (!form.asunto.trim()) fields.push("asunto");
-    if (!form.mensaje.trim()) fields.push("mensaje");
+    if (!form.user_name.trim()) fields.push("user_name");
+    if (!isValidEmail(form.user_email)) fields.push("user_email");
+    if (!form.subject.trim()) fields.push("subject");
+    if (!form.message.trim()) fields.push("message");
     return fields;
   }, [form]);
 
@@ -59,18 +64,37 @@ export default function StudentConsultations() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const showToast = (message, severity = "warning") => {
+    setToast({ message, severity });
+  };
+
+  const closeToast = () =>
+    setToast((previous) => ({ ...previous, message: "" }));
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (invalidFields.length > 0) {
-      setToast("Completá todos los campos con un correo válido.");
+      showToast("Completá todos los campos con un correo válido.");
       return;
     }
 
-    const subject = encodeURIComponent(`[Consulta SAE] ${form.asunto.trim()}`);
-    const body = encodeURIComponent(
-      `Nombre: ${form.nombre.trim()}\nCorreo: ${form.email.trim()}\nLegajo: ${user?.legajo ?? "-"}\n\nConsulta:\n${form.mensaje.trim()}`,
-    );
-    globalThis.location.href = `mailto:${SAE_EMAIL}?subject=${subject}&body=${body}`;
+    try {
+      setSending(true);
+      await sendConsultationEmail({
+        user_name: form.user_name,
+        user_email: form.user_email,
+        subject: `[Consulta SAE] ${form.subject.trim()}`,
+        message: form.message.trim(),
+        legajo: user?.legajo,
+      });
+      showToast("Consulta enviada con éxito.", "success");
+      setForm((prev) => ({ ...prev, subject: "", message: "" }));
+    } catch (error) {
+      console.error("Error al enviar consulta:", error);
+      showToast("No se pudo enviar la consulta. Intentá nuevamente.", "error");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -122,9 +146,7 @@ export default function StudentConsultations() {
         <Grid container spacing={2.5} alignItems="flex-start" sx={{ mt: 1 }}>
           {CONSULTATION_FAQS.map((faq) => (
             <Grid key={faq.id} size={{ xs: 12, md: 6 }}>
-              <Card
-                sx={{ borderRadius: 4, overflow: "hidden" }}
-              >
+              <Card sx={{ borderRadius: 4, overflow: "hidden" }}>
                 <Box
                   sx={{
                     height: 150,
@@ -201,8 +223,7 @@ export default function StudentConsultations() {
               Enviar una consulta
             </Typography>
             <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
-              Se abrirá tu aplicación de correo con el mensaje preparado para{" "}
-              {SAE_EMAIL}.
+              Tu consulta se enviará por correo a {SAE_EMAIL}.
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
               <Grid container spacing={2}>
@@ -211,8 +232,8 @@ export default function StudentConsultations() {
                     fullWidth
                     required
                     label="Nombre"
-                    name="nombre"
-                    value={form.nombre}
+                    name="user_name"
+                    value={form.user_name}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -222,8 +243,8 @@ export default function StudentConsultations() {
                     required
                     type="email"
                     label="Correo"
-                    name="email"
-                    value={form.email}
+                    name="user_email"
+                    value={form.user_email}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -232,8 +253,8 @@ export default function StudentConsultations() {
                     fullWidth
                     required
                     label="Asunto"
-                    name="asunto"
-                    value={form.asunto}
+                    name="subject"
+                    value={form.subject}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -244,8 +265,8 @@ export default function StudentConsultations() {
                     multiline
                     minRows={5}
                     label="Consulta"
-                    name="mensaje"
-                    value={form.mensaje}
+                    name="message"
+                    value={form.message}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -255,8 +276,9 @@ export default function StudentConsultations() {
                   type="submit"
                   variant="contained"
                   endIcon={<SendIcon />}
+                  disabled={sending}
                 >
-                  Preparar correo
+                  {sending ? "Enviando..." : "Enviar consulta"}
                 </SAEButton>
               </Stack>
             </Box>
@@ -265,12 +287,12 @@ export default function StudentConsultations() {
       </Container>
 
       <Snackbar
-        open={Boolean(toast)}
+        open={Boolean(toast.message)}
         autoHideDuration={4000}
-        onClose={() => setToast("")}
+        onClose={closeToast}
       >
-        <Alert severity="warning" variant="filled" onClose={() => setToast("")}>
-          {toast}
+        <Alert severity={toast.severity} variant="filled" onClose={closeToast}>
+          {toast.message}
         </Alert>
       </Snackbar>
     </Box>

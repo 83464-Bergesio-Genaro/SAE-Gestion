@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import ObtenerTokenJWT from "../../api/AuthService";
 import { appConfig } from "../../config/appConfig";
 const AuthContext = createContext();
@@ -30,19 +30,41 @@ export function AuthProvider({ children }) {
 
   const [sessionExpired, setSessionExpired] = useState(false);
 
+  const clearSession = useCallback(() => {
+    setUser(null);
+    setSessionExpired(false);
+    localStorage.removeItem("session");
+  }, []);
+
+  const isSessionValid = useCallback(() => {
+    const stored = localStorage.getItem("session");
+    if (!stored) return false;
+
+    try {
+      const parsed = JSON.parse(stored);
+      return Boolean(parsed.token) && Date.now() <= parsed.expiration;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const expireSession = useCallback(() => {
+    clearSession();
+  }, [clearSession]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       const stored = localStorage.getItem("session");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Date.now() > parsed.expiration) {
-          setSessionExpired(true);
+          clearSession();
         }
       }
     }, 300000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [clearSession]);
 
   const login = async (legajo, dominio, password) => {
     const result = await ObtenerTokenJWT(legajo, dominio, password);
@@ -79,9 +101,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    setUser(null);
-    setSessionExpired(false);
-    localStorage.removeItem("session");
+    clearSession();
     globalThis.location.replace(`${import.meta.env.BASE_URL}login`);
   };
 
@@ -94,6 +114,8 @@ export function AuthProvider({ children }) {
         extendSession,
         sessionExpired,
         setSessionExpired,
+        isSessionValid,
+        expireSession,
       }}
     >
       {children}

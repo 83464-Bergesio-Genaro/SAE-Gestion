@@ -119,11 +119,11 @@ export default function StudentConsultations() {
           </Typography>
         </Box>
 
-        <Grid container spacing={2.5} sx={{ mt: 1 }}>
+        <Grid container spacing={2.5} alignItems="flex-start" sx={{ mt: 1 }}>
           {CONSULTATION_FAQS.map((faq) => (
             <Grid key={faq.id} size={{ xs: 12, md: 6 }}>
               <Card
-                sx={{ height: "100%", borderRadius: 4, overflow: "hidden" }}
+                sx={{ borderRadius: 4, overflow: "hidden" }}
               >
                 <Box
                   sx={{

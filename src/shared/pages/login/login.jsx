@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./login.css";
 import { useAuth } from "../../auth/AuthContext";
 import {
@@ -19,6 +20,7 @@ import SAEButton from "../../components/buttons/SAEButton";
 import SAETextField from "../../components/inputs/SAETextField";
 import SAESpinner from "../../components/spinner/SAESpinner";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { ModificarUsuario } from "../../../api/AuthService";
 
 const carreras = [
   { value: "sistemas", label: "Sistemas" },
@@ -40,25 +42,80 @@ export default function Login() {
     legajo: false,
     password: false,
   });
-  const { logout, login, user } = useAuth();
+  const { logout, login, user, updateUser } = useAuth();
+  const navigate = useNavigate();
   const [legajo, setLegajo] = useState("");
   const [dominio, setDominio] = useState("sistemas");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [normalizarOpen, setNormalizarOpen] = useState(false);
+  const [normalizarApellido, setNormalizarApellido] = useState("");
+  const [normalizarNombre, setNormalizarNombre] = useState("");
+  const [normalizarApellidoError, setNormalizarApellidoError] = useState("");
+  const [normalizarNombreError, setNormalizarNombreError] = useState("");
+  const [normalizarError, setNormalizarError] = useState("");
+  const [normalizarLoading, setNormalizarLoading] = useState(false);
+  const [pendingSession, setPendingSession] = useState(null);
+
+  const redirectAfterLogin = (session) => {
+    if (session.id_perfil !== 1) {
+      navigate("/Inicio");
+    } else {
+      navigate("/Principal");
+    }
+  };
 
   const handleLogin = async () => {
     if (!validateForm()) return;
     setIsLoading(true);
     const session = await login(legajo, dominio, password);
     if (session) {
-      if (session.id_perfil !== 1) {
-        globalThis.location.replace(`${baseUrl}Inicio`);
+      if (session.nombre.startsWith(",")) {
+        setPendingSession(session);
+        setNormalizarOpen(true);
+        setIsLoading(false);
       } else {
-        globalThis.location.replace(`${baseUrl}Principal`);
+        redirectAfterLogin(session);
       }
     } else {
       setIsLoading(false);
       setError("Credenciales no válidas");
+    }
+  };
+
+  const handleNormalizar = async () => {
+    setNormalizarApellidoError("");
+    setNormalizarNombreError("");
+    setNormalizarError("");
+    if (!normalizarApellido.trim()) {
+      setNormalizarApellidoError("Ingrese el apellido");
+      return;
+    }
+    if (!normalizarNombre.trim()) {
+      setNormalizarNombreError("Ingrese el nombre");
+      return;
+    }
+    setNormalizarLoading(true);
+    try {
+      const nombre_usuario = `${normalizarApellido.trim()},${normalizarNombre.trim()}`;
+      const result = await ModificarUsuario(
+        pendingSession.id,
+        {
+          id: pendingSession.id,
+          legajo: pendingSession.legajo,
+          nombre_usuario,
+          id_perfil: pendingSession.id_perfil,
+          activo: true,
+        },
+        pendingSession.token
+      );
+      if (!result.success) throw new Error(result.message || "Error al actualizar el usuario");
+      updateUser({ nombre: nombre_usuario });
+      redirectAfterLogin(pendingSession);
+    } catch (err) {
+      setNormalizarError(err.message || "Error al guardar");
+    } finally {
+      setNormalizarLoading(false);
     }
   };
 
@@ -100,7 +157,7 @@ export default function Login() {
         pb: { xs: 4, md: 3 },
         background:"linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%)"
     }}>
-      { user && !isLoading && (
+      { user && !isLoading && !normalizarOpen && (
       <Box
         sx={{
           display: "flex",
@@ -344,6 +401,61 @@ export default function Login() {
       </Dialog>
     </Box>
       )}
+
+      <Dialog
+        open={normalizarOpen}
+        slotProps={{ paper: { sx: { borderRadius: 3, p: 2, minWidth: 360 } } }}
+        disableEscapeKeyDown
+      >
+        <DialogContent sx={{ px: 4, py: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "#153b6f", mb: 1 }}>
+            Completar datos de usuario
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#5a6f8f", mb: 3 }}>
+            Tu nombre de usuario necesita ser normalizado. Ingresá tu apellido y nombre.
+          </Typography>
+          <Stack spacing={2}>
+            <SAETextField
+              label="Apellido"
+              value={normalizarApellido}
+              onChange={(e) => {
+                setNormalizarApellido(e.target.value);
+                setNormalizarApellidoError("");
+              }}
+              error={!!normalizarApellidoError}
+              helperText={normalizarApellidoError}
+              disabled={normalizarLoading}
+              size="small"
+              fullWidth
+            />
+            <SAETextField
+              label="Nombre"
+              value={normalizarNombre}
+              onChange={(e) => {
+                setNormalizarNombre(e.target.value);
+                setNormalizarNombreError("");
+              }}
+              error={!!normalizarNombreError}
+              helperText={normalizarNombreError}
+              disabled={normalizarLoading}
+              size="small"
+              fullWidth
+            />
+            {normalizarError && (
+              <Alert severity="error">{normalizarError}</Alert>
+            )}
+            <SAEButton
+              variant="contained"
+              fullWidth
+              onClick={handleNormalizar}
+              disabled={normalizarLoading}
+              sx={{ fontWeight: 600, mt: 1 }}
+            >
+              {normalizarLoading ? "Guardando..." : "Confirmar"}
+            </SAEButton>
+          </Stack>
+        </DialogContent>
+      </Dialog>
     </Box>
     
   )

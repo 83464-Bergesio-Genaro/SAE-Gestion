@@ -14,9 +14,9 @@ import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import { obtenerDeportesActivos, obtenerHorariosXDeporte } from "../../../api/DeporteService";
 
 const HOUR_HEIGHT = 32; // px per hour
-const START_HOUR = 7;
-const END_HOUR = 23;
-const TOTAL_HOURS = END_HOUR - START_HOUR; // 16
+const START_HOUR = 12;
+const END_HOUR = 22;
+const TOTAL_HOURS = END_HOUR - START_HOUR; // 10
 const TOTAL_HEIGHT = TOTAL_HOURS * HOUR_HEIGHT;
 const TIME_COL_WIDTH = 40; // px
 
@@ -27,8 +27,6 @@ const DAYS = [
     { label: "Miércoles", dia: 3 },
     { label: "Jueves",    dia: 4 },
     { label: "Viernes",   dia: 5 },
-    { label: "Sábado",    dia: 6 },
-    { label: "Domingo",   dia: 0 },
 ];
 
 const PALETTE = [

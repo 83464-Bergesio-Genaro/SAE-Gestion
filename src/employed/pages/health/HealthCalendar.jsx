@@ -1,4 +1,4 @@
-import { useMemo, useState  } from "react";
+import { useMemo  } from "react";
 import {
     Box,
     Typography,
@@ -104,12 +104,14 @@ export function EmployedCalendar(){
 
     const colorOf = useMemo(() => {
         const map = {};
-        personal.forEach((d, i) => { map[i] = PALETTE[i % PALETTE.length]; });
+        personal.forEach((d, i) => { 
+            // CLAVE: Usamos el cuil como clave para poder buscarlo fácilmente después
+            map[d.cuil] = PALETTE[i % PALETTE.length]; 
+        });
         return map;
     }, [personal]);
 
     const visibleHorarios = useMemo(
-        
         () => (selectedEmploy === null ? allHorarios : allHorarios.filter((h) => h.cuil_especialista === selectedEmploy)),
         [allHorarios, selectedEmploy]
     );
@@ -143,6 +145,7 @@ export function EmployedCalendar(){
         () => Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (i + 1) * HOUR_HEIGHT),
         []
     );
+
         return (
             <Box>
                 {/* Filter chips */}
@@ -316,7 +319,7 @@ export function EmployedCalendar(){
                                                 const endMin   = parseMinutes(ev.hora_fin);
                                                 const top    = (startMin - START_HOUR * 60) * (HOUR_HEIGHT / 60);
                                                 const height = Math.max((endMin - startMin) * (HOUR_HEIGHT / 60), 28);
-                                                const c      = colorOf[index] || PALETTE[0];
+                                                const c      = colorOf[ev.cuil_especialista] || PALETTE[index];
 
                                                 return (
                                                     <Tooltip

@@ -27,12 +27,14 @@ import EmployedHealth from "./employed/pages/health/EmployedHealth";
 import TurnBoardHealth from "./employed/pages/health/HealthTurns";
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
+import EmployedConsultations from "./employed/pages/consultations/EmployedConsultations";
 
 import StudentMain from "./students/pages/main";
 import StudentSports from "./students/pages/sports/StudentSports";
 import Scholarships from "./students/pages/scholarships/Scholarships";
 import StudentHealth from "./students/pages/health/healthStudent";
 import MyProfile from './students/pages/profile/Profile';
+import StudentConsultations from "./students/pages/consultations/StudentConsultations";
 
 import ProtectedRoute from "./shared/auth/ProtectedRoute"; 
 
@@ -177,7 +179,7 @@ export default function App() {
         {
           path: "Gestion-Prensa",
           element: (
-            <ProtectedRoute role={5}>
+            <ProtectedRoute role={[2, 5]}>
               <AdministrarPrensa />
             </ProtectedRoute>
           )
@@ -187,6 +189,14 @@ export default function App() {
           element: (
             <ProtectedRoute role={5}>
               <UsuariosAdmin />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: "Gestion-Consultas",
+          element: (
+            <ProtectedRoute role={[2, 5]}>
+              <EmployedConsultations />
             </ProtectedRoute>
           )
         },
@@ -227,8 +237,16 @@ export default function App() {
         {
           path: "Mi-Perfil",
           element: (
-            <ProtectedRoute role={1}>
+            <ProtectedRoute role={[1,2,5]}>
               <MyProfile />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: "Consultas",
+          element: (
+            <ProtectedRoute role={1}>
+              <StudentConsultations />
             </ProtectedRoute>
           )
         }

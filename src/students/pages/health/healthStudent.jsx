@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Container,
   Divider,
@@ -24,9 +25,12 @@ import {
   Alert,
   Snackbar,
 } from "@mui/material";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
+
 import { useAuth } from "../../../shared/auth/AuthContext";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
@@ -52,6 +56,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 
+import HeaderPage from "../../components/headerPage";
 import { DataGrid } from "@mui/x-data-grid";
 import { HealthUsersProvider, useHealthUser } from './healthContext'; 
 
@@ -72,6 +77,80 @@ const COURSE_PALLETE = [
     "#F6F399",//Finalizado
     "#B3A4A4",//Reprogramado
 ];
+
+const settings = {
+  dots: true,
+  infinite: false,
+  speed: 500,
+  slidesToShow:3,     // Cuántas tarjetas se ven en computadora
+  slidesToScroll: 1,
+  swipe: true,           
+  swipeToSlide: true,    
+  touchMove: true,       
+  draggable: true,  
+  responsive: [
+    {
+      breakpoint: 1024, // En pantallas medianas (tablets)
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 1,
+      }
+    },
+    {
+      breakpoint: 600,  
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+      }
+    }
+  ]
+};
+
+const settingsSchedule = {
+  dots: true,
+  infinite: false,
+  speed: 500,
+  slidesToShow:4,     // Cuántas tarjetas se ven en computadora
+  slidesToScroll: 1,
+  swipe: true,           
+  swipeToSlide: true,    
+  touchMove: true,       
+  draggable: true,  
+  responsive: [
+    {
+      breakpoint: 1024, // En pantallas medianas (tablets)
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 1,
+      }
+    },
+    {
+      breakpoint: 600,  
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+      }
+    }
+  ]
+};
+const mostrarHorasMinutos = (horario) => {
+  const [h1, m1] = horario.split(":").map(Number);
+  if (m1 === 0) return `${h1}:00hs`;
+  return `${h1}:${m1}hs`;
+};
+const formatearFecha = (fechaString) => {
+  if (!fechaString) return "";
+  
+  // Convertimos el texto "2026-05-07" a un objeto de fecha real
+  // Usamos el reemplazo de guiones por barras para evitar problemas de zona horaria
+  const fecha = new Date(fechaString.replace(/-/g, '/')); 
+
+  // Le pedimos a JavaScript que solo nos devuelva el día y el mes en español
+  return fecha.toLocaleDateString('es-ES', {
+    day: '2-digit',   // Fuerza a que el día tenga 2 dígitos (ej: "07")
+    month: 'long'     // Muestra el nombre completo del mes (ej: "Mayo")
+  });
+};
 
 const MEDICINE_ICONS = [
   LocalHospitalIcon,    // Cruz de hospital / medicina general
@@ -116,8 +195,24 @@ const agruparPorEspecialidad = (horariosMapeados) => {
 }
 
 export function EmployedStudentContent(){
-  
-    const navigate = useNavigate();
+      function ScaleText({ text }) {
+      if(!text)return;
+      const baseSize = 26; // Tamaño máximo en px para textos cortos
+      const minSize = 13.4;  // Tamaño mínimo en px para que siga siendo legible
+
+      // 2. Calculamos el tamaño según el largo del texto
+      // Dividimos un factor (ej. 300) por el largo del texto
+      let calculatedSize = text.length > 0 ? 400 / text.length : baseSize;
+
+      // 3. Ajustamos el tamaño para que no pase de los límites
+      const finalSize = Math.max(minSize, Math.min(baseSize, calculatedSize));
+
+      return (
+          <Typography sx={{ fontSize: `${finalSize}px`, lineHeight: 1.2 }}>
+            {text}
+          </Typography>
+      );
+    }
     const { user } = useAuth();
 
     const {
@@ -159,136 +254,64 @@ export function EmployedStudentContent(){
       }}
     >
       <Container maxWidth="xl">
+        <HeaderPage
+          title={"Salud"}
+          description={"Permite sacar turnos medicos y ver los cursos disponibles"}
+          backgroundImage="images/carrousel/EntradaUTN.jpg"
+          icon={<HealingIcon />}
+        />
         <Box
           sx={{
-            overflow: "hidden",
-            borderRadius: 6,
-            px: { xs: 3, md: 6 },
-            py: { xs: 4, md: 5 },
-            mb: 4,
-            minHeight: 220,
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            gap: 3,
-            backgroundImage:
-              "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('/images/carrousel/EntradaUTN.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            color: "white",
+            gap: 2,
+            mb: 3,
+            mt: 4,
           }}
         >
-          <Box sx={{ maxWidth: 700 }}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={1}
-              sx={{ mb: 0.5 }}
-            >
-              <IconButton
-                size="small"
-                onClick={() => navigate("/Inicio")}
-                sx={{
-                  color: "rgba(255,255,255,0.7)",
-                  "&:hover": {
-                    color: "white",
-                    bgcolor: "rgba(255,255,255,0.12)",
-                  },
-                }}
-              >
-                <ArrowBackIcon fontSize="small" />
-              </IconButton>
-              <Typography
-                variant="overline"
-                sx={{ letterSpacing: 1.8, opacity: 0.85, fontWeight: 700 }}
-              >
-                Módulo Salud
-              </Typography>
-            </Stack>
-            <Typography
-              variant="h3"
-              sx={{
-                mt: 1,
-                fontWeight: 800,
-                lineHeight: 1.1,
-                fontSize: { xs: "2rem", md: "2.6rem" },
-              }}
-            >
-              Horarios y Turnos medicos
-            </Typography>
-            <Typography
-              sx={{
-                mt: 2,
-                maxWidth: 520,
-                fontSize: { xs: 15, md: 17 },
-                opacity: 0.92,
-              }}
-            >
-              Informate de los horarios de nuestros especialistas y consulta por un turno desde la aplicacion.
-            </Typography>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1.5}
-              sx={{ mt: 3 }}
-            >
-              <Chip
-                label={`Perfil ${user?.id_perfil ?? "-"}`}
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.18)",
-                  color: "white",
-                  fontWeight: 700,
-                }}
-              />
-              <Chip
-                label={user?.legajo ? `Legajo ${user.legajo}` : "Sesión activa"}
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.18)",
-                  color: "white",
-                  fontWeight: 700,
-                }}
-              />
-            </Stack>
-          </Box>
           <Box
             sx={{
-              display: { xs: "none", md: "block" },
-              width: 180,
-              height: 180,
-              borderRadius: "28px",
-              backgroundImage: "url('/images/principal/logoUTNrotado.png')",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "contain",
-              transform: "rotate(8deg)",
-              filter: "drop-shadow(0 18px 35px rgba(0,0,0,0.22))",
+              width: 8,
+              height: 50,
+              borderRadius: 2,
+              bgcolor: "#2A548B",
             }}
           />
-        </Box>
-        <Box  mt={2} mb={-2} >
-          <Typography variant="h3" fontWeight="bold" 
-          sx={{pt:{xs:0,md:2},fontSize:{xs:"2em",md:"3em"},textAlign:{xs:"center",md:"left"} }}>
-            Servicios para Alumnos:
-          </Typography>
-          <Divider sx={{width:{xs:0,md:"100%"}, mt:-1, borderBottom: "3px solid black" }} />        
-        </Box>        
+          <Box>
+            <Typography
+              variant="h4"
+              fontWeight={800}
+              color="#123666"
+            >
+              Servicios para Alumnos
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+            >
+              Especialidades médicas disponibles para solicitar turnos
+            </Typography>
+          </Box>
+        </Box>      
         {/*Tarjeta de Medicos */}
-        <Card sx={{
-          background:{xs:"none",md:"linear-gradient(140deg, #2A548B  6.71% ,#A8C2DB 91.97%)"},
-          borderRadius: 4,
-          boxShadow: {xs:"none",md:"0 18px 45px rgba(21, 61, 113, 0.08)"},
-          overflow: "hidden", 
-          mt: {xs:1, md:3},
-          border: {xs:"none",md:"2px solid lightGray"},        // Hide the scrollbar
-        '&::-webkit-scrollbar': { display: 'none' },
-        scrollbarWidth: 'none',
-        // Optional: Adds native-feeling swipe snapping
-        scrollSnapType: 'x mandatory',
-        '& > *': {
-          scrollSnapAlign: 'center',
-          flexShrink: 0,
-        },}}>
-
-
+          <Card sx={{
+            position: "relative",
+            background:
+              "linear-gradient(135deg,#123666 0%,#2A548B 50%,#6CABDD 100%)",
+            borderRadius: 6,
+            overflow: "hidden",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              width: 400,
+              height: 400,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.08)",
+              top: -150,
+              right: -150,
+            }
+          }}>
             <Stack direction={{xs:"column",md:"row"}} alignItems="center" spacing={1.5} p={5}>
             {loadingHorarios && (
               <Stack alignItems="center" width={"100%"} gap={1}>
@@ -296,49 +319,98 @@ export function EmployedStudentContent(){
               </Stack>
             )}
             {!loadingHorarios && (
-              <>
-                {horariosAgrupados.map((especialidad, index) => {
+            <Box
+              sx={{
+                px: { xs: 2, sm: 4 },
+                width: "100%",
+                boxSizing: "border-box",
+                overflow: "hidden",
+                "& .slick-slider": {
+                  width: "100%",
+                  touchAction: "pan-y",
+                },
+                "& .slick-list": {
+                  margin: "0 -10px",
+                },
+                "& .slick-slide": {
+                  padding: "0 10px",
+                  boxSizing: "border-box",
+                  height: "auto", 
+                  "& > div": {
+                    width: "100%",
+                  }
+                },
+              }}
+            >
+              <Slider {...settingsSchedule}>
+              { horariosAgrupados.map((especialidad, index) => {
                   const IconoDinamico = MEDICINE_ICONS[index % MEDICINE_ICONS.length];
                   return(
                   <Card 
-                      key={especialidad.id_especialidad} // Usamos el ID de la especialidad como key
+                      key={especialidad.id_especialidad}
                       variant="outlined"
-                      sx={{ 
-                        minWidth: 200, 
+                      sx={{
+                        minWidth: 300,
                         maxWidth: 300,
-                        my: 2,
-                        borderRadius: 2,
-                        p:1.1,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                        transition:"background-color 0.3s ease, width 0.3s ease"
+                        minHeight: 400,
+                        maxHeight: 400,
+                        borderRadius: 4,
+                        my:3,
+                        background: "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)",
+                        border: "1px solid #DCE7F5",
+                        boxShadow: "0 10px 25px rgba(18,54,102,0.12)",
+                        transition: "all .3s ease",
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: "0 18px 40px rgba(18,54,102,0.20)",
+                        },
+                        // NUEVO: Hacemos que la tarjeta sea un contenedor Flex vertical
+                        display: "flex",
+                        flexDirection: "column"
                       }}
                     >
-                      
-                        <CardContent >
-                          {/* Cabecera: Nombre Especialidad */}
-                          <Stack direction="row" justifyContent="flex" alignItems="start" spacing={2}>
-                            <IconoDinamico sx={{ fontSize: 34 }}/>
-                            <Typography variant="h6" fontWeight="bold" noWrap >
-                              {especialidad.nombre_especialidad}
-                            </Typography>
-                          </Stack>
+                      {/* NUEVO: Forzamos a CardContent a ocupar el 100% del alto y usar Flexbox */}
+                      <CardContent sx={{ display: "flex", flexDirection: "column", height: "100%", p: 2, '&:last-child': { pb: 2 } }}>
+                        
+                        {/* SECCIÓN 1: CABECERA (Alto fijo implícito por el icono de 55px) */}
+                        <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
+                          <Box
+                            sx={{
+                              width: 55,
+                              height: 60,
+                              borderRadius: "50%",
+                              bgcolor: "#E7F1FF",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <IconoDinamico sx={{ fontSize: 30, color: "#2A548B" }} />
+                          </Box>
+                          <Typography variant="h6" fontWeight="bold" noWrap>
+                            {especialidad.nombre_especialidad}
+                          </Typography>
+                        </Stack>
 
-                          <Divider sx={{ my: 1 }} />
+                        <Divider sx={{ my: 1 }} />
 
-                          <Stack spacing={1.5} mt={2}>
-                            <Typography variant="body1" >
-                              {especialidad.descripcion_especialidad || "Sin descripción"}
-                            </Typography>
+                        {/* NUEVO: Stack intermedio que se estira para ocupar el espacio y empujar el botón */}
+                        <Stack sx={{ flexGrow: 1, justifyContent: "space-between" }}>
+                          
+                          {/* SECCIÓN 2: DESCRIPCIÓN (Le damos un alto fijo para que no mueva lo demás) */}
+                          <Box sx={{ height: "80px", overflow: "hidden" }}> 
+                            <ScaleText text={especialidad?.descripcion_especialidad ?? ""} />
+                          </Box>
 
-                            <Divider sx={{ my: 1, borderStyle: 'dashed' }} />
-
-                            {/* LISTADO DE DÍAS Y HORARIOS AGRUPADOS */}
+                          <Divider sx={{ my: 0.5, borderStyle: 'dashed' }} />
+                          
+                          {/* SECCIÓN 3: HORARIOS Y PROFESIONAL (Alto fijo y control de scroll por si hay muchos días) */}
+                          <Box sx={{ height: "90px", overflowY: "auto", pr: 0.5 }} my={2}>
                             <Typography variant="body2" fontWeight="bold" color="text.secondary">
                               Horarios de Atención:
                             </Typography>
 
                             {especialidad.diasYHorarios.map((item, index) => {
-                              // Buscamos el nombre del día para cada horario de la lista
                               const diaEncontrado = DAYS.find(d => d.value === item.dia);
                               const nombreDia = diaEncontrado ? diaEncontrado.label : "Día no asignado";
 
@@ -346,50 +418,93 @@ export function EmployedStudentContent(){
                                 <Stack key={index} direction="row" alignItems="center" gap={1} sx={{ mt: 0.5 }}>
                                   <AccessTimeIcon fontSize="small" color="action" />
                                   <Typography variant="body2">
-                                    <strong>{nombreDia}:</strong> {item.hora_inicio} a {item.hora_fin}
+                                    <strong>{nombreDia}:</strong> {mostrarHorasMinutos(item.hora_inicio)} a {mostrarHorasMinutos(item.hora_fin)}
                                   </Typography>
                                 </Stack>
                               );
                             })}
-                            <Typography variant="body2" sx={{ pt: 2 }}>
+                            
+
+                          </Box>
+                            <Typography variant="body2" sx={{ pt: 1.5 }}>
                               <strong>{"Profesional: "}</strong>{especialidad.especialista}
                             </Typography>
-                            <SAEButton
-                                variant="contained"
-                                onClick={()=>openCreateTurnos(user.email,especialidad.id_especialidad,especialidad.diasYHorarios)}
-                                sx={{
-                                    whiteSpace: "nowrap",
-                                    color: "white",
-                                    border: "1px solid rgba(255,255,255,0.4)"
-                                }}
-                            >
-                                Pedir Turno
-                            </SAEButton>
-                          </Stack>
-                        </CardContent>
-                      
+                          {/* SECCIÓN EN EL FONDO: EL BOTÓN (Queda alineado abajo siempre igual) */}
+                          <SAEButton
+                            variant="contained"
+                            onClick={() => openCreateTurnos(user.email, especialidad.id_especialidad, especialidad.diasYHorarios)}
+                            sx={{
+                              whiteSpace: "nowrap",
+                              color: "white",
+                              border: "1px solid rgba(255,255,255,0.4)",
+                              mt: 1 // Pequeño margen superior de seguridad
+                            }}
+                          >
+                            Pedir Turno
+                          </SAEButton>
+                        </Stack>
+                      </CardContent>
                     </Card>)
                 })}
-              </>
+              </Slider> 
+            </Box>
             )}
             
             </Stack>
         </Card>
-        <Box  mt={2} mb={-2} >
-          <Typography variant="h3" fontWeight="bold" 
-          sx={{pt:{xs:0,md:2},fontSize:{xs:"2em",md:"3em"},textAlign:{xs:"center",md:"left"} }}>
-            Turnos Activos
-          </Typography>
-          <Divider sx={{width:{xs:0,md:"100%"}, mt:-1, borderBottom: "3px solid black" }} />        
-        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            mb: 3,
+            mt: 4,
+          }}
+        >
+          <Box
+            sx={{
+              width: 8,
+              height: 50,
+              borderRadius: 2,
+              bgcolor: "#2A548B",
+            }}
+          />
+          <Box>
+            <Typography
+              variant="h4"
+              fontWeight={800}
+              color="#123666"
+            >
+              Turnos Activos
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+            >
+              Podras ver aquellos turnos que tengas activos en estos dias.
+            </Typography>
+          </Box>
+        </Box> 
                
         <Card sx={{
-          background:{xs:"none",md:"linear-gradient(140deg,#A8C2DB 6.71%, #2A548B 91.97% )"},
-          borderRadius: 4,
-          boxShadow: {xs:"none",md:"0 18px 45px rgba(21, 61, 113, 0.08)"},
-          overflow: "hidden", 
-          mt: {xs:1, md:3},
-          border: {xs:"none",md:"2px solid lightGray"} }}>
+          position: "relative",
+          p:2,
+          background:
+            "linear-gradient(135deg,#123666 0%,#2A548B 50%,#6CABDD 100%)",
+          borderRadius: 6,
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            width: 400,
+            height: 400,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            top: -150,
+            right: -150,
+          }
+        }}>
           {loadingTurnos && (
             <Grid width={"100%"} container alignItems="center" justifyContent="center">
                 <SAESpinner></SAESpinner>
@@ -398,20 +513,20 @@ export function EmployedStudentContent(){
           )}
           {!loadingTurnos && estudianteTurnos.length === 0 && (
               <Typography variant="h3" fontWeight="bold" 
-              sx={{pt:{xs:2,md:4},fontSize:{xs:"1.5em",md:"2.5em"},textAlign:{xs:"center"} }}>
+                sx={{color:"white",pt:{xs:2,md:4},fontSize:{xs:"1.5em",md:"2.5em"},textAlign:{xs:"center"} }}>
                 No hay turnos activos
               </Typography>
           ) }
           <Stack direction={{xs:"column",md:"row"}} alignItems="center" width={"100%"} spacing={1.5} p={2}>
             {!loadingTurnos && estudianteTurnos.length > 0 &&  (
             //ESTAS SON LAS TARJETAS QUE VES ADENTRO DEL COMPONENTE
-            estudianteTurnos.map((turno) => (
+             estudianteTurnos.map((turno) => (
               <Card
                 key={turno.id} 
                 variant="outlined"
                 sx={{ 
-                    minWidth: 400, 
-                    maxWidth: 400,
+                    minWidth: 350, 
+                    maxWidth: 350,
                     color:"black",
                     my: 2,
                     borderRadius: 2,
@@ -442,7 +557,7 @@ export function EmployedStudentContent(){
                     <Typography variant="body2"  >
                       <strong>{"Solicitante: "}</strong><br/>{turno.paciente || "Error recuperando el nombre"}
                     </Typography>
-                    <Typography variant="body2" noWrap >
+                    <Typography variant="body2" >
                       <strong>{"Asunto: "}</strong><br/>{turno.asunto || "Turno sin Asunto"}
                     </Typography>
                     <Typography variant="body2" >
@@ -486,97 +601,206 @@ export function EmployedStudentContent(){
                     >
                         Eliminar Turno
                     </SAEButton>     
-                  </Stack>              
-                </CardContent>
-                  
-            </Card>
-            ))
-          )}
+                    </Stack>              
+                  </CardContent>
+                </Card> ))
+                )}
           </Stack>
         </Card>
 
-        <Box  mt={2} mb={-2} >
-          <Typography variant="h3" fontWeight="bold" 
-          sx={{pt:{xs:0,md:2},fontSize:{xs:"1em",md:"2em"},textAlign:{xs:"center",md:"left"} }}>
-            Cursos ofrecidos por la secretaria:
-          </Typography>
-          <Divider sx={{width:{xs:0,md:"100%"}, mt:-1, borderBottom: "3px solid black" }} />        
-        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            mb: 3,
+            mt: 4,
+          }}
+        >
+          <Box
+            sx={{
+              width: 8,
+              height: 50,
+              borderRadius: 2,
+              bgcolor: "#2A548B",
+            }}
+          />
+          <Box>
+            <Typography
+              variant="h4"
+              fontWeight={800}
+              color="#123666"
+            >
+              Cursos y Capacitaciones
+            </Typography>
 
-        <Card sx={{
-          background:{xs:"none",md:"linear-gradient(140deg,#A8C2DB 6.71%, #2A548B 91.97% )"},
-          borderRadius: 4,
-          boxShadow: {xs:"none",md:"0 18px 45px rgba(21, 61, 113, 0.08)"},
-          overflow: "hidden", 
-          mt: {xs:1, md:3},
-          border: {xs:"none",md:"2px solid lightGray"} }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+            >
+              Descubrí que lo primero es la salud
+            </Typography>
+          </Box>
+        </Box> 
+
+          <Card sx={{
+            position: "relative",
+            background:
+              "linear-gradient(135deg,#5B84B8 0%,#4D7DBB 50%,#6CABDD 100%)",
+            borderRadius: 6,
+            overflow: "hidden",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              width: 400,
+              height: 400,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.08)",
+              top: -150,
+              right: -150,
+            }
+          }}>
             {loadingCursos && (
               <Stack alignItems="center" width={"100%"} gap={1}>
                 <SAESpinner size="S" />
               </Stack>
               ) }
-            {!loadingCursos && cursos.length === 0 && (
+              {!loadingCursos && cursos.length === 0 && (
                   <Typography variant="h3" fontWeight="bold" 
                   sx={{pt:{xs:2,md:4},fontSize:{xs:"0.5em",md:"1.5em"},textAlign:{xs:"center"} }}>
                     No hay cursos actualmente activos
                   </Typography>
               ) }
-            {!loadingCursos && cursos.length > 0 && (
-              <Stack direction={{xs:"column",md:"row"}} alignItems="center" width={"100%"} spacing={1.5} p={2}>
-                  {!loadingTurnos && cursos.length > 0 &&  (
-                  //ESTAS SON LAS TARJETAS QUE VES ADENTRO DEL COMPONENTE
-                  cursos.map((curso,i) => (
-                    <Card
-                      key={curso.id} 
-                      variant="outlined"
-                      sx={{ 
-                         bgcolor:COURSE_PALLETE[i],
-                          minWidth: 400, 
-                          maxWidth: 400,
-                          color:"black",
-                          borderRadius: 2,
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                        }}>
-
-                      <CardContent sx={{ '&:last-child': { paddingBottom: 2 } }}>
-                        {/* Cabecera: Nombre y Estado */}
-                          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
-                            <Typography variant="subtitle1" fontWeight="bold" noWrap >
-                              {curso.fecha_inicio || "01-01-2026"} al {curso.fecha_fin || "01-01-2026"}
-                            </Typography>
-
-                          </Stack>
-
-                          <Divider sx={{ my: 1 }} />
-
-                          {/* Datos Mínimos: Fecha y Hora */}
-                        <Stack spacing={1}>
-                          <Typography variant="body2"  >
-                            <strong>{"Curso: "}</strong><br/>{curso.nombre_curso || "Error recuperando el nombre"}
-                          </Typography>
-                          <Typography variant="body2" noWrap >
-                            <strong>{"Docente: "}</strong><br/>{curso.nombre_docente || "Turno sin Asunto"}
-                          </Typography>
-                          <Typography variant="body2" >
-                          <strong>{"Cupo: "}</strong><br/>{curso.cupo_maximo || "Sin medico asignado"}
-                          </Typography>                  
-                        </Stack>        
-                      </CardContent>
-                        
-                  </Card>
-                  ))
+              {!loadingTurnos && cursos.length > 0 &&  (
+                <Box
+                  sx={{
+                    px: { xs: 2, sm: 4 },
+                    py: 3,
+                    width: "100%",
+                    boxSizing: "border-box",
+                    overflow: "hidden",
+                    "& .slick-slider": {
+                      width: "100%",
+                      touchAction: "pan-y",
+                    },
+                    "& .slick-list": {
+                      margin: "0 -10px",
+                    },
+                    "& .slick-slide": {
+                      padding: "0 10px",
+                      boxSizing: "border-box",
+                      height: "auto", 
+                      "& > div": {
+                        width: "100%",
+                      }
+                    },
+                  }}
+                >
+                  <Slider {...settings}>
+                      {cursos.map((curso, index) => (
+                        <div key={curso.id || index} style={{ width: "100%" }} > 
+                          <Card
+                            sx={{
+                              minWidth:"300px",
+                              height: 220,
+                              borderRadius: 4,
+                              background: "linear-gradient(180deg,#1D3557 0%,#2A548B 100%)",
+                              color: "white",
+                              cursor: "pointer",
+                              transition: "all .3s ease",
+                              overflow: "hidden",
+                              display: "flex",       // Añadido para asegurar consistencia interna
+                              flexDirection: "column",
+                              "&:hover": {
+                                transform: "scale(1.01)",
+                                boxShadow: "0 15px 35px rgba(0,0,0,.05)",
+                              },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                p: 2,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 2,
+                              }}
+                            >
+                              <SchoolIcon
+                                sx={{
+                                  fontSize: 45,
+                                  color: COURSE_PALLETE[index]
+                                }}
+                              />
+                              <Typography variant="h6" fontWeight={400}>
+                                {curso.nombre_curso}
+                              </Typography>
+                            </Box>
+                            <Divider
+                              sx={{
+                                borderColor: COURSE_PALLETE[index]
+                              }}
+                            />
+                            <CardContent>
+                              <Stack spacing={2}>
+                                <Chip
+                                  label={`${curso.cupo_maximo} Vacantes`}
+                                  sx={{
+                                    width: "fit-content",
+                                    bgcolor: "#FFD54F",
+                                    color: "#1D3557",
+                                    fontWeight: 700,
+                                  }}
+                                />
+                                <Typography variant="body2">
+                                 Docente:<strong> 👨‍🏫 {curso.nombre_docente}</strong>
+                                </Typography>
+                                <Typography variant="body2">
+                                 Desde el: 📅<strong> {formatearFecha(curso.fecha_inicio)}</strong> hasta el: <strong>{formatearFecha(curso.fecha_fin)}</strong>
+                                </Typography>
+                              </Stack>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      ))}
+                    </Slider>
+                 </Box>
                 )}
-                </Stack>
-              ) }
         </Card>
 
-        <Box  mt={2} mb={-2} >
-          <Typography variant="h3" fontWeight="bold" 
-          sx={{pt:{xs:0,md:2},fontSize:{xs:"2em",md:"3em"},textAlign:{xs:"center",md:"left"} }}>
-            Historico de Turnos:
-          </Typography>
-          <Divider sx={{width:{xs:0,md:"100%"}, mt:-1, borderBottom: "3px solid black" }} />        
-        </Box>         
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            mb: 3,
+            mt: 4,
+          }}
+        >
+          <Box
+            sx={{
+              width: 8,
+              height: 50,
+              borderRadius: 2,
+              bgcolor: "#2A548B",
+            }}
+          />
+          <Box>
+            <Typography
+              variant="h4"
+              fontWeight={800}
+              color="#123666"
+            >
+              Historico de Turnos
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+            >
+              Turnos cancelados o finalizados
+            </Typography>
+          </Box>
+        </Box>      
         <Card sx={{ borderRadius: 4, boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)", my: 3, overflow: "hidden" }}>
           <CardContent sx={{ p: 0 }}>
               <Box sx={{ width: "100%"}}>
@@ -706,10 +930,10 @@ export function EmployedStudentContent(){
                             <Grid size={{xs:12}} m={0}>
                                <Card sx={{ bgcolor: "rgba(193, 73, 55, 0.7)", border: "1px solid rgba(235, 41, 41, 0.1)" }}>
                                   <CardContent sx={{ p: 2 }}>
-                                    <Typography variant="subtitle2" color="textPrimary" fontWeight={600} gutterBottom>
+                                    <Typography variant="subtitle2" color="textPrimary" fontWeight={600} gutterBottom fontSize={"22px"}>
                                         ¡ATENCION! 
                                     </Typography>
-                                    <Typography variant="body2" color="textSecondary">
+                                    <Typography variant="body2" fontSize={"18px"} color="textSecondary">
                                         Esta por cancelar el turno, toda la informacion que se haya utilizado en este turno se perdera como tambien la disponibilidad.
                                     </Typography>
                                   </CardContent>

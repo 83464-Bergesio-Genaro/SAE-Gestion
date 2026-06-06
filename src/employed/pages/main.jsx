@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
     Box,
     Card,
@@ -19,90 +18,15 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import ExploreIcon from "@mui/icons-material/Explore";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import { useAuth } from "../../shared/auth/AuthContext";
 import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
-import { ObtenerEventosPublicos } from "../../api/JPAService";
+import { ObtenerEventosPublicos, ObtenerEventosSAE } from "../../api/JPAService";
 import { EmployedCalendar } from "./users/EmployedCalendar";
 import { AdminUsersProvider } from "./users/AdminUsersContext";
+import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
 
-const fallbackEventos = [
-    {
-        id: 1,
-        fecha_evento: "10 de Abril",
-        horario_inicio: "9hs",
-        duracion: "2hs",
-        nombre_evento: "Reunión de coordinación SAE",
-        encargado: "Equipo SAE",
-        lugar: "Sala de reuniones",
-    },
-    {
-        id: 2,
-        fecha_evento: "12 de Abril",
-        horario_inicio: "15hs",
-        duracion: "1hs 30m",
-        nombre_evento: "Seguimiento de becas",
-        encargado: "Área Becas",
-        lugar: "Oficina administrativa",
-    },
-    {
-        id: 3,
-        fecha_evento: "15 de Abril",
-        horario_inicio: "11hs",
-        duracion: "1hs",
-        nombre_evento: "Revisión de prensa institucional",
-        encargado: "Comunicación",
-        lugar: "Secretaría SAE",
-    },
-    {
-        id: 4,
-        fecha_evento: "18 de Abril",
-        horario_inicio: "17hs",
-        duracion: "2hs",
-        nombre_evento: "Planificación deportiva",
-        encargado: "Coordinación Deportes",
-        lugar: "SUM",
-    },
-];
-
-const gestionOptions = [
-    {
-        name: "Gestión Deportes",
-        icon: SportsBasketballIcon,
-        route: "/Gestion-Deportes",
-        roles: [2, 5],
-    },
-    {
-        name: "Gestión Becas",
-        icon: SchoolIcon,
-        route: "/Gestion-Becas",
-        roles: [2, 5],
-    },
-    {
-        name: "Gestión Prensa",
-        icon: NewspaperIcon,
-        route: "/Gestion-Prensa",
-        roles: [5],
-    },
-    {
-        name: "Gestión JPA",
-        icon: GroupsIcon,
-        route: "/JPA",
-        roles: [2, 5],
-    },
-    {
-        name: "Gestión Salud",
-        icon: LocalHospitalIcon,
-        route: "/Gestion-Salud",
-        roles: [2, 5],
-    },
-    {
-        name: "Gestión Trámites",
-        icon: ListAltIcon,
-        disabled: true,
-        roles: [2, 5],
-    },
-];
-
+/*
 const reportOptions = [
     {
         name: "Reporte Deportes",
@@ -140,7 +64,7 @@ const reportOptions = [
         disabled: true,
         roles: [2, 5],
     },
-];
+];*/
 
 function DashboardCard({ item, onClick }) {
     const Icon = item.icon;
@@ -208,24 +132,18 @@ function DashboardCard({ item, onClick }) {
 export default function EmployedMain() {
     const baseUrl = import.meta.env.BASE_URL;
     const { user } = useAuth();
-    const navigate = useNavigate();
-    const [eventos, setEventos] = useState(fallbackEventos);
-
+    const [eventosJPA, setEventosJPA] = useState([]);
     useEffect(() => {
-        const cargarEventos = async () => {
-            try {
-                const data = await ObtenerEventosPublicos();
-                if (Array.isArray(data) && data.length > 0) {
-                    setEventos(data);
-                }
-            } catch (error) {
-                console.error("Error al obtener agenda de eventos:", error);
-            }
+        const ObtenerEventosPublicosApi = async () => {
+        try {
+            const data = await ObtenerEventosSAE();
+            setEventosJPA(data);
+        } catch (error) {
+            console.error("Error al traer Eventos:", error);
+        }
         };
-
-        cargarEventos();
+        ObtenerEventosPublicosApi();
     }, []);
-
     return (
         <Box
             sx={{
@@ -309,16 +227,9 @@ export default function EmployedMain() {
                         <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
                             Módulos operativos principales para el trabajo diario del equipo.
                         </Typography>
-
-                        <Grid container spacing={2.5} sx={{ mt: 1 }}>
-                            {gestionOptions.map((item) => (
-                                <Grid key={item.name} item xs={12} sm={6} lg={4}>
-                                    <DashboardCard item={item} onClick={() => navigate(item.route)} />
-                                </Grid>
-                            ))}
-                        </Grid>
+                        <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
                     </Box>
-
+                    {/* 
                     <Box sx={{ mt: 6 }}>
                         <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
                             Estadísticas y Reportes
@@ -334,12 +245,12 @@ export default function EmployedMain() {
                                 </Grid>
                             ))}
                         </Grid>
-                    </Box>
+                    </Box>*/}
                  </>
                 )}
                 <Box sx={{ mt: 6 }}>
                     <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-                        Eventos y Horarios
+                        Tus horarios y proximos eventos
                     </Typography>
                     <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
                         Permite visualizar tus horarios y los eventos proximos
@@ -367,7 +278,7 @@ export default function EmployedMain() {
                         }}
                     >
  
-                        <CalendarEvent eventos={eventos} />
+                         <CalendarEvent eventos={eventosJPA} />
                     </Box>
 
                 </Box>

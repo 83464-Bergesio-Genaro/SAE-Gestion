@@ -989,7 +989,7 @@ export const HealthUsersProvider = ({ children }) => {
                 fetchHorarios();
                 fetchHorariosXEmpleado(selectedEmploy.cuil);
                 setShowNuevoForm(false);
-                setHorariosDialogOpen(false);
+
             } catch (err) {
                 setErrorHorario(err.message || "Error al crear");
             } finally {

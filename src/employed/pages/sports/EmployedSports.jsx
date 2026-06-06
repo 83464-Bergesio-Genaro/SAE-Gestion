@@ -1,6 +1,12 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  validateDocente,
+  validateEspacio,
+  validateDeportista,
+  validateDeporte,
+} from "./sports.validations";
+import {
   Box,
   Container,
   Stack,
@@ -135,6 +141,7 @@ export default function EmployedSports() {
   const [dialogData, setDialogData] = useState(EMPTY_DOCENTE);
   const [dialogSaving, setDialogSaving] = useState(false);
   const [dialogError, setDialogError] = useState("");
+  const [dialogFieldErrors, setDialogFieldErrors] = useState({});
 
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
   const [docsLegajo, setDocsLegajo] = useState("");
@@ -239,6 +246,7 @@ export default function EmployedSports() {
     setDialogType("docente");
     setDialogMode("create");
     setDialogError("");
+    setDialogFieldErrors({});
     setDialogOpen(true);
   };
 
@@ -253,6 +261,7 @@ export default function EmployedSports() {
     setDialogType("docente");
     setDialogMode("edit");
     setDialogError("");
+    setDialogFieldErrors({});
     setDialogOpen(true);
   }, []);
 
@@ -261,6 +270,7 @@ export default function EmployedSports() {
     setDialogType("espacio");
     setDialogMode("create");
     setDialogError("");
+    setDialogFieldErrors({});
     setDialogOpen(true);
   };
 
@@ -275,6 +285,7 @@ export default function EmployedSports() {
     setDialogType("espacio");
     setDialogMode("edit");
     setDialogError("");
+    setDialogFieldErrors({});
     setDialogOpen(true);
   }, []);
 
@@ -371,6 +382,7 @@ export default function EmployedSports() {
     setDialogType("deportista");
     setDialogMode("create");
     setDialogError("");
+    setDialogFieldErrors({});
     setDialogOpen(true);
   };
 
@@ -385,6 +397,7 @@ export default function EmployedSports() {
     setDialogType("deportista");
     setDialogMode("edit");
     setDialogError("");
+    setDialogFieldErrors({});
     setDialogOpen(true);
   }, []);
 
@@ -393,6 +406,7 @@ export default function EmployedSports() {
     setDialogType("deporte");
     setDialogMode("create");
     setDialogError("");
+    setDialogFieldErrors({});
     setDialogOpen(true);
   };
 
@@ -405,16 +419,42 @@ export default function EmployedSports() {
     setDialogType("deporte");
     setDialogMode("edit");
     setDialogError("");
+    setDialogFieldErrors({});
     setDialogOpen(true);
   }, []);
 
   const handleDialogChange = (field, value) => {
     setDialogData((prev) => ({ ...prev, [field]: value }));
+    if (dialogFieldErrors[field]) {
+      setDialogFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   };
 
-  const handleDialogSave = async () => {
-    setDialogSaving(true);
+  const handleDialogSave = () => {
     setDialogError("");
+
+    // Validación sincrónica — return garantizado antes de cualquier await
+    const validatorsMap = {
+      docente: () => validateDocente(dialogData, dialogMode),
+      espacio: () => validateEspacio(dialogData),
+      deportista: () => validateDeportista(dialogData, dialogMode),
+      deporte: () => validateDeporte(dialogData),
+    };
+
+    const validator = validatorsMap[dialogType];
+    if (validator) {
+      const errors = validator();
+      setDialogFieldErrors(errors);
+      if (Object.keys(errors).length > 0) {
+        return;
+      }
+    }
+
+    executeDialogSave();
+  };
+
+  const executeDialogSave = async () => {
+    setDialogSaving(true);
     try {
       if (dialogType === "docente") {
         const body = {
@@ -1345,6 +1385,8 @@ export default function EmployedSports() {
                   onChange={(e) => handleDialogChange("cuil", e.target.value)}
                   disabled={dialogMode === "edit"}
                   fullWidth
+                  error={!!dialogFieldErrors.cuil}
+                  helperText={dialogFieldErrors.cuil}
                 />
                 <SAETextField
                   label="Nombres"
@@ -1353,6 +1395,8 @@ export default function EmployedSports() {
                     handleDialogChange("nombres", e.target.value)
                   }
                   fullWidth
+                  error={!!dialogFieldErrors.nombres}
+                  helperText={dialogFieldErrors.nombres}
                 />
                 <SAETextField
                   label="Apellidos"
@@ -1361,6 +1405,8 @@ export default function EmployedSports() {
                     handleDialogChange("apellidos", e.target.value)
                   }
                   fullWidth
+                  error={!!dialogFieldErrors.apellidos}
+                  helperText={dialogFieldErrors.apellidos}
                 />
                 <SAETextField
                   label="Fecha de nacimiento"
@@ -1371,6 +1417,8 @@ export default function EmployedSports() {
                   }
                   fullWidth
                   slotProps={{ inputLabel: { shrink: true } }}
+                  error={!!dialogFieldErrors.fecha_nacimiento}
+                  helperText={dialogFieldErrors.fecha_nacimiento}
                 />
                 <FormControlLabel
                   control={
@@ -1392,6 +1440,8 @@ export default function EmployedSports() {
                   value={dialogData.nombre}
                   onChange={(e) => handleDialogChange("nombre", e.target.value)}
                   fullWidth
+                  error={!!dialogFieldErrors.nombre}
+                  helperText={dialogFieldErrors.nombre}
                 />
                 <SAETextField
                   label="Domicilio"
@@ -1400,6 +1450,8 @@ export default function EmployedSports() {
                     handleDialogChange("domicilio", e.target.value)
                   }
                   fullWidth
+                  error={!!dialogFieldErrors.domicilio}
+                  helperText={dialogFieldErrors.domicilio}
                 />
                 <SAETextField
                   label="URL Google Maps"
@@ -1408,6 +1460,8 @@ export default function EmployedSports() {
                     handleDialogChange("url_maps", e.target.value)
                   }
                   fullWidth
+                  error={!!dialogFieldErrors.url_maps}
+                  helperText={dialogFieldErrors.url_maps}
                 />
                 <FormControlLabel
                   control={
@@ -1430,6 +1484,8 @@ export default function EmployedSports() {
                   onChange={(e) => handleDialogChange("legajo", e.target.value)}
                   disabled={dialogMode === "edit"}
                   fullWidth
+                  error={!!dialogFieldErrors.legajo}
+                  helperText={dialogFieldErrors.legajo}
                 />
                 <SAETextField
                   label="Vencimiento ficha"
@@ -1440,6 +1496,8 @@ export default function EmployedSports() {
                   }
                   fullWidth
                   slotProps={{ inputLabel: { shrink: true } }}
+                  error={!!dialogFieldErrors.vencimiento_ficha}
+                  helperText={dialogFieldErrors.vencimiento_ficha}
                 />
                 <FormControlLabel
                   control={
@@ -1479,6 +1537,8 @@ export default function EmployedSports() {
                   value={dialogData.nombre}
                   onChange={(e) => handleDialogChange("nombre", e.target.value)}
                   fullWidth
+                  error={!!dialogFieldErrors.nombre}
+                  helperText={dialogFieldErrors.nombre}
                 />
                 <FormControlLabel
                   control={

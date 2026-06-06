@@ -2,13 +2,12 @@ import { appConfig } from "../config/appConfig";
 
 export default async function ObtenerTokenJWT(legajo, dominio, password) {
   try {
-    console.log(
-      `${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`,
-    );
+
     const response = await fetch(
       `${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`,
       { headers: { "ngrok-skip-browser-warning": "true" } },
     );
+    console.log("La sesion es:",response);
     switch (response.status) {
       case 201: {
         const data = await response.json();

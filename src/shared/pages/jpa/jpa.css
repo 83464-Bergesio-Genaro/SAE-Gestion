@@ -156,7 +156,7 @@ a:hover{
 }
 /*  FINAL SECCIONES     */
 
-@media (min-width: 1024px){
+@media (min-width: 1030px){
   .mobile-container{
       display: none;
   }

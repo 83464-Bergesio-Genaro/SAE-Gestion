@@ -193,8 +193,9 @@ export default function JPA() {
             variant="h3" 
             align="center"
             sx={{
-            fontSize:{xs:20,sm:24,md:46},
-            marginTop:{xs:4,sm:3,md:2},
+            fontSize:{xs:"1.8em",sm:"2.1em",md:"2.4em"},
+              marginTop:{xs:4,sm:3,md:2,lg:-2},
+             marginBottom:{xs:4,sm:3,md:2}
             }}
             fontWeight="bold">
             CHARLAS Y EVENTOS

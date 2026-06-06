@@ -49,6 +49,7 @@ export function AuthProvider({ children }) {
     if (result.success && result.data) {
       const session = {
         token: result.data.token ?? "",
+        id: result.data.id ?? 0,
         legajo: (result.data.legajo_armado ?? ""),
         email: result.data.legajo_armado ?? "",
         nombre: result.data.nombre_usuario ?? "",
@@ -78,11 +79,20 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUser = (updates) => {
+    const stored = localStorage.getItem("session");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const updated = { ...parsed, ...updates };
+      localStorage.setItem("session", JSON.stringify(updated));
+      setUser(updated);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setSessionExpired(false);
     localStorage.removeItem("session");
-    globalThis.location.replace(`${import.meta.env.BASE_URL}login`);
   };
 
   return (
@@ -92,6 +102,7 @@ export function AuthProvider({ children }) {
         login,
         logout,
         extendSession,
+        updateUser,
         sessionExpired,
         setSessionExpired,
       }}

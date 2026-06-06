@@ -51,3 +51,39 @@ export default async function ObtenerTokenJWT(legajo, dominio, password) {
     };
   }
 }
+
+export async function ModificarUsuario(id, payload, token) {
+  try {
+    const response = await fetch(
+      `${appConfig.apiUrl}/api/Usuarios/ModificarUsuario/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+    switch (response.status) {
+      case 200:
+      case 201: {
+        const data = await response.json();
+        return { success: true, data };
+      }
+      case 400:
+        return { success: false, message: "Datos inválidos" };
+      case 401:
+        return { success: false, message: "No autorizado" };
+      case 404:
+        return { success: false, message: "Usuario no encontrado" };
+      case 500:
+        return { success: false, message: "Error interno del servidor" };
+      default:
+        return { success: false, message: "Respuesta desconocida" };
+    }
+  } catch (error) {
+    return { success: false, message: "Error de conexión" };
+  }
+}

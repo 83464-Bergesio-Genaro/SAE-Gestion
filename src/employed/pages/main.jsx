@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
     Box,
     Card,
@@ -27,7 +26,7 @@ import { EmployedCalendar } from "./users/EmployedCalendar";
 import { AdminUsersProvider } from "./users/AdminUsersContext";
 import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
 
-
+/*
 const reportOptions = [
     {
         name: "Reporte Deportes",
@@ -65,7 +64,7 @@ const reportOptions = [
         disabled: true,
         roles: [2, 5],
     },
-];
+];*/
 
 function DashboardCard({ item, onClick }) {
     const Icon = item.icon;
@@ -133,7 +132,6 @@ function DashboardCard({ item, onClick }) {
 export default function EmployedMain() {
     const baseUrl = import.meta.env.BASE_URL;
     const { user } = useAuth();
-    const navigate = useNavigate();
     const [eventosJPA, setEventosJPA] = useState([]);
     useEffect(() => {
         const ObtenerEventosPublicosApi = async () => {

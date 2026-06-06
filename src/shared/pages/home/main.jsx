@@ -1,7 +1,7 @@
-import { Box,Grid, Typography } from "@mui/material";
+import { Box,Container,Grid, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import SAEButton from "../../components/buttons/SAEButton";
-import NewsGrid from "../../components/newsCards/NewsGrid";
+import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
 import "./main.css";
 
 export default function Main(){
@@ -65,10 +65,11 @@ export default function Main(){
               </Grid>
           </Grid>
         </Grid>
+        
       </Box>
-      
+
     </Box>
-    <NewsGrid />
+      <NovedadesEstudiantiles/>
     </div>
   );
 }

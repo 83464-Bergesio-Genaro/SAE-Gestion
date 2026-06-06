@@ -54,7 +54,6 @@ export const ProfileContextProvider = ({ children }) => {
 
     try {
       let data = await ObtenerPerfilXLegajo(legajo);
-      console.log("Datos obtenidos del perfil:", data);
       setDatosPerfil(mapEstudiante(data));
       setSaveAttempted(false);
     } catch {

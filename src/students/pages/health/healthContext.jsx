@@ -303,8 +303,9 @@ export const HealthUsersProvider = ({ children }) => {
                 { label: "Jueves",    value: 4 },
                 { label: "Viernes",   value: 5 }
             ];
-            const especialidad = especialidadesActivas?.find(esp => esp.id === dialogData?.id_especialidad)?? "No se selecciono especialidad";
-            const dia_selec = dias?.find(esp => esp.value === dialogData?.dia_selecionado);
+            console.log(dias,especialidadesActivas,dialogData);
+            const especialidad = especialidadesActivas?.find(esp => esp.id === dialogData?.id_especialidad)?.nombre?? "Especialidad no Valida";
+            const dia_selec = dias?.find(di => di.value === Number(dialogData?.dia_selecionado))?.label??"lunes";
 
             const id_nuevo = dialogData.id === "" ? 0 : Number(dialogData.id);
             const hoy = new Date();
@@ -312,7 +313,7 @@ export const HealthUsersProvider = ({ children }) => {
 
             const asunto = especialidad  +": "+ dialogData.asunto + " tiene disponible a las "+ dialogData.horario_disponible + " del " + dia_selec;
             const cuil_medico = dialogData.cuil_medico === null||dialogData.cuil_medico.trim()===""? null: dialogData.cuil_medico.trim();
-            
+
             const horario_atencion = dialogData.hora_atencion===null ||dialogData.hora_atencion.trim()===""? null: dialogData.hora_atencion.trim();
             // Construcción del objeto que se enviará al servidor
             const body = {

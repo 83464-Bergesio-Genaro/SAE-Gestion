@@ -8,9 +8,11 @@ import "./jpa.css";
 export function InfoSectionPhone({information}){
     return(
         <div className="info-jpa-container">     
-            <Grid Grid container spacing={5} justify="center"item xs={12} sm={6} md={4}>
+            <Grid container spacing={5} justify="center"item xs={12} sm={6} md={4}>
             {information.map((item,index)=>(
-                 <Card key={index} sx={{ minHeight: 300,borderRadius:5 }}>
+                 <Card key={index} 
+                 sx={{ minHeight: 300,
+                 borderRadius:5 }}>
                     <CardMedia
                         component="img"
                         height="250"
@@ -18,10 +20,23 @@ export function InfoSectionPhone({information}){
                         alt={item.alt}
                     />
                     <CardContent>
-                        <Typography gutterBottom variant="h5" textAlign="center"  component="div" fontWeight={"bold"}>
+                        <Typography gutterBottom variant="h5" 
+                        textAlign="center"  
+                        component="div"
+                        fontWeight={"bold"}
+                        sx={{
+                            fontSize:{xs:"1.3em",md:"1.8em",lg:"2.4em"}
+                        }} 
+                         >
                             {item.title}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" dangerouslySetInnerHTML={{ __html: item.text }}>
+                        <Typography variant="body2"
+                                    color="text.secondary"
+                                    dangerouslySetInnerHTML={{ __html: item.text }}
+                                    sx={{
+                                        fontSize:{xs:"1em",md:"1.3em",lg:"2em"}
+                                    }}
+                                    >
                             
                         </Typography>
                     </CardContent>
@@ -34,36 +49,39 @@ export function InfoSectionWithId({information}){
     return(        
         <div className="info-jpa-container">
             
-            {information.map((item,index)=>(
-                index % 2 === 0 ? 
-                    (<section id={item.section} className="info-jpa-secciones">
-                    <div className="info-jpa-content">
-                        <h2>{item.title}</h2>
-                        <div className="info-jpa-hidden">
-                            <div className="info-jpa-hidden-text">
+            {information.map((item, index) => (
+            index % 2 === 0 ? 
+        (
+            /* Aquí agregamos key */
+            <section key={item.section} id={item.section} className="info-jpa-secciones">
+                <div className="info-jpa-content">
+                    <h2>{item.title}</h2>
+                    <div className="info-jpa-hidden">
+                        <div className="info-jpa-hidden-text">
                             <p dangerouslySetInnerHTML={{ __html: item.text }}></p>
-                            </div>
-                            <div className="info-jpa-image" alt={item.alt} style={{ backgroundImage: `url(${item.image})` }}></div>
+                        </div>
+                        <div className="info-jpa-image" alt={item.alt} style={{ backgroundImage: `url(${item.image})` }}></div>
+                    </div>
+                </div>
+            </section>
+        ) : 
+        (
+            /* Aquí también agregamos key */
+            <section key={item.section} id={item.section} className="info-jpa-secciones">
+                <div className="info-jpa-content">
+                    <h2>{item.title}</h2>
+                    <div className="info-jpa-hidden-left">
+                        <div className="info-jpa-image" alt={item.alt} style={{ backgroundImage: `url(${item.image})` }}></div>
+                        <div className="info-jpa-hidden-text">
+                            <Typography variant="body" gutterBottom>
+                                <p dangerouslySetInnerHTML={{ __html: item.text }}></p>
+                            </Typography>                                
                         </div>
                     </div>
-                </section>) : 
-                (
-                    <section id={item.section} className="info-jpa-secciones">
-                        <div className="info-jpa-content">
-                            <h2>{item.title}</h2>
-                            <div className="info-jpa-hidden-left">
-                                <div className="info-jpa-image" alt={item.alt} style={{ backgroundImage: `url(${item.image})` }}></div>
-                                <div className="info-jpa-hidden-text">
-                                    <Typography variant="body" gutterBottom>
-                                        <p dangerouslySetInnerHTML={{ __html: item.text }}></p>
-                                    </Typography>                                
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                )
-                
-            ))}
+                </div>
+            </section>
+        )
+        ))}
         </div>
     );
 }

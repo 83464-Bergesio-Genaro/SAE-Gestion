@@ -21,7 +21,6 @@ import { DataGrid } from "@mui/x-data-grid";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import { ObtenerEventosPublicos,ObtenerEventosSAE,ObtenerStands,ObtenerInteresados } from "../../../api/JPAService";
-import { data } from "react-router-dom";
 
 const formatHeader = (key) =>
   key
@@ -145,7 +144,6 @@ export default function JpaAdmin(){
 };
     const [activeSection, setActiveSection] = useState("eventosPublicos");
     const [busquedaGestion, setBusquedaGestion] = useState("");
-    const [busquedaDeportes, setBusquedaDeportes] = useState("");
     
     const handleSectionChange = (section) => {
         setActiveSection(section);

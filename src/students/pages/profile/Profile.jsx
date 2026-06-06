@@ -425,10 +425,7 @@ export function MyProfileContent(){
                                         ¡ATENCIÓN!
                                     </Typography>
                                     <Typography variant="body2" color="textSecondary" sx={{ lineHeight: 2 }}>
-                                        La dirección se guardará con el siguiente formato:<br/>
-                                        <strong>[PROVINCIA] - [ CIUDAD/LOCALIDAD ] - [ NOMBRE DE LA CALLE ] - [ ALTURA ]</strong><br/>
-                                        Ejemplo:<br/>
-                                        <strong>Córdoba - Springfield - Avenida Siempre Viva - 742</strong>
+                                        Es necesario completar datos para poder acceder a algunas funcionalidades de la aplicacion
                                     </Typography>
                                 </CardContent>
                             </Card>

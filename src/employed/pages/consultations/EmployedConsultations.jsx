@@ -13,6 +13,8 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import StorageIcon from "@mui/icons-material/Storage";
 import PublicIcon from "@mui/icons-material/Public";
 import CodeIcon from "@mui/icons-material/Code";
+
+import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 import {
   CONSULTATION_FAQS,
   QUICK_CONSULTATION_FAQS,
@@ -42,24 +44,26 @@ const options = [
 
 export default function EmployedConsultations() {
   return (
-    <Box sx={{ mt: "-90px", pt: "120px", pb: 8, bgcolor: "#f4f8fc", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        mt: "-90px",
+        pt: { xs: "90px", md: "100px" },
+        pb: 8,
+        bgcolor: "#f4f8fc",
+        minHeight: "calc(100vh - 90px)",
+      }}
+    >
       <Container maxWidth="xl">
-        <Stack direction="row" spacing={2} alignItems="center">
-          <ManageSearchIcon color="primary" sx={{ fontSize: 48 }} />
-          <Box>
-            <Typography variant="h3" fontWeight={800} color="#123666">
-              Gestión de Consultas
-            </Typography>
-            <Typography color="text.secondary">
-              Revisá el contenido visible para estudiantes y planificá su administración.
-            </Typography>
-          </Box>
-        </Stack>
-
-        <Alert severity="info" sx={{ mt: 4 }}>
-          Actualmente las preguntas son contenido versionado. Sin una API o CMS, los cambios desde una interfaz no podrían publicarse para todos los estudiantes.
+        <HeaderPageEmployed
+          header=" Módulo de Consultas"
+          title="Gestión de Consultas"
+          description="Revisá el contenido visible para estudiantes y planificá su administración."
+        />
+        <Alert severity="info" sx={{ mt: 2 }}>
+          Actualmente las preguntas son contenido versionado. Sin una API o CMS,
+          los cambios desde una interfaz no podrían publicarse para todos los
+          estudiantes.
         </Alert>
-
         <Typography variant="h5" fontWeight={800} sx={{ mt: 4 }}>
           Preguntas publicadas
         </Typography>
@@ -83,7 +87,6 @@ export default function EmployedConsultations() {
             </Grid>
           ))}
         </Grid>
-
         <Typography variant="h5" fontWeight={800} sx={{ mt: 5 }}>
           Respuestas rápidas publicadas
         </Typography>
@@ -104,7 +107,6 @@ export default function EmployedConsultations() {
             </Grid>
           ))}
         </Grid>
-
         <Typography variant="h5" fontWeight={800} sx={{ mt: 5 }}>
           Opciones para habilitar administración
         </Typography>
@@ -128,9 +130,9 @@ export default function EmployedConsultations() {
             );
           })}
         </Grid>
-
         <Typography color="text.secondary" sx={{ mt: 4 }}>
-          Las consultas preparadas por estudiantes se dirigen actualmente a: {SAE_EMAIL}
+          Las consultas preparadas por estudiantes se dirigen actualmente a:{" "}
+          {SAE_EMAIL}
         </Typography>
       </Container>
     </Box>

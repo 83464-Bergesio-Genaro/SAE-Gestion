@@ -28,9 +28,8 @@ import {
   SAE_EMAIL,
 } from "../../../shared/pages/consultations/consultations.config";
 import { sendConsultationEmail } from "../../../shared/services/EmailService";
-
-import HeaderPage from "../../components/headerPage";
-
+import HeaderPage from "../../../shared/components/headerPage";
+import TitleBox from "../../../shared/components/titleBox";
 const isValidEmail = (value) =>
   /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value.trim());
 
@@ -101,47 +100,23 @@ export default function StudentConsultations() {
     <Box
       sx={{
         mt: "-90px",
-        pt: { xs: "114px", md: "130px" },
+        pt: { xs: "114px", md: "100px" },
         pb: 8,
         minHeight: "calc(100vh - 90px)",
         bgcolor: "#f4f8fc",
       }}
     >
       <Container maxWidth="xl">
-        {/* <Box
-          sx={{
-            borderRadius: 5,
-            p: { xs: 3, md: 5 },
-            color: "white",
-            backgroundImage: `linear-gradient(120deg, rgba(18,54,102,.96), rgba(53,108,178,.78)), url('${baseUrl}images/carrousel/AuditorioUTN.jpeg')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <ContactSupportIcon sx={{ fontSize: 48 }} />
-          <Typography variant="h3" fontWeight={800} sx={{ mt: 1 }}>
-            Consultas SAE
-          </Typography>
-          <Typography sx={{ mt: 1, maxWidth: 700 }}>
-            Encontrá respuestas rápidas o escribinos para recibir ayuda personalizada.
-          </Typography>
-        </Box> */}
-
         <HeaderPage
           title="Consultas SAE"
           description="Encontrá respuestas rápidas o escribinos para recibir ayuda personalizada."
           backgroundImage="images/carrousel/AuditorioUTN.jpeg"
           icon={<ContactSupportIcon />}
         />
-
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            Preguntas frecuentes
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            Las Preguntas frecuentes
-          </Typography>
-        </Box>
+        <TitleBox
+          title="Preguntas frecuentes"
+          description="Las Preguntas frecuentes"
+        />
 
         <Grid container spacing={2.5} alignItems="flex-start" sx={{ mt: 1 }}>
           {CONSULTATION_FAQS.map((faq) => (
@@ -180,18 +155,12 @@ export default function StudentConsultations() {
           ))}
         </Grid>
 
-        <Typography
-          variant="h4"
-          fontWeight={800}
-          color="#123666"
-          sx={{ mt: 5 }}
-        >
-          Más respuestas rápidas
-        </Typography>
-        <Typography color="text.secondary" sx={{ mt: 1, mb: 2 }}>
-          Revisá estas preguntas antes de enviar una consulta.
-        </Typography>
         <Box>
+          <TitleBox
+            title="Más respuestas rápidas"
+            description="Revisá estas preguntas antes de enviar una consulta."
+          />
+
           {QUICK_CONSULTATION_FAQS.map((faq) => (
             <Accordion
               key={faq.id}

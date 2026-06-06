@@ -71,8 +71,9 @@ import {
   ECONOMIC_OPTIONAL_DOCUMENTS,
 } from "./scholarship.configs";
 
-import HeaderPage from "../../components/headerPage";
+import HeaderPage from "../../../shared/components/headerPage";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
+import TitleBox from "../../../shared/components/titleBox";
 
 const C = SCHOLARSHIP_STRINGS;
 
@@ -632,7 +633,7 @@ export default function Scholarships() {
     <Box
       sx={{
         mt: "-90px",
-        pt: { xs: "114px", md: "130px" },
+        pt: { xs: "114px", md: "100px" },
         pb: 8,
         minHeight: "calc(100vh - 90px)",
         bgcolor: "#f4f8fc",
@@ -646,15 +647,10 @@ export default function Scholarships() {
           icon={<Diversity3Icon />}
         />
 
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            {C.documentationTitle}
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {C.documentationSubtitle}
-          </Typography>
-        </Box>
-
+        <TitleBox
+          title={C.documentationTitle}
+          description={C.documentationSubtitle}
+        />
         {!loadingScholarships && perfilIncompleto && (
           <Box
             sx={{
@@ -916,14 +912,11 @@ export default function Scholarships() {
           )}
         </Box>
 
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            {C.myDocumentsTitle}
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {C.documentationSubtitle}
-          </Typography>
-        </Box>
+        <TitleBox
+          title={C.myDocumentsTitle}
+          description={C.documentationSubtitle}
+        />
+
         {!loadingDocuments && !loadingScholarships && perfilIncompleto && (
           <Box
             sx={{

@@ -179,7 +179,7 @@ export default function App() {
         {
           path: "Gestion-Prensa",
           element: (
-            <ProtectedRoute role={5}>
+            <ProtectedRoute role={[2, 5]}>
               <AdministrarPrensa />
             </ProtectedRoute>
           )
@@ -237,7 +237,7 @@ export default function App() {
         {
           path: "Mi-Perfil",
           element: (
-            <ProtectedRoute role={1}>
+            <ProtectedRoute role={[1,2,5]}>
               <MyProfile />
             </ProtectedRoute>
           )

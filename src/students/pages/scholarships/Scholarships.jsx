@@ -1,19 +1,14 @@
 import { useAuth } from "../../../shared/auth/AuthContext";
 import { useState, useEffect, useCallback } from "react";
 
-import utnLogo from "../../../assets/utn.png";
 import {
   Box,
-  CircularProgress,
   Container,
   Typography,
   Grid,
   Card,
   CardContent,
   Stack,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Chip,
   Dialog,
   DialogTitle,
@@ -26,10 +21,10 @@ import {
 import { SCHOLARSHIP_STRINGS } from "./scholarship.string";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
+import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   AddCircleOutline,
-  ExpandMore,
   AttachMoney,
   Diversity3,
   School,
@@ -37,7 +32,7 @@ import {
 
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
 import ScholarshipsForm from "./scholarshipsForm";
-import ScholarshipDocumentCard from "./ScholarshipDocumentCard";
+import DocumentCard from "../../../shared/components/documents/DocumentCard";
 
 import {
   ObtenerBecariosXLegajo,
@@ -51,6 +46,8 @@ import {
 } from "../../../api/BecasService";
 
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
+import { ObtenerPerfilXLegajo } from "../../../api/EstudianteService";
+import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
 
 import {
   INITIAL_PREVIEW,
@@ -74,7 +71,47 @@ import {
   ECONOMIC_OPTIONAL_DOCUMENTS,
 } from "./scholarship.configs";
 
+import HeaderPage from "../../components/headerPage";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
+
 const C = SCHOLARSHIP_STRINGS;
+
+const REQUIRED_PROFILE_FIELDS = [
+  ["legajo", "Legajo", (value) => String(value).trim() !== ""],
+  ["nombres", "Nombres", (value) => String(value).trim() !== ""],
+  ["apellidos", "Apellidos", (value) => String(value).trim() !== ""],
+  ["dni", "DNI", (value) => String(value).replace(/\D/g, "").length === 8],
+  ["cuil", "CUIL", (value) => String(value).replace(/\D/g, "").length === 11],
+  [
+    "fecha_nacimiento",
+    "Fecha de nacimiento",
+    (value) => String(value).trim() !== "",
+  ],
+  [
+    "email",
+    "Correo electrónico",
+    (value) => /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(String(value).trim()),
+  ],
+  [
+    "telefono",
+    "Teléfono",
+    (value) => String(value).replace(/\D/g, "").length === 12,
+  ],
+  [
+    "direccion",
+    "Dirección",
+    (value) => {
+      const parts = String(value).split(/\s+-\s+/);
+      return parts.length === 4 && parts.every((part) => part.trim() !== "");
+    },
+  ],
+];
+
+const getMissingProfileFields = (profile) =>
+  REQUIRED_PROFILE_FIELDS.filter(([field, , isValid]) => {
+    const value = profile?.[field];
+    return value === null || value === undefined || !isValid(value);
+  }).map(([, label]) => label);
 
 /*
   Componente Scholarships
@@ -108,7 +145,9 @@ export default function Scholarships() {
     setPreview((prev) => ({ ...prev, open: false }));
   }
   const { user } = useAuth();
-  const perfilIncompleto = user?.datosCompletos === false;
+  const [perfilEstudiante, setPerfilEstudiante] = useState(null);
+  const camposPerfilFaltantes = getMissingProfileFields(perfilEstudiante);
+  const perfilIncompleto = camposPerfilFaltantes.length > 0;
   // Mensaje flotante para informar éxito, advertencias o errores.
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -119,8 +158,8 @@ export default function Scholarships() {
   // Becario base del sistema SAE. Es distinto de la beca específica.
   // Primero se necesita este registro para después crear económica/servicio/investigación.
   const [becarioActual, setBecarioActual] = useState(null);
-  // Loading general de pantalla: se usa durante la carga inicial.
-  const [loading, setLoading] = useState(true);
+  const [loadingScholarships, setLoadingScholarships] = useState(true);
+  const [loadingDocuments, setLoadingDocuments] = useState(true);
   // Lista normalizada de becas para pintar las cards.
   const [misBecas, setMisBecas] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -141,6 +180,22 @@ export default function Scholarships() {
   const showSnackbar = useCallback((message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   }, []);
+
+  const cargarPerfilEstudiante = useCallback(async () => {
+    const legajo = user?.legajo ?? user?.email;
+    if (!legajo) {
+      setPerfilEstudiante(null);
+      return;
+    }
+
+    try {
+      const perfil = await ObtenerPerfilXLegajo(legajo);
+      setPerfilEstudiante(mapEstudiante(perfil));
+    } catch (error) {
+      console.error("Error al obtener el perfil del estudiante", error);
+      setPerfilEstudiante(null);
+    }
+  }, [user?.email, user?.legajo]);
 
   // Carga los proyectos disponibles para la beca de investigación.
 
@@ -240,34 +295,40 @@ export default function Scholarships() {
   }, []);
 
   // Carga el becario base y las becas asociadas al usuario logueado.
-  const cargarMisBecas = useCallback(async () => {
-    if (!user?.email) return;
+  const cargarMisBecas = useCallback(
+    async ({ showLoading = true } = {}) => {
+      if (!user?.email) return;
 
-    try {
-      const becario = await ObtenerBecariosXLegajo(user.email);
+      try {
+        if (showLoading) setLoadingScholarships(true);
+        const becario = await ObtenerBecariosXLegajo(user.email);
 
-      if (!isValidObjectResponse(becario)) {
+        if (!isValidObjectResponse(becario)) {
+          setBecarioActual(null);
+          setMisBecas([]);
+          return;
+        }
+
+        setBecarioActual(becario);
+
+        const [economica, servicio, investigacion] = await Promise.all([
+          ObtenerBecariosEconomicaXLegajo(user.email),
+          ObtenerBecariosServiciosXLegajo(user.email),
+          ObtenerBecariosInvestigacionXLegajo(user.email),
+        ]);
+
+        setMisBecas(normalizarBecas(economica, servicio, investigacion));
+      } catch (error) {
+        console.error("Error al cargar becario y becas", error);
         setBecarioActual(null);
         setMisBecas([]);
-        return;
+        showSnackbar(C.loadScholarshipsError, "error");
+      } finally {
+        if (showLoading) setLoadingScholarships(false);
       }
-
-      setBecarioActual(becario);
-
-      const [economica, servicio, investigacion] = await Promise.all([
-        ObtenerBecariosEconomicaXLegajo(user.email),
-        ObtenerBecariosServiciosXLegajo(user.email),
-        ObtenerBecariosInvestigacionXLegajo(user.email),
-      ]);
-
-      setMisBecas(normalizarBecas(economica, servicio, investigacion));
-    } catch (error) {
-      console.error("Error al cargar becario y becas", error);
-      setBecarioActual(null);
-      setMisBecas([]);
-      showSnackbar(C.loadScholarshipsError, "error");
-    }
-  }, [normalizarBecas, showSnackbar, user?.email]);
+    },
+    [normalizarBecas, showSnackbar, user?.email],
+  );
 
   // Carga directa desde "Mis Documentos". El formulario usa el mismo servicio,
   // pero maneja su propio estado local mientras el dialog esta abierto.
@@ -309,7 +370,7 @@ export default function Scholarships() {
     let archivoGuardado;
 
     try {
-      setLoading(true);
+      setLoadingDocuments(true);
       archivoGuardado = await crearDocumentoEstudiante(
         item.id_tipo_documento,
         archivoRenombrado,
@@ -327,7 +388,7 @@ export default function Scholarships() {
       });
       console.error("Error al subir el archivo:", error);
     } finally {
-      setLoading(false);
+      setLoadingDocuments(false);
     }
 
     if (!archivoGuardado) {
@@ -384,6 +445,11 @@ export default function Scholarships() {
   // Abre el Dialog para solicitar una beca nueva.
   // Si ya existe Becario SAE, precarga sus datos; si no, usa datos del usuario logueado.
   const handleAgregarBeca = () => {
+    if (perfilIncompleto) {
+      showSnackbar(C.incompleteProfileMessage, "warning");
+      return;
+    }
+
     setOpenDialog(true);
   };
 
@@ -393,7 +459,7 @@ export default function Scholarships() {
     try {
       setOpenPopup(false);
 
-      setLoading(true);
+      setLoadingDocuments(true);
 
       await eliminarDocumentoEstudiante(item.id_archivo);
 
@@ -438,7 +504,7 @@ export default function Scholarships() {
         severity: "error",
       });
     } finally {
-      setLoading(false);
+      setLoadingDocuments(false);
     }
   }
 
@@ -531,25 +597,33 @@ export default function Scholarships() {
     if (!user?.email) return;
 
     const inicializarPantalla = async () => {
-      try {
-        setLoading(true);
+      setLoadingScholarships(true);
+      setLoadingDocuments(true);
 
-        await cargarMisBecas();
+      const loadScholarships = Promise.all([
+        cargarMisBecas({ showLoading: false }),
+        cargarPerfilEstudiante(),
+      ]).finally(() => setLoadingScholarships(false));
 
-        const documentosConTipo = await ObtenerTipoDocumentos();
+      const loadDocuments = (async () => {
+        try {
+          const documentosConTipo = await ObtenerTipoDocumentos();
+          await ObtenerDocumentosEstudiante(documentosConTipo);
+        } catch (error) {
+          console.error("Error al cargar documentos de becas", error);
+        } finally {
+          setLoadingDocuments(false);
+        }
+      })();
 
-        await ObtenerDocumentosEstudiante(documentosConTipo);
-      } catch (error) {
-        console.error("Error al cargar la pantalla de becas", error);
-      } finally {
-        setLoading(false);
-      }
+      await Promise.all([loadScholarships, loadDocuments]);
     };
 
     inicializarPantalla();
   }, [
     user?.email,
     cargarMisBecas,
+    cargarPerfilEstudiante,
     ObtenerTipoDocumentos,
     ObtenerDocumentosEstudiante,
   ]);
@@ -564,53 +638,8 @@ export default function Scholarships() {
         bgcolor: "#f4f8fc",
       }}
     >
-      {/* Overlay de carga inicial de toda la pantalla. */}
-      {loading && (
-        <Box
-          sx={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            zIndex: 1300,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            pointerEvents: "all",
-            backdropFilter: "blur(2px)",
-          }}
-          textAlign="center"
-        >
-          <Box
-            sx={{
-              position: "relative",
-              width: 200,
-              height: 200,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            <CircularProgress size={200} thickness={2.8} />
-            <Box
-              component="img"
-              src={utnLogo}
-              alt={C.utnLogoAlt}
-              sx={{
-                width: 125,
-                height: 125,
-                objectFit: "contain",
-                position: "absolute",
-                borderRadius: "50%",
-                bgcolor: "white",
-                p: 0.5,
-                boxShadow: 1,
-              }}
-            />
-          </Box>
-        </Box>
-      )}
-
       <Container maxWidth="xl">
-        <Box
+        {/* <Box
           sx={{
             overflow: "hidden",
             borderRadius: 6,
@@ -666,7 +695,13 @@ export default function Scholarships() {
               filter: "drop-shadow(0 18px 35px rgba(0,0,0,0.22))",
             }}
           />
-        </Box>
+        </Box> */}
+        <HeaderPage
+          title={C.bigTitle}
+          description={C.bigSubtitle}
+          backgroundImage="images/carrousel/EntradaUTN.jpg"
+          icon={<Diversity3Icon />}
+        />
 
         <Box sx={{ mt: 3 }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
@@ -677,7 +712,7 @@ export default function Scholarships() {
           </Typography>
         </Box>
 
-        {perfilIncompleto && (
+        {!loadingScholarships && perfilIncompleto && (
           <Box
             sx={{
               mt: 3,
@@ -696,10 +731,13 @@ export default function Scholarships() {
               </Typography>
             </Box>
             <Typography sx={{ mt: 1 }}>{C.incompleteProfileMessage}</Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Campos faltantes: {camposPerfilFaltantes.join(", ")}.
+            </Typography>
             <Box sx={{ mt: 1 }}>
               <SAEButton
                 variant="contained"
-                onClick={() => (window.location.href = "/perfil")}
+                onClick={() => (window.location.href = "/Mi-Perfil")}
               >
                 {C.incompleteProfileButton}
               </SAEButton>
@@ -709,7 +747,16 @@ export default function Scholarships() {
 
         {/* Cards de becas ya solicitadas por el usuario. */}
         <Box sx={{ position: "relative", mt: 1 }}>
-          <Grid container spacing={2.5}>
+          {loadingScholarships && (
+            <Stack alignItems="center" sx={{ py: 5 }}>
+              <SAESpinner size="S" />
+            </Stack>
+          )}
+          <Grid
+            container
+            spacing={2.5}
+            sx={{ display: loadingScholarships ? "none" : "flex" }}
+          >
             {misBecas.map((item) => (
               <Grid
                 item
@@ -901,7 +948,7 @@ export default function Scholarships() {
             </Grid>
           </Grid>
 
-          {perfilIncompleto && (
+          {!loadingScholarships && perfilIncompleto && (
             <Box
               role="alert"
               aria-live="polite"
@@ -934,7 +981,7 @@ export default function Scholarships() {
             {C.documentationSubtitle}
           </Typography>
         </Box>
-        {perfilIncompleto && (
+        {!loadingDocuments && !loadingScholarships && perfilIncompleto && (
           <Box
             sx={{
               mt: 3,
@@ -953,10 +1000,13 @@ export default function Scholarships() {
               </Typography>
             </Box>
             <Typography sx={{ mt: 1 }}>{C.incompleteProfileMessage}</Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Campos faltantes: {camposPerfilFaltantes.join(", ")}.
+            </Typography>
             <Box sx={{ mt: 1 }}>
               <SAEButton
                 variant="contained"
-                onClick={() => (window.location.href = "/perfil")}
+                onClick={() => (window.location.href = "/Mi-Perfil")}
               >
                 {C.incompleteProfileButton}
               </SAEButton>
@@ -965,7 +1015,12 @@ export default function Scholarships() {
         )}
         {/* Sección: Mis Documentos */}
         <Box sx={{ mt: 4, position: "relative" }}>
-          {perfilIncompleto && (
+          {loadingDocuments && (
+            <Stack alignItems="center" sx={{ py: 5 }}>
+              <SAESpinner size="S" />
+            </Stack>
+          )}
+          {!loadingDocuments && !loadingScholarships && perfilIncompleto && (
             <Box
               role="alert"
               aria-live="polite"
@@ -988,7 +1043,11 @@ export default function Scholarships() {
               </Typography>
             </Box>
           )}
-          <Grid container spacing={2.5} sx={{ mt: 1 }}>
+          <Grid
+            container
+            spacing={2.5}
+            sx={{ mt: 1, display: loadingDocuments ? "none" : "flex" }}
+          >
             {documentos.map((item) => (
               <Grid
                 item
@@ -997,7 +1056,7 @@ export default function Scholarships() {
                 md={4}
                 key={item.id_tipo_documento ?? item.id ?? item.nombre}
               >
-                <ScholarshipDocumentCard
+                <DocumentCard
                   documento={item}
                   notUploadedLabel={C.docStateNotUploaded}
                   uploadedLabel={C.docStataUplodaded}
@@ -1085,7 +1144,7 @@ export default function Scholarships() {
           </Grid>
 
           {/* Mini-sección: documentos de beca económica */}
-          {hasEconomica && (
+          {!loadingDocuments && hasEconomica && (
             <Box sx={{ mt: 2 }}>
               <Typography
                 variant="h6"
@@ -1103,7 +1162,7 @@ export default function Scholarships() {
                       md={4}
                       key={item.id_tipo_documento ?? item.id ?? item.nombre}
                     >
-                      <ScholarshipDocumentCard
+                      <DocumentCard
                         documento={item}
                         notUploadedLabel={C.docStateNotUploaded}
                         uploadedLabel={C.docStataUplodaded}
@@ -1124,45 +1183,11 @@ export default function Scholarships() {
           )}
         </Box>
 
-        {/* Sección de preguntas frecuentes. */}
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            {C.FAQTitle}
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {C.FAQSubtitle}
-          </Typography>
-          <Box sx={{ mt: 2 }}>
-            {C.faqsBecas.map((faq, index) => (
-              <Accordion
-                key={index}
-                disableGutters
-                sx={{
-                  mb: 1.5,
-                  borderRadius: 3,
-                  boxShadow: "0 8px 24px rgba(21, 61, 113, 0.08)",
-                  border: "1px solid rgba(17, 53, 101, 0.08)",
-                  "&:before": { display: "none" },
-                }}
-              >
-                <AccordionSummary expandIcon={<ExpandMore />}>
-                  <Typography fontWeight={600}>{faq.pregunta}</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Typography color="text.secondary">
-                    {faq.respuesta}
-                  </Typography>
-                </AccordionDetails>
-              </Accordion>
-            ))}
-          </Box>
-        </Box>
-
         {/* El form recibe documentos y callbacks; Scholarships conserva la fuente de verdad. */}
         <ScholarshipsForm
           open={openDialog}
           onClose={() => setOpenDialog(false)}
-          user={user}
+          user={{ ...user, datosPerfil: perfilEstudiante }}
           becarioActual={becarioActual}
           setBecarioActual={setBecarioActual}
           cargarMisBecas={cargarMisBecas}
@@ -1173,6 +1198,8 @@ export default function Scholarships() {
           handlePreview={handlePreview}
           handleDeleteDocument={DeleteDocument}
           showSnackbar={showSnackbar}
+          perfilCompleto={!perfilIncompleto}
+          camposPerfilFaltantes={camposPerfilFaltantes}
         />
 
         <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>

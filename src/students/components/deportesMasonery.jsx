@@ -268,27 +268,57 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
         justifyContent="space-between"
         alignItems="center"
         gap={2}
-        mb={2}
-        mt={2}
         flexWrap="wrap"
+        sx={{
+          px: { xs: 2, md: 3 },
+          py: 2,
+          background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+        }}
       >
         {/* IZQUIERDA */}
         <Box display="flex" gap={2}>
           <SAEButton
             variant={filtro === "todos" ? "contained" : "outlined"}
             onClick={() => setFiltro("todos")}
+            sx={
+              filtro === "todos"
+                ? undefined
+                : {
+                    bgcolor: "transparent",
+                    color: "white",
+                    borderColor: "white",
+                  }
+            }
           >
             Todos
           </SAEButton>
           <SAEButton
             variant={filtro === "inscriptos" ? "contained" : "outlined"}
             onClick={() => setFiltro("inscriptos")}
+            sx={
+              filtro === "inscriptos"
+                ? undefined
+                : {
+                    bgcolor: "transparent",
+                    color: "white",
+                    borderColor: "white",
+                  }
+            }
           >
             Inscriptos
           </SAEButton>
           <SAEButton
             variant={filtro === "noinscriptos" ? "contained" : "outlined"}
             onClick={() => setFiltro("noinscriptos")}
+            sx={
+              filtro === "noinscriptos"
+                ? undefined
+                : {
+                    bgcolor: "transparent",
+                    color: "white",
+                    borderColor: "white",
+                  }
+            }
           >
             No inscriptos
           </SAEButton>
@@ -306,6 +336,9 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
               xs: "100%",
               md: 300,
             },
+            "& .MuiOutlinedInput-root": {
+              bgcolor: "white",
+            },
           }}
           InputProps={{
             startAdornment: (
@@ -318,7 +351,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
       </Box>
 
       <Masonry
-        spacing={{ xs: 2, sm: 3, md: 3 }}
+        spacing={{ xs: 2, sm: 3, md: 2 }}
         columns={{ xs: 2, sm: 2, md: 4 }}
       >
         {agrupadoFiltrado.map((card, index) => (
@@ -328,6 +361,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                 borderRadius: 6,
                 px: { xs: 1, md: 2 },
                 py: { xs: 0.5, md: 1 },
+                m: 1,
                 boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
                 border: "1px solid rgba(17, 53, 101, 0.08)",
               }}

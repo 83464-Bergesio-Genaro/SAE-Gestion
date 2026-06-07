@@ -14,7 +14,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import { useAuth } from "../../auth/AuthContext";
 import SAEButton from "../buttons/SAEButton";
-import { sharedMenu, studentMenu, employedMenu } from "../../menus/MenuConfig";
+import { sharedMenu, studentMenu, employedMenu ,adminMenu} from "../../menus/MenuConfig";
 
 function getInitials(nombre = "") {
   return nombre
@@ -33,12 +33,22 @@ export default function Navbar() {
   const [mobileAnchorEl, setMobileAnchorEl] = useState(null);
 
   let menu = [];
-  if (!user) {
-    menu = sharedMenu;
-  } else if (user?.id_perfil !== 1) {
-    menu = employedMenu;
-  } else {
-    menu = studentMenu;
+  switch (user?.id_perfil) {
+    case 1:
+      menu = studentMenu;
+      break;
+    case 2:
+      menu = employedMenu;
+      break;
+    case 5:
+      menu = adminMenu;
+      break;
+    case null:
+      menu = sharedMenu;
+      break;
+    default:
+      menu = sharedMenu;
+      break;
   }
 
   const handleNav = (path) => {
@@ -146,7 +156,7 @@ export default function Navbar() {
           </MenuItem>
         ))}
         {user && <Divider />}
-        {user && <MenuItem onClick={handleMobileClose}>Perfil</MenuItem>}
+        {user && <MenuItem onClick={() => { handleMobileClose(); navigate("Mi-Perfil");}}>Perfil</MenuItem>}
         {user && (
           <MenuItem onClick={() => { handleMobileClose(); logout(); }}>
             Cerrar Sesión

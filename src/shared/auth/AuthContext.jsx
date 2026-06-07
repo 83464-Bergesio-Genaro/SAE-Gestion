@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
         id_perfil: result.data.id_perfil ?? 0,
         expiration: Date.now() + appConfig.sessionTimeout,
       };
-
+      console.log("La sesion es:",session);
       localStorage.setItem("session", JSON.stringify(session));
       setUser(session);
       setSessionExpired(false);

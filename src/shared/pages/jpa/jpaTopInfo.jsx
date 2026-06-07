@@ -26,10 +26,11 @@ export default function JPAIntro(){
         }}>
            <Typography variant="h2" 
             align="center" 
-            fontSize={{xs:"3em",sm:"3.6em", lg:"4em"}}
-            fontWeight="bold"
-            marginTop={{xs:"100px", lg:"140px"}}>
-              ¡BIENVENID@ A NUESTRA UNIVERSIDAD!
+            fontSize={{xs:"2em",md:"4.5em", lg:"5em"}}
+            fontWeight={{xs:"bold",md:"bold"}}
+            marginTop={{xs:"100px", lg:"140px"}}
+            marginBottom={{xs:"10px"}}>
+              ¡Bienvenid@ a nuestra Universidad!
             </Typography>
       
 

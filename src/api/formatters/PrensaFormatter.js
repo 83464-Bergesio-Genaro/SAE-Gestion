@@ -1,11 +1,9 @@
-const baseUrl = import.meta.env.BASE_URL;
-
 export const mapPublicacionPublica = (publicacion) => ({
   id: publicacion.id,
   titulo: publicacion.titulo_publicacion,
   descripcion: publicacion.descripcion ,
-  fecha_inicio: formatearFecha(publicacion.fecha_inicio),
-  fecha_vigencia: formatearFecha(publicacion.fecha_vigencia),
+  fecha_inicio: removerHoras(publicacion.fecha_inicio),
+  fecha_vigencia: removerHoras(publicacion.fecha_vigencia),
   prioridad:publicacion.prioridad,
   no_dar_baja: publicacion.no_dar_baja,
   visualizaciones: publicacion.visualizaciones,
@@ -13,11 +11,12 @@ export const mapPublicacionPublica = (publicacion) => ({
   documentos:getDownloadableFiles(publicacion.documentos_asociados),
   ruta_publicacion:"https://www.instagram.com/sae.utn.frc/"
 });
-const formatearFecha =(fecha) =>{
-    const dateObject = new Date(fecha); // Or your parsed date object
-    // Format the date for display in DD/MM/YYYY format
-    return dateObject.toLocaleDateString('en-GB'); 
+function removerHoras(isoString) {
+    if (!isoString) return "";  
+    const [year, month, day] = (isoString.split("T")[0]).split("-");
+    return year+'/'+month+'/'+day;
 }
+
 
 function parseFiles(filesString){
   
@@ -34,10 +33,7 @@ function parseFiles(filesString){
   }
   else return [];
 }
-const imageStock = [`${baseUrl}images/principal/newsGeneric.webp`
-  ,`${baseUrl}images/carrousel/AuditorioUTN.jpeg`
-  ,`${baseUrl}images/carrousel/EntradaUTN.jpg`
-,`${baseUrl}images/carrousel/estacionamientoUTN.jpg`];
+
 const imageFormats = ["jpg","jpeg","png","svg"];
 
 export function getFirstImage(filesString){
@@ -45,8 +41,7 @@ export function getFirstImage(filesString){
   const image = files.find(file => 
     imageFormats.includes(file.extension)
   );
-  const randomIndex = Math.floor(Math.random() * imageStock.length);
-  if(!image) return imageStock[randomIndex];
+  
   return image;
 }
 

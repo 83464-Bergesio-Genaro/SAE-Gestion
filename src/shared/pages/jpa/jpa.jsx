@@ -8,12 +8,12 @@ import HowToRegIcon from "@mui/icons-material/HowToReg";
 import { CalendarEvent } from "../../components/calendarEvent/calendarEvent";
 import Fab from "@mui/material/Fab";
 
-import { ObtenerEventosPublicos } from "../../../api/JPAService";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import JPAIntro from "./jpaTopInfo";
+import { useJPA } from "../../context/sharedContext";
+import { JPAProvider } from "../../context/providers/jpaProvider";
 import {InfoSectionPhone,InfoSectionWithId} from "./jpaInfoSection";
+
 
 const baseUrl = import.meta.env.BASE_URL;
 
@@ -133,21 +133,17 @@ function ParticipeButton(){
     <span className="texto"> Quiero participar</span>
     </Fab>)
 }
-
 export default function JPA() {
-  const [eventosJPA, setEventosJPA] = useState([]);
-  useEffect(() => {
-    const ObtenerEventosPublicosApi = async () => {
-      try {
-        const data = await ObtenerEventosPublicos();
-        setEventosJPA(data);
-      } catch (error) {
-        console.error("Error al traer Eventos:", error);
-      }
-    };
-    ObtenerEventosPublicosApi();
-  }, []);
-
+    return (
+        <JPAProvider>
+            <JPAContent />
+        </JPAProvider>
+    );
+}
+function JPAContent() {
+    const {
+      eventosJPA
+    } = useJPA();
   return (
     <Box sx={{ 
           height: "100%",

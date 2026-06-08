@@ -1,8 +1,9 @@
 //FUNCIONES
 import React, { useMemo,useState  } from 'react';
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../shared/auth/AuthContext";
-import { HealthUsersProvider, useHealthUser } from './HealthContext'; 
+import { HealthUsersProvider } from '../../context/providers/healthProvider';
+import { useHealth } from '../../context/employedContext';
+import { useAuth } from '../../../shared/context/sharedContext';
 //ICONS
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
@@ -67,7 +68,7 @@ function EmployedAdminContent(){
             snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
             dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
             setHorariosDialogOpen,horariosDialogOpen
-    } = useHealthUser();
+    } = useHealth();
    
     const sectionConfig = useMemo(
             () => ({

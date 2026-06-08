@@ -29,7 +29,9 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 
-import { useAuth } from "../../../shared/auth/AuthContext";
+import { useAuth } from "../../../shared/context/sharedContext";
+import { useHealth } from "../../context/studentContext"; 
+import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useEffect } from "react";
 
 import SAETextField from "../../../shared/components/inputs/SAETextField";
@@ -58,7 +60,7 @@ import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 
 import HeaderPage from "../../components/headerPage";
 import { DataGrid } from "@mui/x-data-grid";
-import { HealthUsersProvider, useHealthUser } from './healthContext'; 
+
 
 const PALETTE = [
     "#8A8A8A",//Pendiente
@@ -226,7 +228,7 @@ export function EmployedStudentContent(){
         snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
         dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
 
-    } = useHealthUser();
+    } = useHealth();
 
     useEffect(() => {
         fetchTurnosEstudiante(user.email);
@@ -236,11 +238,6 @@ export function EmployedStudentContent(){
         setDialogData((prev) => ({ ...prev, [field]: value }));
     };   
     
-    /*const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: "",
-        severity: "success",
-    });*/
     const horariosAgrupados = agruparPorEspecialidad(allHorarios);
     
     return (

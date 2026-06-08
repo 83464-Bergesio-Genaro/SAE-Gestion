@@ -1,3 +1,4 @@
+import {useEffect, useState,useMemo } from "react";
 import {
   Box,
   Card,
@@ -22,81 +23,42 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import SettingsIcon from "@mui/icons-material/Settings";
-
-import {useEffect, useMemo, useState ,useCallback} from "react";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
+import { PressProvider } from "../../context/providers/pressProvider";
+import { usePress } from "../../context/sharedContext";
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
-
-import { ObtenerNoticiasPublicas,descargarDocumentoPorId } from "../../../api/PrensaService";
-
-const PREVIEW_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "pdf"]);
-
-function hasRealDocumentName(value) {
-  if (!value) return false;
-  const normalized = String(value).trim().toLowerCase();
-  if (!normalized) return false;
-
-  const genericNames = new Set(["documento", "archivo", "file", "document"]);
-  return !genericNames.has(normalized);
-}
-
-function getDocumentName(doc, fallback = "Archivo") {
-  const candidate = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo;
-  return hasRealDocumentName(candidate) ? candidate : fallback;
-}
-
-function normalizeExtension(value) {
-  if (!value) return "";
-
-  let normalized = String(value).trim().toLowerCase();
-  if (normalized.includes("/")) {
-    normalized = normalized.split("/").pop();
-  }
-  if (normalized.includes(";")) {
-    normalized = normalized.split(";")[0];
-  }
-
-  return normalized.replace(/^\./, "");
-}
-
-function getDocumentExtension(doc) {
-  const directExtension = normalizeExtension(doc?.extension);
-  if (directExtension) return directExtension;
-
-  const fileName = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo || "";
-  const parts = fileName.split(".");
-  if (parts.length < 2) return "";
-
-  return normalizeExtension(parts.pop());
-}
-
-function isPreviewableDocument(doc) {
-  return PREVIEW_EXTENSIONS.has(doc.extension);
-}
-
-function getImageSource(doc) {
-  if (!doc?.datos_documento) return "";
-
-  if (doc.datos_documento.startsWith("data:")) {
-    return doc.datos_documento;
-  }
-  
-  const extension = getDocumentExtension(doc);
-  const mimeByExtension = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-    bmp: "image/bmp",
-    svg: "image/svg+xml",
-  };
-
-  const mime = mimeByExtension[extension] || "image/jpeg";
-  return `data:${mime};base64,${doc.datos_documento}`;
-}
+import { descargarDocumentoPorId } from "../../../api/PrensaService";
 
 function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,documentos }) {
+  // Estado para la imagen. Empieza con la foto genérica por defecto
+  const [imagenUrl, setImagenUrl] = useState(null);
+
+  useEffect(() => {
+    // Si no hay portada o no tiene ID, dejamos la imagen genérica
+    if (!portada || !portada.id) {
+      return;
+    }
+
+    const cargarImagen = async () => {
+      try {
+        // Llamamos a tu función del provider
+        const resultado = await descargarDocumentoPorId(portada.id);
+        
+        // Tu función devuelve un objeto con 'datos_documento' (que es el DataURL)
+        if (resultado && resultado.datos_documento) {
+          setImagenUrl(resultado.datos_documento);
+        }
+
+      } catch (error) {
+        console.error("No se pudo cargar la imagen de portada:", error);
+        // Si hay un error en la API, se mantiene la imagen por defecto
+        setImagenUrl("/images/principal/newsGeneric.webp");
+      }
+    };
+
+    cargarImagen();
+  }, [portada]);
+
 
   return (
     <Card
@@ -118,7 +80,8 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
             objectFit: "cover",
           }}
           component="img"
-          image={portada??"/images/principal/newsGeneric.webp" }
+          image={imagenUrl??"/images/principal/newsGeneric.webp"}
+          alt={portada?.name??"UTN"}
         />
       }
 
@@ -143,28 +106,9 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
   );
 }
 
-export default function NovedadesEstudiantiles() {
-    const [isLoading, setLoadingNews] = useState(true);
-    const [novedades, setNovedades] = useState([]);
-    const fetchEventosPublicos = useCallback(async () => {
-        setLoadingNews(true);
-        try {
-            const respuesta = await ObtenerNoticiasPublicas();      
-            if(respuesta?.success && respuesta?.data){
-              setNovedades(respuesta.data);
-            }
-        } catch {
-             setNovedades([]);
-        } finally {
-            setLoadingNews(false);
-        }
-    }, []);
+export  function NovedadesContent() {
 
-    useEffect(() => {
-        fetchEventosPublicos();
-    }, [fetchEventosPublicos]);
-
-
+  const {isLoading, novedades} = usePress();
   const [paginaActual, setPaginaActual] = useState(1);
   const itemsPorPagina = 3;
 
@@ -222,7 +166,7 @@ export default function NovedadesEstudiantiles() {
                 fecha_inicio={item.fecha_inicio}
                 descripcion={item.descripcion}
                 invertida={i%2 === 0}
-                portada={item.imagen}
+                portada={item.portada}
                 documentos={item.documentos}
               />
             ))}
@@ -262,96 +206,9 @@ export default function NovedadesEstudiantiles() {
 }
 
 export function DocumentList(listadoDocumentos){
-    const [previewOpen, setPreviewOpen] = useState(false);
-    const [previewDoc, setPreviewDoc] = useState(null);
-    const [previewDocName, setPreviewDocName] = useState("");
-    const [previewLoading, setPreviewLoading] = useState(false);
-    const [previewError, setPreviewError] = useState("");
-    
-      const handleOpenPreview = async (documento) => {
-        setPreviewLoading(true);
-        if(!documento || !documento.id || !documento.name || !documento.extension) {
-          setPreviewError("No se encontró el documento para previsualizar.");
-          setPreviewLoading(false);
-          return;
-        }
-      
-        setPreviewOpen(true);
-        setPreviewError("");
-        setPreviewDoc(null);
- 
-        try {
-
-          const data = await descargarDocumentoPorId(documento.id);
- 
-          if (!isPreviewableDocument(data) && !isPreviewableDocument(documento)) {
-            setPreviewError("Solo se permite vista previa para imágenes o PDF.");
-            return;
-          }
-    
-          setPreviewDoc(data);
-
-        } catch (error) {
-          console.error("Error al descargar documento:", error);
-          setPreviewError("No se pudo cargar la imagen.");
-        } finally {
-          setPreviewLoading(false);
-        }
-      };
-    
-      const handleClosePreview = () => {
-        setPreviewOpen(false);
-        setPreviewDoc(null);
-        setPreviewDocName("");
-        setPreviewError("");
-        setPreviewLoading(false);
-      };
-    
-      const handleDownloadPreview = () => {
-        if (!previewDoc) return;
-    
-        const imageSource = getImageSource(previewDoc);
-        if (!imageSource) return;
-    
-        const extension = getDocumentExtension(previewDoc);
-        const fileName = getDocumentName(previewDoc, previewDocName || "archivo");
-        const hasExtension = fileName.includes(".");
-        const downloadName = hasExtension
-          ? fileName
-          : `${fileName}.${extension || "jpg"}`;
-    
-        const link = document.createElement("a");
-        link.href = imageSource;
-        link.download = downloadName;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      };
-
-      const handleDownload = async (documento) => {
-        setPreviewLoading(true);
-        if(!documento || !documento.id || !documento.name || !documento.extension) {
-          setPreviewError("No se encontró el documento para previsualizar.");
-          setPreviewLoading(false);
-          return;
-        }
-        try {
-          let data = await descargarDocumentoPorId(documento.id);
-          const imageSource = getImageSource(data);
-          
-          if (!imageSource) return;
-          const link = document.createElement("a");
-          link.href = imageSource;
-          link.download = documento.nombre_documento || documento.nombreDocumento || documento.name || `documento_${documento.id}`;
-          document.body.appendChild(link);
-          console.log(link);
-          link.click();
-          link.remove();
-          
-        } catch (error) {
-          setPreviewError(`No se pudo descargar el documento. ${error}`);
-        }
-      };
+     const { previewOpen,previewDoc,previewDocName,previewLoading,previewError,
+                handleOpenPreview,handleClosePreview,handleDownloadPreview,handleDownload,
+              getDocumentName,getImageSource,getDocumentExtension} = usePress();
     return (
     <div>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2, mb: 1 }}>
@@ -406,4 +263,12 @@ export function DocumentList(listadoDocumentos){
           onDownload={handleDownloadPreview}
         />      
     </div>)
+}
+// Este componente solo inicializa el Proveedor y llama al contenido interno
+export default function NovedadesEstudiantiles() {
+    return (
+        <PressProvider>
+            <NovedadesContent />
+        </PressProvider>
+    );
 }

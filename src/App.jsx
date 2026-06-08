@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { AuthProvider } from './shared/auth/AuthContext'; 
+import { AuthProvider } from './shared/context/providers/authProvider';
 import MainLayout from "./shared/components/layout/MainLayout";
 
 import SharedMain from "./shared/pages/home/main";
@@ -15,7 +15,6 @@ import SharedJPAIndustrial from "./shared/pages/degrees/industrial";
 import SharedJPAMecanic from "./shared/pages/degrees/mecanic";
 import SharedJPAMetalurgic from "./shared/pages/degrees/metalurgic";
 import SharedJPAParticipar from "./shared/pages/jpa/participar";
-import Prensa from "./shared/pages/prensa/Prensa";
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
 import EmployedMain from "./employed/pages/main";
@@ -35,7 +34,7 @@ import Scholarships from "./students/pages/scholarships/Scholarships";
 import StudentHealth from "./students/pages/health/healthStudent";
 import MyProfile from './students/pages/profile/Profile';
 import StudentConsultations from "./students/pages/consultations/StudentConsultations";
-
+import Prensa from './employed/pages/prensa/Prensa';
 import ProtectedRoute from "./shared/auth/ProtectedRoute"; 
 
 import { appConfig } from "./config/appConfig";
@@ -111,10 +110,6 @@ export default function App() {
           element: <SharedJPAParticipar />
         },
         {
-          path: "Prensa",
-          element: <Prensa />
-        },
-        {
           path: "lab/componentes",
           element: <ComponentLab />
         },
@@ -178,6 +173,14 @@ export default function App() {
         },
         {
           path: "Gestion-Prensa",
+          element: (
+            <ProtectedRoute role={[2, 5]}>
+              <Prensa />
+            </ProtectedRoute>
+          )
+        },        
+        {
+          path: "Gestion-Prensa/Administrar",
           element: (
             <ProtectedRoute role={[2, 5]}>
               <AdministrarPrensa />

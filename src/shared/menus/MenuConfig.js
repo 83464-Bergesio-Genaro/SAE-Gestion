@@ -92,7 +92,7 @@ export const employedMenu = [
   },
   {
     label: "Prensa",
-    path: "/Prensa",
+    path: "/Gestion-Prensa",
     color:"#5E8ACC",
     icon: NewspaperIcon,
     descripcion: "Gestiona las noticias y documentacion que veran los alumnos.",   
@@ -144,7 +144,7 @@ export const adminMenu = [
   },
   {
     label: "Prensa",
-    path: "/Prensa",
+    path: "/Gestion-Prensa",
     color:"#5E8ACC",
     icon: NewspaperIcon,
     descripcion: "Gestiona las noticias y documentacion que veran los alumnos.",   

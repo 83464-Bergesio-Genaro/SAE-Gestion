@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 
-import { AdminUsersProvider, useAdminUsers } from './AdminUsersContext'; 
+import { useEmploy } from '../../context/employedContext'; 
+import { AdminUsersProvider } from '../../context/providers/employProvider';
 
 const HOUR_HEIGHT = 36; // px per hour
 const START_HOUR = 8;//AM
@@ -96,7 +97,7 @@ export function EmployedCalendar({ legajoEmpleado = null }){
             dialogError,
             empleados,loadingEmpleados,
             allHorarios,loadingHorarios,
-        } = useAdminUsers();
+        } = useEmploy();
 
     const [manualSelected, setManualSelected] = useState(null);
 

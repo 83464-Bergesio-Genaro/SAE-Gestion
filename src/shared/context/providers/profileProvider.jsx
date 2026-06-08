@@ -1,6 +1,4 @@
 import React, {
-  createContext,
-  useContext,
   useState,
   useCallback,
   useEffect,
@@ -11,7 +9,7 @@ import {
   ModificarPerfilEstudiante,
 } from "../../../api/EstudianteService";
 import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
-const ProfileContext = createContext();
+import { ProfileContext } from "../../../students/context/studentContext";
 
 const isValidEmail = (value) =>
   /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value);
@@ -165,11 +163,4 @@ export const ProfileContextProvider = ({ children }) => {
       {children}
     </ProfileContext.Provider>
   );
-};
-
-export const useProfileContext = () => {
-  const context = useContext(ProfileContext);
-  if (!context)
-    throw new Error("useHealthUser debe usarse dentro de HealthProvider");
-  return context;
 };

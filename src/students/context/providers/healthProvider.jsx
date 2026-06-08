@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useEffect,useMemo } from 'react';
+import React, { useState, useCallback, useEffect,useMemo } from 'react';
 import { Box, IconButton, Chip } from '@mui/material';
-
+import { HealthContext } from '../studentContext';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -11,7 +11,6 @@ import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurno
 import { ObtenerUsuariosXLegajo } from '../../../api/EmpleadoService';
 
 
-const HealthUserContext = createContext();
 
 const EMPTY_TURNO =
 {
@@ -433,7 +432,7 @@ export const HealthUsersProvider = ({ children }) => {
 
     // ---------
     return (
-        <HealthUserContext.Provider value={{
+        <HealthContext.Provider value={{
             DAYS,
             // ABM de Turnos
             estadosTurno,
@@ -456,12 +455,6 @@ export const HealthUsersProvider = ({ children }) => {
             
         }}>
             {children}
-        </HealthUserContext.Provider>
+        </HealthContext.Provider>
     );
-};
-
-export const useHealthUser = () => {
-    const context = useContext(HealthUserContext);
-    if (!context) throw new Error("useHealthUser debe usarse dentro de HealthProvider");
-    return context;
 };

@@ -1,4 +1,3 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Box,
   Card,
@@ -25,88 +24,13 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import SettingsIcon from "@mui/icons-material/Settings";
+import SAEButton from "../../../shared/components/buttons/SAEButton";
+import SAETextField from "../../../shared/components/inputs/SAETextField";
+import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import { useAuth } from "../../../shared/context/sharedContext"; 
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/AuthContext";
-import SAEButton from "../../components/buttons/SAEButton";
-import SAETextField from "../../components/inputs/SAETextField";
-import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
-import {
-  listarPublicacionesActivas,
-  listarDocumentosPorPublicacion,
-  descargarDocumentoPorId,
-} from "../../../api/PrensaService";
-
-const PREVIEW_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "pdf"]);
-
-function getDocumentId(doc) {
-  return doc?.id ?? doc?.id_documento ?? doc?.idDocumento ?? null;
-}
-
-function hasRealDocumentName(value) {
-  if (!value) return false;
-  const normalized = String(value).trim().toLowerCase();
-  if (!normalized) return false;
-
-  const genericNames = new Set(["documento", "archivo", "file", "document"]);
-  return !genericNames.has(normalized);
-}
-
-function getDocumentName(doc, fallback = "Archivo") {
-  const candidate = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo;
-  return hasRealDocumentName(candidate) ? candidate : fallback;
-}
-
-function normalizeExtension(value) {
-  if (!value) return "";
-
-  let normalized = String(value).trim().toLowerCase();
-  if (normalized.includes("/")) {
-    normalized = normalized.split("/").pop();
-  }
-  if (normalized.includes(";")) {
-    normalized = normalized.split(";")[0];
-  }
-
-  return normalized.replace(/^\./, "");
-}
-
-function getDocumentExtension(doc) {
-  const directExtension = normalizeExtension(doc?.extension);
-  if (directExtension) return directExtension;
-
-  const fileName = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo || "";
-  const parts = fileName.split(".");
-  if (parts.length < 2) return "";
-
-  return normalizeExtension(parts.pop());
-}
-
-function isPreviewableDocument(doc) {
-  const extension = getDocumentExtension(doc);
-  return PREVIEW_EXTENSIONS.has(extension);
-}
-
-function getImageSource(doc) {
-  if (!doc?.datos_documento) return "";
-
-  if (doc.datos_documento.startsWith("data:")) {
-    return doc.datos_documento;
-  }
-
-  const extension = getDocumentExtension(doc);
-  const mimeByExtension = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-    bmp: "image/bmp",
-    svg: "image/svg+xml",
-  };
-
-  const mime = mimeByExtension[extension] || "image/jpeg";
-  return `data:${mime};base64,${doc.datos_documento}`;
-}
+import { usePress } from "../../context/employedContext";
+import { PressProvider } from "../../context/providers/pressProvider";
 
 function prioridadLabel(prioridad) {
   switch (prioridad) {
@@ -116,124 +40,24 @@ function prioridadLabel(prioridad) {
     default: return { label: "Normal", color: "default" };
   }
 }
-
 export default function Prensa() {
+    return (
+        <PressProvider>
+            <PrensaContent />
+        </PressProvider>
+    );
+}
+function PrensaContent() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [publicaciones, setPublicaciones] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [busqueda, setBusqueda] = useState("");
-  const [selectedPub, setSelectedPub] = useState(null);
-  const [documentos, setDocumentos] = useState([]);
-  const [loadingDocs, setLoadingDocs] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState(null);
-  const [previewDocName, setPreviewDocName] = useState("");
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewError, setPreviewError] = useState("");
+  const {
+    busqueda,setBusqueda,loading,publicacionesFiltradas,
+    handleCardClick,
+    selectedPub,handleClose,loadingDocs,documentos,getDocumentId,handleOpenPreview,
+    previewOpen,handleClosePreview,previewDoc,previewDocName,previewLoading,previewError,handleDownloadPreview,
 
-  const fetchPublicaciones = useCallback(() => {
-    setLoading(true);
-    listarPublicacionesActivas()
-      .then((data) => setPublicaciones(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Error al cargar publicaciones:", err))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetchPublicaciones();
-  }, [fetchPublicaciones]);
-
-  const publicacionesFiltradas = useMemo(() => {
-    if (!busqueda.trim()) return publicaciones;
-    const termino = busqueda.toLowerCase();
-    return publicaciones.filter(
-      (pub) =>
-        (pub.titulo_publicacion &&
-          pub.titulo_publicacion.toLowerCase().includes(termino)) ||
-        (pub.descripcion && pub.descripcion.toLowerCase().includes(termino))
-    );
-  }, [publicaciones, busqueda]);
-
-  const handleCardClick = async (pub) => {
-    setSelectedPub(pub);
-    setLoadingDocs(true);
-    setDocumentos([]);
-    try {
-      const data = await listarDocumentosPorPublicacion(pub.id);
-      setDocumentos(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Error al obtener documentos:", err);
-    } finally {
-      setLoadingDocs(false);
-    }
-  };
-
-  const handleClose = () => {
-    setSelectedPub(null);
-    setDocumentos([]);
-  };
-
-  const handleOpenPreview = async (doc) => {
-    const documentId = getDocumentId(doc);
-    setPreviewDocName(getDocumentName(doc, "Vista previa"));
-    setPreviewOpen(true);
-    setPreviewLoading(true);
-    setPreviewError("");
-    setPreviewDoc(null);
-
-    if (!documentId) {
-      setPreviewError("No se encontró el id del documento para previsualizar.");
-      setPreviewLoading(false);
-      return;
-    }
-
-    try {
-      const data = await descargarDocumentoPorId(documentId);
-
-      if (!isPreviewableDocument(data) && !isPreviewableDocument(doc)) {
-        setPreviewError("Solo se permite vista previa para imágenes o PDF.");
-        return;
-      }
-
-      setPreviewDoc(data);
-    } catch (error) {
-      console.error("Error al descargar documento:", error);
-      setPreviewError("No se pudo cargar la imagen.");
-    } finally {
-      setPreviewLoading(false);
-    }
-  };
-
-  const handleClosePreview = () => {
-    setPreviewOpen(false);
-    setPreviewDoc(null);
-    setPreviewDocName("");
-    setPreviewError("");
-    setPreviewLoading(false);
-  };
-
-  const handleDownloadPreview = () => {
-    if (!previewDoc) return;
-
-    const imageSource = getImageSource(previewDoc);
-    if (!imageSource) return;
-
-    const extension = getDocumentExtension(previewDoc);
-    const fileName = getDocumentName(previewDoc, previewDocName || "archivo");
-    const hasExtension = fileName.includes(".");
-    const downloadName = hasExtension
-      ? fileName
-      : `${fileName}.${extension || "jpg"}`;
-
-    const link = document.createElement("a");
-    link.href = imageSource;
-    link.download = downloadName;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  };
-
+    getImageSource,getDocumentName,getDocumentExtension
+  } = usePress();
   return (
     <Container sx={{ py: 4 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
@@ -244,7 +68,7 @@ export default function Prensa() {
           <SAEButton
             variant="contained"
             startIcon={<SettingsIcon />}
-            onClick={() => navigate("/Gestion-Prensa")}
+            onClick={() => navigate("/Gestion-Prensa/Administrar")}
           >
             Administrar
           </SAEButton>

@@ -16,20 +16,10 @@ import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 
 import { useEffect } from "react";
-import { useAuth } from "../../../shared/auth/AuthContext";
-import { useProfileContext,ProfileContextProvider } from "./ProfileContext";
+import { useAuth } from "../../../shared/context/sharedContext"; 
+import { useMyProfile } from "../../context/studentContext";
+import { ProfileContextProvider } from "../../../shared/context/providers/profileProvider";
 
-/*const [perfil, setPerfil] = useState({
-  legajo: "",
-  nombres: "",
-  apellidos: "",
-  email: "",
-  telefono: "",
-  fecha_nacimiento: "",
-  cuil: "",
-  dni: "",
-  direccion: ""
-});*/
 function getInitials(nombre = "") {
   return nombre
     .trim()
@@ -102,7 +92,7 @@ export function MyProfileContent(){
             snackbarOpen, setSnackbarOpen,snackbarMsg,setFormError,
              formError, saveAttempted
 
-    } = useProfileContext();
+    } = useMyProfile();
 
     useEffect(() => {
         fetchDatosPerfil(user.legajo);

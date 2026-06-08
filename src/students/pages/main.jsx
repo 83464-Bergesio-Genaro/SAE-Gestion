@@ -9,7 +9,7 @@ import {
   CardContent,
   Chip,
 } from "@mui/material";
-import { useAuth } from "../../shared/auth/AuthContext";
+import { useAuth } from "../../shared/context/sharedContext"; 
 import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
 import NovedadesEstudiantiles from "../../shared/components/StudentNews/studentNews";
 export default function StudentMain() {

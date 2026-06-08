@@ -1,26 +1,42 @@
-import { Box, Container, Divider, Stack, Typography } from "@mui/material";
+import { Box, Container, Link, Stack, Typography } from "@mui/material";
+import { FOOTER_LINKS, FOOTER_STRINGS } from "./footer.strings";
+import { footerStyles as sx } from "./footer.styles";
 
 export default function Footer() {
   return (
-    <Box
-      component="footer"
-      sx={{ bgcolor: "#154383", py: 2.5 }}
-    >
+    <Box component="footer" sx={sx.root}>
       <Container maxWidth="xl">
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          justifyContent="space-between"
-          alignItems="center"
-          spacing={1}
-        >
-          <Typography variant="body2" sx={{ color: "#7a92b0", fontWeight: 600 }}>
-            SAE Gestión — UTN Facultad Regional Córdoba
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+
+          <Typography variant="body2" sx={sx.brand}>
+            {FOOTER_STRINGS.brand}
           </Typography>
-          <Typography variant="caption" sx={{ color: "#a0b4cc" }}>
-            © 2026 Cátedra de Proyecto Final · v1.0
+
+          <Stack direction="column" alignItems="center" spacing={0.5}>
+            {FOOTER_LINKS.map(({ key, icon: Icon, label, href, external }) => (
+              <Stack key={key} direction="row" spacing={0.5} alignItems="center">
+                <Icon sx={sx.icon} />
+                <Typography variant="caption" sx={sx.linkText}>
+                  <Link
+                    href={href}
+                    underline="hover"
+                    sx={sx.linkAnchor}
+                    {...(external && { target: "_blank", rel: "noopener noreferrer" })}
+                  >
+                    {label}
+                  </Link>
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
+
+          <Typography variant="caption" sx={sx.copyright}>
+            {FOOTER_STRINGS.copyright}
           </Typography>
+
         </Stack>
       </Container>
     </Box>
   );
 }
+

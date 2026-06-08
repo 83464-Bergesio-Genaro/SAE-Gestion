@@ -1,7 +1,4 @@
 import React, { useMemo,useState  } from 'react';
-import Diversity3Icon from '@mui/icons-material/Diversity3';
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
-import { AdminUsersProvider, useAdminUsers } from './AdminUsersContext'; 
 import {
     Autocomplete,
     Box,
@@ -40,14 +37,22 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import SearchIcon from "@mui/icons-material/Search";
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import { useAuth } from "../../../shared/auth/AuthContext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Diversity3Icon from '@mui/icons-material/Diversity3';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
+
+import GestionarHorariosDialog from "./HorariosDialog";
+
+import { useAuth } from "../../../shared/context/sharedContext"; 
 import { DataGrid } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import {EmployedCalendar} from "./EmployedCalendar";
-import GestionarHorariosDialog from "./HorariosDialog";
+import { useEmploy } from '../../context/employedContext'; 
+import { AdminUsersProvider } from '../../context/providers/employProvider';
+
 const secciones = [
     { key: "empleados", label: "Empleados" },
     { key: "usuarios", label: "Estudiantes Registrados" }
@@ -63,7 +68,7 @@ function EmployedAdminContent() {
             dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
             horariosDialogOpen, setHorariosDialogOpen, snackbarOpen, setSnackbarOpen, snackbarMsg,setDialogError,handleUsuariosSave,handleEmpleadosSave,
             carreras,perfiles
-    } = useAdminUsers();
+    } = useEmploy();
 
     const sectionConfig = useMemo(
         () => ({
@@ -655,7 +660,6 @@ function EmployedAdminContent() {
     )
 }
 
-// Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function EmployedAdmin() {
     return (
         <AdminUsersProvider>

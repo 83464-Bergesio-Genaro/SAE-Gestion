@@ -1,4 +1,4 @@
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../context/sharedContext";
 import SAEButton from "../buttons/SAEButton";
 
 export default function SessionLog() {

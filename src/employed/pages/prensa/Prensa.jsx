@@ -30,35 +30,101 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import SettingsIcon from "@mui/icons-material/Settings";
+import SAEButton from "../../../shared/components/buttons/SAEButton";
+import SAETextField from "../../../shared/components/inputs/SAETextField";
+import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import { useAuth } from "../../../shared/context/sharedContext"; 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/AuthContext";
-import SAEButton from "../../components/buttons/SAEButton";
-import SAETextField from "../../components/inputs/SAETextField";
-import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
-import utnLogo from "../../../assets/utn.png";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import {
   listarPublicacionesActivas,
   listarDocumentosPorPublicacion,
   descargarDocumentoPorId,
 } from "../../../api/PrensaService";
-import { PRENSA_STRINGS, SORT_DATE_OPTIONS, SORT_NAME_OPTIONS } from "./prensa.strings";
-import { prensaStyles as sx } from "./prensa.styles";
-import {
-  getDocumentId,
-  getDocumentName,
-  getDocumentExtension,
-  isPreviewableDocument,
-  getImageSource,
-  prioridadLabel,
-  getAccentColor,
-  filterAndSort,
-  formatDateShort,
-  formatDateLong,
-  downloadDocument,
-} from "./prensa.utils";
+import utnLogo from "../../../assets/utn.png";
+const PREVIEW_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "pdf"]);
 
+function getDocumentId(doc) {
+  return doc?.id ?? doc?.id_documento ?? doc?.idDocumento ?? null;
+}
+
+function hasRealDocumentName(value) {
+  if (!value) return false;
+  const normalized = String(value).trim().toLowerCase();
+  if (!normalized) return false;
+
+  const genericNames = new Set(["documento", "archivo", "file", "document"]);
+  return !genericNames.has(normalized);
+}
+
+function getDocumentName(doc, fallback = "Archivo") {
+  const candidate = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo;
+  return hasRealDocumentName(candidate) ? candidate : fallback;
+}
+
+function normalizeExtension(value) {
+  if (!value) return "";
+
+  let normalized = String(value).trim().toLowerCase();
+  if (normalized.includes("/")) {
+    normalized = normalized.split("/").pop();
+  }
+  if (normalized.includes(";")) {
+    normalized = normalized.split(";")[0];
+  }
+
+  return normalized.replace(/^\./, "");
+}
+
+function getDocumentExtension(doc) {
+  const directExtension = normalizeExtension(doc?.extension);
+  if (directExtension) return directExtension;
+
+  const fileName = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo || "";
+  const parts = fileName.split(".");
+  if (parts.length < 2) return "";
+
+  return normalizeExtension(parts.pop());
+}
+
+function isPreviewableDocument(doc) {
+  const extension = getDocumentExtension(doc);
+  return PREVIEW_EXTENSIONS.has(extension);
+}
+
+function getImageSource(doc) {
+  if (!doc?.datos_documento) return "";
+
+  if (doc.datos_documento.startsWith("data:")) {
+    return doc.datos_documento;
+  }
+
+  const extension = getDocumentExtension(doc);
+  const mimeByExtension = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    webp: "image/webp",
+    bmp: "image/bmp",
+    svg: "image/svg+xml",
+  };
+
+  const mime = mimeByExtension[extension] || "image/jpeg";
+  return `data:${mime};base64,${doc.datos_documento}`;
+}
+
+function prioridadLabel(prioridad) {
+  switch (prioridad) {
+    case 0: return { label: "Normal", color: "default" };
+    case 1: return { label: "Media", color: "warning" };
+    case 2: return { label: "Alta", color: "error" };
+    default: return { label: "Normal", color: "default" };
+  }
+}
 
 export default function Prensa() {
   const baseUrl = import.meta.env.BASE_URL;

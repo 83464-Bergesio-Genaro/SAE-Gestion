@@ -7,7 +7,7 @@ export default async function ObtenerTokenJWT(legajo, dominio, password) {
       `${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`,
       { headers: { "ngrok-skip-browser-warning": "true" } },
     );
-    console.log("La sesion es:",response);
+
     switch (response.status) {
       case 201: {
         const data = await response.json();
@@ -84,6 +84,6 @@ export async function ModificarUsuario(id, payload, token) {
         return { success: false, message: "Respuesta desconocida" };
     }
   } catch (error) {
-    return { success: false, message: "Error de conexión" };
+    return { success: false, message: "Error de conexión ",error };
   }
 }

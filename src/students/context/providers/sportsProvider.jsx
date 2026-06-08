@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState,useCallback } from "react";
 import { useAuth } from "../../../shared/context/sharedContext"; 
-import {
-  obtenerIdDeportista,
+import {   obtenerIdDeportista,
   listarDocumentacionXLegajo,
   obtenerHorariosDeportista,
   obtenerTorneosXDeporte,
@@ -10,9 +9,9 @@ import {
   descargarDocumentacionXId,
   crearDocumentoEstudiante,
   eliminarDocumentoEstudiante,
-} from "../../../api/DeporteService";
+ } from "../../../api/DeporteService";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
-import { SPORTS_STRINGS } from "./sports.strings";
+import { SPORTS_STRINGS } from "../../pages/sports/sports.strings";
 import {
   construirNombre,
   filterTournaments,
@@ -22,16 +21,15 @@ import {
   MAX_SIZE_MB,
   SPORTS_REQUIRED_DOCUMENTS,
   SPORTS_TOURNAMENT_COLUMNS,
-} from "./sports.utils";
-import { SportsContext } from "./sports.context";
+} from "../../pages/sports/sports.utils";
+import { SportsContext } from "../studentContext";
 
 const C = SPORTS_STRINGS;
 
 export function SportsProvider({ children }) {
   const { user } = useAuth();
   const [documentos, setDocumentos] = useState(() =>
-    SPORTS_REQUIRED_DOCUMENTS.map((documento) => ({ ...documento })),
-  );
+    SPORTS_REQUIRED_DOCUMENTS.map((documento) => ({ ...documento })),);
   const [deportista, setDeportista] = useState(null);
   const [horariosDeportista, setHorariosDeportista] = useState([]);
   const [torneoDeportista, setTorneoDeportista] = useState([]);

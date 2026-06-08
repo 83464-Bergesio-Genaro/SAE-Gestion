@@ -7,9 +7,9 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { useAuth } from "../auth/AuthContext";
-import SAEButton from "./buttons/SAEButton";
+import { useAuth } from "../context/sharedContext"; 
 import { useState } from "react";
+import SAEButton from "./buttons/SAEButton";
 
 export default function SessionExpiredDialog() {
   const { sessionExpired, setSessionExpired, extendSession, logout } = useAuth();

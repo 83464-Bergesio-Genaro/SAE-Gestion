@@ -33,8 +33,8 @@ import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import { SPORTS_STRINGS } from "./sports.strings";
 
 import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
-import { SportsProvider } from "./SportsContext";
-import { useSportsContext } from "./useSportsContext";
+import { useSportsContext } from "../../context/studentContext";
+import { SportsProvider } from "../../context/providers/sportsProvider"; 
 
 import HeaderPage from "../../components/headerPage";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
@@ -42,7 +42,7 @@ import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 const C = SPORTS_STRINGS;
 
 function StudentSportsContent() {
-  const baseUrl = import.meta.env.BASE_URL;
+
   const {
     busquedaTorneos,
     closeDeleteDialog,
@@ -80,64 +80,6 @@ function StudentSportsContent() {
       }}
     >
       <Container maxWidth="xl">
-        {/* <Box
-          sx={{
-            overflow: "hidden",
-            borderRadius: 6,
-            px: { xs: 3, md: 3 },
-            py: { xs: 2, md: 2 },
-            minHeight: 100,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 3,
-            background:
-              "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%)",
-            color: "white",
-            backgroundImage: `linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('${baseUrl}images/carrousel/EntradaUTN.jpg')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <Box sx={{ maxWidth: 700 }}>
-            <Typography
-              variant="h3"
-              sx={{
-                mt: 1,
-                fontWeight: 800,
-                lineHeight: 1.1,
-                fontSize: { xs: "2rem", md: "3rem" },
-              }}
-            >
-              {C.bigTitle}
-            </Typography>
-            <Typography
-              sx={{
-                mt: 2,
-                maxWidth: 560,
-                fontSize: { xs: 16, md: 18 },
-                opacity: 0.92,
-              }}
-            >
-              {C.bigSubtitle}
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              display: { xs: "none", md: "block" },
-              width: 80,
-              height: 80,
-              borderRadius: "20px",
-              backgroundImage: `url('${baseUrl}images/principal/logoUTNrotado.png')`,
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "contain",
-              transform: "rotate(8deg)",
-              filter: "drop-shadow(0 18px 35px rgba(0,0,0,0.22))",
-            }}
-          />
-        </Box> */}
 
         <HeaderPage
           title={C.bigTitle}
@@ -371,9 +313,9 @@ function StudentSportsContent() {
 }
 
 export default function StudentSports() {
-  return (
-    <SportsProvider>
-      <StudentSportsContent />
-    </SportsProvider>
-  );
+    return (
+        <SportsProvider>
+            <StudentSportsContent />
+        </SportsProvider>
+    );
 }

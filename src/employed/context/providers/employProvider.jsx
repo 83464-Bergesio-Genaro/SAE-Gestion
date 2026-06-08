@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
+import React, {  useState, useCallback, useEffect, useMemo } from 'react';
 import { Box, IconButton, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario,
@@ -7,76 +7,75 @@ import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario,
         ModificarHorario,EliminarHorario } from "../../../api/EmpleadoService";
 import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService";
 import {mapEmpleadoSAE,mapHorarioSAE} from "../../../api/formatters/EmpleadoFormatter";
+import { EmployContext } from '../employedContext';
 
-const AdminUsersContext = createContext();
+const EMPTY_FORM = {
+    dia: 1,
+    hora_inicio: "",
+    hora_fin: "",
+    activo: true
+};
+const formatHeader = (key) =>
+key
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, l => l.toUpperCase());
 
-    const EMPTY_FORM = {
-        dia: 1,
-        hora_inicio: "",
-        hora_fin: "",
-        activo: true
-    };
-    const formatHeader = (key) =>
-    key
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, l => l.toUpperCase());
+const buildColumns = (data, editAction) => {
+if (!data || data.length === 0) return [];
 
-    const buildColumns = (data, editAction) => {
-    if (!data || data.length === 0) return [];
-
-    const columns = Object.keys(data).map((key) => {
-        const isId = key.toLowerCase().includes("id");
-        const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(key.toLowerCase());
-        
-        if (key.toLowerCase() === "activo") {
-            return {
-                field: "activo",
-                headerName: "Estado",
-                align: "center",
-                headerAlign: "center",
-                width: 100,
-                renderCell: (params) => (
-                    <Chip
-                        size="small"
-                        label={params.value ? "Activo" : "Inactivo"}
-                        color={params.value ? "success" : "default"}
-                    />
-                )
-            };
-        } else {
-            return {
-                field: key,
-                headerName: formatHeader(key),
-                flex: isId ? 0.3 : 1,
-                minWidth: isId ? 50 : 150,
-                maxWidth: isId ? 70 : isShort ? 100 : NaN,
-                align: isId || isShort ? "center" : "left",
-                headerAlign: isId || isShort ? "center" : "left",
-            };
-        }
-    });
-
-    columns.push({
-        field: "actions",
-        headerName: "Acciones",
-        sortable: false,
-        filterable: false,
-        width: 100,
-        renderCell: (params) => (
-            <Box>
-                <IconButton
+const columns = Object.keys(data).map((key) => {
+    const isId = key.toLowerCase().includes("id");
+    const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(key.toLowerCase());
+    
+    if (key.toLowerCase() === "activo") {
+        return {
+            field: "activo",
+            headerName: "Estado",
+            align: "center",
+            headerAlign: "center",
+            width: 100,
+            renderCell: (params) => (
+                <Chip
                     size="small"
-                    color="primary"
-                    title="Ver / Editar"
-                    onClick={() => editAction(params.row)}
-                >
-                    <EditIcon fontSize="small" />
-                </IconButton>               
-            </Box>  
-        )
-    });
+                    label={params.value ? "Activo" : "Inactivo"}
+                    color={params.value ? "success" : "default"}
+                />
+            )
+        };
+    } else {
+        return {
+            field: key,
+            headerName: formatHeader(key),
+            flex: isId ? 0.3 : 1,
+            minWidth: isId ? 50 : 150,
+            maxWidth: isId ? 70 : isShort ? 100 : NaN,
+            align: isId || isShort ? "center" : "left",
+            headerAlign: isId || isShort ? "center" : "left",
+        };
+    }
+});
 
-    return columns;
+columns.push({
+    field: "actions",
+    headerName: "Acciones",
+    sortable: false,
+    filterable: false,
+    width: 100,
+    renderCell: (params) => (
+        <Box>
+            <IconButton
+                size="small"
+                color="primary"
+                title="Ver / Editar"
+                onClick={() => editAction(params.row)}
+            >
+                <EditIcon fontSize="small" />
+            </IconButton>               
+        </Box>  
+    )
+});
+
+return columns;
 };
 
 const generateRows = (data) => {
@@ -108,7 +107,6 @@ const EMPTY_USUARIO =
     activo: false 
 }
 
-const UsuariosContext = createContext();
 
 export const AdminUsersProvider = ({ children }) => {
     // Estados globales de Diálogo compartidos por ambas secciones
@@ -457,7 +455,7 @@ export const AdminUsersProvider = ({ children }) => {
     };
 
     return (
-        <AdminUsersContext.Provider value={{
+        <EmployContext.Provider value={{
 
             //Valores crudos de los endpoings
             empleados,carreras,perfiles,allHorarios,
@@ -477,12 +475,6 @@ export const AdminUsersProvider = ({ children }) => {
             
         }}>
             {children}
-        </AdminUsersContext.Provider>
+        </EmployContext.Provider>
     );
-};
-
-export const useAdminUsers = () => {
-    const context = useContext(AdminUsersContext);
-    if (!context) throw new Error("useAdminUsers debe usarse dentro de AdminUsersProvider");
-    return context;
 };

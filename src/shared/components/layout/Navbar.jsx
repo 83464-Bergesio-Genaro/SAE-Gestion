@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../context/sharedContext";
 import SAEButton from "../buttons/SAEButton";
 import { sharedMenu, studentMenu, employedMenu ,adminMenu} from "../../menus/MenuConfig";
 

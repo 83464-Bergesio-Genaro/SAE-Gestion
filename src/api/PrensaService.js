@@ -142,9 +142,10 @@ export async function descargarDocumentoPorId(idDocumento) {
     const disposition = res.headers.get("Content-Disposition") || "";
     const fileNameMatch = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
     const fileName = fileNameMatch?.[1] ? decodeURIComponent(fileNameMatch[1].replace(/"/g, "")) : "documento";
-    const extension = contentType.includes("application/pdf")
+    
+    const extension = contentType?.includes("application/pdf")
       ? "pdf"
-      : contentType.split("/")[1] || "jpg";
+      : contentType?.split("/")[1] || "jpg";
 
     return {
       id: idDocumento,
@@ -160,13 +161,15 @@ export async function descargarDocumentoPorId(idDocumento) {
 export async function ObtenerNoticiasPublicas(){
   try {
     const response = await fetch(`${appConfig.apiUrl}/api/Prensa/ListarPublicacionesActivas`, { headers: { "ngrok-skip-browser-warning": "true" } });
-  
+
     switch (response.status) {
 
       case 200:
       {
         const data = await response.json();
+
         let  listaPublicaciones =data.map(mapPublicacionPublica);
+        //console.log(listaPublicaciones);
         //Se ordena el listado obtenido de acuerdo a su prioridad
         listaPublicaciones=[...listaPublicaciones].sort((a, b) => b.prioridad - a.prioridad);
         //console.log("Lista de publicaciones obtenida: ", listaPublicaciones);

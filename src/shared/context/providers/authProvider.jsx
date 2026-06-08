@@ -1,18 +1,7 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import ObtenerTokenJWT from "../../api/AuthService";
-import { appConfig } from "../../config/appConfig";
-const AuthContext = createContext();
-
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-
-  const hash = await crypto.subtle.digest("SHA-256", data);
-
-  return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+import {useState, useEffect } from "react";
+import { appConfig } from "../../../config/appConfig";
+import ObtenerTokenJWT from "../../../api/AuthService";
+import { AuthContext } from "../sharedContext"; 
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -56,7 +45,7 @@ export function AuthProvider({ children }) {
         id_perfil: result.data.id_perfil ?? 0,
         expiration: Date.now() + appConfig.sessionTimeout,
       };
-      console.log("La sesion es:",session);
+
       localStorage.setItem("session", JSON.stringify(session));
       setUser(session);
       setSessionExpired(false);
@@ -111,4 +100,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-export const useAuth = () => useContext(AuthContext);

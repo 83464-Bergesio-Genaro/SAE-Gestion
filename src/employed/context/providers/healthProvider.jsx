@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
+import React, {  useState, useCallback, useEffect, useMemo } from 'react';
 import { Box, IconButton, Chip } from '@mui/material';
 
 import EditIcon from '@mui/icons-material/Edit';
@@ -9,9 +9,7 @@ import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as Modifica
 import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos} from '../../../api/formatters/SaludFormatters';
 import { Try } from '@mui/icons-material';
 import { ObtenerUsuariosXLegajo } from '../../../api/EmpleadoService';
-
-
-const HealthUserContext = createContext();
+import { HealthContext } from '../employedContext';
 
     // FORMULARIOS VACIOS
     const EMPTY_ESPECIALIDAD = 
@@ -178,9 +176,6 @@ const generateRows = (data) => {
     }));
  
 };
-
-// CONTEXTO
-const HealthContext = createContext();
 
 export const HealthUsersProvider = ({ children }) => {
     const DAYS = [
@@ -1053,7 +1048,7 @@ export const HealthUsersProvider = ({ children }) => {
 
     // ---------
     return (
-        <HealthUserContext.Provider value={{
+        <HealthContext.Provider value={{
             DAYS,
             //Faltas
             cuilFaltas, SetCuilFaltas,faltasRows,faltasColumns,loadingFaltas,
@@ -1086,12 +1081,6 @@ export const HealthUsersProvider = ({ children }) => {
             
         }}>
             {children}
-        </HealthUserContext.Provider>
+        </HealthContext.Provider>
     );
-};
-
-export const useHealthUser = () => {
-    const context = useContext(HealthUserContext);
-    if (!context) throw new Error("useHealthUser debe usarse dentro de HealthProvider");
-    return context;
 };

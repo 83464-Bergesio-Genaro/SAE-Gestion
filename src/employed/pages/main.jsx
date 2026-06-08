@@ -19,11 +19,11 @@ import ExploreIcon from "@mui/icons-material/Explore";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
-import { useAuth } from "../../shared/auth/AuthContext";
+import { useAuth } from "../../shared/context/sharedContext"; 
 import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
 import { ObtenerEventosPublicos, ObtenerEventosSAE } from "../../api/JPAService";
-import { EmployedCalendar } from "./users/EmployedCalendar";
-import { AdminUsersProvider } from "./users/AdminUsersContext";
+import { EmployedCalendar } from "./users/EmployedCalendar";  
+import { AdminUsersProvider } from "../context/providers/employProvider"; 
 import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
 
 /*

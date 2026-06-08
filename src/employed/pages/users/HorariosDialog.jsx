@@ -30,13 +30,14 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { AdminUsersProvider, useAdminUsers } from './AdminUsersContext'; 
+import { useEmploy } from '../../context/employedContext'; 
+import { AdminUsersProvider } from '../../context/providers/employProvider';
 
 // FORMULARIO DE HORARIOS
 function HorarioFormFields() {
     const {
             form,handleChangeForm,DAYS
-        } = useAdminUsers();
+        } = useEmploy();
     return (
         <Stack spacing={1}>
             <Grid container spacing={1} >
@@ -83,7 +84,7 @@ function HorarioFormFields() {
 //ALTA DE FORMULARIOS
 function NuevoHorarioCard() {
     //Con esto traemos las funciones y valores que nos hacen falta del contexto compartido
-    const { savingHorario,errorHorario,handleCreateHorario,setErrorHorario,DAYS,setShowNuevoForm} = useAdminUsers();
+    const { savingHorario,errorHorario,handleCreateHorario,setErrorHorario,DAYS,setShowNuevoForm} = useEmploy();
 
     const createHeader = (
         <Box
@@ -146,7 +147,7 @@ function HorarioCard({ horario }) {
         errorHorario,
         setErrorHorario,
         DAYS
-    } = useAdminUsers();
+    } = useEmploy();
 
     const isEditing = editingId === horario.id;
     const isDeleting = deleteId === horario.id;
@@ -328,7 +329,7 @@ export default function GestionarHorariosDialog({ open }){
         loadingHorarios,selectedHorarios,selectedEmploy,selectedHorariosLoading,
         handleEmployChange,handleClose,showNuevoForm,setShowNuevoForm,
         dialogError
-        } = useAdminUsers();
+        } = useEmploy();
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
             <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

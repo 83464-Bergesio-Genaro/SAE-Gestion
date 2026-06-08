@@ -10,14 +10,14 @@ import {
   Container,
   List,
   ListItem,
-  ListItemIcon, 
+  ListItemIcon,
   ListItemText,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Masonry from "@mui/lab/Masonry";
 import SearchIcon from "@mui/icons-material/Search";
-import DownloadIcon from '@mui/icons-material/Download';
+import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import CloseIcon from "@mui/icons-material/Close";
@@ -27,7 +27,9 @@ import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import { PressProvider } from "../../context/providers/pressProvider";
 import { usePress } from "../../context/sharedContext";
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
-import { descargarDocumentoPorId } from "../../../api/PrensaService";
+
+import { ObtenerNoticiasPublicas,descargarDocumentoPorId } from "../../../api/PrensaService";
+import TitleBox from "../titleBox";
 
 function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,documentos }) {
   // Estado para la imagen. Empieza con la foto genérica por defecto
@@ -92,7 +94,7 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
           </Typography>
           <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
             {fecha_inicio}
-          </Typography>          
+          </Typography>
           <Typography
             variant="subtitle1"
             sx={{ mt: 1, color: "#5a6f8f", minHeight: 48 }}
@@ -139,17 +141,12 @@ export  function NovedadesContent() {
       }}
     >
       <Container maxWidth="xl">
-        <Box >
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            Novedades Estudiantiles
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {" "}
-            Información actualizada sobre actividades, comunicados y novedades
-            académicas.
-          </Typography>
-        </Box>        
-        <Box sx={{ mt : 1 }}>
+        <TitleBox
+          title="Novedades Estudiantiles"
+          description="Información actualizada sobre actividades, comunicados y novedades
+            académicas."
+        />
+        <Box sx={{ mt: 1 }}>
           {isLoading && (
             <Stack alignItems="center" width={"100%"} gap={1}>
               <SAESpinner size="S" />
@@ -172,33 +169,35 @@ export  function NovedadesContent() {
             ))}
           </Stack>
 
-          <Box
-            sx={{
-              mt: 2,
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              gap: 0.5,
-            }}
-          >
-            <Typography sx={{ fontSize: "0.95rem", color: "#333" }}>
-              {paginaActual} de {totalPaginas}
-            </Typography>
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  gap: 0.5,
+                }}
+              >
+                <Typography sx={{ fontSize: "0.95rem", color: "#333" }}>
+                  {paginaActual} de {totalPaginas}
+                </Typography>
 
-            <IconButton onClick={irPaginaAnterior} disabled={paginaActual === 1}>
-              <ChevronLeftIcon />
-            </IconButton>
+                <IconButton
+                  onClick={irPaginaAnterior}
+                  disabled={paginaActual === 1}
+                >
+                  <ChevronLeftIcon />
+                </IconButton>
 
-            <IconButton
-              onClick={irPaginaSiguiente}
-              disabled={paginaActual === totalPaginas}
-            >
-              <ChevronRightIcon />
-            </IconButton>
-          </Box>
-          </>
+                <IconButton
+                  onClick={irPaginaSiguiente}
+                  disabled={paginaActual === totalPaginas}
+                >
+                  <ChevronRightIcon />
+                </IconButton>
+              </Box>
+            </>
           )}
-          
         </Box>
       </Container>
     </Box>
@@ -211,58 +210,76 @@ export function DocumentList(listadoDocumentos){
               getDocumentName,getImageSource,getDocumentExtension} = usePress();
     return (
     <div>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2, mb: 1 }}>
-            { listadoDocumentos.listadoDocumentos?.length > 0 && ( 
-              <Box sx={{ display: "block", alignItems: "center", gap: 1, mt: 2, mb: 1 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                  Documentos adjuntos
-                </Typography>
-                  <List dense>
-                    {listadoDocumentos.listadoDocumentos.map((doc, i) => (
-                      <ListItem key={doc.id}>
-                        <ListItemIcon sx={{ minWidth:50,alignItems:"center",justifyContent:"center" }}>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <InsertDriveFileIcon />
-                            
-                          </Box>
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={doc.name ||doc.nombre_documento || doc.titulo || `Documento ${i + 1}`}
-                        />
-                        <IconButton
-                              size="small"
-                              onClick={() => handleOpenPreview(doc)}
-                              aria-label="Visualizar documento"
-                              title="Ver documento"
-                            >
-                              <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                              size="small"
-                              onClick={
-                                () => handleDownload(doc)}
-                              aria-label="Descargar documento"
-                              title="Descargar documento"
-                            >
-                              <DownloadIcon fontSize="small" />
-                            </IconButton>
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              )}
-        </Box>
-        <DocumentPreviewDialog
-          open={previewOpen}
-          onClose={handleClosePreview}
-          title={getDocumentName(previewDoc, previewDocName || "Vista previa")}
-          imageSrc={previewDoc ? getImageSource(previewDoc) : ""}
-          isPdf={getDocumentExtension(previewDoc) === "pdf"}
-          loading={previewLoading}
-          error={previewError}
-          onDownload={handleDownloadPreview}
-        />      
-    </div>)
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2, mb: 1 }}>
+        {listadoDocumentos.listadoDocumentos?.length > 0 && (
+          <Box
+            sx={{
+              display: "block",
+              alignItems: "center",
+              gap: 1,
+              mt: 2,
+              mb: 1,
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              Documentos adjuntos
+            </Typography>
+            <List dense>
+              {listadoDocumentos.listadoDocumentos.map((doc, i) => (
+                <ListItem key={doc.id}>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 50,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <InsertDriveFileIcon />
+                    </Box>
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      doc.name ||
+                      doc.nombre_documento ||
+                      doc.titulo ||
+                      `Documento ${i + 1}`
+                    }
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={() => handleOpenPreview(doc)}
+                    aria-label="Visualizar documento"
+                    title="Ver documento"
+                  >
+                    <VisibilityIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDownload(doc)}
+                    aria-label="Descargar documento"
+                    title="Descargar documento"
+                  >
+                    <DownloadIcon fontSize="small" />
+                  </IconButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
+      </Box>
+      <DocumentPreviewDialog
+        open={previewOpen}
+        onClose={handleClosePreview}
+        title={getDocumentName(previewDoc, previewDocName || "Vista previa")}
+        imageSrc={previewDoc ? getImageSource(previewDoc) : ""}
+        isPdf={getDocumentExtension(previewDoc) === "pdf"}
+        loading={previewLoading}
+        error={previewError}
+        onDownload={handleDownloadPreview}
+      />
+    </div>
+  );
 }
 // Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function NovedadesEstudiantiles() {

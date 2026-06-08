@@ -55,6 +55,7 @@ export function CalendarEvent({eventos}){
   return(
     <Box
       sx={{
+        py:{ xs: 2, sm: 4 },
         px: { xs: 2, sm: 4 },
         width: "100%",
         boxSizing: "border-box",
@@ -281,17 +282,17 @@ function EventoCard({ evento }) {
   return (
     <Card sx={{
       position: "relative",
-      borderRadius: 6,
+      borderRadius: 5,
       overflow: "hidden",
-            width: 350,
-        height: 350,
+      width: 350,
+      height: 350,
       "&::before": {
         content: '""',
         position: "absolute",
         width: 400,
         height: 400,
         borderRadius: "50%",
-        background: "rgba(255,255,255,0.08)",
+        background: "rgba(255,255,255,0.1)",
         top: -150,
         right: -150,
       }
@@ -308,7 +309,7 @@ function EventoCard({ evento }) {
         <Box
           sx={{
             minWidth: 40,
-            height:40,
+            maxheight:40,
             borderRadius: "50%",
             bgcolor: "#E7F1FF",
             display: "flex",
@@ -316,32 +317,32 @@ function EventoCard({ evento }) {
             justifyContent: "center",
           }}
         >
-          <CalendarIcon sx={{ fontSize: 26, color: "#2A548B" }} />
+          <CalendarIcon sx={{ fontSize: 20, color: "#2A548B" }} />
         </Box>
-          <Typography sx={{ fontSize: 22, fontWeight: 700,width:"100%" }}>
+          <Typography sx={{ fontSize:18, fontWeight: 700,width:"100%" }}>
             {formatearFecha(evento.fecha_evento)}
           </Typography>
-          <Typography sx={{ fontSize: 26, fontWeight: 700 }}>
+          <Typography sx={{ fontSize: 24, fontWeight: 700 }}>
             {evento.horario_inicio}
           </Typography>          
       </Stack>        
       <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.5)", mb: 2 }} />
       <Stack sx={{ flexGrow: 1, justifyContent: "space-between" }}>
-        <Box sx={{ height: "80px", overflow: "hidden"}}> 
-          <Typography sx={{mt:2, fontSize: 26, fontWeight: 700,textAlign:"center" }}>
+        <Box sx={{ maxHeight: "75px", overflow: "hidden"}}> 
+          <Typography sx={{mt:0.5, fontSize: 26, fontWeight: 700,textAlign:"center" }}>
             {evento.nombre_evento}
           </Typography>
 
       
         </Box>
-        <Box sx={{ height: "50px", overflow: "hidden", pt:3 }}> 
+        <Box sx={{ height: "45px", overflow: "hidden", pt:3 }}> 
           <Typography sx={{textAlign:"left" }}>
             <strong>Expositor: </strong>{evento.encargado}
           </Typography>  
         </Box>
       </Stack>
 
-      <Box sx={{ height: "50px", pr: 0.5 }} my={2}>
+      <Box sx={{ height: "40px", pr: 0.5 }} my={2}>
         <Typography sx={{ mb: 2 }}>
           <Box component="span" sx={{ fontWeight: 700 }}>
             Duración:
@@ -352,31 +353,34 @@ function EventoCard({ evento }) {
         <Divider
           sx={{ borderColor: "rgba(0, 0, 0, 0.6)", mt: "auto", mb: 2 }}
         />
-        <Link 
-          target="_blank" 
-          href={evento.lugar} 
-          underline="none"
-          sx={{ 
-            display: "flex", 
-            alignItems: "center", 
-            gap: 1, 
-            color: "primary.main",
-            transition: "all 0.2s ease",
-            "&:hover": {
-              color: "primary.dark",
-              transform: "scale(1.02)",
-            },
-            "&:active": {
-              color: "secondary.main", 
-              transform: "scale(0.98)", 
-            }
-          }}
-        >
+        <Box sx={{ height: "20px"}} my={1}>
+          <Link 
+            target="_blank" 
+            href={evento.lugar} 
+            underline="none"
+            sx={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: 1, 
+              color: "primary.main",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                color: "primary.dark",
+                transform: "scale(1.02)",
+              },
+              "&:active": {
+                color: "secondary.main", 
+                transform: "scale(0.98)", 
+              }
+            }}
+          >
           <LocationOnIcon sx={{ fontSize: 22 }} />
           <Typography sx={{ fontSize: 16, fontWeight: 500 }}>
             Ver Ubicacion en Maps
           </Typography>
         </Link>
+                  
+        </Box>
       </CardContent>
     </Card>
   );

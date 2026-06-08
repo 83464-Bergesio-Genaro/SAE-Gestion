@@ -5,6 +5,7 @@ import {
   listarDocumentacionXLegajo,
   obtenerHorariosDeportista,
   obtenerTorneosXDeporte,
+  crearDeportista,
   crearInscripcionDeporte,
   eliminarInscripcionDeporte,
   descargarDocumentacionXId,
@@ -181,11 +182,33 @@ export function SportsProvider({ children }) {
   };
 
   const loadSportsmanSchedules = async (sportsman) => {
-    const data = await obtenerHorariosDeportista(sportsman.id);
+    const data = await obtenerHorariosDeportista(sportsman?.id);
     setHorariosDeportista(data);
     return data;
   };
+const requiredDocumentsUploaded = () =>
+    documentos
+      .filter((documento) => documento.required)
+      .every((documento) => documento.subido);
 
+  const getOrCreateSportsman = async () => {
+    if (deportista?.id) return deportista;
+
+    const body = {
+      legajo: user?.email ?? user?.legajo ?? "",
+      nombre_deportista: user?.nombre ?? "",
+      vencimiento_ficha: null,
+      habilitado_deportado: true,
+      habilitado_deporte: true,
+    };
+
+    const createdSportsman = await crearDeportista(body);
+    const sportsman = createdSportsman?.id
+      ? createdSportsman
+      : await obtenerIdDeportista(body.legajo);
+    setDeportista(sportsman);
+    return sportsman;
+  };
 const loadTournamentsForSchedules = useCallback(async (schedules) => {
   setLoadingTournaments(true);
   try {
@@ -212,15 +235,26 @@ const loadTournamentsForSchedules = useCallback(async (schedules) => {
   const handleInscribirClick = async (card) => {
     try {
       setLoadingSports(true);
+      let currentSportsman = deportista;
+      let missingRequiredDocuments = false;
       if (card.esta_inscripto) {
         await eliminarInscripcionDeporte(card.id_inscripcion);
       } else {
-        await crearInscripcionDeporte(card.id_deporte, deportista.id);
+        missingRequiredDocuments =
+          loadingDocuments || !requiredDocumentsUploaded();
+        currentSportsman = await getOrCreateSportsman();
+        await crearInscripcionDeporte(card.id_deporte, currentSportsman.id);
       }
+      const successMessage = card.esta_inscripto
+        ? C.successUnsuscription
+        : C.successInsncription;
       showSnackbar(
-        card.esta_inscripto ? C.successUnsuscription : C.successInsncription,
+        missingRequiredDocuments
+          ? `${successMessage}. Recordá subir toda la documentación obligatoria.`
+          : successMessage,
+        missingRequiredDocuments ? "warning" : "success",
       );
-      const schedules = await loadSportsmanSchedules(deportista);
+      const schedules = await loadSportsmanSchedules(currentSportsman);
       setLoadingSports(false);
       await loadTournamentsForSchedules(schedules);
     } catch (error) {
@@ -288,9 +322,14 @@ const loadTournamentsForSchedules = useCallback(async (schedules) => {
       const loadSportsAndTournaments = async () => {
         let schedules = [];
         try {
-          const sportsman = await obtenerIdDeportista(user.email);
-          setDeportista(sportsman);
-          schedules = sportsman ? await loadSportsmanSchedules(sportsman) : [];
+          let sportsman = null;
+          try {
+            sportsman = await obtenerIdDeportista(user.email);
+            setDeportista(sportsman);
+          } catch {
+            setDeportista(null);
+          }
+          schedules = await loadSportsmanSchedules(sportsman);
         } catch (error) {
           console.error("Error al cargar deportes del estudiante:", error);
           showSnackbar(C.errorLoadSports, "error");

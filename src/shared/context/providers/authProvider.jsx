@@ -1,4 +1,4 @@
-import {useState, useEffect } from "react";
+import {useState, useEffect,useCallback } from "react";
 import { appConfig } from "../../../config/appConfig";
 import ObtenerTokenJWT from "../../../api/AuthService";
 import { AuthContext } from "../sharedContext"; 
@@ -19,19 +19,41 @@ export function AuthProvider({ children }) {
 
   const [sessionExpired, setSessionExpired] = useState(false);
 
+  const clearSession = useCallback(() => {
+    setUser(null);
+    setSessionExpired(false);
+    localStorage.removeItem("session");
+  }, []);
+
+  const isSessionValid = useCallback(() => {
+    const stored = localStorage.getItem("session");
+    if (!stored) return false;
+
+    try {
+      const parsed = JSON.parse(stored);
+      return Boolean(parsed.token) && Date.now() <= parsed.expiration;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const expireSession = useCallback(() => {
+    clearSession();
+  }, [clearSession]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       const stored = localStorage.getItem("session");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Date.now() > parsed.expiration) {
-          setSessionExpired(true);
+          clearSession();
         }
       }
     }, 300000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [clearSession]);
 
   const login = async (legajo, dominio, password) => {
     const result = await ObtenerTokenJWT(legajo, dominio, password);
@@ -94,6 +116,8 @@ export function AuthProvider({ children }) {
         updateUser,
         sessionExpired,
         setSessionExpired,
+        isSessionValid,
+        expireSession,
       }}
     >
       {children}

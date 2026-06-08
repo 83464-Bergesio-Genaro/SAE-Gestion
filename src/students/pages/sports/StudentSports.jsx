@@ -36,7 +36,8 @@ import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
 import { useSportsContext } from "../../context/studentContext";
 import { SportsProvider } from "../../context/providers/sportsProvider"; 
 
-import HeaderPage from "../../components/headerPage";
+import HeaderPage from "../../../shared/components/headerPage";
+import TitleBox from "../../../shared/components/titleBox";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 
 const C = SPORTS_STRINGS;
@@ -73,14 +74,13 @@ function StudentSportsContent() {
     <Box
       sx={{
         mt: "-90px",
-        pt: { xs: "114px", md: "130px" },
+        pt: { xs: "114px", md: "100px" },
         pb: 8,
         minHeight: "calc(100vh - 90px)",
         bgcolor: "#f4f8fc",
       }}
     >
       <Container maxWidth="xl">
-
         <HeaderPage
           title={C.bigTitle}
           description={C.bigSubtitle}
@@ -88,14 +88,11 @@ function StudentSportsContent() {
           icon={<SportsHandballIcon />}
         />
 
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            {C.documentationTitle}
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {C.documentationSubtitle}
-          </Typography>
-        </Box>
+        <TitleBox
+          title={C.documentationTitle}
+          description={C.documentationSubtitle}
+        />
+
         {loadingDocuments ? (
           <Stack alignItems="center" sx={{ py: 5 }}>
             <SAESpinner size="S" />
@@ -122,14 +119,8 @@ function StudentSportsContent() {
             ))}
           </Grid>
         )}
-        <Box sx={{ mt: 3, mb: 2 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            {C.sportsTitle}
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {C.sportsSubTitle}
-          </Typography>
-        </Box>
+
+        <TitleBox title={C.sportsTitle} description={C.sportsSubTitle} />
         {loadingSports ? (
           <Stack alignItems="center" sx={{ py: 5 }}>
             <SAESpinner size="S" />
@@ -148,14 +139,12 @@ function StudentSportsContent() {
             />
           </Card>
         ) : null}
-        <Box sx={{ mt: 3, mb: 2 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            {C.tournamnetsTitle}
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {C.tournamnetsSubTitle}
-          </Typography>
-        </Box>
+
+        <TitleBox
+          title={C.tournamnetsTitle}
+          description={C.tournamnetsSubTitle}
+        />
+
         {loadingTournaments ? (
           <Stack alignItems="center" sx={{ py: 5 }}>
             <SAESpinner size="S" />
@@ -247,17 +236,10 @@ function StudentSportsContent() {
         ) : null}
         {!loadingSports && horariosDeportista.length > 0 && (
           <>
-            <Box sx={{ mt: 3, mb: 2 }}>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 800, color: "#123666" }}
-              >
-                {C.horariosTitle}
-              </Typography>
-              <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-                {C.horariosSubTitle}
-              </Typography>
-            </Box>
+            <TitleBox
+              title={C.horariosTitle}
+              description={C.horariosSubTitle}
+            />
             <SportsCalendar subscribedSportIds={subscribedSportIds} />
           </>
         )}

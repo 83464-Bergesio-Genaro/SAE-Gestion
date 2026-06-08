@@ -550,15 +550,12 @@ export default function ScholarshipsForm({
   const crearBecarioSiNoExiste = async () => {
     if (becarioActual?.id) return becarioActual;
 
-    const fechaSolicitudOriginal =
-      becarioFechaSolicitud ?? formBeca.fecha_solicitud ?? null;
-
     const payloadBecario = {
       id: 0,
       legajo: user.email,
       nombre_becario: user.nombre,
       alquila: formBeca.alquila,
-      fecha_solicitud: fechaSolicitudOriginal,
+      fecha_solicitud: new Date().toISOString(),
       aceptado_inicio: false,
       puede_pagarle: false,
       activo: true,

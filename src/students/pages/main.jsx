@@ -12,6 +12,7 @@ import {
 import { useAuth } from "../../shared/context/sharedContext"; 
 import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
 import NovedadesEstudiantiles from "../../shared/components/StudentNews/studentNews";
+import TitleBox from "../../shared/components/titleBox";
 export default function StudentMain() {
   const baseUrl = import.meta.env.BASE_URL;
   const { user } = useAuth();
@@ -41,8 +42,7 @@ export default function StudentMain() {
             background:
               "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%)",
             color: "white",
-            backgroundImage:
-              `linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('${baseUrl}images/carrousel/EntradaUTN.jpg')`,
+            backgroundImage: `linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('${baseUrl}images/carrousel/EntradaUTN.jpg')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -107,16 +107,15 @@ export default function StudentMain() {
           />
         </Box>
         <Box sx={{ mt: 5 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            Gestión Alumnos
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            Módulos operativos principales para el trabajo diario del equipo.
-          </Typography>
-        <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
+          <TitleBox
+            title=" Gestión Alumnos"
+            description=" Módulos operativos principales para el trabajo diario del equipo."
+          />
+
+          <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
         </Box>
       </Container>
-      <NovedadesEstudiantiles/>
+      <NovedadesEstudiantiles />
     </Box>
   );
 }

@@ -1,6 +1,8 @@
 import { appConfig } from "../config/appConfig";
 import { mapHorarios } from "./formatters/DeportesFormatters";
 
+export const URLApiCotroller = `${appConfig.apiUrl}/api/Deporte`;
+
 function getToken() {
   const stored = localStorage.getItem("session");
   if (!stored) return null;
@@ -14,249 +16,251 @@ function getToken() {
 
 function getHeaders(method, body) {
   const token = getToken();
-  const headers = {
-    "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true",
-  };
+  const isFormData = body instanceof FormData;
+  const headers = { "ngrok-skip-browser-warning": "true" };
+  if (!isFormData) headers["Content-Type"] = "application/json";
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const options = { method, headers };
-  if (body) options.body = JSON.stringify(body);
+  if (body) options.body = isFormData ? body : JSON.stringify(body);
   return options;
 }
 
+export async function RequestAPI(endpoint, action, body = null) {
+  const res = await fetch(appConfig.apiUrl + endpoint, getHeaders(action, body));
+
+  if (res.status === 204 && action === "GET") return [];
+  if (res.status === 204) return {};
+
+  if (!res.ok) {
+    let detail = `Error ${res.status}`;
+    try {
+      const json = await res.json();
+      if (json.title) detail = `${json.title} (${res.status})`;
+      else if (json.message) detail = json.message;
+    } catch {
+      /* ignore */
+    }
+    throw new Error(detail);
+  }
+
+  const text = await res.text();
+  if (!text?.trim()) return action === "GET" ? [] : {};
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
+// DOCENTES DEPORTIVOS
 export async function obtenerDocentesDeportivos() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerDocentesDeportivos`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
+  return RequestAPI("/api/Deporte/ObtenerDocentesDeportivos", "GET");
 }
 
 export async function crearDocenteDeportivo(body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/CrearDocenteDeportivo`,
-    getHeaders("POST", body),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function obtenerDeportistas() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerDeportistasCompleto`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function crearDeportista(body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/CrearDeportista`,
-    getHeaders("POST", body),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
-}
-
-export async function modificarDeportista(id, body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ModificarDeportista/${encodeURIComponent(id)}`,
-    getHeaders("PUT", body),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
-}
-
-export async function obtenerEspaciosDeportivos() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerEspDeportivoCompleto`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function crearEspacioDeportivo(body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/CrearEspacioDeportivo`,
-    getHeaders("POST", body),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
-}
-
-export async function modificarEspacioDeportivo(id, body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ModificarEspacioDeportivo/${encodeURIComponent(id)}`,
-    getHeaders("PUT", body),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
+  return RequestAPI("/api/Deporte/CrearDocenteDeportivo", "POST", body);
 }
 
 export async function modificarDocenteDeportivo(cuil, body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ModificarDocenteDeportivo/${encodeURIComponent(cuil)}`,
-    getHeaders("PUT", body),
+  return RequestAPI(
+    "/api/Deporte/ModificarDocenteDeportivo/" + encodeURIComponent(cuil),
+    "PUT",
+    body,
   );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
 }
 
-export async function crearHorarioDeportivo(body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/CrearHorarioDeportivo/`,
-    getHeaders("POST", body),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
+// DEPORTISTAS
+export async function obtenerDeportistas() {
+  return RequestAPI("/api/Deporte/ObtenerDeportistasCompleto", "GET");
 }
 
-export async function modificarHorarioDeportivo(id, body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ModificarHorario/${encodeURIComponent(id)}`,
-    getHeaders("PUT", body),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
+export async function crearDeportista(body) {
+  return RequestAPI("/api/Deporte/CrearDeportista", "POST", body);
 }
 
-export async function eliminarHorarioDeportivo(id) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/EliminarHorarioDeportivo/${encodeURIComponent(id)}`,
-    getHeaders("DELETE"),
+export async function modificarDeportista(id, body) {
+  return RequestAPI(
+    "/api/Deporte/ModificarDeportista/" + encodeURIComponent(id),
+    "PUT",
+    body,
   );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
 }
 
+export async function obtenerIdDeportista(legajo) {
+  return RequestAPI(
+    "/api/Deporte/ObtenerDeportistasXLegajo/" + encodeURIComponent(legajo),
+    "GET",
+  );
+}
+
+export async function obtenerDeportistasXTorneo(idTorneo) {
+  return RequestAPI(
+    "/api/Deporte/ObtenerDeportistasXTorneo/" + encodeURIComponent(idTorneo),
+    "GET",
+  );
+}
+
+export async function obtenerDeportistasXTorneo2(idTorneo) {
+  return obtenerDeportistasXTorneo(idTorneo);
+}
+
+// ESPACIOS DEPORTIVOS
+export async function obtenerEspaciosDeportivos() {
+  return RequestAPI("/api/Deporte/ObtenerEspDeportivoCompleto", "GET");
+}
+
+export async function obtenerEspDeportivoActivos() {
+  return RequestAPI("/api/Deporte/obtenerEspDeportivoActivos/", "GET");
+}
+
+export async function crearEspacioDeportivo(body) {
+  return RequestAPI("/api/Deporte/CrearEspacioDeportivo", "POST", body);
+}
+
+export async function modificarEspacioDeportivo(id, body) {
+  return RequestAPI(
+    "/api/Deporte/ModificarEspacioDeportivo/" + encodeURIComponent(id),
+    "PUT",
+    body,
+  );
+}
+
+// DEPORTES
 export async function obtenerDeportesActivos() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerDeportesActivos/`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
+  return RequestAPI("/api/Deporte/ObtenerDeportesActivos/", "GET");
 }
 
 export async function obtenerDeportesCompleto() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerDeportesCompleto/`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
+  return RequestAPI("/api/Deporte/ObtenerDeportesCompleto/", "GET");
 }
 
 export async function crearDeporte(body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/CrearDeporte`,
-    getHeaders("POST", body),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
+  return RequestAPI("/api/Deporte/CrearDeporte", "POST", body);
 }
 
 export async function modificarDeporte(id, body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ModificarDeporte/${encodeURIComponent(id)}`,
-    getHeaders("PUT", body),
+  return RequestAPI(
+    "/api/Deporte/ModificarDeporte/" + encodeURIComponent(id),
+    "PUT",
+    body,
   );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
+}
+
+// HORARIOS
+export async function obtenerHorariosActivos() {
+  return RequestAPI("/api/Deporte/obtenerHorariosActivos/", "GET");
 }
 
 export async function obtenerHorariosXDeporte(idDeporte) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerHorariosXDeporte/${encodeURIComponent(idDeporte)}`,
-    getHeaders("GET"),
+  return RequestAPI(
+    "/api/Deporte/ObtenerHorariosXDeporte/" + encodeURIComponent(idDeporte),
+    "GET",
   );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  const text = await res.text();
-  if (!text || !text.trim()) return [];
-  return JSON.parse(text);
 }
 
-export async function listarDocumentacionXLegajo(legajo) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Estudiante/ListarDocumentacionXLegajo/${legajo}`,
-    getHeaders("GET"),
+export async function crearHorarioDeportivo(body) {
+  return RequestAPI("/api/Deporte/CrearHorarioDeportivo/", "POST", body);
+}
+
+export async function modificarHorarioDeportivo(id, body) {
+  return RequestAPI(
+    "/api/Deporte/ModificarHorario/" + encodeURIComponent(id),
+    "PUT",
+    body,
   );
-  if (res.status === 204) return [];
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
+}
+
+export async function eliminarHorarioDeportivo(id) {
+  return RequestAPI(
+    "/api/Deporte/EliminarHorarioDeportivo/" + encodeURIComponent(id),
+    "DELETE",
+  );
+}
+
+// TORNEOS
+export async function obtenerTorneosDeportivos() {
+  return RequestAPI("/api/Deporte/ObtenerTorneosDeportivos/", "GET");
+}
+
+export async function obtenerTorneoXId(id) {
+  return RequestAPI(
+    "/api/Deporte/ObtenerTorneosXId/" + encodeURIComponent(id),
+    "GET",
+  );
+}
+
+export async function obtenerTorneosXDeporte(id_deporte) {
+  return RequestAPI(
+    "/api/Deporte/ObtenerTorneosXDeporte/" + encodeURIComponent(id_deporte),
+    "GET",
+  );
+}
+
+export async function crearTorneo(body) {
+  return RequestAPI("/api/Deporte/CrearTorneo/", "POST", body);
+}
+
+export async function modificarTorneo(id, body) {
+  return RequestAPI(
+    "/api/Deporte/ModificarTorneo/" + encodeURIComponent(id),
+    "PUT",
+    body,
+  );
+}
+
+export async function crearInscripcionTorneo(idTorneo, idDeportista, body) {
+  return RequestAPI(
+    "/api/Deporte/CrearInscripcionTorneo/" +
+      encodeURIComponent(idTorneo) +
+      "/" +
+      encodeURIComponent(idDeportista),
+    "POST",
+    body,
+  );
+}
+
+export async function eliminarInscripcionTorneo(idInscripcion) {
+  return RequestAPI(
+    "/api/Deporte/EliminarInscripcionTorneo/" +
+      encodeURIComponent(idInscripcion),
+    "DELETE",
+  );
+}
+
+// INSCRIPCIONES
+export async function obtenerInscripcionesXDeportista(id_deportista) {
+  return RequestAPI(
+    "/api/Deporte/obtenerInscripcionesXDeportista/" +
+      encodeURIComponent(id_deportista),
+    "GET",
+  );
+}
+
+export async function crearInscripcionDeporte(id_deporte, id_deportista) {
+  return RequestAPI(
+    "/api/Deporte/CrearInscripcionDeporte/" +
+      encodeURIComponent(id_deporte) +
+      "/" +
+      encodeURIComponent(id_deportista),
+    "POST",
+  );
+}
+
+export async function eliminarInscripcionDeporte(idInscripcion) {
+  return RequestAPI(
+    "/api/Deporte/EliminarInscripcionDeporte/" +
+      encodeURIComponent(idInscripcion),
+    "DELETE",
+  );
+}
+
+// DOCUMENTACION
+export async function listarDocumentacionXLegajo(legajo) {
+  return RequestAPI(
+    "/api/Estudiante/ListarDocumentacionXLegajo/" + encodeURIComponent(legajo),
+    "GET",
+  );
 }
 
 export async function descargarDocumentacionXId(id) {
@@ -264,7 +268,18 @@ export async function descargarDocumentacionXId(id) {
     `${appConfig.apiUrl}/api/Estudiante/DescargarDocumentacionXId/${encodeURIComponent(id)}`,
     getHeaders("GET"),
   );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
+
+  if (!res.ok) {
+    let detail = `Error ${res.status}`;
+    try {
+      const json = await res.json();
+      if (json.title) detail = `${json.title} (${res.status})`;
+      else if (json.message) detail = json.message;
+    } catch {
+      /* ignore */
+    }
+    throw new Error(detail);
+  }
 
   const contentType = (res.headers.get("Content-Type") || "").toLowerCase();
 
@@ -306,262 +321,24 @@ export async function descargarDocumentacionXId(id) {
   throw new Error("Formato de respuesta no soportado");
 }
 
-export async function obtenerTorneosDeportivos() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerTorneosDeportivos/`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function obtenerTorneoXId(id) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerTorneosXId/${encodeURIComponent(id)}`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function obtenerDeportistasXTorneo(idTorneo) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerDeportistasXTorneo/${encodeURIComponent(idTorneo)}`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function modificarTorneo(id, body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ModificarTorneo/${encodeURIComponent(id)}`,
-    getHeaders("PUT", body),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
-}
-
-export async function crearTorneo(body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/CrearTorneo/`,
-    getHeaders("POST", body),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
-}
-
-export async function eliminarInscripcionTorneo(idInscripcion) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/EliminarInscripcionTorneo/${encodeURIComponent(idInscripcion)}`,
-    getHeaders("DELETE"),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  const text = await res.text();
-  if (!text?.trim()) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
-
-export async function crearInscripcionTorneo(idTorneo, idDeportista, body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/CrearInscripcionTorneo/${encodeURIComponent(idTorneo)}/${encodeURIComponent(idDeportista)}`,
-    getHeaders("POST", body),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
-}
-
-export async function obtenerIdDeportista(legajo) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerDeportistasXLegajo/${legajo}`,
-    getHeaders("GET"),
-  );
-
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function obtenerDeportistasXTorneo2(idTorneo) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerDeportistasXTorneo/${encodeURIComponent(idTorneo)}`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function obtenerHorariosActivos() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/obtenerHorariosActivos/`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function obtenerEspDeportivoActivos() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/obtenerEspDeportivoActivos/`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function obtenerInscripcionesXDeportista(id_deportista) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/obtenerInscripcionesXDeportista/${encodeURIComponent(id_deportista)}`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-export async function obtenerTorneosXDeporte(id_deporte) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/ObtenerTorneosXDeporte/${encodeURIComponent(id_deporte)}`,
-    getHeaders("GET"),
-  );
-
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-
-  if (res.status === 204) return [];
-
-  return res.json();
-}
-
-export async function crearInscripcionDeporte(id_deporte, id_deportista) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/CrearInscripcionDeporte/${encodeURIComponent(id_deporte)}/${encodeURIComponent(id_deportista)}`,
-    getHeaders("POST"),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
-}
-
-export async function eliminarInscripcionDeporte(idInscripcion) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Deporte/EliminarInscripcionDeporte/${encodeURIComponent(idInscripcion)}`,
-    getHeaders("DELETE"),
-  );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  const text = await res.text();
-  if (!text?.trim()) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
-
 export async function crearDocumentoEstudiante(id_tipo_documento, archivo) {
   const body = new FormData();
   body.append("archivo", archivo);
 
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Estudiantes/CrearDocumentoEstudiante/${encodeURIComponent(id_tipo_documento)}`,
-    getHeaders("POST", body),
+  return RequestAPI(
+    "/api/Estudiante/CrearDocumentoEstudiante/" +
+      encodeURIComponent(id_tipo_documento),
+    "POST",
+    body,
   );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
 }
 
 export async function eliminarDocumentoEstudiante(id_archivo) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Estudiantes/EliminarDocumentoEstudiante/${encodeURIComponent(id_archivo)}`,
-    getHeaders("DELETE"),
+  return RequestAPI(
+    "/api/Estudiante/EliminarDocumentoEstudiante/" +
+      encodeURIComponent(id_archivo),
+    "DELETE",
   );
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  const text = await res.text();
-  if (!text?.trim()) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
 }
 
 export async function obtenerHorariosDeportista(id_deportista) {
@@ -574,7 +351,9 @@ export async function obtenerHorariosDeportista(id_deportista) {
     obtenerDeportesActivos(),
     obtenerHorariosActivos(),
     obtenerEspDeportivoActivos(),
-    obtenerInscripcionesXDeportista(id_deportista),
+    id_deportista
+      ? obtenerInscripcionesXDeportista(id_deportista)
+      : Promise.resolve([]),
   ]);
 
   if (!deporte?.length) {
@@ -591,12 +370,10 @@ export async function obtenerHorariosDeportista(id_deportista) {
 
   const inscripciones = inscripcionesDeportista ?? [];
 
-  const horarios = mapHorarios(
+  return mapHorarios(
     horariosActivos,
     deporte,
     espaciosDeportivos,
     inscripciones,
   );
-
-  return horarios;
 }

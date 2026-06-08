@@ -13,7 +13,11 @@ import { JPAContext } from "../employedContext";
          crearInteresado,
          modificarInteresado,
          eliminarInteresado } from "../../../api/JPAService";
-         
+import { Box,IconButton } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import CastleIcon from "@mui/icons-material/Castle";
+import EditIcon from "@mui/icons-material/Edit";
+import CloseIcon from "@mui/icons-material/Close";    
  const formatTime = (time) => {
      return time ? (time.endsWith("hs") ? time.replace("hs", ":00") : `${time}:00`) : time;
  };

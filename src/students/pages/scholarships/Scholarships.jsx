@@ -42,9 +42,10 @@ import {
   ECONOMIC_OPTIONAL_DOCUMENTS,
 } from "./scholarship.configs";
 
-import HeaderPage from "../../components/headerPage";
+import HeaderPage from "../../../shared/components/headerPage";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
 import DocumentCard from "../../../shared/components/documents/DocumentCard";
+import TitleBox from "../../../shared/components/titleBox";
 
 const C = SCHOLARSHIP_STRINGS;
 
@@ -88,70 +89,13 @@ function ScholarshipsContent() {
     <Box
       sx={{
         mt: "-90px",
-        pt: { xs: "114px", md: "130px" },
+        pt: { xs: "114px", md: "100px" },
         pb: 8,
         minHeight: "calc(100vh - 90px)",
         bgcolor: "#f4f8fc",
       }}
     >
       <Container maxWidth="xl">
-        {/* <Box
-          sx={{
-            overflow: "hidden",
-            borderRadius: 6,
-            px: { xs: 3, md: 3 },
-            py: { xs: 2, md: 2 },
-            minHeight: 100,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 3,
-            color: "white",
-            backgroundImage:
-              "linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('/images/carrousel/EntradaUTN.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <Box sx={{ maxWidth: 700 }}>
-            <Typography
-              variant="h3"
-              sx={{
-                mt: 1,
-                fontWeight: 800,
-                lineHeight: 1.1,
-                fontSize: { xs: "2rem", md: "3rem" },
-              }}
-            >
-              {C.bigTitle}
-            </Typography>
-            <Typography
-              sx={{
-                mt: 2,
-                maxWidth: 560,
-                fontSize: { xs: 16, md: 18 },
-                opacity: 0.92,
-              }}
-            >
-              {C.bigSubtitle}
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              display: { xs: "none", md: "block" },
-              width: 80,
-              height: 80,
-              borderRadius: "20px",
-              backgroundImage: "url('/images/principal/logoUTNrotado.png')",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "contain",
-              transform: "rotate(8deg)",
-              filter: "drop-shadow(0 18px 35px rgba(0,0,0,0.22))",
-            }}
-          />
-        </Box> */}
         <HeaderPage
           title={C.bigTitle}
           description={C.bigSubtitle}
@@ -159,15 +103,10 @@ function ScholarshipsContent() {
           icon={<Diversity3Icon />}
         />
 
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            {C.documentationTitle}
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {C.documentationSubtitle}
-          </Typography>
-        </Box>
-
+        <TitleBox
+          title={C.documentationTitle}
+          description={C.documentationSubtitle}
+        />
         {!loadingScholarships && perfilIncompleto && (
           <Box
             sx={{
@@ -429,14 +368,11 @@ function ScholarshipsContent() {
           )}
         </Box>
 
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "#123666" }}>
-            {C.myDocumentsTitle}
-          </Typography>
-          <Typography sx={{ mt: 1, color: "#5a6f8f" }}>
-            {C.documentationSubtitle}
-          </Typography>
-        </Box>
+        <TitleBox
+          title={C.myDocumentsTitle}
+          description={C.documentationSubtitle}
+        />
+
         {!loadingDocuments && !loadingScholarships && perfilIncompleto && (
           <Box
             sx={{

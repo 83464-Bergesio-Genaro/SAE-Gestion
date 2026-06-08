@@ -1,88 +1,64 @@
-// Static display texts for the Prensa feature.
-// Update copy here without touching component logic or layout.
 
 export const PRENSA_STRINGS = {
-  adminTitle: "Administrar Publicaciones",
+  moduleOverline: "Módulo de Prensa",
+  heroTitle: "Prensa",
+  heroSubtitle: "Publicaciones, comunicados y novedades de la SAE.",
+  backRoute: "/Inicio",
 
-  // Filtros
-  filterAll: "Todas",
-  filterActive: "Activas",
-  filterExpired: "Vencidas",
-  searchPlaceholder: "Buscar...",
-  newButtonLabel: "Nueva",
+  chipLegajo: (legajo) => `Legajo ${legajo}`,
+  chipPerfil: (id) => `Perfil ${id}`,
 
-  // DataGrid columns
-  colId: "ID",
-  colTitle: "Título",
-  colDescription: "Descripción",
-  colStartDate: "Fecha Inicio",
-  colExpiry: "Vigencia",
-  colPriority: "Prioridad",
-  colFixed: "Fija",
-  colViews: "Vistas",
-  colActions: "Acciones",
-  colFixed_yes: "Sí",
-  colFixed_no: "No",
+  searchPlaceholder: "Buscar publicación...",
+  filterDateLabel: "Ordenar por fecha",
+  filterNameLabel: "Ordenar por nombre",
+  clearFiltersTitle: "Limpiar filtros",
+  adminButtonLabel: "Administrar",
+  adminRoute: "/Gestion-Prensa",
 
-  // Edit modal
-  editTitle: "Editar Publicación",
-  fieldTitle: "Título",
-  fieldDescription: "Descripción",
-  fieldStartDate: "Fecha Inicio",
-  fieldEndDate: "Fecha Fin",
-  fieldPriority: "Prioridad",
-  fieldNoDarBaja: "No dar de baja",
-  attachDocument: "Adjuntar documento",
-  saveButton: "Guardar",
-  saving: "Guardando...",
+  sortDateNone: "Sin orden",
+  sortDateInicioAsc: "Publicado: más antiguo",
+  sortDateInicioDesc: "Publicado: más reciente",
+  sortVigenciaAsc: "Vigencia: más próxima",
+  sortVigenciaDesc: "Vigencia: más lejana",
 
-  // Delete modal
-  deleteTitle: "Eliminar publicación",
-  deleteConfirm: () => `¿Estás seguro de que deseas eliminar `,
-  deleteConfirmBold: (titulo) => titulo,
-  deleteButton: "Eliminar",
+  sortNameNone: "Sin orden",
+  sortNameAsc: "A → Z",
+  sortNameDesc: "Z → A",
 
-  // Snackbar messages
-  snackSaved: "Publicación guardada",
-  snackCreated: "Publicación guardada",
-  snackDeleted: "Publicación eliminada",
-  snackErrorSave: "Error al guardar",
-  snackErrorCreate: "Error al crear publicación",
-  snackWarnDocUpload: "Publicación creada, pero falló la subida del documento",
-  snackWarnDocLink: "Publicación creada, pero falló el vínculo con el documento",
+  noResults: "No se encontraron publicaciones.",
+  chipFija: "Fija",
 
-  // Nueva publicación dialog (also used for edit)
-  nueva: {
-    title: "Nueva Publicación De Prensa",
-    editTitle: "Editar Publicación",
-    sectionDatos: "Datos",
-    sectionVigencia: "Vigencia",
-    sectionPrioridad: "Prioridad",
-    sectionDocumentos: "Documentos",
-    fieldTitle: "Título",
-    fieldDescription: "Descripción",
-    fieldStartDate: "Fecha Inicio",
-    fieldEndDate: "Fecha Vigencia",
-    fieldNoDarBaja: "No dar de baja",
-    tabUpload: "Subir nuevo",
-    tabExisting: "Existente",
-    attachButton: "Adjuntar documento",
-    searchDocPlaceholder: "Buscar documento...",
-    tableColName: "Nombre",
-    tableColType: "Tipo",
-    tableColView: "Vista",
-    noDocuments: "Sin documentos disponibles",
-    docCount: (n) => `${n} documento${n !== 1 ? "s" : ""}`,
-    saveButton: "Guardar",
-    saving: "Guardando...",
-  },
-
-  // Document type labels
-  tipoImagen: "Imagen",
-  tipoDocumento: "Documento",
-
-  // Priority labels
   priorityNormal: "Normal",
-  priorityMedium: "Media",
-  priorityHigh: "Alta",
+  priorityMedia: "Media",
+  priorityAlta: "Alta",
+
+  cardViews: (n) => n ?? 0,
+
+  dialogDocsTitle: "Documentos adjuntos",
+  dialogNoDocs: "No hay documentos adjuntos.",
+  dialogDocTooltip: "Ver documento",
+  dialogPublicado: "Publicado:",
+  dialogVigencia: "Vigencia:",
+
+  previewFallbackTitle: "Vista previa",
+  previewFallbackName: "Archivo",
+  previewErrorNoId: "No se encontró el id del documento para previsualizar.",
+  previewErrorNotSupported: "Solo se permite vista previa para imágenes o PDF.",
+  previewErrorLoad: "No se pudo cargar la imagen.",
+
+  loadingAlt: "Cargando",
 };
+
+export const SORT_DATE_OPTIONS = [
+  { value: "", label: "Sin orden" },
+  { value: "fecha_inicio_asc",  label: "Publicado: más antiguo" },
+  { value: "fecha_inicio_desc", label: "Publicado: más reciente" },
+  { value: "fecha_vigencia_asc",  label: "Vigencia: más próxima" },
+  { value: "fecha_vigencia_desc", label: "Vigencia: más lejana" },
+];
+
+export const SORT_NAME_OPTIONS = [
+  { value: "",     label: "Sin orden" },
+  { value: "asc",  label: "A → Z" },
+  { value: "desc", label: "Z → A" },
+];

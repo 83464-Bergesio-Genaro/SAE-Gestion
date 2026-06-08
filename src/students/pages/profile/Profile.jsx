@@ -17,20 +17,10 @@ import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import TitleBox from "../../../shared/components/titleBox";
 
 import { useEffect } from "react";
-import { useAuth } from "../../../shared/auth/AuthContext";
-import { useProfileContext, ProfileContextProvider } from "./ProfileContext";
+import { useAuth } from "../../../shared/context/sharedContext"; 
+import { useMyProfile } from "../../context/studentContext";
+import { ProfileContextProvider } from "../../../shared/context/providers/profileProvider";
 
-/*const [perfil, setPerfil] = useState({
-  legajo: "",
-  nombres: "",
-  apellidos: "",
-  email: "",
-  telefono: "",
-  fecha_nacimiento: "",
-  cuil: "",
-  dni: "",
-  direccion: ""
-});*/
 function getInitials(nombre = "") {
   return nombre
     .trim()
@@ -86,22 +76,15 @@ const parseAddress = (value = "") => {
 const sanitizeAddressPart = (value = "") =>
   value.replace(/\s*-\s*/g, " ").replace(/\s{2,}/g, " ");
 
-export function MyProfileContent() {
-  const { user } = useAuth();
-  const {
-    fetchDatosPerfil,
-    datosPerfil,
-    loadingPerfil,
-    setDatosPerfil,
-    handleProfileSave,
-    //Valores de error, mostrar mensajes, etc.
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
-    setFormError,
-    formError,
-    saveAttempted,
-  } = useProfileContext();
+export function MyProfileContent(){
+    const { user } = useAuth();
+    const {
+            fetchDatosPerfil,datosPerfil,loadingPerfil,setDatosPerfil,handleProfileSave,
+            //Valores de error, mostrar mensajes, etc.
+            snackbarOpen, setSnackbarOpen,snackbarMsg,setFormError,
+             formError, saveAttempted
+
+    } = useMyProfile();
 
   useEffect(() => {
     fetchDatosPerfil(user.legajo);

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./login.css";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../context/sharedContext";
 import {
   Box,
   Backdrop,
@@ -277,7 +276,7 @@ export default function Login() {
             </Alert>
           )}
 
-          <Stack spacing={2.5}>
+          <Stack spacing={2.5} >
             {/* Email Field */}
             <Box>
               <Stack
@@ -318,8 +317,8 @@ export default function Login() {
                     </MenuItem>
                   ))}
                 </SAETextField>
-                <Typography sx={{ fontWeight: 600, color: "#5a6f8f", px: 1 }}>
-                  .frc.utn.edu.ar
+                <Typography sx={{ fontWeight: 600, color: "#5a6f8f", px: 1,minWidth:130}}>
+                  {dominio === "frc"? "utn.edu.ar": ".frc.utn.edu.ar" }
                 </Typography>
               </Stack>
             </Box>
@@ -374,7 +373,7 @@ export default function Login() {
               color: "#5a6f8f",
             }}
           >
-            © 2024 SAE Gestión - UTN FRC
+            © 2026 SAE Gestión - UTN FRC
           </Typography>
         </Paper>
       </Container>

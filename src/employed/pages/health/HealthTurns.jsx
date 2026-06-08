@@ -1,6 +1,7 @@
 
 import { useCallback, useState,useMemo } from 'react';
-import { HealthUsersProvider, useHealthUser } from './HealthContext'; 
+import { HealthUsersProvider } from '../../context/providers/healthProvider';
+import { useHealth } from '../../context/employedContext';
 import { useNavigate } from "react-router-dom";
 
 import { Autocomplete,Alert,Box,Button, Card,CardActionArea,CardContent,Container,InputAdornment ,CircularProgress,FormControlLabel ,Switch ,
@@ -44,7 +45,7 @@ export function TurnGrid(){
     //Fundamentales para el funcionamiento de los Dialog
     snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
     dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving   
-  } = useHealthUser();
+  } = useHealth();
 
     const [busquedaGestion, setBusquedaGestion] = useState("");
 
@@ -484,7 +485,7 @@ export function TurnGrid(){
 
     const {
         handleTurnosChangeState,openShowNoActivos,loadingTurnos
-    } = useHealthUser();
+    } = useHealth();
 
     const handleDrop = useCallback(async (e, nuevoEstado) => {
        

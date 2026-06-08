@@ -13,7 +13,8 @@ import {
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 
-import { AdminUsersProvider, useAdminUsers } from "./AdminUsersContext";
+import { useEmploy } from '../../context/employedContext'; 
+import { AdminUsersProvider } from '../../context/providers/employProvider';
 
 const HOUR_HEIGHT = 36; // px per hour
 const START_HOUR = 8; //AM
@@ -98,14 +99,12 @@ function layoutEvents(events) {
 
 const WEEKEND = new Set([0, 6]); // dia values for Sat/Sun
 
-export function EmployedCalendar({ legajoEmpleado = null }) {
-  const {
-    dialogError,
-    empleados,
-    loadingEmpleados,
-    allHorarios,
-    loadingHorarios,
-  } = useAdminUsers();
+export function EmployedCalendar({ legajoEmpleado = null }){
+    const {
+            dialogError,
+            empleados,loadingEmpleados,
+            allHorarios,loadingHorarios,
+        } = useEmploy();
 
   const [manualSelected, setManualSelected] = useState(null);
 

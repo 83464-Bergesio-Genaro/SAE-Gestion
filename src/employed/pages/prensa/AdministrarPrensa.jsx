@@ -1,4 +1,3 @@
-import { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -16,179 +15,40 @@ import {
   CardContent,
   Stack,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
-import { useNavigate } from "react-router-dom";
+
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import NuevaPublicacionDialog from "./NuevaPublicacionDialog";
-import {
-  listarPublicacionesCompleto,
-  eliminarPublicacion,
-} from "../../../api/PrensaService";
-import { vigenciaActiva } from "./prensa.utils";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import { DataGrid } from "@mui/x-data-grid";
+import { useNavigate } from "react-router-dom";
 import { PRENSA_STRINGS } from "./prensa.strings";
-import { useNuevaPublicacion } from "./useNuevaPublicacion";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 
+import { usePress } from "../../context/employedContext";
+import { PressProvider } from "../../context/providers/pressProvider";
 const C = PRENSA_STRINGS;
 
-function prioridadChip(prioridad) {
-  switch (prioridad) {
-    case 1:
-      return <Chip label={C.priorityMedium} color="warning" size="small" />;
-    case 2:
-      return <Chip label={C.priorityHigh} color="error" size="small" />;
-    default:
-      return <Chip label={C.priorityNormal} size="small" />;
-  }
+export default function AdministrarPrensa() {
+    return (
+        <PressProvider>
+            <AdministrarPrensaContent />
+        </PressProvider>
+    );
 }
 
-export default function AdministrarPrensa() {
+function AdministrarPrensaContent() {
   const navigate = useNavigate();
-  const [rows, setRows] = useState([]);
-  const [loadedKey, setLoadedKey] = useState(-1);
-  const [filtroEstado, setFiltroEstado] = useState("todos");
-  const [busqueda, setBusqueda] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-  const [refreshKey, setRefreshKey] = useState(0);
-  const loading = loadedKey < refreshKey;
-
-  const nueva = useNuevaPublicacion({
-    onSuccess: (isEdit) => {
-      setRefreshKey((k) => k + 1);
-      setSnackbar({
-        open: true,
-        message: isEdit ? C.snackSaved : C.snackCreated,
-        severity: "success",
-      });
-    },
-    onWarning: (msg) =>
-      setSnackbar({ open: true, message: msg, severity: "warning" }),
-    onError: (msg) =>
-      setSnackbar({ open: true, message: msg, severity: "error" }),
-  });
-
-  useEffect(() => {
-    listarPublicacionesCompleto()
-      .then((data) => setRows(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Error al cargar publicaciones:", err))
-      .finally(() => setLoadedKey(refreshKey));
-  }, [refreshKey]);
-
-  const rowsFiltradas = useMemo(() => {
-    let filtradas = rows;
-    if (filtroEstado === "activas")
-      filtradas = filtradas.filter((r) => vigenciaActiva(r.fecha_vigencia));
-    if (filtroEstado === "vencidas")
-      filtradas = filtradas.filter((r) => !vigenciaActiva(r.fecha_vigencia));
-    if (busqueda.trim()) {
-      const termino = busqueda.toLowerCase();
-      filtradas = filtradas.filter(
-        (r) =>
-          (r.titulo_publicacion &&
-            r.titulo_publicacion.toLowerCase().includes(termino)) ||
-          (r.descripcion && r.descripcion.toLowerCase().includes(termino)),
-      );
-    }
-    return filtradas;
-  }, [rows, filtroEstado, busqueda]);
-
-  const handleEdit = (pub) => nueva.actions.openEdit(pub);
-
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
-    try {
-      await eliminarPublicacion(deleteTarget.id);
-    } catch (err) {
-      console.warn("Respuesta del delete:", err);
-    }
-    setDeleteTarget(null);
-    setRefreshKey((k) => k + 1);
-    setSnackbar({ open: true, message: C.snackDeleted, severity: "error" });
-  };
-
-  const columns = [
-    { field: "id", headerName: C.colId, width: 70 },
-    {
-      field: "titulo_publicacion",
-      headerName: C.colTitle,
-      flex: 1,
-      minWidth: 200,
-    },
-    {
-      field: "descripcion",
-      headerName: C.colDescription,
-      flex: 1,
-      minWidth: 200,
-    },
-    {
-      field: "fecha_inicio",
-      headerName: C.colStartDate,
-      width: 140,
-      valueFormatter: (value) =>
-        value
-          ? new Date(value).toLocaleDateString("es-AR", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "",
-    },
-    {
-      field: "fecha_vigencia",
-      headerName: C.colExpiry,
-      width: 140,
-      valueFormatter: (value) =>
-        value
-          ? new Date(value).toLocaleDateString("es-AR", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "",
-    },
-    {
-      field: "prioridad",
-      headerName: C.colPriority,
-      width: 80,
-      renderCell: (params) => prioridadChip(params.value),
-    },
-    {
-      field: "no_dar_baja",
-      headerName: C.colFixed,
-      width: 80,
-      renderCell: (params) => (params.value ? C.colFixed_yes : C.colFixed_no),
-    },
-    { field: "visualizaciones", headerName: C.colViews, width: 80 },
-    {
-      field: "acciones",
-      headerName: C.colActions,
-      width: 100,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 0.5 }}>
-          <IconButton color="primary" onClick={() => handleEdit(params.row)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton color="error" onClick={() => setDeleteTarget(params.row)}>
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-      ),
-    },
-  ];
+  const {filtroEstado,setFiltroEstado,
+    busqueda,setBusqueda,
+    nueva,rowsFiltradas,columns,loading,
+    deleteTarget,setDeleteTarget,
+    handleDeleteConfirm,
+    snackbar,setSnackbar
+  }=usePress();
 
   return (
     <Box

@@ -1,19 +1,17 @@
 import { useEffect, useMemo, useState,useCallback } from "react";
 import { useAuth } from "../../../shared/context/sharedContext"; 
-import {
-  obtenerIdDeportista,
+import {   obtenerIdDeportista,
   listarDocumentacionXLegajo,
   obtenerHorariosDeportista,
   obtenerTorneosXDeporte,
-  crearDeportista,
   crearInscripcionDeporte,
   eliminarInscripcionDeporte,
   descargarDocumentacionXId,
   crearDocumentoEstudiante,
   eliminarDocumentoEstudiante,
-} from "../../../api/DeporteService";
+ } from "../../../api/DeporteService";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
-import { SPORTS_STRINGS } from "./sports.strings";
+import { SPORTS_STRINGS } from "../../pages/sports/sports.strings";
 import {
   construirNombre,
   filterTournaments,
@@ -23,16 +21,15 @@ import {
   MAX_SIZE_MB,
   SPORTS_REQUIRED_DOCUMENTS,
   SPORTS_TOURNAMENT_COLUMNS,
-} from "./sports.utils";
-import { SportsContext } from "./sports.context";
+} from "../../pages/sports/sports.utils";
+import { SportsContext } from "../studentContext";
 
 const C = SPORTS_STRINGS;
 
 export function SportsProvider({ children }) {
   const { user } = useAuth();
   const [documentos, setDocumentos] = useState(() =>
-    SPORTS_REQUIRED_DOCUMENTS.map((documento) => ({ ...documento })),
-  );
+    SPORTS_REQUIRED_DOCUMENTS.map((documento) => ({ ...documento })),);
   const [deportista, setDeportista] = useState(null);
   const [horariosDeportista, setHorariosDeportista] = useState([]);
   const [torneoDeportista, setTorneoDeportista] = useState([]);
@@ -182,33 +179,11 @@ export function SportsProvider({ children }) {
   };
 
   const loadSportsmanSchedules = async (sportsman) => {
-    const data = await obtenerHorariosDeportista(sportsman?.id);
+    const data = await obtenerHorariosDeportista(sportsman.id);
     setHorariosDeportista(data);
     return data;
   };
-const requiredDocumentsUploaded = () =>
-    documentos
-      .filter((documento) => documento.required)
-      .every((documento) => documento.subido);
 
-  const getOrCreateSportsman = async () => {
-    if (deportista?.id) return deportista;
-
-    const body = {
-      legajo: user?.email ?? user?.legajo ?? "",
-      nombre_deportista: user?.nombre ?? "",
-      vencimiento_ficha: null,
-      habilitado_deportado: true,
-      habilitado_deporte: true,
-    };
-
-    const createdSportsman = await crearDeportista(body);
-    const sportsman = createdSportsman?.id
-      ? createdSportsman
-      : await obtenerIdDeportista(body.legajo);
-    setDeportista(sportsman);
-    return sportsman;
-  };
 const loadTournamentsForSchedules = useCallback(async (schedules) => {
   setLoadingTournaments(true);
   try {
@@ -235,26 +210,15 @@ const loadTournamentsForSchedules = useCallback(async (schedules) => {
   const handleInscribirClick = async (card) => {
     try {
       setLoadingSports(true);
-      let currentSportsman = deportista;
-      let missingRequiredDocuments = false;
       if (card.esta_inscripto) {
         await eliminarInscripcionDeporte(card.id_inscripcion);
       } else {
-        missingRequiredDocuments =
-          loadingDocuments || !requiredDocumentsUploaded();
-        currentSportsman = await getOrCreateSportsman();
-        await crearInscripcionDeporte(card.id_deporte, currentSportsman.id);
+        await crearInscripcionDeporte(card.id_deporte, deportista.id);
       }
-      const successMessage = card.esta_inscripto
-        ? C.successUnsuscription
-        : C.successInsncription;
       showSnackbar(
-        missingRequiredDocuments
-          ? `${successMessage}. Recordá subir toda la documentación obligatoria.`
-          : successMessage,
-        missingRequiredDocuments ? "warning" : "success",
+        card.esta_inscripto ? C.successUnsuscription : C.successInsncription,
       );
-      const schedules = await loadSportsmanSchedules(currentSportsman);
+      const schedules = await loadSportsmanSchedules(deportista);
       setLoadingSports(false);
       await loadTournamentsForSchedules(schedules);
     } catch (error) {
@@ -322,14 +286,9 @@ const loadTournamentsForSchedules = useCallback(async (schedules) => {
       const loadSportsAndTournaments = async () => {
         let schedules = [];
         try {
-          let sportsman = null;
-          try {
-            sportsman = await obtenerIdDeportista(user.email);
-            setDeportista(sportsman);
-          } catch {
-            setDeportista(null);
-          }
-          schedules = await loadSportsmanSchedules(sportsman);
+          const sportsman = await obtenerIdDeportista(user.email);
+          setDeportista(sportsman);
+          schedules = sportsman ? await loadSportsmanSchedules(sportsman) : [];
         } catch (error) {
           console.error("Error al cargar deportes del estudiante:", error);
           showSnackbar(C.errorLoadSports, "error");

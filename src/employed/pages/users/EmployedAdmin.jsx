@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
-import Diversity3Icon from "@mui/icons-material/Diversity3";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-import { AdminUsersProvider, useAdminUsers } from "./AdminUsersContext";
+import React, { useMemo,useState  } from 'react';
+import Diversity3Icon from '@mui/icons-material/Diversity3';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+
 import {
   Autocomplete,
   Box,
@@ -39,15 +39,19 @@ import SchoolIcon from "@mui/icons-material/School";
 import GroupsIcon from "@mui/icons-material/Groups";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import SearchIcon from "@mui/icons-material/Search";
-import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
-import { useAuth } from "../../../shared/auth/AuthContext";
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { DataGrid } from "@mui/x-data-grid";
-import { useNavigate } from "react-router-dom";
-import { EmployedCalendar } from "./EmployedCalendar";
+
 import GestionarHorariosDialog from "./HorariosDialog";
+
+import { DataGrid } from "@mui/x-data-grid";
+
+import {EmployedCalendar} from "./EmployedCalendar";
+import { useEmploy } from '../../context/employedContext'; 
+import { AdminUsersProvider } from '../../context/providers/employProvider';
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 const secciones = [
   { key: "empleados", label: "Empleados" },
@@ -55,37 +59,13 @@ const secciones = [
 ];
 // 1. ESTE SUBCOMPONENTE SÍ PUEDE USAR EL HOOK (Porque está abajo del Provider)
 function EmployedAdminContent() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
   const {
-    empleadosRows,
-    empleadosColumns,
-    loadingEmpleados,
-    openCreateEmpleados,
-    usuariosRows,
-    usuariosColumns,
-    loadingUsuarios,
-    openCreateUsuarios,
-    dialogOpen,
-    setDialogOpen,
-    dialogData,
-    setDialogData,
-    dialogType,
-    dialogMode,
-    dialogError,
-    dialogSaving,
-    horariosDialogOpen,
-    setHorariosDialogOpen,
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
-    setDialogError,
-    handleUsuariosSave,
-    handleEmpleadosSave,
-    carreras,
-    perfiles,
-  } = useAdminUsers();
+          empleadosRows, empleadosColumns, loadingEmpleados, openCreateEmpleados,
+          usuariosRows, usuariosColumns, loadingUsuarios, openCreateUsuarios,
+          dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
+          horariosDialogOpen, setHorariosDialogOpen, snackbarOpen, setSnackbarOpen, snackbarMsg,setDialogError,handleUsuariosSave,handleEmpleadosSave,
+          carreras,perfiles
+  } = useEmploy();
 
   const sectionConfig = useMemo(
     () => ({
@@ -796,7 +776,6 @@ function EmployedAdminContent() {
   );
 }
 
-// Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function EmployedAdmin() {
   return (
     <AdminUsersProvider>

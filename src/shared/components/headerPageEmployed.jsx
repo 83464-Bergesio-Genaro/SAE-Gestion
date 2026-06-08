@@ -1,7 +1,7 @@
 import { Box, Stack, Typography, Chip, IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../shared/auth/AuthContext";
+import { useAuth } from "../context/sharedContext"; 
 
 export default function HeaderPageEmployed({
   header,

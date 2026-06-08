@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/sharedContext"; 
 import { useEffect } from "react";
-import { useAuth } from "./AuthContext";
 
 function ExpiredSessionRedirect() {
   const { expireSession } = useAuth();

@@ -19,14 +19,11 @@ import ExploreIcon from "@mui/icons-material/Explore";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
-import { useAuth } from "../../shared/auth/AuthContext";
+import { useAuth } from "../../shared/context/sharedContext"; 
 import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
-import {
-  ObtenerEventosPublicos,
-  ObtenerEventosSAE,
-} from "../../api/JPAService";
-import { EmployedCalendar } from "./users/EmployedCalendar";
-import { AdminUsersProvider } from "./users/AdminUsersContext";
+import { ObtenerEventosPublicos, ObtenerEventosSAE } from "../../api/JPAService";
+import { EmployedCalendar } from "./users/EmployedCalendar";  
+import { AdminUsersProvider } from "../context/providers/employProvider"; 
 import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
 import TitleBox from "../../shared/components/titleBox";
 import HeaderPageEmployed from "../../shared/components/headerPageEmployed";
@@ -137,7 +134,6 @@ function DashboardCard({ item, onClick }) {
 }
 
 export default function EmployedMain() {
-  const baseUrl = import.meta.env.BASE_URL;
   const { user } = useAuth();
   const [eventosJPA, setEventosJPA] = useState([]);
   useEffect(() => {
@@ -201,10 +197,8 @@ export default function EmployedMain() {
           <Box
             sx={{
               mt: 3,
-              p: { xs: 1.5, md: 2.5 },
-              borderRadius: 6,
-              bgcolor: "white",
-              boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+              bgcolor:"lightgray",
+               borderRadius: 6,
             }}
           >
             <CalendarEvent eventos={eventosJPA} />

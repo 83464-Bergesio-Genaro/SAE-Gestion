@@ -21,7 +21,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SendIcon from "@mui/icons-material/Send";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { useAuth } from "../../../shared/auth/AuthContext";
+import { useAuth } from "../../../shared/context/sharedContext"; 
 import {
   CONSULTATION_FAQS,
   QUICK_CONSULTATION_FAQS,

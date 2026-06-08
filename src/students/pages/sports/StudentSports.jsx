@@ -33,8 +33,8 @@ import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import { SPORTS_STRINGS } from "./sports.strings";
 
 import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
-import { SportsProvider } from "./SportsContext";
-import { useSportsContext } from "./useSportsContext";
+import { useSportsContext } from "../../context/studentContext";
+import { SportsProvider } from "../../context/providers/sportsProvider"; 
 
 import HeaderPage from "../../../shared/components/headerPage";
 import TitleBox from "../../../shared/components/titleBox";
@@ -43,6 +43,7 @@ import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 const C = SPORTS_STRINGS;
 
 function StudentSportsContent() {
+
   const {
     busquedaTorneos,
     closeDeleteDialog,
@@ -294,9 +295,9 @@ function StudentSportsContent() {
 }
 
 export default function StudentSports() {
-  return (
-    <SportsProvider>
-      <StudentSportsContent />
-    </SportsProvider>
-  );
+    return (
+        <SportsProvider>
+            <StudentSportsContent />
+        </SportsProvider>
+    );
 }

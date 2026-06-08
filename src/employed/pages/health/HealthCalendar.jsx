@@ -12,8 +12,8 @@ import {
 } from "@mui/material";
 
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-
-import { HealthUsersProvider, useHealthUser } from './HealthContext'; 
+import { HealthUsersProvider } from '../../context/providers/healthProvider';
+import { useHealth } from '../../context/employedContext';
 
 
 const HOUR_HEIGHT = 36; // px per hour
@@ -100,7 +100,7 @@ export function EmployedCalendar(){
         selectedEmploy,setSelectedEmploy, personal,loadingPersonal,
         allHorarios,loadingHorarios,
         dialogError,
-        } = useHealthUser();
+        } = useHealth();
 
     const colorOf = useMemo(() => {
         const map = {};

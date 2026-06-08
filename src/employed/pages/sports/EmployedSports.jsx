@@ -45,7 +45,7 @@ import GestionarHorariosDialog from "./GestionarHorariosDialog";
 import { DataGrid } from "@mui/x-data-grid";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { useAuth } from "../../../shared/auth/AuthContext";
+import { useAuth } from "../../../shared/context/sharedContext"; 
 import TorneoFormDialog from "./TorneoFormDialog";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";

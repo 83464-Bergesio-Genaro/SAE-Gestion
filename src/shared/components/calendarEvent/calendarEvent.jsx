@@ -55,7 +55,7 @@ export function CalendarEvent({eventos}){
   return(
     <Box
       sx={{
-        py:{ xs: 2, sm: 4 },
+        py:{ xs: 2, sm: 8 },
         px: { xs: 2, sm: 4 },
         width: "100%",
         boxSizing: "border-box",
@@ -75,6 +75,15 @@ export function CalendarEvent({eventos}){
             width: "100%",
           }
         },
+        "& .slick-slide > div": {
+          padding: "0 10px",
+          boxSizing: "border-box",
+          height: "auto", 
+          "& > div": {
+            width: "100%",
+          }
+        },
+
       }}
     >
       <Slider {...settingsSchedule}>
@@ -281,6 +290,8 @@ function CalendarEvent2({ eventos }) {
 function EventoCard({ evento }) {
   return (
     <Card sx={{
+      my:2,
+
       position: "relative",
       borderRadius: 5,
       overflow: "hidden",

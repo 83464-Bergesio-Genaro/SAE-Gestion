@@ -107,7 +107,7 @@ export default function EmployedConsultations() {
             </Grid>
           ))}
         </Grid>
-        <Typography variant="h5" fontWeight={800} sx={{ mt: 5 }}>
+        {/*<Typography variant="h5" fontWeight={800} sx={{ mt: 5 }}>
           Opciones para habilitar administración
         </Typography>
         <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -129,10 +129,10 @@ export default function EmployedConsultations() {
               </Grid>
             );
           })}
-        </Grid>
+        </Grid>*/}
         <Typography color="text.secondary" sx={{ mt: 4 }}>
           Las consultas preparadas por estudiantes se dirigen actualmente a:{" "}
-          {SAE_EMAIL}
+         <strong> {SAE_EMAIL}</strong>
         </Typography>
       </Container>
     </Box>

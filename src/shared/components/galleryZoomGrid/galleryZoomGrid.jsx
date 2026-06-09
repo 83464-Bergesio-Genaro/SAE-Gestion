@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { Box, Container, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+
 
 export default function InteractiveGrid({items}) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const navigate = useNavigate();
 
   const hoveredCol = hoveredIndex !== null ? hoveredIndex % 4 : null;
   const hoveredRow =
@@ -44,13 +43,17 @@ export default function InteractiveGrid({items}) {
         }}
       >
         {items.map((item, index) => {
+          const previewText =
+            item.text
+              .replace(/<[^>]+>/g, "")
+              .substring(0, 120) + "...";
           const isActive = hoveredIndex === index;
           const isDimmed = hoveredIndex !== null && hoveredIndex !== index;
 
           return (
             <Box
-              key={item.title}
-              onClick={() => navigate(item.route)}
+              key={item.section}
+              //onClick={() => navigate(item.route)}
               onMouseEnter={() => setHoveredIndex(index)}
               sx={{
                 position: "relative",
@@ -62,7 +65,7 @@ export default function InteractiveGrid({items}) {
             >
               <Box
                 component="img"
-                src={item.img}
+                src={item.image}
                 alt={item.title}
                 sx={{
                   width: "100%",
@@ -71,7 +74,7 @@ export default function InteractiveGrid({items}) {
                   display: "block",
                   transform: isActive ? "scale(1.08)" : "scale(1)",
                   filter: isDimmed ? "brightness(0.72)" : "brightness(1)",
-                  transition: "transform 350ms ease, filter 350ms ease",
+                  transition: "transform 600ms ease, filter 600ms ease",
                 }}
               />
 
@@ -82,7 +85,7 @@ export default function InteractiveGrid({items}) {
                   background:
                     "linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.15))",
                   opacity: isActive ? 1 : 0.75,
-                  transition: "opacity 350ms ease",
+                  transition: "opacity 600ms ease",
                 }}
               />
 
@@ -96,12 +99,12 @@ export default function InteractiveGrid({items}) {
                   zIndex: 2,
                   transform: isActive ? "translateY(0)" : "translateY(8px)",
                   opacity: isActive ? 1 : 0.9,
-                  transition: "all 350ms ease",
+                  transition: "all 600ms ease",
                 }}
               >
                 <Typography
                   sx={{
-                    mt: 0.5,
+                    my: 2.5,
                     fontSize: isActive ? 24 : 18,
                     fontWeight: 700,
                     lineHeight: 1.1,
@@ -111,12 +114,33 @@ export default function InteractiveGrid({items}) {
                     },
                     opacity: {
                       xs: 1, // mobile siempre visible
-                      md: isActive ? 1 : 0,
                     },
-                    transition: "all 350ms ease",
+                    transition: "all 400ms ease",
                   }}
                 >
                   {item.title}
+                </Typography>
+                <Typography
+                  sx={{
+                    mt: 0.5,
+                    display: isActive? "block":"none",
+                    fontSize: isActive ? 18 : 14,
+                    fontWeight:500,
+                    lineHeight: 1.1,
+                    transform: {
+                      xs: "translateY(0)", // mobile siempre visible
+                      md: isActive ? "translateY(0)" : "translateY(8px)",
+                    },
+                    opacity: {
+                      xs: 1,
+                      md: isActive ? 1 : 0,
+                    },
+                    transition: "all 600ms ease",
+                  }}
+
+                >
+                  {previewText}
+
                 </Typography>
               </Box>
             </Box>

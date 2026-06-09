@@ -5,7 +5,7 @@ import MainLayout from "./shared/components/layout/MainLayout";
 
 import SharedMain from "./shared/pages/home/main";
 import Login from "./shared/pages/login/login"; 
-import SharedJPA from "./shared/pages/jpa/jpa"; 
+import SharedJPA from "./shared/pages/jpa/jpaShared"; 
 import SharedJPASistemas from "./shared/pages/degrees/systems";
 import SharedJPAQuimica from "./shared/pages/degrees/chemical";
 import SharedJPACivil from "./shared/pages/degrees/civil";

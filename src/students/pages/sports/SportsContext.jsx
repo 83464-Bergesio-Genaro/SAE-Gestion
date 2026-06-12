@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState,useCallback } from "react";
-import { useAuth } from "../../../shared/context/sharedContext"; 
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useAuth } from "../../../shared/context/sharedContext";
 import {
   obtenerIdDeportista,
   listarDocumentacionXLegajo,
@@ -105,7 +105,10 @@ export function SportsProvider({ children }) {
     }
 
     if (file.size > MAX_SIZE_BYTES) {
-      showSnackbar(`El archivo no puede superar los ${MAX_SIZE_MB} MB.`, "warning");
+      showSnackbar(
+        `El archivo no puede superar los ${MAX_SIZE_MB} MB.`,
+        "warning",
+      );
       event.target.value = "";
       return;
     }
@@ -186,7 +189,7 @@ export function SportsProvider({ children }) {
     setHorariosDeportista(data);
     return data;
   };
-const requiredDocumentsUploaded = () =>
+  const requiredDocumentsUploaded = () =>
     documentos
       .filter((documento) => documento.required)
       .every((documento) => documento.subido);
@@ -209,28 +212,31 @@ const requiredDocumentsUploaded = () =>
     setDeportista(sportsman);
     return sportsman;
   };
-const loadTournamentsForSchedules = useCallback(async (schedules) => {
-  setLoadingTournaments(true);
-  try {
-    const sportIds = [
-      ...new Set(
-        schedules
-          .filter((schedule) => schedule.esta_inscripto)
-          .map((schedule) => schedule.id_deporte),
-      ),
-    ];
-    const tournaments =
-      sportIds.length > 0
-        ? (await Promise.all(sportIds.map(obtenerTorneosXDeporte))).flat()
-        : [];
-    setTorneoDeportista(tournaments);
-  } catch (error) {
-    console.error("Error al cargar torneos:", error);
-    showSnackbar(C.erroLoadTournaments, "error");
-  } finally {
-    setLoadingTournaments(false);
-  }
-}, [ showSnackbar]); 
+  const loadTournamentsForSchedules = useCallback(
+    async (schedules) => {
+      setLoadingTournaments(true);
+      try {
+        const sportIds = [
+          ...new Set(
+            schedules
+              .filter((schedule) => schedule.esta_inscripto)
+              .map((schedule) => schedule.id_deporte),
+          ),
+        ];
+        const tournaments =
+          sportIds.length > 0
+            ? (await Promise.all(sportIds.map(obtenerTorneosXDeporte))).flat()
+            : [];
+        setTorneoDeportista(tournaments);
+      } catch (error) {
+        console.error("Error al cargar torneos:", error);
+        showSnackbar(C.erroLoadTournaments, "error");
+      } finally {
+        setLoadingTournaments(false);
+      }
+    },
+    [showSnackbar],
+  );
 
   const handleInscribirClick = async (card) => {
     try {
@@ -242,6 +248,12 @@ const loadTournamentsForSchedules = useCallback(async (schedules) => {
       } else {
         missingRequiredDocuments =
           loadingDocuments || !requiredDocumentsUploaded();
+        console.log(
+          "Documentos obligatorios subidos:",
+          !missingRequiredDocuments,
+        );
+        console.log("Documentos obligatorios:", requiredDocumentsUploaded());
+        console.log("Loading documents:", loadingDocuments);
         currentSportsman = await getOrCreateSportsman();
         await crearInscripcionDeporte(card.id_deporte, currentSportsman.id);
       }
@@ -261,6 +273,7 @@ const loadTournamentsForSchedules = useCallback(async (schedules) => {
       console.error("Error al manejar la inscripción:", error);
       showSnackbar(C.errorHandleSucscription, "error");
     } finally {
+      console.log("Finalizando proceso de inscripción/desinscripción");
       setLoadingSports(false);
     }
   };
@@ -291,7 +304,9 @@ const loadTournamentsForSchedules = useCallback(async (schedules) => {
               : { ...documento };
           });
 
-          const uploadedDocuments = await listarDocumentacionXLegajo(user.email);
+          const uploadedDocuments = await listarDocumentacionXLegajo(
+            user.email,
+          );
           setDocumentos(
             typedDocuments.map((documento) => {
               const uploaded = uploadedDocuments?.find(
@@ -344,7 +359,7 @@ const loadTournamentsForSchedules = useCallback(async (schedules) => {
     };
 
     initialize();
-  }, [user?.email,loadTournamentsForSchedules,showSnackbar]);
+  }, [user?.email, loadTournamentsForSchedules, showSnackbar]);
 
   const rowsTorneosFiltradas = useMemo(
     () => filterTournaments(torneoDeportista, busquedaTorneos),

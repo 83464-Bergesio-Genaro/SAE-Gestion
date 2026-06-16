@@ -67,7 +67,12 @@ const isValidPhone = (value = "") =>
   onlyDigits(String(value), 13).length === 12;
 
 const parseAddress = (value = "") => {
-  const parts = String(value).split(/\s+-\s+/);
+  let parts = String(value).split(" - ");
+
+  if (parts.length < 4) {
+    parts = String(value).split(/\s+-\s+/);
+  }
+
   if (parts.length < 4) return [...parts, "", "", ""].slice(0, 4);
 
   return [parts[0], parts[1], parts.slice(2, -1).join(" "), parts.at(-1)];
@@ -125,6 +130,22 @@ export function MyProfileContent(){
     requiredError(datosPerfil.cuil) ||
     (Boolean(datosPerfil.cuil) &&
       onlyDigits(String(datosPerfil.cuil), 12).length !== 11);
+  const missingRequiredFields = [
+    ["Legajo", datosPerfil.legajo],
+    ["Nombres", datosPerfil.nombres],
+    ["Apellidos", datosPerfil.apellidos],
+    ["DNI", datosPerfil.dni],
+    ["CUIL", datosPerfil.cuil],
+    ["Fecha de nacimiento", datosPerfil.fecha_nacimiento],
+    ["Correo electronico", datosPerfil.email],
+    ["Telefono", datosPerfil.telefono],
+    ["Provincia", addressParts[0]],
+    ["Ciudad / Localidad", addressParts[1]],
+    ["Nombre de la calle", addressParts[2]],
+    ["Altura", addressParts[3]],
+  ]
+    .filter(([, value]) => isEmpty(value))
+    .map(([label]) => label);
 
   return (
     <Box
@@ -419,8 +440,9 @@ export function MyProfileContent(){
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12 }}>
-                  <Card
+                {missingRequiredFields.length > 0 && (
+                  <Grid size={{ xs: 12 }}>
+                    <Card
                     sx={{
                       bgcolor: "rgba(235, 235, 41, 0.7)",
                       border: "1px solid rgba(235, 41, 41, 0.1)",
@@ -440,12 +462,15 @@ export function MyProfileContent(){
                         color="textSecondary"
                         sx={{ lineHeight: 2 }}
                       >
-                        Es necesario completar datos para poder acceder a
-                        algunas funcionalidades de la aplicacion
+                        {missingRequiredFields.length === 1
+                          ? "Falta completar el campo: "
+                          : "Faltan completar los campos: "}
+                        {missingRequiredFields.join(", ")}.
                       </Typography>
                     </CardContent>
-                  </Card>
-                </Grid>
+                    </Card>
+                  </Grid>
+                )}
               </Grid>
 
               <Divider sx={{ mb: 4 }} />

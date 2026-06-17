@@ -1,10 +1,15 @@
 import { useMemo, useState } from "react";
-import { Box, Container, Typography } from "@mui/material";
-
+import { Box, Container, Typography,Dialog,DialogContent,DialogTitle,IconButton,DialogActions } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import  SAEButton from "../buttons/SAEButton";
 
 export default function InteractiveGrid({items}) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogSelection, setDialogSelection] = useState(null);
+  const [dialogError, setDialogError] = useState("");
+  
   const [hoveredIndex, setHoveredIndex] = useState(null);
-
   const hoveredCol = hoveredIndex !== null ? hoveredIndex % 4 : null;
   const hoveredRow =
     hoveredIndex !== null ? Math.floor(hoveredIndex / 4) : null;
@@ -43,17 +48,17 @@ export default function InteractiveGrid({items}) {
         }}
       >
         {items.map((item, index) => {
-          const previewText =
-            item.text
-              .replace(/<[^>]+>/g, "")
-              .substring(0, 120) + "...";
+
           const isActive = hoveredIndex === index;
           const isDimmed = hoveredIndex !== null && hoveredIndex !== index;
 
           return (
             <Box
               key={item.section}
-              //onClick={() => navigate(item.route)}
+              onClick={() => {
+                setDialogSelection(item);
+                setDialogOpen(true);
+              }}
               onMouseEnter={() => setHoveredIndex(index)}
               sx={{
                 position: "relative",
@@ -88,7 +93,39 @@ export default function InteractiveGrid({items}) {
                   transition: "opacity 600ms ease",
                 }}
               />
-
+              <Box
+                sx={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: "rgba(0,0,0,.15)",
+                    transition: "all .3s ease",
+                }}
+                
+                >
+                  <Typography
+                    sx={{
+                      color: "white",
+                      fontSize: 24 , 
+                      fontWeight:500,
+                      lineHeight: 1.1,
+                      transform: {
+                        xs: "translateY(0)",
+                        md: isActive ? "translateY(0)" : "translateY(8px)",
+                      },
+                      opacity: {
+                        xs: 0,
+                        md: isActive ? 1 : 0,
+                      },
+                      borderRadius: 1,
+                      transition: "all 600ms ease",
+                    }}
+                  >
+                    Aprieta para ver mas
+                  </Typography>
+                </Box>
               <Box
                 sx={{
                   position: "absolute",
@@ -102,10 +139,11 @@ export default function InteractiveGrid({items}) {
                   transition: "all 600ms ease",
                 }}
               >
+
                 <Typography
                   sx={{
                     my: 2.5,
-                    fontSize: isActive ? 24 : 18,
+                    fontSize: { xs: 14, md: isActive ? 24 : 18 },
                     fontWeight: 700,
                     lineHeight: 1.1,
                     transform: {
@@ -120,32 +158,60 @@ export default function InteractiveGrid({items}) {
                 >
                   {item.title}
                 </Typography>
-                <Typography
-                  sx={{
-                    mt: 0.5,
-                    display: isActive? "block":"none",
-                    fontSize: isActive ? 18 : 14,
-                    fontWeight:500,
-                    lineHeight: 1.1,
-                    transform: {
-                      xs: "translateY(0)", // mobile siempre visible
-                      md: isActive ? "translateY(0)" : "translateY(8px)",
-                    },
-                    opacity: {
-                      xs: 1,
-                      md: isActive ? 1 : 0,
-                    },
-                    transition: "all 600ms ease",
-                  }}
 
-                >
-                  {previewText}
-
-                </Typography>
+                
               </Box>
             </Box>
           );
         })}
+        {dialogOpen && dialogSelection && (
+        <Dialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              variant="h6"
+              component="span"
+              sx={{ fontWeight: "bold" }}
+            >
+              {dialogSelection?.title}
+            </Typography>
+            <IconButton onClick={() => setDialogOpen(false)} size="small">
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={2} sx={{ pt: 1 }}>
+              <>
+                <Grid container spacing={1}>
+                  <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}
+                  dangerouslySetInnerHTML={{ __html: dialogSelection.text }} >
+
+                  </Typography>
+                </Grid>
+              </>
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <SAEButton
+              variant="outlined"
+              onClick={() => setDialogOpen(false)}
+            >
+              Cerrar
+            </SAEButton>
+
+          </DialogActions>
+        </Dialog>
+        )}
       </Box>
     </Container>
   );

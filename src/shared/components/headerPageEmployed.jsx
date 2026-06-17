@@ -12,7 +12,17 @@ export default function HeaderPageEmployed({
   const { user } = useAuth();
   const navigate = useNavigate();
   const baseUrl = import.meta.env.BASE_URL;
-
+  const getPerfilName = (id) => {
+    if (id === undefined || id === null) return null; // Para manejar el ?? "-" externo
+    
+    switch (id) {
+      case 0: return 'Interesado';
+      case 1: return 'Estudiante';
+      case 2: return 'Empleado';
+      case 5: return 'Administrador';
+      default: return 'Desconocido';
+    }
+  };
   return (
     <Box
       sx={{
@@ -83,7 +93,7 @@ export default function HeaderPageEmployed({
           sx={{ mt: 3 }}
         >
           <Chip
-            label={`Perfil ${user?.id_perfil ?? "-"}`}
+            label={`Perfil ${getPerfilName(user?.id_perfil) ?? "-"}`}
             sx={{
               bgcolor: "rgba(255,255,255,0.18)",
               color: "white",

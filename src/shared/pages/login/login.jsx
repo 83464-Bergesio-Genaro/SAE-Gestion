@@ -30,7 +30,7 @@ const carreras = [
   { value: "quimica", label: "Química" },
   { value: "industrial", label: "Industrial" },
   { value: "civil", label: "Civil" },
-  { value: "frc", label: "FRC" },
+  { value: "frc", label: "frc" },
 ];
 
 export default function Login() {

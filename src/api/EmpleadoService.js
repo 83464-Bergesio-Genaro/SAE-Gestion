@@ -15,21 +15,24 @@ function getToken() {
 
 function getHeaders(method, body) {
   const token = getToken();
-  const headers = { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" };
+  const headers = {
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const options = { method, headers };
   if (body) options.body = JSON.stringify(body);
   return options;
 }
 
-export async function RequestAPI(endpoint,action, body=null) {
+export async function RequestAPI(endpoint, action, body = null) {
   const res = await fetch(
-    appConfig.apiUrl+ endpoint,
+    appConfig.apiUrl + endpoint,
     getHeaders(action, body),
-  ); 
+  );
 
-  if(res.ok && action === "DELETE") return res; // Para DELETE no esperamos un body, por lo que no intentamos parsear la respuesta
-  if(res.status === 204 && action === "GET") return []; // Para GET, si el status es 204 (No Content) devolvemos un array vacío para evitar errores al mapear la respuesta
+  if (res.ok && action === "DELETE") return res; // Para DELETE no esperamos un body, por lo que no intentamos parsear la respuesta
+  if (res.status === 204 && action === "GET") return []; // Para GET, si el status es 204 (No Content) devolvemos un array vacío para evitar errores al mapear la respuesta
   if (!res.ok) {
     let detail = `Error ${res.status}`;
     try {
@@ -43,36 +46,85 @@ export async function RequestAPI(endpoint,action, body=null) {
   }
   return res.json();
 }
-export async function ObtenerEmpleados(){
-    return RequestAPI('/api/Empleados/ObtenerEmpleados/',"GET");
+export async function ObtenerEmpleados() {
+  return RequestAPI("/api/Empleados/ObtenerEmpleados/", "GET");
 }
-export async function ObtenerUsuariosXLegajo(legajo){
-    return RequestAPI('/api/Usuarios/ObtenerUsuarioXlegajo/'+encodeURIComponent(legajo),"GET");
+export async function ObtenerUsuariosXLegajo(legajo) {
+  return RequestAPI(
+    "/api/Usuarios/ObtenerUsuarioXlegajo/" + encodeURIComponent(legajo),
+    "GET",
+  );
 }
-export async function ObtenerUsuarios(){
-    return RequestAPI('/api/Usuarios/ObtenerUsuarios/',"GET");
+export async function ObtenerUsuarios() {
+  return RequestAPI("/api/Usuarios/ObtenerUsuarios/", "GET");
 }
-export async function CrearEmpleado(body,nombres,apellidos){
-    return RequestAPI(`/api/Empleados/CrearEmpleado?nombres=${encodeURIComponent(nombres)}&apellidos=${encodeURIComponent(apellidos)}`, "POST", body);
+export async function CrearEmpleado(body, nombres, apellidos) {
+  return RequestAPI(
+    `/api/Empleados/CrearEmpleado?nombres=${encodeURIComponent(nombres)}&apellidos=${encodeURIComponent(apellidos)}`,
+    "POST",
+    body,
+  );
 }
-export async function ModificarUsuario(id,body){
-    return RequestAPI("/api/Usuarios/ModificarUsuario/"+encodeURIComponent(id), "PUT", body);
+export async function ModificarUsuario(id, body) {
+  return RequestAPI(
+    "/api/Usuarios/ModificarUsuario/" + encodeURIComponent(id),
+    "PUT",
+    body,
+  );
 }
-export async function CrearRegistroUsuario(body,nombres,apellidos,id_especialidad){
-    return RequestAPI(`/api/Usuarios/CrearRegistroUsuario?nombres=${encodeURIComponent(nombres)}&apellidos=${encodeURIComponent(apellidos)}&id_especialidad=${encodeURIComponent(id_especialidad)}`, "POST", body);
+export async function CrearRegistroUsuario(
+  body,
+  nombres,
+  apellidos,
+  id_especialidad,
+) {
+  return RequestAPI(
+    `/api/Usuarios/CrearRegistroUsuario?nombres=${encodeURIComponent(nombres)}&apellidos=${encodeURIComponent(apellidos)}&id_especialidad=${encodeURIComponent(id_especialidad)}`,
+    "POST",
+    body,
+  );
 }
-export async function ObtenerHorarios(){
-    return RequestAPI(`/api/Empleados/ObtenerHorarios/`, "GET");
+export async function ObtenerHorarios() {
+  return RequestAPI(`/api/Empleados/ObtenerHorarios/`, "GET");
 }
-export async function BuscarHorariosXEmpleado(id_empleado){
-    return RequestAPI(`/api/Empleados/ObtenerHorariosXEmpleado/${encodeURIComponent(id_empleado)}`, "GET");
+export async function BuscarHorariosXEmpleado(id_empleado) {
+  return RequestAPI(
+    `/api/Empleados/ObtenerHorariosXEmpleado/${encodeURIComponent(id_empleado)}`,
+    "GET",
+  );
 }
-export async function CrearHorarioEmpleado(body){
-    return RequestAPI("/api/Empleados/CrearHorario/", "POST", body);
+export async function CrearHorarioEmpleado(body) {
+  return RequestAPI("/api/Empleados/CrearHorario/", "POST", body);
 }
-export async function ModificarHorario(id,body){
-    return RequestAPI("/api/Empleados/ModificarHorario/"+encodeURIComponent(id), "PUT", body);
+export async function ModificarHorario(id, body) {
+  return RequestAPI(
+    "/api/Empleados/ModificarHorario/" + encodeURIComponent(id),
+    "PUT",
+    body,
+  );
 }
-export async function EliminarHorario(id_horario){
-    return RequestAPI(`/api/Empleados/EliminarHorario/${encodeURIComponent(id_horario)}`, "DELETE");
+export async function EliminarHorario(id_horario) {
+  return RequestAPI(
+    `/api/Empleados/EliminarHorario/${encodeURIComponent(id_horario)}`,
+    "DELETE",
+  );
+}
+
+export async function BuscarLinkFrecuentes() {
+  return RequestAPI(`/api/Empleados/ObtenerLinktree/`, "GET");
+}
+export async function CrearLinkFrecuentes(body) {
+  return RequestAPI("/api/Empleados/CrearItemLinkTree/", "POST", body);
+}
+export async function EliminarLinkFrecuentes(id_link) {
+  return RequestAPI(
+    `/api/Empleados/EliminarItem/${encodeURIComponent(id_link)}`,
+    "DELETE",
+  );
+}
+export async function ContarVisualizacionLinkFrecuente(id_link) {
+  return RequestAPI(
+    `/api/Empleados/ContarVisualizacionItem/${encodeURIComponent(id_link)}`,
+    "PUT",
+  );
 }

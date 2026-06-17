@@ -1,9 +1,9 @@
 //FUNCIONES
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { HealthUsersProvider } from '../../context/providers/healthProvider';
-import { useHealth } from '../../context/employedContext';
-import { useAuth } from '../../../shared/context/sharedContext';
+import { HealthUsersProvider } from "../../context/providers/healthProvider";
+import { useHealth } from "../../context/employedContext";
+import { useAuth } from "../../../shared/context/sharedContext";
 //ICONS
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
@@ -52,66 +52,103 @@ const secciones = [
   { key: "cursos", label: "Cursos Medicos" },
 ];
 
-function EmployedAdminContent(){
-    const navigate = useNavigate();
-    const { user } = useAuth();
-    const {
-            //ABM Faltas
-             SetCuilFaltas,faltasRows,faltasColumns,loadingFaltas,
-            //ABM Especialidades
-            especialidades,especialidadesActivas,especialidadesRows,especialidadesColumns,loadingEspecialidades,openCreateEspecialidades,handleEspecialidadesSave,
-            //ABM de Personal
-            personalRows,personalColumns,loadingPersonal,openCreatePersonal,handlePersonalSave,
-            //ABM de Cursos
-            cursosRows,cursosColumns,loadingCursos,openCreateCurso,handleCursoSave,
-            //Valores de error, mostrar mensajes, etc.
-            snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
-            dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
-            setHorariosDialogOpen,horariosDialogOpen
-    } = useHealth();
-   
-    const sectionConfig = useMemo(
-            () => ({
-                especialidades: {
-                    title: "Especialidades",
-                    dialog: openCreateEspecialidades,
-                    addButton: "Nueva Especialidad",
-                    icon: MedicalServicesIcon,
-                    rows: especialidadesRows,
-                    columns: especialidadesColumns,
-                    loading: loadingEspecialidades
-                },
-                personal: {
-                    title: "Personal Medico",
-                    dialog: openCreatePersonal,
-                    addButton: "Alta de Personal",
-                    icon: PersonAddAltIcon,
-                    rows: personalRows,
-                    columns: personalColumns,
-                    loading: loadingPersonal
-                },
-                cursos:{
-                    title: "Cursos Medicos",
-                    dialog: openCreateCurso,
-                    addButton: "Nuevo Curso",
-                    icon: SchoolIcon,
-                    rows: cursosRows,
-                    columns: cursosColumns,
-                    loading: loadingCursos                    
-                }
-            }),
-            [
-                especialidadesRows,especialidadesColumns,loadingEspecialidades,openCreateEspecialidades,
-                personalRows,personalColumns,loadingPersonal,openCreatePersonal,
-                cursosRows,cursosColumns,loadingCursos,openCreateCurso
-            ]
-        );
-    const [activeSection, setActiveSection] = useState("especialidades");
-    const [busquedaGestion, setBusquedaGestion] = useState("");
-    const handleSectionChange = (section) => {
-        setActiveSection(section);
-        setBusquedaGestion("");
-    };
+function EmployedAdminContent() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const {
+    //ABM Faltas
+    SetCuilFaltas,
+    faltasRows,
+    faltasColumns,
+    loadingFaltas,
+    //ABM Especialidades
+    especialidades,
+    especialidadesActivas,
+    especialidadesRows,
+    especialidadesColumns,
+    loadingEspecialidades,
+    openCreateEspecialidades,
+    handleEspecialidadesSave,
+    //ABM de Personal
+    personalRows,
+    personalColumns,
+    loadingPersonal,
+    openCreatePersonal,
+    handlePersonalSave,
+    //ABM de Cursos
+    cursosRows,
+    cursosColumns,
+    loadingCursos,
+    openCreateCurso,
+    handleCursoSave,
+    //Valores de error, mostrar mensajes, etc.
+    snackbarOpen,
+    setSnackbarOpen,
+    snackbarMsg,
+    setDialogError,
+    dialogOpen,
+    setDialogOpen,
+    dialogData,
+    setDialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setHorariosDialogOpen,
+    horariosDialogOpen,
+  } = useHealth();
+
+  const sectionConfig = useMemo(
+    () => ({
+      especialidades: {
+        title: "Especialidades",
+        dialog: openCreateEspecialidades,
+        addButton: "Nueva Especialidad",
+        icon: MedicalServicesIcon,
+        rows: especialidadesRows,
+        columns: especialidadesColumns,
+        loading: loadingEspecialidades,
+      },
+      personal: {
+        title: "Personal Medico",
+        dialog: openCreatePersonal,
+        addButton: "Alta de Personal",
+        icon: PersonAddAltIcon,
+        rows: personalRows,
+        columns: personalColumns,
+        loading: loadingPersonal,
+      },
+      cursos: {
+        title: "Cursos Medicos",
+        dialog: openCreateCurso,
+        addButton: "Nuevo Curso",
+        icon: SchoolIcon,
+        rows: cursosRows,
+        columns: cursosColumns,
+        loading: loadingCursos,
+      },
+    }),
+    [
+      especialidadesRows,
+      especialidadesColumns,
+      loadingEspecialidades,
+      openCreateEspecialidades,
+      personalRows,
+      personalColumns,
+      loadingPersonal,
+      openCreatePersonal,
+      cursosRows,
+      cursosColumns,
+      loadingCursos,
+      openCreateCurso,
+    ],
+  );
+  const [activeSection, setActiveSection] = useState("especialidades");
+  const [busquedaGestion, setBusquedaGestion] = useState("");
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    setBusquedaGestion("");
+  };
 
   const currentSection = useMemo(
     () => sectionConfig[activeSection],

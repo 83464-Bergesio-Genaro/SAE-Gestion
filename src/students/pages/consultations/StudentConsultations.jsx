@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Accordion,
@@ -21,15 +21,20 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SendIcon from "@mui/icons-material/Send";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { useAuth } from "../../../shared/context/sharedContext"; 
+import { useAuth } from "../../../shared/context/sharedContext";
 import {
   CONSULTATION_FAQS,
   QUICK_CONSULTATION_FAQS,
   SAE_EMAIL,
 } from "../../../shared/pages/consultations/consultations.config";
+import { getLinkFrecuenteIconByIndex } from "../../../shared/pages/consultations/linkFrecuentesIcons";
 import { sendConsultationEmail } from "../../../shared/services/EmailService";
 import HeaderPage from "../../../shared/components/headerPage";
 import TitleBox from "../../../shared/components/titleBox";
+import {
+  BuscarLinkFrecuentes,
+  ContarVisualizacionLinkFrecuente,
+} from "../../../api/EmpleadoService";
 const isValidEmail = (value) =>
   /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value.trim());
 
@@ -42,6 +47,8 @@ export default function StudentConsultations() {
     severity: "warning",
   });
   const [sending, setSending] = useState(false);
+  const [loadingLinksFrecuentes, setLoadingLinksFrecuentes] = useState(false);
+  const [linksFrecuentes, setLinksFrecuentes] = useState([]);
   const [form, setForm] = useState({
     user_name: user?.nombre ?? "",
     user_email: user?.email ?? "",
@@ -58,6 +65,30 @@ export default function StudentConsultations() {
     return fields;
   }, [form]);
 
+  useEffect(() => {
+    let active = true;
+
+    const fetchLinksFrecuentes = async () => {
+      setLoadingLinksFrecuentes(true);
+      try {
+        const data = await BuscarLinkFrecuentes();
+        setLinksFrecuentes(data);
+      } catch (error) {
+        if (!active) return;
+        console.error("Error al cargar links frecuentes:", error);
+        setLinksFrecuentes([]);
+      } finally {
+        if (active) setLoadingLinksFrecuentes(false);
+      }
+    };
+
+    fetchLinksFrecuentes();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -69,6 +100,21 @@ export default function StudentConsultations() {
 
   const closeToast = () =>
     setToast((previous) => ({ ...previous, message: "" }));
+
+  const handleLinkFrecuenteClick = async (event, link) => {
+    if (!link.hipervinculo) {
+      event.preventDefault();
+      showToast("Este link no tiene hipervinculo configurado.", "warning");
+      return;
+    }
+
+    try {
+      console.log(link)
+      await ContarVisualizacionLinkFrecuente(link.id);
+    } catch (error) {
+      console.error("Error al contar visualizacion del link:", error);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -113,6 +159,83 @@ export default function StudentConsultations() {
           backgroundImage="images/carrousel/AuditorioUTN.jpeg"
           icon={<ContactSupportIcon />}
         />
+        <TitleBox
+          title="Links frecuentes"
+          description="Accesos rapidos a recursos utiles de SAE."
+        />
+
+        <Grid container spacing={2} sx={{ mt: 1, mb: 4 }}>
+          {linksFrecuentes.map((link) => {
+            const iconOption = getLinkFrecuenteIconByIndex(link.id_index_ico);
+            const Icon = iconOption.icon;
+
+            return (
+              <Grid key={link.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <Box
+                  component="a"
+                  href={link.hipervinculo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(event) => handleLinkFrecuenteClick(event, link)}
+                  sx={{
+                    alignItems: "center",
+                    bgcolor: "white",
+                    border: "1px solid",
+                    borderColor: "rgba(17, 53, 101, 0.08)",
+                    borderRadius: 3,
+                    boxShadow: "0 8px 24px rgba(21, 61, 113, 0.08)",
+                    color: "inherit",
+                    display: "flex",
+                    gap: 1.5,
+                    height: "100%",
+                    minHeight: 96,
+                    p: 2,
+                    textDecoration: "none",
+                    transition:
+                      "border-color 0.15s, box-shadow 0.15s, transform 0.15s",
+                    "&:hover": {
+                      borderColor: "primary.main",
+                      boxShadow: "0 14px 30px rgba(21, 61, 113, 0.14)",
+                      transform: "translateY(-2px)",
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      alignItems: "center",
+                      bgcolor: "primary.main",
+                      borderRadius: 2,
+                      color: "white",
+                      display: "flex",
+                      flexShrink: 0,
+                      height: 46,
+                      justifyContent: "center",
+                      width: 46,
+                    }}
+                  >
+                    <Icon fontSize="small" />
+                  </Box>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography fontWeight={800} noWrap>
+                      {link.titulo}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" noWrap>
+                      {link.hipervinculo}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            );
+          })}
+          {!loadingLinksFrecuentes && linksFrecuentes.length === 0 && (
+            <Grid size={{ xs: 12 }}>
+              <Alert severity="info">
+                No hay links frecuentes disponibles.
+              </Alert>
+            </Grid>
+          )}
+        </Grid>
+
         <TitleBox
           title="Preguntas frecuentes"
           description="Las Preguntas frecuentes"

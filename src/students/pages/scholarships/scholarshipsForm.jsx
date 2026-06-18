@@ -549,11 +549,12 @@ export default function ScholarshipsForm({
   // se crea antes de avanzar.
   const crearBecarioSiNoExiste = async () => {
     if (becarioActual?.id) return becarioActual;
-
+    console.log(user);
     const payloadBecario = {
       id: 0,
-      legajo: user.email,
-      nombre_becario: user.nombre,
+      legajo: user.datosPerfil.legajo,
+      nombre_becario:
+        user.datosPerfil.nombres + " " + user.datosPerfil.apellidos,
       alquila: formBeca.alquila,
       fecha_solicitud: new Date().toISOString(),
       aceptado_inicio: false,
@@ -562,7 +563,7 @@ export default function ScholarshipsForm({
       anio_beca: new Date().getFullYear(),
       id_becario_previo: null,
     };
-
+    console.log(payloadBecario);
     const nuevoBecario = await CrearBecarioSAE(payloadBecario);
     setBecarioActual(nuevoBecario);
     return nuevoBecario;
@@ -673,10 +674,7 @@ export default function ScholarshipsForm({
 
         <Grid container spacing={2}>
           {PERSONAL_FIELDS.map((field) => (
-            <Grid
-              key={field.name}
-              size={{ xs: 12, sm: 6, md: field.md ?? 6 }}
-            >
+            <Grid key={field.name} size={{ xs: 12, sm: 6, md: field.md ?? 6 }}>
               <SAETextField
                 fullWidth
                 label={field.label}

@@ -1,30 +1,23 @@
-import {
-  Box,
-  CardContent,
-  Typography,
-  Card,
-  CardActionArea,
-  CardActions,
-  CardMedia,
-  TextField,
-} from "@mui/material";
+import { Box, CardContent, Typography, Card, CardActions } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import Masonry from "@mui/lab/Masonry";
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
-import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 import CheckIcon from "@mui/icons-material/Check";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
-import { useState, useEffect } from "react";
-import Chip from "@mui/material/Chip";
+import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import { useMemo, useState } from "react";
 import SAEButton from "../../shared/components/buttons/SAEButton";
 import SAETextField from "../../shared/components/inputs/SAETextField";
 
@@ -83,7 +76,6 @@ function horariosToTexto(horarios) {
   // Une todos los textos con " / "
   return (
     <>
-      <strong>Horario: </strong>
       {partes.reduce(
         (prev, curr, idx) => (idx === 0 ? [curr] : [prev, " / ", curr]),
         null,
@@ -104,55 +96,84 @@ function profesoresToTexto(profesores) {
     }
   }
 
-  if (unicos.length === 1) {
-    return (
-      <>
-        <strong>Profesor: </strong>
-        {unicos[0].docente_responsable}
-      </>
-    );
-  }
+  // if (unicos.length === 1) {
+  //   return unicos[0].docente_responsable;
+  // }
 
   return (
-    <>
-      <strong>Profesores: </strong>
-      <ul style={{ margin: 0, paddingLeft: 18 }}>
-        {unicos.map((p, idx) => (
-          <li key={p.cuil_docente || idx}>{p.docente_responsable}</li>
-        ))}
-      </ul>
-    </>
+    <ul style={{ margin: 0, paddingLeft: 18 }}>
+      {unicos.map((p, idx) => (
+        <li key={p.cuil_docente || idx}>{p.docente_responsable}</li>
+      ))}
+    </ul>
   );
 }
 
-function ubicacionATexto(ubicaciones) {
+function horariosPorUbicacionToTexto(ubicaciones) {
   if (!Array.isArray(ubicaciones) || ubicaciones.length === 0) return null;
-
-  // Filtra ubicaciones duplicadas por id_espacio_deportivo
-  const unicas = [];
-  const ids = new Set();
-  for (const u of ubicaciones) {
-    if (!ids.has(u.id_espacio_deportivo)) {
-      unicas.push(u);
-      ids.add(u.id_espacio_deportivo);
-    }
-  }
 
   return (
     <>
-      {unicas.map((u, idx) => (
-        <span key={u.id_espacio_deportivo || idx}>
-          <Link
-            underline="hover"
-            color="inherit"
-            href={u.url_map_espacio_deportivo}
-            rel="noopener noreferrer"
-            target="_blank"
+      {ubicaciones.map((ubicacion, idx) => (
+        <Box
+          key={ubicacion.id_espacio_deportivo || idx}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "44px 1fr",
+            gap: 1.5,
+            mt: idx ? 1.75 : 0,
+          }}
+        >
+          <Box
+            sx={(theme) => ({
+              width: 44,
+              height: 44,
+              borderRadius: 2,
+              display: "grid",
+              placeItems: "center",
+              bgcolor: alpha(theme.palette.primary.main, 0.1),
+              color: "primary.main",
+            })}
           >
-            {u.espacio_deportivo}
-          </Link>
-          {idx < unicas.length - 1 && <br />}
-        </span>
+            <LocationOnOutlinedIcon />
+          </Box>
+          <Box>
+            <Link
+              underline="none"
+              color="inherit"
+              href={ubicacion.url_map_espacio_deportivo}
+              rel="noopener noreferrer"
+              target="_blank"
+              sx={{
+                color: "#2A548B",
+                fontWeight: 800,
+                lineHeight: 1.2,
+              }}
+            >
+              <Typography
+                component="span"
+                variant="subtitle1"
+                sx={{ fontWeight: 600 }}
+              >
+                {ubicacion.espacio_deportivo}
+              </Typography>
+            </Link>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                mt: 0.25,
+                color: "text.secondary",
+              }}
+            >
+              <AccessTimeOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+              <Typography component="div" variant="body2">
+                {horariosToTexto(ubicacion.horarios)}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
       ))}
     </>
   );
@@ -165,7 +186,6 @@ function agruparHorariosPorDeporte(arr) {
 
     const key = JSON.stringify({
       id_deporte: item.id_deporte,
-      id_espacio_deportivo: item.id_espacio_deportivo,
       id_inscripcion: item.id_inscripcion,
     });
 
@@ -177,20 +197,45 @@ function agruparHorariosPorDeporte(arr) {
         id_inscripcion: item.id_inscripcion,
         horarios: [],
         ubicacion: [],
+        horariosPorUbicacion: [],
         profesores: [],
       });
     }
-    map.get(key).horarios.push({
+    const deporteAgrupado = map.get(key);
+
+    deporteAgrupado.horarios.push({
       dia: item.dia,
       hora_inicio: item.hora_inicio,
       hora_fin: item.hora_fin,
     });
-    map.get(key).ubicacion.push({
+
+    deporteAgrupado.ubicacion.push({
       id_espacio_deportivo: item.id_espacio_deportivo,
       espacio_deportivo: item.espacio_deportivo,
       url_map_espacio_deportivo: item.url_map_espacio_deportivo,
     });
-    map.get(key).profesores.push({
+
+    let ubicacion = deporteAgrupado.horariosPorUbicacion.find(
+      (grupo) => grupo.id_espacio_deportivo === item.id_espacio_deportivo,
+    );
+
+    if (!ubicacion) {
+      ubicacion = {
+        id_espacio_deportivo: item.id_espacio_deportivo,
+        espacio_deportivo: item.espacio_deportivo,
+        url_map_espacio_deportivo: item.url_map_espacio_deportivo,
+        horarios: [],
+      };
+      deporteAgrupado.horariosPorUbicacion.push(ubicacion);
+    }
+
+    ubicacion.horarios.push({
+      dia: item.dia,
+      hora_inicio: item.hora_inicio,
+      hora_fin: item.hora_fin,
+    });
+
+    deporteAgrupado.profesores.push({
       cuil_docente: item.cuil_docente,
       docente_responsable: item.docente_responsable,
     });
@@ -199,38 +244,35 @@ function agruparHorariosPorDeporte(arr) {
 }
 
 export default function DeportesMasonry({ deportes, onInscribirClick }) {
-  const [agrupado, setAgrupado] = useState([]);
-  const [filtro, setFiltro] = useState("todos");
+  const agrupado = useMemo(
+    () => agruparHorariosPorDeporte(deportes),
+    [deportes],
+  );
+  const [filtro, setFiltro] = useState(null);
 
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [openDialogIndex, setOpenDialogIndex] = useState(null); // Guardar el índice de la tarjeta seleccionada
 
-  useEffect(() => {
-    const data = agruparHorariosPorDeporte(deportes);
-    setAgrupado(data);
-
-    const hayInscriptos = data.some((d) => d.esta_inscripto === true);
-
-    if (hayInscriptos) {
-      setFiltro("inscriptos");
-    } else {
-      setFiltro("todos");
-    }
-  }, [deportes]);
+  const filtroActivo =
+    filtro ??
+    (agrupado.some((d) => d.esta_inscripto === true) ? "inscriptos" : "todos");
 
   // Filtrado según el botón seleccionado
   const agrupadoFiltrado = agrupado.filter((card) => {
     const coincideFiltro =
-      filtro === "todos" ||
-      (filtro === "inscriptos" && card.esta_inscripto === true) ||
-      (filtro === "noinscriptos" && card.esta_inscripto === false);
+      filtroActivo === "todos" ||
+      (filtroActivo === "inscriptos" && card.esta_inscripto === true) ||
+      (filtroActivo === "noinscriptos" && card.esta_inscripto === false);
 
     const texto = textoBusqueda.trim().toLowerCase();
 
     const deporte = card.deporte?.toLowerCase() || "";
-    const ubicacion = card.ubicacion[0].espacio_deportivo?.toLowerCase() || "";
-    const profesores =
-      card.profesores[0].docente_responsable?.toLowerCase() || "";
+    const ubicacion = card.ubicacion
+      .map((item) => item.espacio_deportivo?.toLowerCase() || "")
+      .join(" ");
+    const profesores = card.profesores
+      .map((item) => item.docente_responsable?.toLowerCase() || "")
+      .join(" ");
 
     const coincideTexto =
       texto.length < 3 ||
@@ -278,10 +320,10 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
         {/* IZQUIERDA */}
         <Box display="flex" gap={2}>
           <SAEButton
-            variant={filtro === "todos" ? "contained" : "outlined"}
+            variant={filtroActivo === "todos" ? "contained" : "outlined"}
             onClick={() => setFiltro("todos")}
             sx={
-              filtro === "todos"
+              filtroActivo === "todos"
                 ? undefined
                 : {
                     bgcolor: "transparent",
@@ -293,10 +335,10 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
             Todos
           </SAEButton>
           <SAEButton
-            variant={filtro === "inscriptos" ? "contained" : "outlined"}
+            variant={filtroActivo === "inscriptos" ? "contained" : "outlined"}
             onClick={() => setFiltro("inscriptos")}
             sx={
-              filtro === "inscriptos"
+              filtroActivo === "inscriptos"
                 ? undefined
                 : {
                     bgcolor: "transparent",
@@ -308,10 +350,10 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
             Inscriptos
           </SAEButton>
           <SAEButton
-            variant={filtro === "noinscriptos" ? "contained" : "outlined"}
+            variant={filtroActivo === "noinscriptos" ? "contained" : "outlined"}
             onClick={() => setFiltro("noinscriptos")}
             sx={
-              filtro === "noinscriptos"
+              filtroActivo === "noinscriptos"
                 ? undefined
                 : {
                     bgcolor: "transparent",
@@ -352,45 +394,93 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
 
       <Masonry
         spacing={{ xs: 2, sm: 3, md: 2 }}
-        columns={{ xs: 2, sm: 2, md: 4 }}
+        columns={{ xs: 1, sm: 2, md: 4 }}
       >
         {agrupadoFiltrado.map((card, index) => (
-          <Grid spacing={10} size={{ xs: 4, sm: 4, md: 4 }} key={index}>
+          <Grid spacing={10} size={{ xs: 12, sm: 4, md: 4 }} key={index}>
             <Card
               sx={{
-                borderRadius: 6,
-                px: { xs: 1, md: 2 },
+                borderRadius: 4,
+                px: { xs: 1, md: 1.5 },
                 py: { xs: 0.5, md: 1 },
                 m: 1,
-                boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
-                border: "1px solid rgba(17, 53, 101, 0.08)",
+                boxShadow: "0 18px 45px rgba(21, 61, 113, 0.14)",
+                border: "1px solid rgba(17, 53, 101, 0.1)",
               }}
             >
-              <CardContent>
-                <Typography gutterBottom variant="body1">
-                  {ubicacionATexto(card.ubicacion)}
-                </Typography>
+              <CardContent sx={{ pb: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+                  <Box
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      display: "grid",
+                      placeItems: "center",
+                      bgcolor: "primary.main",
+                      color: "primary.contrastText",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <SportsBasketballIcon sx={{ fontSize: 28 }} />
+                  </Box>
+                  <Box>
+                    <Typography
+                      sx={{
+                        color: "#2A548B",
+                        fontSize: { xs: 16, md: 22 },
+                        fontWeight: 700,
+                        lineHeight: 1.05,
+                      }}
+                      variant="h5"
+                    >
+                      {card.deporte}
+                    </Typography>
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 4,
+                        mt: 1,
+                        borderRadius: 999,
+                        bgcolor: "primary.main",
+                      }}
+                    />
+                  </Box>
+                </Box>
 
-                <Typography
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
-                  variant="h5"
+                <Box sx={{ mt: 3 }}>
+                  {horariosPorUbicacionToTexto(card.horariosPorUbicacion)}
+                </Box>
+
+                <Box
+                  sx={{
+                    borderTop: "1px solid",
+                    borderColor: "divider",
+                    mt: 2,
+                    pt: 2,
+                  }}
                 >
-                  {card.deporte}
-                </Typography>
-                <Chip
-                  label={card.esta_inscripto ? "Inscripto" : "No Inscripto"}
-                  color={card.esta_inscripto ? "success" : "error"}
-                  sx={{ mt: -1 }}
-                />
-                <Typography gutterBottom variant="body2">
-                  {horariosToTexto(card.horarios)}
-                  <br />
-                  {card.competencias}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {profesoresToTexto(card.profesores)}
-                </Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <GroupsRoundedIcon color="primary" />
+                    <Typography
+                      sx={{ color: "#15203c", fontWeight: 600 }}
+                      variant="subtitle1"
+                    >
+                      Profesores
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: 14,
+                      mt: 0.5,
+                      "& ul": { mb: 0 },
+                      "& li::marker": { color: "primary.main" },
+                    }}
+                  >
+                    {profesoresToTexto(card.profesores)}
+                  </Box>
+                </Box>
               </CardContent>
               <CardActions>
                 <SAEButton
@@ -400,7 +490,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                     card.esta_inscripto === false ? <AddIcon /> : <CancelIcon />
                   }
                   onClick={() => handleOpen(index)} // Abrir el diálogo específico del card
-                  color={card.esta_inscripto === false ? "success" : "error"}
+                  color={card.esta_inscripto === false ? "primary" : "error"}
                   fullWidth
                 >
                   {card.esta_inscripto === false
@@ -428,7 +518,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                       onClick={() => handleInscripcion(card.id_deporte)}
                       variant="contained"
                       color={
-                        card.esta_inscripto === false ? "success" : "error"
+                        card.esta_inscripto === false ? "primary" : "error"
                       }
                       startIcon={
                         card.esta_inscripto === false ? (

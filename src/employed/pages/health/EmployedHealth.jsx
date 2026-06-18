@@ -1,9 +1,9 @@
 //FUNCIONES
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { HealthUsersProvider } from '../../context/providers/healthProvider';
-import { useHealth } from '../../context/employedContext';
-import { useAuth } from '../../../shared/context/sharedContext';
+import { HealthUsersProvider } from "../../context/providers/healthProvider";
+import { useHealth } from "../../context/employedContext";
+import { useAuth } from "../../../shared/context/sharedContext";
 //ICONS
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";

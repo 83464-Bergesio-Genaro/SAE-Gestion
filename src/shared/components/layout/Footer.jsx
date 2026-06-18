@@ -15,7 +15,13 @@ export default function Footer() {
           <Grid size={{ xs: 12,md:4 }} mt={1}>
             <Stack direction="column" alignItems="center" spacing={0.5}>
             {FOOTER_LINKS.map(({ key, icon: Icon, label, href, external }) => (
-              <Stack key={key} direction="row" spacing={0.5} alignItems="center">
+              <Stack
+                key={key}
+                direction="row"
+                spacing={0.5}
+                alignItems="center"
+                justifyContent="center"
+              >
                 <Icon sx={sx.icon} />
                 <Typography variant="caption" sx={sx.linkText}>
                   <Link

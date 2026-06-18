@@ -1,4 +1,4 @@
-import { useMemo, useState  } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
   Grid,
@@ -37,6 +37,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
+import SAETimeField from "../../../shared/components/inputs/SAETimeField";
 
 import { DataGrid } from "@mui/x-data-grid";
 import { JPAProvider } from "../../context/providers/jpaProvider";
@@ -63,119 +64,149 @@ function CopyURLButton() {
   };
 
   const [copiedId, setCopied] = useState(null);
-    return (
-     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-       {ubicacionesComunes.map((lugar) => (
-         <SAEButton
-           key={lugar.name}
-           onClick={() => handleCopy(lugar.url, lugar.name)}
-           sx={{ 
-             padding: '4px 8px',     // Reduce el padding
-             fontSize: '0.8rem',     // Letra más pequeña
-             fontWeight: 'bold'      // Negrita
-         }}
-         >
-           {copiedId === lugar.name ? 'Copiado!' : `${lugar.name}: Copiar link`}
-         </SAEButton>
-       ))}
-     </div>
-   );
- }
-  const secciones=[
-    {   key: "eventosPublicos", 
-        label: "Eventos Publicos"
-    },
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: "10px",
+      }}
+    >
+      {ubicacionesComunes.map((lugar) => (
+        <SAEButton
+          key={lugar.name}
+          onClick={() => handleCopy(lugar.url, lugar.name)}
+          sx={{
+            padding: "4px 8px", // Reduce el padding
+            fontSize: "0.8rem", // Letra más pequeña
+            fontWeight: "bold", // Negrita
+          }}
+        >
+          {copiedId === lugar.name ? "Copiado!" : `${lugar.name}: Copiar link`}
+        </SAEButton>
+      ))}
+    </div>
+  );
+}
+const secciones = [
+  { key: "eventosPublicos", label: "Eventos Publicos" },
 
-    {   key: "eventosInternos", 
-        label: "Eventos SAE"
-    },
-    {   key: "stands", 
-        label: "Puestos"
-    },
-    {   key: "interesados", 
-        label: "Interesados"
-    }
-    ]; 
+  { key: "eventosInternos", label: "Eventos SAE" },
+  { key: "stands", label: "Puestos" },
+  { key: "interesados", label: "Interesados" },
+];
 function EmployedJPAContent() {
-    const {
-        snackbarOpen,snackbarMsg,
-        
-        eventosPublicosRows,loadingEventosPublicos,
-        openCreateEventoPublico ,handleEventoPublicoSave,
-        
-        eventosSAERows,eventoColumns,loadingEventosSAE,
-        openCreateEventoSAE,handleEventoSAESave,
+  const {
+    snackbarOpen,
+    snackbarMsg,
 
-        standsRows,standsColumns,loadingStands,   
-        openCreateStands,handleStandSave,
+    eventosPublicosRows,
+    loadingEventosPublicos,
+    openCreateEventoPublico,
+    handleEventoPublicoSave,
 
-        interesadosRows,interesadosColumns,loadingInteresados,
-        openCreateInteresados,handleInteresadoSave,
+    eventosSAERows,
+    eventoColumns,
+    loadingEventosSAE,
+    openCreateEventoSAE,
+    handleEventoSAESave,
 
-        dialogOpen,dialogType,dialogMode,dialogData,dialogSaving,dialogError,
-        setDialogData,setDialogOpen,setDialogError,setSnackbarOpen } = useJPA();
+    standsRows,
+    standsColumns,
+    loadingStands,
+    openCreateStands,
+    handleStandSave,
 
-        const sectionConfig = useMemo(
-            () => ({
-                eventosPublicos:{
-                    title:"Eventos Generales",
-                    dialog:openCreateEventoPublico,
-                    addButton:"Nuevo Evento Publico",
-                    icon: SchoolIcon,
-                    rows: eventosPublicosRows,
-                    columns:eventoColumns,
-                    loading: loadingEventosPublicos
-                },
-                eventosInternos:{
-                    title:"Eventos Internos",
-                    dialog:openCreateEventoSAE,
-                    addButton:"Nuevo Evento SAE",
-                    icon: CastleIcon,
-                    rows: eventosSAERows,
-                    columns: eventoColumns,
-                    loading: loadingEventosSAE
-                },
-                stands:{
-                    title:"Puestos",
-                    dialog:openCreateStands,
-                    addButton:"Nuevo Puesto",
-                    icon: StorefrontIcon,
-                    rows: standsRows,
-                    columns: standsColumns,
-                    loading: loadingStands
-                },
-                interesados:{
-                    title:"Interesados",
-                    dialog:openCreateInteresados,
-                    addButton:"Nuevo Interesado",
-                    icon: GroupsIcon,
-                    rows: interesadosRows,
-                    columns: interesadosColumns,
-                    loading: loadingInteresados
-                }
-            }),
-            [
-                eventosPublicosRows, loadingEventosPublicos,eventoColumns,openCreateEventoPublico,
-                eventosSAERows,loadingEventosSAE,openCreateEventoSAE,
-                standsRows,loadingStands,standsColumns,openCreateStands,
-                interesadosRows,loadingInteresados,interesadosColumns,openCreateInteresados
-            ]
-        );
+    interesadosRows,
+    interesadosColumns,
+    loadingInteresados,
+    openCreateInteresados,
+    handleInteresadoSave,
 
-    const [activeSection, setActiveSection] = useState("eventosPublicos");
-    const [busquedaGestion, setBusquedaGestion] = useState("");
-    const handleSectionChange = (section) => {
-        setActiveSection(section);
-        setBusquedaGestion("");
-    };
+    dialogOpen,
+    dialogType,
+    dialogMode,
+    dialogData,
+    dialogSaving,
+    dialogError,
+    setDialogData,
+    setDialogOpen,
+    setDialogError,
+    setSnackbarOpen,
+  } = useJPA();
 
-    const currentSection = useMemo(
-        () => sectionConfig[activeSection],
-        [activeSection, sectionConfig],
-    );
-    const rowsGestionFiltradas = useMemo(() => {
-        const term = busquedaGestion.trim().toLowerCase();
-        if (!term) return currentSection.rows;
+  const sectionConfig = useMemo(
+    () => ({
+      eventosPublicos: {
+        title: "Eventos Generales",
+        dialog: openCreateEventoPublico,
+        addButton: "Nuevo Evento Publico",
+        icon: SchoolIcon,
+        rows: eventosPublicosRows,
+        columns: eventoColumns,
+        loading: loadingEventosPublicos,
+      },
+      eventosInternos: {
+        title: "Eventos Internos",
+        dialog: openCreateEventoSAE,
+        addButton: "Nuevo Evento SAE",
+        icon: CastleIcon,
+        rows: eventosSAERows,
+        columns: eventoColumns,
+        loading: loadingEventosSAE,
+      },
+      stands: {
+        title: "Puestos",
+        dialog: openCreateStands,
+        addButton: "Nuevo Puesto",
+        icon: StorefrontIcon,
+        rows: standsRows,
+        columns: standsColumns,
+        loading: loadingStands,
+      },
+      interesados: {
+        title: "Interesados",
+        dialog: openCreateInteresados,
+        addButton: "Nuevo Interesado",
+        icon: GroupsIcon,
+        rows: interesadosRows,
+        columns: interesadosColumns,
+        loading: loadingInteresados,
+      },
+    }),
+    [
+      eventosPublicosRows,
+      loadingEventosPublicos,
+      eventoColumns,
+      openCreateEventoPublico,
+      eventosSAERows,
+      loadingEventosSAE,
+      openCreateEventoSAE,
+      standsRows,
+      loadingStands,
+      standsColumns,
+      openCreateStands,
+      interesadosRows,
+      loadingInteresados,
+      interesadosColumns,
+      openCreateInteresados,
+    ],
+  );
+
+  const [activeSection, setActiveSection] = useState("eventosPublicos");
+  const [busquedaGestion, setBusquedaGestion] = useState("");
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    setBusquedaGestion("");
+  };
+
+  const currentSection = useMemo(
+    () => sectionConfig[activeSection],
+    [activeSection, sectionConfig],
+  );
+  const rowsGestionFiltradas = useMemo(() => {
+    const term = busquedaGestion.trim().toLowerCase();
+    if (!term) return currentSection.rows;
 
     return currentSection.rows.filter((row) =>
       Object.values(row).some((value) =>
@@ -462,32 +493,32 @@ function EmployedJPAContent() {
                   />
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      <SAETextField
+                      <SAETimeField
                         label="Hora inicio"
-                        type="time"
-                        size="small"
                         value={
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
-                        onChange={(e) =>
-                          handleDialogChange("horario_inicio", e.target.value)
+                        onChange={(value) =>
+                          handleDialogChange("horario_inicio", value)
                         }
-                        slotProps={{ inputLabel: { shrink: true } }}
+                        minTime="08:00"
+                        maxTime="24:00"
+                        size="big"
                         fullWidth
                       />
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      <SAETextField
-                        label="Hora Fin"
-                        type="time"
-                        size="small"
+                      <SAETimeField
+                        label="Hora fin"
                         value={
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
-                        onChange={(e) =>
-                          handleDialogChange("horario_fin", e.target.value)
+                        onChange={(value) =>
+                          handleDialogChange("horario_fin", value)
                         }
-                        slotProps={{ inputLabel: { shrink: true } }}
+                        minTime="08:00"
+                        maxTime="24:00"
+                        size="big"
                         fullWidth
                       />
                     </Grid>
@@ -626,32 +657,32 @@ function EmployedJPAContent() {
                   />
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      <SAETextField
+                      <SAETimeField
                         label="Hora inicio"
-                        type="time"
-                        size="small"
                         value={
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
-                        onChange={(e) =>
-                          handleDialogChange("horario_inicio", e.target.value)
+                        onChange={(value) =>
+                          handleDialogChange("horario_inicio", value)
                         }
-                        slotProps={{ inputLabel: { shrink: true } }}
+                        minTime="08:00"
+                        maxTime="24:00"
+                        size="big"
                         fullWidth
                       />
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      <SAETextField
-                        label="Hora Fin"
-                        type="time"
-                        size="small"
+                      <SAETimeField
+                        label="Hora fin"
                         value={
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
-                        onChange={(e) =>
-                          handleDialogChange("horario_fin", e.target.value)
+                        onChange={(value) =>
+                          handleDialogChange("horario_fin", value)
                         }
-                        slotProps={{ inputLabel: { shrink: true } }}
+                        minTime="08:00"
+                        maxTime="24:00"
+                        size="big"
                         fullWidth
                       />
                     </Grid>
@@ -775,32 +806,32 @@ function EmployedJPAContent() {
                   />
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      <SAETextField
+                      <SAETimeField
                         label="Hora inicio"
-                        type="time"
-                        size="small"
                         value={
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
-                        onChange={(e) =>
-                          handleDialogChange("horario_inicio", e.target.value)
+                        onChange={(value) =>
+                          handleDialogChange("horario_inicio", value)
                         }
-                        slotProps={{ inputLabel: { shrink: true } }}
+                        minTime="08:00"
+                        maxTime="24:00"
+                        size="big"
                         fullWidth
                       />
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      <SAETextField
-                        label="Hora Fin"
-                        type="time"
-                        size="small"
+                      <SAETimeField
+                        label="Hora fin"
                         value={
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
-                        onChange={(e) =>
-                          handleDialogChange("horario_fin", e.target.value)
+                        onChange={(value) =>
+                          handleDialogChange("horario_fin", value)
                         }
-                        slotProps={{ inputLabel: { shrink: true } }}
+                        minTime="08:00"
+                        maxTime="24:00"
+                        size="big"
                         fullWidth
                       />
                     </Grid>
@@ -978,9 +1009,9 @@ function EmployedJPAContent() {
 }
 
 export default function EmployedJPA() {
-    return (
-        <JPAProvider>
-            <EmployedJPAContent />
-        </JPAProvider>
-    );
+  return (
+    <JPAProvider>
+      <EmployedJPAContent />
+    </JPAProvider>
+  );
 }

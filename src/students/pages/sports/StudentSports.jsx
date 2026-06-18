@@ -34,7 +34,7 @@ import { SPORTS_STRINGS } from "./sports.strings";
 
 import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
 import { useSportsContext } from "../../context/studentContext";
-import { SportsProvider } from "../../context/providers/sportsProvider"; 
+import { SportsProvider } from "../../context/providers/sportsProvider";
 
 import HeaderPage from "../../../shared/components/headerPage";
 import TitleBox from "../../../shared/components/titleBox";
@@ -43,7 +43,6 @@ import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 const C = SPORTS_STRINGS;
 
 function StudentSportsContent() {
-
   const {
     busquedaTorneos,
     closeDeleteDialog,
@@ -98,11 +97,13 @@ function StudentSportsContent() {
             <SAESpinner size="S" />
           </Stack>
         ) : (
-          <Grid container spacing={2.5} sx={{ mt: 1 }}>
+          <Grid container spacing={3} sx={{ mt: 1 }}>
             {documentos.map((item) => (
               <Grid
                 key={item.id_tipo_documento ?? item.nombre}
                 size={{ xs: 12, sm: 6, md: 4 }}
+                item
+                sx={{ justifyContent: "center", alignItems: "center" }}
               >
                 <DocumentCard
                   documento={item}
@@ -295,9 +296,9 @@ function StudentSportsContent() {
 }
 
 export default function StudentSports() {
-    return (
-        <SportsProvider>
-            <StudentSportsContent />
-        </SportsProvider>
-    );
+  return (
+    <SportsProvider>
+      <StudentSportsContent />
+    </SportsProvider>
+  );
 }

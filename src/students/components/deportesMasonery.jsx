@@ -394,10 +394,10 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
 
       <Masonry
         spacing={{ xs: 2, sm: 3, md: 2 }}
-        columns={{ xs: 2, sm: 2, md: 4 }}
+        columns={{ xs: 1, sm: 2, md: 4 }}
       >
         {agrupadoFiltrado.map((card, index) => (
-          <Grid spacing={10} size={{ xs: 4, sm: 4, md: 4 }} key={index}>
+          <Grid spacing={10} size={{ xs: 12, sm: 4, md: 4 }} key={index}>
             <Card
               sx={{
                 borderRadius: 4,

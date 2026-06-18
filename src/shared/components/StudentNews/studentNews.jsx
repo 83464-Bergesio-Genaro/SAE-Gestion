@@ -8,6 +8,9 @@ import {
   CardMedia,
   CardContent,
   Container,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   List,
   ListItem,
   ListItemIcon,
@@ -34,6 +37,7 @@ import TitleBox from "../titleBox";
 function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,documentos }) {
   // Estado para la imagen. Empieza con la foto genérica por defecto
   const [imagenUrl, setImagenUrl] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     // Si no hay portada o no tiene ID, dejamos la imagen genérica
@@ -63,18 +67,23 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
 
 
   return (
-    <Card
-      sx={{
-        borderRadius: 4,
-        boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
-        border: "1px solid rgba(17, 53, 101, 0.08)",
-        opacity: 1,
-        marginBottom: 3,
-        display: "flex",
-        flexDirection: { xs: "column", md: invertida ? "row-reverse" : "row" },
-      }}
-    >
-      {
+    <>
+      <Card
+        onClick={() => setDialogOpen(true)}
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
+          border: "1px solid rgba(17, 53, 101, 0.08)",
+          cursor: { xs: "pointer", md: "default" },
+          opacity: 1,
+          marginBottom: 3,
+          display: "flex",
+          flexDirection: {
+            xs: "column",
+            md: invertida ? "row-reverse" : "row",
+          },
+        }}
+      >
         <CardMedia
           sx={{
             width: { xs: "100%", md: 300 },
@@ -85,26 +94,88 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
           image={imagenUrl??"/images/principal/newsGeneric.webp"}
           alt={portada?.name??"UTN"}
         />
-      }
 
-      <Box sx={{ flex: 1 }}>
-        <CardContent>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: "#14325c" }}>
-            {titulo}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
-            {fecha_inicio}
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            sx={{ mt: 1, color: "#5a6f8f", minHeight: 48 }}
-          >
-            {descripcion}
-          </Typography>
-          <DocumentList listadoDocumentos={documentos} />
-        </CardContent>
-      </Box>
-    </Card>
+        <Box sx={{ flex: 1 }}>
+          <CardContent>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: "#14325c" }}>
+              {titulo}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
+              {fecha_inicio}
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                mt: 1,
+                color: "#5a6f8f",
+                minHeight: 48,
+                display: { xs: "-webkit-box", md: "block" },
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: { xs: 3, md: "unset" },
+                overflow: { xs: "hidden", md: "visible" },
+              }}
+            >
+              {descripcion}
+            </Typography>
+            <Box
+              onClick={(event) => event.stopPropagation()}
+              sx={{ display: { xs: "none", md: "block" } }}
+            >
+              <DocumentList listadoDocumentos={documentos} />
+            </Box>
+          </CardContent>
+        </Box>
+      </Card>
+
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            alignItems: "center",
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: "#14325c" }} >
+              {titulo}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {fecha_inicio}
+            </Typography>
+          </Box>
+          <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2}>
+            <Box
+              component="img"
+              src={imagenUrl??"/images/principal/newsGeneric.webp"}
+              alt={portada?.name??"UTN"}
+              sx={{
+                borderRadius: 2,
+                maxHeight: 280,
+                objectFit: "cover",
+                width: "100%",
+              }}
+            />
+            <Typography color="text.secondary" sx={{ whiteSpace: "pre-line" }}>
+              {descripcion}
+            </Typography>
+            <Box onClick={(event) => event.stopPropagation()}>
+              <DocumentList listadoDocumentos={documentos} />
+            </Box>
+          </Stack>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

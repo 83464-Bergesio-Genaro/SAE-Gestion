@@ -10,6 +10,61 @@ import {
 } from "../../../api/EstudianteService";
 import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
 import { ProfileContext } from "../../../students/context/studentContext";
+import { useAuth } from "../sharedContext";
+
+function getInitials(nombre = "") {
+  return nombre
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+const onlyDigits = (value = "", maxLength) =>
+  value.replace(/\D/g, "").slice(0, maxLength);
+
+const formatDni = (value = "") =>
+  onlyDigits(String(value), 8).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+const formatCuil = (value = "") => {
+  const digits = onlyDigits(String(value), 11);
+  const parts = [digits.slice(0, 2), digits.slice(2, 10), digits.slice(10, 11)];
+
+  return parts.filter(Boolean).join("-");
+};
+
+const formatPhone = (value = "") => {
+  const digits = onlyDigits(String(value), 12);
+  if (!digits) return "";
+
+  const parts = [
+    digits.slice(0, 2),
+    digits.slice(2, 5),
+    digits.slice(5, 8),
+    digits.slice(8, 12),
+  ];
+
+  return `+${parts.filter(Boolean).join(" ")}`.replace(
+    /(\+\d{2} \d{3} \d{3}) (\d{1,4})$/,
+    "$1-$2",
+  );
+};
+
+const parseAddress = (value = "") => {
+  let parts = String(value).split(" - ");
+
+  if (parts.length < 4) {
+    parts = String(value).split(/\s+-\s+/);
+  }
+
+  if (parts.length < 4) return [...parts, "", "", ""].slice(0, 4);
+
+  return [parts[0], parts[1], parts.slice(2, -1).join(" "), parts.at(-1)];
+};
+
+const sanitizeAddressPart = (value = "") =>
+  value.replace(/\s*-\s*/g, " ").replace(/\s{2,}/g, " ");
 
 const isValidEmail = (value) =>
   /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value);
@@ -36,13 +91,14 @@ const REQUIRED_FIELDS = [
 ];
 
 export const ProfileContextProvider = ({ children }) => {
+  const { user } = useAuth();
   const [formError, setFormError] = useState(null);
   // Estados de Notificación
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
 
   //ESTADOS
-  const [datosPerfil, setDatosPerfil] = useState([]);
+  const [datosPerfil, setDatosPerfil] = useState({});
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [saveAttempted, setSaveAttempted] = useState(false);
 
@@ -55,15 +111,38 @@ export const ProfileContextProvider = ({ children }) => {
       setDatosPerfil(mapEstudiante(data));
       setSaveAttempted(false);
     } catch {
-      setDatosPerfil([]);
+      setDatosPerfil({});
     } finally {
       setLoadingPerfil(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchDatosPerfil();
-  }, [fetchDatosPerfil]);
+    fetchDatosPerfil(user?.legajo);
+  }, [fetchDatosPerfil, user?.legajo]);
+
+  const handleChange = useCallback((field, value) => {
+    setDatosPerfil((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleMaskedChange = useCallback(
+    (field, formatter) => (event) => {
+      handleChange(field, formatter(event.target.value));
+    },
+    [handleChange],
+  );
+
+  const handleAddressChange = useCallback(
+    (index, value) => {
+      const parts = parseAddress(datosPerfil.direccion);
+      parts[index] =
+        index === 3 ? onlyDigits(value, 6) : sanitizeAddressPart(value);
+
+      const hasAddressData = parts.some((part) => part.trim() !== "");
+      handleChange("direccion", hasAddressData ? parts.join(" - ") : "");
+    },
+    [datosPerfil.direccion, handleChange],
+  );
 
   const cleanField = (field) => {
     if (field === null || field === undefined) return null;
@@ -143,14 +222,65 @@ export const ProfileContextProvider = ({ children }) => {
     }
   };
 
+  const today = new Date().toLocaleDateString("en-CA");
+  const addressParts = parseAddress(datosPerfil.direccion);
+  const isEmpty = (value) => !value || String(value).trim() === "";
+  const requiredError = (value) => saveAttempted && isEmpty(value);
+  const emailHasError =
+    requiredError(datosPerfil.email) ||
+    (Boolean(datosPerfil.email) && !isValidEmail(datosPerfil.email));
+  const phoneHasError =
+    requiredError(datosPerfil.telefono) ||
+    (Boolean(datosPerfil.telefono) && !isValidPhone(datosPerfil.telefono));
+  const dniHasError =
+    requiredError(datosPerfil.dni) ||
+    (Boolean(datosPerfil.dni) &&
+      onlyDigits(String(datosPerfil.dni), 9).length !== 8);
+  const cuilHasError =
+    requiredError(datosPerfil.cuil) ||
+    (Boolean(datosPerfil.cuil) &&
+      onlyDigits(String(datosPerfil.cuil), 12).length !== 11);
+  const missingRequiredFields = [
+    ["Legajo", datosPerfil.legajo],
+    ["Nombres", datosPerfil.nombres],
+    ["Apellidos", datosPerfil.apellidos],
+    ["DNI", datosPerfil.dni],
+    ["CUIL", datosPerfil.cuil],
+    ["Fecha de nacimiento", datosPerfil.fecha_nacimiento],
+    ["Correo electronico", datosPerfil.email],
+    ["Telefono", datosPerfil.telefono],
+    ["Provincia", addressParts[0]],
+    ["Ciudad / Localidad", addressParts[1]],
+    ["Nombre de la calle", addressParts[2]],
+    ["Altura", addressParts[3]],
+  ]
+    .filter(([, value]) => isEmpty(value))
+    .map(([label]) => label);
+
   return (
     <ProfileContext.Provider
       value={{
         fetchDatosPerfil,
+        user,
+        profileInitials: getInitials(user?.nombre),
         datosPerfil,
         loadingPerfil,
         setDatosPerfil,
+        handleChange,
+        handleMaskedChange,
+        handleAddressChange,
         handleProfileSave,
+        formatDni,
+        formatCuil,
+        formatPhone,
+        today,
+        addressParts,
+        requiredError,
+        emailHasError,
+        phoneHasError,
+        dniHasError,
+        cuilHasError,
+        missingRequiredFields,
         //Valores de error, mostrar mensajes, etc.
         snackbarOpen,
         setSnackbarOpen,

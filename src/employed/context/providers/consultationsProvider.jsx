@@ -4,6 +4,7 @@ import {
   CrearLinkFrecuentes,
   EliminarLinkFrecuentes,
   BuscarLinkFrecuentes,
+  ContarVisualizacionLinkFrecuente,
 } from "../../../api/EmpleadoService";
 import { Box, IconButton, Chip, Tooltip, Typography } from "@mui/material";
 
@@ -323,7 +324,9 @@ export const ConsultationProvider = ({ children }) => {
       if (dialogMode === "create") {
         await CrearLinkFrecuentes(body);
       } else if (dialogMode === "edit") {
-        throw new Error("La modificacion de links frecuentes no esta disponible.");
+        throw new Error(
+          "La modificacion de links frecuentes no esta disponible.",
+        );
       }
       setDialogOpen(false);
       setDialogData(EMPTY_LINKFRECUENTE);

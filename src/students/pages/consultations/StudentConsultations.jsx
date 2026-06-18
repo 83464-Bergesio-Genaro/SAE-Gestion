@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Accordion,
@@ -21,126 +20,33 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SendIcon from "@mui/icons-material/Send";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { useAuth } from "../../../shared/context/sharedContext";
+import { useConsultationContext } from "../../context/studentContext";
 import {
   CONSULTATION_FAQS,
   QUICK_CONSULTATION_FAQS,
   SAE_EMAIL,
 } from "../../../shared/pages/consultations/consultations.config";
 import { getLinkFrecuenteIconByIndex } from "../../../shared/pages/consultations/linkFrecuentesIcons";
-import { sendConsultationEmail } from "../../../shared/services/EmailService";
 import HeaderPage from "../../../shared/components/headerPage";
 import TitleBox from "../../../shared/components/titleBox";
-import {
-  BuscarLinkFrecuentes,
-  ContarVisualizacionLinkFrecuente,
-} from "../../../api/EmpleadoService";
-const isValidEmail = (value) =>
-  /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value.trim());
+import SAESpinner from "../../../shared/components/spinner/SAESpinner";
+import { ConsultationAlumnoProvider } from "../../../students/context/providers/consultationsProvider";
 
-export default function StudentConsultations() {
-  const { user } = useAuth();
+export function StudentContent() {
   const navigate = useNavigate();
   const baseUrl = import.meta.env.BASE_URL;
-  const [toast, setToast] = useState({
-    message: "",
-    severity: "warning",
-  });
-  const [sending, setSending] = useState(false);
-  const [loadingLinksFrecuentes, setLoadingLinksFrecuentes] = useState(false);
-  const [linksFrecuentes, setLinksFrecuentes] = useState([]);
-  const [form, setForm] = useState({
-    user_name: user?.nombre ?? "",
-    user_email: user?.email ?? "",
-    subject: "",
-    message: "",
-  });
 
-  const invalidFields = useMemo(() => {
-    const fields = [];
-    if (!form.user_name.trim()) fields.push("user_name");
-    if (!isValidEmail(form.user_email)) fields.push("user_email");
-    if (!form.subject.trim()) fields.push("subject");
-    if (!form.message.trim()) fields.push("message");
-    return fields;
-  }, [form]);
-
-  useEffect(() => {
-    let active = true;
-
-    const fetchLinksFrecuentes = async () => {
-      setLoadingLinksFrecuentes(true);
-      try {
-        const data = await BuscarLinkFrecuentes();
-        setLinksFrecuentes(data);
-      } catch (error) {
-        if (!active) return;
-        console.error("Error al cargar links frecuentes:", error);
-        setLinksFrecuentes([]);
-      } finally {
-        if (active) setLoadingLinksFrecuentes(false);
-      }
-    };
-
-    fetchLinksFrecuentes();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const showToast = (message, severity = "warning") => {
-    setToast({ message, severity });
-  };
-
-  const closeToast = () =>
-    setToast((previous) => ({ ...previous, message: "" }));
-
-  const handleLinkFrecuenteClick = async (event, link) => {
-    if (!link.hipervinculo) {
-      event.preventDefault();
-      showToast("Este link no tiene hipervinculo configurado.", "warning");
-      return;
-    }
-
-    try {
-      console.log(link)
-      await ContarVisualizacionLinkFrecuente(link.id);
-    } catch (error) {
-      console.error("Error al contar visualizacion del link:", error);
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (invalidFields.length > 0) {
-      showToast("Completá todos los campos con un correo válido.");
-      return;
-    }
-
-    try {
-      setSending(true);
-      await sendConsultationEmail({
-        user_name: form.user_name,
-        user_email: form.user_email,
-        subject: `[Consulta SAE] ${form.subject.trim()}`,
-        message: form.message.trim(),
-        legajo: user?.legajo,
-      });
-      showToast("Consulta enviada con éxito.", "success");
-      setForm((prev) => ({ ...prev, subject: "", message: "" }));
-    } catch (error) {
-      console.error("Error al enviar consulta:", error);
-      showToast("No se pudo enviar la consulta. Intentá nuevamente.", "error");
-    } finally {
-      setSending(false);
-    }
-  };
+  const {
+    loadingLinksFrecuentes,
+    linksFrecuentes,
+    form,
+    sending,
+    handleChange,
+    handleSubmit,
+    handleLinkFrecuenteClick,
+    snackbar,
+    closeSnackbar,
+  } = useConsultationContext();
 
   return (
     <Box
@@ -164,77 +70,83 @@ export default function StudentConsultations() {
           description="Accesos rapidos a recursos utiles de SAE."
         />
 
-        <Grid container spacing={2} sx={{ mt: 1, mb: 4 }}>
-          {linksFrecuentes.map((link) => {
-            const iconOption = getLinkFrecuenteIconByIndex(link.id_index_ico);
-            const Icon = iconOption.icon;
+        {loadingLinksFrecuentes ? (
+          <Stack alignItems="center" sx={{ mt: 3, mb: 5 }}>
+            <SAESpinner size="S" />
+          </Stack>
+        ) : (
+          <Grid container spacing={2} sx={{ mt: 1, mb: 4 }}>
+            {linksFrecuentes.map((link) => {
+              const iconOption = getLinkFrecuenteIconByIndex(link.id_index_ico);
+              const Icon = iconOption.icon;
 
-            return (
-              <Grid key={link.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Box
-                  component="a"
-                  href={link.hipervinculo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(event) => handleLinkFrecuenteClick(event, link)}
-                  sx={{
-                    alignItems: "center",
-                    bgcolor: "white",
-                    border: "1px solid",
-                    borderColor: "rgba(17, 53, 101, 0.08)",
-                    borderRadius: 3,
-                    boxShadow: "0 8px 24px rgba(21, 61, 113, 0.08)",
-                    color: "inherit",
-                    display: "flex",
-                    gap: 1.5,
-                    height: "100%",
-                    minHeight: 96,
-                    p: 2,
-                    textDecoration: "none",
-                    transition:
-                      "border-color 0.15s, box-shadow 0.15s, transform 0.15s",
-                    "&:hover": {
-                      borderColor: "primary.main",
-                      boxShadow: "0 14px 30px rgba(21, 61, 113, 0.14)",
-                      transform: "translateY(-2px)",
-                    },
-                  }}
-                >
+              return (
+                <Grid key={link.id} size={{ xs: 12, sm: 6, md: 4 }}>
                   <Box
+                    component="a"
+                    href={link.hipervinculo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(event) => handleLinkFrecuenteClick(event, link)}
                     sx={{
                       alignItems: "center",
-                      bgcolor: "primary.main",
-                      borderRadius: 2,
-                      color: "white",
+                      bgcolor: "white",
+                      border: "1px solid",
+                      borderColor: "rgba(17, 53, 101, 0.08)",
+                      borderRadius: 3,
+                      boxShadow: "0 8px 24px rgba(21, 61, 113, 0.08)",
+                      color: "inherit",
                       display: "flex",
-                      flexShrink: 0,
-                      height: 46,
-                      justifyContent: "center",
-                      width: 46,
+                      gap: 1.5,
+                      height: "100%",
+                      minHeight: 96,
+                      p: 2,
+                      textDecoration: "none",
+                      transition:
+                        "border-color 0.15s, box-shadow 0.15s, transform 0.15s",
+                      "&:hover": {
+                        borderColor: "primary.main",
+                        boxShadow: "0 14px 30px rgba(21, 61, 113, 0.14)",
+                        transform: "translateY(-2px)",
+                      },
                     }}
                   >
-                    <Icon fontSize="small" />
+                    <Box
+                      sx={{
+                        alignItems: "center",
+                        bgcolor: "primary.main",
+                        borderRadius: 2,
+                        color: "white",
+                        display: "flex",
+                        flexShrink: 0,
+                        height: 46,
+                        justifyContent: "center",
+                        width: 46,
+                      }}
+                    >
+                      <Icon fontSize="small" />
+                    </Box>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography fontWeight={800} noWrap>
+                        {link.titulo}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" noWrap>
+                        {link.hipervinculo}
+                      </Typography>
+                    </Box>
                   </Box>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography fontWeight={800} noWrap>
-                      {link.titulo}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {link.hipervinculo}
-                    </Typography>
-                  </Box>
-                </Box>
+                </Grid>
+              );
+            })}
+            {linksFrecuentes.length === 0 && (
+              <Grid size={{ xs: 12 }}>
+                <Alert severity="info">
+                  No hay links frecuentes disponibles.
+                </Alert>
               </Grid>
-            );
-          })}
-          {!loadingLinksFrecuentes && linksFrecuentes.length === 0 && (
-            <Grid size={{ xs: 12 }}>
-              <Alert severity="info">
-                No hay links frecuentes disponibles.
-              </Alert>
-            </Grid>
-          )}
-        </Grid>
+            )}
+          </Grid>
+        )}
 
         <TitleBox
           title="Preguntas frecuentes"
@@ -379,14 +291,26 @@ export default function StudentConsultations() {
       </Container>
 
       <Snackbar
-        open={Boolean(toast.message)}
+        open={snackbar.open}
         autoHideDuration={4000}
-        onClose={closeToast}
+        onClose={closeSnackbar}
       >
-        <Alert severity={toast.severity} variant="filled" onClose={closeToast}>
-          {toast.message}
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          onClose={closeSnackbar}
+        >
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>
+  );
+}
+
+export default function StudentConsultations() {
+  return (
+    <ConsultationAlumnoProvider>
+      <StudentContent />
+    </ConsultationAlumnoProvider>
   );
 }

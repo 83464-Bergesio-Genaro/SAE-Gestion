@@ -62,26 +62,26 @@ const secciones = [
 
 function EmployedTravelsContent(){
   const {   snackbarOpen,setSnackbarOpen,
-            snackbarMsg,setSnackbarMsg,
+            snackbarMsg,
 
-            bussiness,bussinessRows, setBussinessRows,
-            loadingBussiness, setLoadingBussiness,bussinessColumns,
-            fetchBussiness,openCreateBussiness,handleBussinessSave,
+            bussiness,bussinessRows, 
+            loadingBussiness,bussinessColumns,
+            openCreateBussiness,handleBussinessSave,
 
-            travels,travelsRows, setTravelsRows,
-            loadingTravels, setLoadingTravels,travelsColumns,
-            fetchTravels,openCreateTravels,
+            travelsRows,
+            loadingTravels,travelsColumns,
+            openCreateTravels,
 
             usuarioSelected,setUsuarioSelected,loadingUsuario,fetchUsuariosXlegajo,
-            inscriptsTravel,setInscriptsTravel,loadingInscripts,fetchInscriptosXTravel,
+            inscriptsTravel,loadingInscripts,
 
-            handleAddIncriptos,handleRemoveInscriptos,handleUpdateInscriptos,
+            handleAddIncriptos,
 
             dialogOpen, setDialogOpen,
-            dialogType, setDialogType,
-            dialogMode, setDialogMode,
+            dialogType, 
+            dialogMode,
             dialogData, setDialogData,
-            dialogSaving, setDialogSaving,
+            dialogSaving,
             dialogError, setDialogError} = useTravel();
       
         const sectionConfig = useMemo(
@@ -413,7 +413,8 @@ function EmployedTravelsContent(){
                     fullWidth
                   />
                 </Grid>
-                {dialogMode === "edit" && (<FormControlLabel
+                {dialogMode === "edit" && (
+                  <FormControlLabel
                       control={
                         <Switch
                           checked={dialogData.activo}
@@ -859,50 +860,7 @@ function EmployedTravelsContent(){
                   {!loadingInscripts && inscriptsTravel && inscriptsTravel.length > 0 &&(
                   <List dense disablePadding>
                     {inscriptsTravel.map((d) => (
-                      <ListItem
-                        key={d.id}
-                        disablePadding
-                      >
-                        <ListItemButton
-                          sx={{ py: 0.5 }}
-                        >
-                          <ListItemIcon sx={{ minWidth: 28 }}>
-                            <Diversity1 fontSize="small" sx={{ color: "#bdbdbd", pointerEvents: "none" }} />
-                          </ListItemIcon>
-                          
-                          <ListItemText
-                            primary={<Typography variant="body2" noWrap>{d.nombre_estudiante || d.legajo_estudiante}</Typography>}
-                            secondary={
-                              d.nombre_estudiante
-                                ? <Typography variant="caption" color="text.secondary">{d.legajo_estudiante}</Typography>
-                                : undefined
-                            }
-                          />
-                          <Stack alignContent={"center"} direction={"row"} spacing={3}>
-                           
-                            <IconButton 
-                            //onClick={()=>handleRemoveInscriptos(d.id)}
-                            edge="end"
-                            >
-                              <FolderIcon />
-                            </IconButton>
-                            
-                            <Checkbox
-                            size="small"
-                            tabIndex={-1}
-                            disableRipple
-                            onClick={handleUpdateInscriptos}
-                          />
-                            <IconButton 
-                            onClick={()=>handleRemoveInscriptos(d.id)}
-                            edge="end"
-                            >
-                              <CloseIcon />
-                            </IconButton>
-                          </Stack>
-                          
-                        </ListItemButton>
-                      </ListItem>
+                      <InscriptosCard datosEstudiante={d}/>
                     ))}
                     </List>
                   )}        
@@ -939,5 +897,66 @@ function EmployedTravelsContent(){
       </Snackbar>
       </Container>
     </Box>
+  );
+}
+function InscriptosCard({datosEstudiante}){
+
+  const [estudiante,SetDatosEstudiante] = useState(datosEstudiante);
+  const handleInscriptosChange = (field, value) => {
+    SetDatosEstudiante((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const {handleRemoveInscriptos} = useTravel();
+  return(
+    <ListItem
+      key={estudiante.id}
+      disablePadding
+    >
+      <ListItemButton
+        sx={{ py: 0.5 }}
+      >
+        <ListItemIcon sx={{ minWidth: 28 }}>
+          <Diversity1 fontSize="small" sx={{ color: "#bdbdbd", pointerEvents: "none" }} />
+        </ListItemIcon>
+        
+        <ListItemText sx={{ minWidth: 28 }}
+          primary={<Typography variant="body2" noWrap>{estudiante.nombre_estudiante || estudiante.legajo_estudiante}</Typography>}
+          secondary={
+            estudiante.nombre_estudiante
+              ? <Typography variant="caption" color="text.secondary">{estudiante.legajo_estudiante}</Typography>
+              : undefined
+          }
+        />
+          <FormControlLabel
+            sx={{ width: 200 }}
+            control={
+              <Switch
+                checked={estudiante.documentacion_presentada}
+                onChange={(e) =>
+                  handleInscriptosChange("documentacion_presentada", e.target.checked)
+                }
+                color="primary"
+              />
+            }
+            label={
+              estudiante.documentacion_presentada
+                ? "Documentacion Completa"
+                : "Falta Documentacion"
+            }
+          />
+          <IconButton sx={{ minWidth: 24,width:50 }}
+          //onClick={()=>handleRemoveInscriptos(d.id)}
+          edge="end"
+          >
+            <FolderIcon />
+          </IconButton> 
+          <IconButton  
+            onClick={()=>handleRemoveInscriptos(estudiante.id)}
+            edge="end"
+            >
+            <CloseIcon />
+          </IconButton>
+      </ListItemButton>
+    </ListItem>
   );
 }

@@ -7,7 +7,6 @@ import  SAEButton from "../buttons/SAEButton";
 export default function InteractiveGrid({items}) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogSelection, setDialogSelection] = useState(null);
-  const [dialogError, setDialogError] = useState("");
   
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const hoveredCol = hoveredIndex !== null ? hoveredIndex % 4 : null;

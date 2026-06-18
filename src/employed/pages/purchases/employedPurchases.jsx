@@ -52,10 +52,10 @@ function EmployedPurchasesContent(){
             fetchPurchases,openCreatePurchases,handlePurchasesSave,
 
             dialogOpen, setDialogOpen,
-            dialogType, setDialogType,
-            dialogMode, setDialogMode,
+            dialogType, 
+            dialogMode, 
             dialogData, setDialogData,
-            dialogSaving, setDialogSaving,
+            dialogSaving, 
             dialogError, setDialogError} = usePurchase();
         
           const sectionConfig = useMemo(
@@ -70,7 +70,7 @@ function EmployedPurchasesContent(){
                       loading:  loadingPurchase
                   }
               }),
-              []
+              [purchasesRows,purchasesColumns,loadingPurchase,openCreatePurchases]
           );
       const [activeSection, setActiveSection] = useState("compras");
       const [busquedaGestion, setBusquedaGestion] = useState("");

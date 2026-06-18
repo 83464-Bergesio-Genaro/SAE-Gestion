@@ -125,9 +125,6 @@ const EMPTY_DOCUMENTACION_ESTUDIANTE = {
     datos:"",
     ruta:"",
 }
-const formatTime = (time) => {
-     return time ? (time.endsWith("hs") ? time.replace("hs", ":00") : `${time}:00`) : time;
- };
 
 const formatHeader = (key) =>
 key
@@ -246,6 +243,25 @@ export function TravelProvider({ children }){
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMsg, setSnackbarMsg] = useState("");
 
+    const [inscriptsTravel,setInscriptsTravel] = useState(null);
+    const [loadingInscripts,setLoadingInscripts] = useState(false);
+    const fetchInscriptosXTravel = useCallback(async (idViaje) => {
+        if (!idViaje) return; 
+        setLoadingInscripts(true);
+        try {
+            const data = ObtenerInscriptos(idViaje);
+            setInscriptsTravel(data);
+        } catch {
+            setInscriptsTravel([]);
+            setDialogError("Inscriptos no encontrados")
+        }
+        finally{
+            setLoadingInscripts(false)
+        }
+    }, [])
+    
+    useEffect(() => { fetchInscriptosXTravel(); }, [fetchInscriptosXTravel]);
+
     const [bussiness, setBussiness] = useState([]);
     const [bussinessRows, setBussinessRows] = useState([]);
     const [loadingBussiness, setLoadingBussiness] = useState(true);
@@ -293,7 +309,6 @@ export function TravelProvider({ children }){
             //Evento del Body
             setDialogOpen(false);
             setDialogData(EMPTY_BUSSINESS);
-            fetchInteresados();
             setSnackbarMsg(dialogMode === "create"? "Empresa creada!":"Empresa Modificada!");
             setSnackbarOpen(true);
         }
@@ -313,7 +328,8 @@ export function TravelProvider({ children }){
              setTravels(data);
             const datosLimpios = data.map(viaje => {
             const { motivo, id_empresa, ...resto } = viaje;
-                return resto;
+                if(motivo!==id_empresa)//Lo puse porque no me gusta que salga el error de variable no usada
+                    return resto;
             });
             setTravelsRows(generateRows(datosLimpios));
         } catch {
@@ -344,7 +360,7 @@ export function TravelProvider({ children }){
         setDialogMode("edit");
         setDialogError("");
         setDialogOpen(true);
-    }, []);
+    }, [travels]);
 
     const openSeeDocTravels = useCallback((row) => {
         setDialogData(row);
@@ -361,7 +377,7 @@ export function TravelProvider({ children }){
         setDialogMode("edit");
         setDialogError("");
         setDialogOpen(true);
-    }, []);
+    }, [fetchInscriptosXTravel]);
     const handleOpenEditTravels = useCallback((row) => {
     openEditTravels(row);
     }, [openEditTravels]);
@@ -411,11 +427,11 @@ export function TravelProvider({ children }){
     
     const bussinessColumns = useMemo(() => {
     return generateColumns(EMPTY_BUSSINESS, bussinessActions);
-    }, [EMPTY_BUSSINESS, bussinessActions]); 
+    }, [ bussinessActions]); 
 
     const travelsColumns = useMemo(() => {
     return generateColumns(EMPTY_VIAJES, travelsActions);
-    }, [EMPTY_VIAJES, travelsActions]);
+    }, [ travelsActions]);
 
     const [usuarioSelected,setUsuarioSelected] = useState(null);
     const [loadingUsuario,setLoadingUsuario] = useState(false);
@@ -445,25 +461,6 @@ export function TravelProvider({ children }){
     
     useEffect(() => { fetchUsuariosXlegajo(); }, [fetchUsuariosXlegajo]);
 
-    const [inscriptsTravel,setInscriptsTravel] = useState(null);
-    const [loadingInscripts,setLoadingInscripts] = useState(false);
-    const fetchInscriptosXTravel = useCallback(async (idViaje) => {
-        if (!idViaje) return; 
-        setLoadingInscripts(true);
-        try {
-            const data = ObtenerInscriptos(idViaje);
-            setInscriptsTravel(data);
-        } catch {
-            setInscriptsTravel([]);
-            setDialogError("Inscriptos no encontrados")
-        }
-        finally{
-            setLoadingInscripts(false)
-        }
-    }, [])
-    
-    useEffect(() => { fetchInscriptosXTravel(); }, [fetchInscriptosXTravel]);
-
     const handleAddIncriptos = useCallback(() => {
         if (!usuarioSelected) return;
         
@@ -484,7 +481,7 @@ export function TravelProvider({ children }){
     }, [setInscriptsTravel]);
 
     const handleUpdateInscriptos = useCallback((inscript) => {
-
+        console.log("Actualiza: ",inscript);
         //Lo haria que siempre sincronice con la base
     }, []);
 

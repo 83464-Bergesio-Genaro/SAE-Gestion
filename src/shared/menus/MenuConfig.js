@@ -8,6 +8,8 @@ import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import HubIcon from '@mui/icons-material/Hub';
 import BadgeIcon from '@mui/icons-material/Badge';
+import LocalAirportIcon from '@mui/icons-material/LocalAirport';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 export const sharedMenu = [
   {
@@ -97,6 +99,20 @@ export const employedMenu = [
     icon: NewspaperIcon,
     descripcion: "Gestiona las noticias y documentacion que veran los alumnos.",   
   },
+    {
+    label: "Compras",
+    path: "/Gestion-Compras",
+    color:"#5E8ACC",
+    icon: ShoppingCartIcon,
+    descripcion: "Registra las compras que va realizando el area.",   
+  },
+    {
+    label: "Viajes",
+    path: "/Gestion-Viajes",
+    color:"#5E8ACC",
+    icon: LocalAirportIcon,
+    descripcion: "Administra los viajes organizados por la institución.",   
+  },
   {
     label: "JPA",
     path: "/Gestion-JPA",
@@ -148,6 +164,20 @@ export const adminMenu = [
     color:"#5E8ACC",
     icon: NewspaperIcon,
     descripcion: "Gestiona las noticias y documentacion que veran los alumnos.",   
+  },
+      {
+    label: "Compras",
+    path: "/Gestion-Compras",
+    color:"#5E8ACC",
+    icon: ShoppingCartIcon,
+    descripcion: "Registra las compras que va realizando el area.",   
+  },
+    {
+    label: "Viajes",
+    path: "/Gestion-Viajes",
+    color:"#5E8ACC",
+    icon: LocalAirportIcon,
+    descripcion: "Administra los viajes organizados por la institución.",   
   },
   {
     label: "JPA",

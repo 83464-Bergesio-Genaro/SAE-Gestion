@@ -33,10 +33,11 @@ import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDia
 
 import { ObtenerNoticiasPublicas,descargarDocumentoPorId } from "../../../api/PrensaService";
 import TitleBox from "../titleBox";
+const baseUrl = import.meta.env.BASE_URL;
 
 function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,documentos }) {
   // Estado para la imagen. Empieza con la foto genérica por defecto
-  const [imagenUrl, setImagenUrl] = useState(null);
+  const [imagenUrl, setImagenUrl] = useState(`${baseUrl}images/principal/newsGeneric.webp`);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -58,7 +59,7 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
       } catch (error) {
         console.error("No se pudo cargar la imagen de portada:", error);
         // Si hay un error en la API, se mantiene la imagen por defecto
-        setImagenUrl("/images/principal/newsGeneric.webp");
+        setImagenUrl(`${baseUrl}images/principal/newsGeneric.webp`);
       }
     };
 
@@ -91,7 +92,7 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
             objectFit: "cover",
           }}
           component="img"
-          image={imagenUrl??"/images/principal/newsGeneric.webp"}
+          image={imagenUrl??`url('${baseUrl}/images/principal/newsGeneric.webp')`}
           alt={portada?.name??"UTN"}
         />
 

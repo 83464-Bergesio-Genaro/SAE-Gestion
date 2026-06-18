@@ -5,7 +5,7 @@ import MainLayout from "./shared/components/layout/MainLayout";
 
 import SharedMain from "./shared/pages/home/main";
 import Login from "./shared/pages/login/login"; 
-import SharedJPA from "./shared/pages/jpa/jpa"; 
+import SharedJPA from "./shared/pages/jpa/jpaShared"; 
 import SharedJPASistemas from "./shared/pages/degrees/systems";
 import SharedJPAQuimica from "./shared/pages/degrees/chemical";
 import SharedJPACivil from "./shared/pages/degrees/civil";
@@ -25,8 +25,11 @@ import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
 import EmployedHealth from "./employed/pages/health/EmployedHealth";
 import TurnBoardHealth from "./employed/pages/health/HealthTurns";
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
-import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
 import EmployedConsultations from "./employed/pages/consultations/EmployedConsultations";
+import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
+import Prensa from './employed/pages/prensa/Prensa';
+import EmployedTravels from './employed/pages/travels/employedTravels';
+import EmployedPurchases from './employed/pages/purchases/employedPurchases';
 
 import StudentMain from "./students/pages/main";
 import StudentSports from "./students/pages/sports/StudentSports";
@@ -34,7 +37,6 @@ import Scholarships from "./students/pages/scholarships/Scholarships";
 import StudentHealth from "./students/pages/health/healthStudent";
 import MyProfile from './students/pages/profile/Profile';
 import StudentConsultations from "./students/pages/consultations/StudentConsultations";
-import Prensa from './employed/pages/prensa/Prensa';
 import ProtectedRoute from "./shared/auth/ProtectedRoute"; 
 
 import { appConfig } from "./config/appConfig";
@@ -160,6 +162,22 @@ export default function App() {
           element: (
             <ProtectedRoute role={[2, 5]}>
               <EmployedHealth />
+            </ProtectedRoute>
+          )
+        },
+                {
+          path: "Gestion-Compras",
+          element: (
+            <ProtectedRoute role={[2, 5]}>
+              <EmployedPurchases />
+            </ProtectedRoute>
+          )
+        },
+                {
+          path: "Gestion-Viajes",
+          element: (
+            <ProtectedRoute role={[2, 5]}>
+              <EmployedTravels />
             </ProtectedRoute>
           )
         },

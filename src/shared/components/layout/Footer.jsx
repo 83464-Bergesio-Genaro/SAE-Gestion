@@ -1,4 +1,4 @@
-import { Box, Container, Link, Stack, Typography } from "@mui/material";
+import { Box, Container,Grid, Link, Stack, Typography } from "@mui/material";
 import { FOOTER_LINKS, FOOTER_STRINGS } from "./footer.strings";
 import { footerStyles as sx } from "./footer.styles";
 
@@ -6,19 +6,14 @@ export default function Footer() {
   return (
     <Box component="footer" sx={sx.root}>
       <Container maxWidth="xl">
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          justifyContent="space-between"
-          alignItems="center"
-          spacing={{ xs: 1.5, md: 0 }}
-          textAlign={{ xs: "center", md: "left" }}
-        >
-
-          <Typography variant="body2" sx={sx.brand}>
-            {FOOTER_STRINGS.brand}
-          </Typography>
-
-          <Stack direction="column" alignItems="center" spacing={0.5}>
+        <Grid container spacing={1} direction="row" justifyContent="space-between" alignItems="center">
+          <Grid size={{ xs: 12,md:4 }} mt={1} textAlign={{xs:"center",md:"left"}}>
+            <Typography variant="body2" sx={sx.brand}>
+              {FOOTER_STRINGS.brand}
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 12,md:4 }} mt={1}>
+            <Stack direction="column" alignItems="center" spacing={0.5}>
             {FOOTER_LINKS.map(({ key, icon: Icon, label, href, external }) => (
               <Stack
                 key={key}
@@ -40,13 +35,14 @@ export default function Footer() {
                 </Typography>
               </Stack>
             ))}
-          </Stack>
-
-          <Typography variant="caption" sx={sx.copyright}>
-            {FOOTER_STRINGS.copyright}
-          </Typography>
-
-        </Stack>
+            </Stack>
+          </Grid>
+          <Grid size={{ xs: 12,md:4 } }mt={1} textAlign={{xs:"center",md:"right"}}>
+            <Typography variant="caption" sx={sx.copyright}  >
+              {FOOTER_STRINGS.copyright}
+            </Typography>
+          </Grid>
+        </Grid>
       </Container>
     </Box>
   );

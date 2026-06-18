@@ -5,6 +5,8 @@ export const JPAContext = createContext(null);
 export const EmployContext = createContext(null);
 export const ScholarshipContext = createContext(null);
 export const PressContext = createContext(null);
+export const TravelContext = createContext(null);
+export const PurchaseContext = createContext(null);
 export const ConsultationContext = createContext(null);
 
 export const useHealth = () => {
@@ -54,6 +56,22 @@ export const useConsultations = () => {
     throw new Error(
       "useConsultations debe usarse dentro de un ConsultationProvider",
     );
+  }
+  return context;
+};
+
+export const useTravel = () => {
+  const context = useContext(TravelContext);
+  if (!context) {
+    throw new Error('useTravel debe usarse dentro de un TravelProvider');
+  }
+  return context;
+};
+
+export const usePurchase = () => {
+  const context = useContext(PurchaseContext);
+  if (!context) {
+    throw new Error('usePurchase debe usarse dentro de un PurchaseProvider');
   }
   return context;
 };

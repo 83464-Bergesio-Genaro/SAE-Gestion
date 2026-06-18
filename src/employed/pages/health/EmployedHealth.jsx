@@ -46,15 +46,15 @@ import { EmployedCalendar } from "./HealthCalendar";
 import GestionarHorariosDialog from "./HorariosDialog";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 
-const secciones = [
-  { key: "especialidades", label: "Especialidades" },
-  { key: "personal", label: "Personal Medico" }, //En esta seccion se le registra la falta medica
-  { key: "cursos", label: "Cursos Medicos" },
-];
+
 
 function EmployedAdminContent(){
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const secciones = [
+      { key: "especialidades", label: "Especialidades" },
+      { key: "personal", label: "Personal Medico" }, //En esta seccion se le registra la falta medica
+      { key: "cursos", label: "Cursos Medicos" },
+    ];
     const {
             //ABM Faltas
              SetCuilFaltas,faltasRows,faltasColumns,loadingFaltas,
@@ -521,7 +521,7 @@ function EmployedAdminContent(){
             </SAEButton>
           </DialogActions>
         </Dialog>
-      )}
+      )} 
 
       {/*DIALOG DE PERSONAL*/}
       {dialogOpen && dialogType === "personal" && (

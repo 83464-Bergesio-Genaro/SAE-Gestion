@@ -141,9 +141,9 @@ export default function JPA() {
     );
 }
 function JPAContent() {
-    const {
-      eventosJPA
-    } = useJPA();
+  const {
+    eventosJPA
+  } = useJPA();
   return (
     <Box sx={{ 
           height: "100%",

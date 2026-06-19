@@ -168,6 +168,7 @@ export default function DocumentCard({
                   type="file"
                   hidden
                   accept={documento.extension}
+                  multiple={Boolean(documento.multiple)}
                   onChange={(event) => onFileChange?.(event, documento)}
                 />
               </IconButton>

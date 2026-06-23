@@ -30,17 +30,20 @@ import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
 import Prensa from './employed/pages/prensa/Prensa';
 import EmployedTravels from './employed/pages/travels/employedTravels';
 import EmployedPurchases from './employed/pages/purchases/employedPurchases';
+import AdminReport from './employed/pages/reports/adminReports';
 
 import StudentMain from "./students/pages/main";
 import StudentSports from "./students/pages/sports/StudentSports";
 import Scholarships from "./students/pages/scholarships/Scholarships";
 import StudentHealth from "./students/pages/health/healthStudent";
+import StudentTravels from './students/pages/trips/studentTravels';
 import MyProfile from './students/pages/profile/Profile';
 import StudentConsultations from "./students/pages/consultations/StudentConsultations";
 import ProtectedRoute from "./shared/auth/ProtectedRoute"; 
 
 import { appConfig } from "./config/appConfig";
 import "./index.css";
+import EmployedTravelInscripts from './employed/pages/travels/employedInscripts';
 export default function App() {
   
   // 1. Calculamos el basename dinámico para que Docker use cualquier subruta
@@ -173,11 +176,19 @@ export default function App() {
             </ProtectedRoute>
           )
         },
-                {
+        {
           path: "Gestion-Viajes",
           element: (
             <ProtectedRoute role={[2, 5]}>
               <EmployedTravels />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: "Gestion-Viajes/Inscriptos",
+          element: (
+            <ProtectedRoute role={[2, 5]}>
+              <EmployedTravelInscripts />
             </ProtectedRoute>
           )
         },
@@ -221,6 +232,14 @@ export default function App() {
             </ProtectedRoute>
           )
         },
+        {
+          path: "Reportes-Estadisticas",
+          element: (
+            <ProtectedRoute role={5}>
+              <AdminReport />
+            </ProtectedRoute>
+          )
+        },
 
         /* === STUDENT ROUTES === */
         {
@@ -260,6 +279,14 @@ export default function App() {
           element: (
             <ProtectedRoute role={[1,2,5]}>
               <MyProfile />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: "Mis-Viajes",
+          element: (
+            <ProtectedRoute role={1}>
+              <StudentTravels />
             </ProtectedRoute>
           )
         },

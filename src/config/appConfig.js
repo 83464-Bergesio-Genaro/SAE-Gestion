@@ -14,11 +14,12 @@ export const appConfig = {
 
   apiUrl: normalizeBasePath(
     import.meta.env.VITE_API_BASE_PATH ??
-      import.meta.env.VITE_API_URL ??
-      import.meta.env.BASE_URL,
+    import.meta.env.VITE_API_URL ??
+    import.meta.env.BASE_URL,
   ),
 
   sessionTimeout: Number(import.meta.env.VITE_SESSION_TIMEOUT),
+  appVersion:import.meta.env.VITE_APP_VERSION,
   
 /* MUY IMPORTANTE, SI DESEAMOS AGREGAR UNA VARIABLE EN appConfig.js y consumirlo desde los css*/
 themes: {

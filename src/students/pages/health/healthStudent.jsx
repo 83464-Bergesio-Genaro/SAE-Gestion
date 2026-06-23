@@ -234,7 +234,7 @@ export function EmployedStudentContent() {
     } = useHealth();
 
   useEffect(() => {
-    fetchTurnosEstudiante(user.email);
+    fetchTurnosEstudiante(user.legajo);
   }, [fetchTurnosEstudiante, user]);
 
     const handleDialogChange = (field, value) => {

@@ -1,7 +1,7 @@
 import { Box, Container,Grid, Link, Stack, Typography } from "@mui/material";
 import { FOOTER_LINKS, FOOTER_STRINGS } from "./footer.strings";
 import { footerStyles as sx } from "./footer.styles";
-
+import { appConfig } from "../../../config/appConfig"; 
 export default function Footer() {
   return (
     <Box component="footer" sx={sx.root}>
@@ -14,7 +14,7 @@ export default function Footer() {
           </Grid>
           <Grid size={{ xs: 12,md:4 }} mt={1}>
             <Stack direction="column" alignItems="center" spacing={0.5}>
-            {FOOTER_LINKS.map(({ key, icon: Icon, label, href, external }) => (
+            {FOOTER_LINKS.map(({ key,icon:Icon, label, href, external }) => (
               <Stack
                 key={key}
                 direction="row"
@@ -39,7 +39,7 @@ export default function Footer() {
           </Grid>
           <Grid size={{ xs: 12,md:4 } }mt={1} textAlign={{xs:"center",md:"right"}}>
             <Typography variant="caption" sx={sx.copyright}  >
-              {FOOTER_STRINGS.copyright}
+              {FOOTER_STRINGS.copyright} - v{appConfig.appVersion}
             </Typography>
           </Grid>
         </Grid>

@@ -1,4 +1,4 @@
-import {useState, useEffect,useCallback,useMemo} from "react";
+import {useState, useEffect,useCallback,useMemo,useRef} from "react";
 import { Box,IconButton,Chip } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -11,92 +11,26 @@ import Diversity3Icon from '@mui/icons-material/Diversity3';
 import { TravelContext } from "../employedContext";
 
 import { ObtenerUsuariosXLegajo } from "../../../api/EmpleadoService";
+import { ObtenerEmpresas,ObtenerViajesActivos,ObtenerInscriptosViaje, EliminarInscriptosViaje, CrearInscriptoViaje, 
+    ModificarInscripto, CrearEmpresa, ModificarEmpresa, CrearViaje, ModificarViaje, ObtenerDocumentacionViaje, 
+    DescargarDocumentacionXId, EliminarDocumentoViaje, 
+    CrearDocumentoViaje,
+    listarDocumentacionXLegajo} from "../../../api/TravelService";
+import { mapViajes } from "../../../api/formatters/ViajeFormatter";
+import { useNavigate } from "react-router-dom";
+import { obtenerTiposDocumento } from "../../../api/HerramientasService";
 
-function ObtenerEmpresas() {
-    return  [{ id: 1, nombre: "Empresa A", telefono: "123456789", email: "empresaA@example.com",cuit:"241412",cbu:"56116",activo:true },
-            { id: 2, nombre: "Empresa B", telefono: "987654321", email: "empresaB@example.com",cuit:"412412",cbu:"412412",activo:true },
-            { id: 3, nombre: "Empresa C", telefono: "555555555", email: "empresaC@example.com",cuit:"41251",cbu:"41251",activo:false }
-    ];
-}
-function ObtenerViajes() {
-    return [{
-        id: 1,
-        nombre: "Viaje a Bariloche",
-        fecha_inicio: "2024-07-01",
-        fecha_fin: "2024-07-10",
-        seguro: true,
-        origen: "Cordoba - Olmos",
-        destino: "Bariloche",
-        motivo:"Viaje de Quimica",
-        cantidad_personas: 40,
-        id_empresa: 1,
-        nombre_empresa:"Empresa A",
-        costo_total: 50000
-    }
-    ,{
-        id: 2,
-        nombre: "Viaje a Mendoza",
-        fecha_inicio: "2024-08-01",
-        fecha_fin: "2024-08-10",
-        seguro: true,
-        origen: "Cordoba - Olmos",
-        destino: "Mendoza",
-        motivo:"Viaje de Geografia",
-        cantidad_personas: 30,
-        id_empresa: 2,
-        nombre_empresa:"Empresas B",
-        costo_total: 40000
-    }]
-}
-function ObtenerInscriptos(idViaje){
-    if(idViaje){
-        return [{
-            id:0,
-            id_viaje:1,
-            nombre_viaje:"Viaje a Bariloche",
-            legajo_estudiante:"83464@sistemas.frc.utn.edu.ar",
-            nombre_estudiante:"Bergesio, Genaro Rafael",
-            documentacion_aprobada: true
-        },
-        {
-            id:1,
-            id_viaje:1,
-            nombre_viaje:"Viaje a Bariloche",
-            legajo_estudiante:"82146@civil.frc.utn.edu.ar",
-            nombre_estudiante:"Cravero, Sabrina de Lourdes",
-            documentacion_aprobada: false
-        }]
-    }
-    else{
-        return[{
-            id:3,
-            id_viaje:2,
-            nombre_viaje:"Viaje a Mendoza",
-            legajo_estudiante:"82440@sistemas.frc.utn.edu.ar",
-            nombre_estudiante:"Villarruel, Juan Cruz",
-            documentacion_aprobada: false
-        },
-        {
-            id:4,
-            id_viaje:2,
-            nombre_viaje:"Viaje a Mendoza",
-            legajo_estudiante:"81146@industrial.frc.utn.edu.ar",
-            nombre_estudiante:"Haro, Jazmín",
-            documentacion_aprobada: false
-        }]
-    }
-}
 const EMPTY_BUSSINESS = {
-    id: null,
+    id: "-1",
     nombre: "",
-    telefono: "",
+    contacto: "",
     email: "",
     cuit:"",
     cbu:"",
-    activo:false
+    activo:true
 }
 const EMPTY_VIAJES ={
-    id: null,
+    id: "-1",
     nombre: "",
     fecha_inicio: "",
     fecha_fin: "",
@@ -105,27 +39,35 @@ const EMPTY_VIAJES ={
     destino: "",
     cantidad_personas: 0,
     nombre_empresa:"",
-    costo_total: 0,
+    costo_aproximado: 0,
+}
+const EMPTY_VIAJES_FORM ={
+    id: "-1",
+    nombre: "",
+    fecha_inicio: "",
+    fecha_fin: "",
+    seguro: false,
+    origen: "",
+    destino: "",
+    cantidad_personas: 0,
+    id_empresa_viaje:-1,
+    nombre_empresa:"",
+    costo_aproximado: 0,
+    motivo:""
 }
 const EMPTY_DOCUMENTACION_VIAJE = {
-    id: null,
-    nombre: "",
-    datos:"",
-    ruta:"",
-}
-const EMPTY_INSCRIPTOS_VIAJE = {
-    id: null,
-    id_viaje: null,
-    legajo_estudiante:null,
-    nombre: ""
-}
-const EMPTY_DOCUMENTACION_ESTUDIANTE = {
-    id: null,
+    id: "-1",
     nombre: "",
     datos:"",
     ruta:"",
 }
 
+const EMPTY_DOCUMENTACION_ESTUDIANTE = {
+    id: "-1",
+    nombre: "",
+    datos:"",
+    ruta:"",
+}
 const formatHeader = (key) =>
 key
     .replaceAll("_", " ")
@@ -239,17 +181,34 @@ const generateRows = (data) => {
     }));
 
 };
+const checkAndCleanDialogData = (data) => {
+
+    if (!data) return { isValid: false, cleanedData: {} };
+
+    const cleanedData = Object.fromEntries(
+        Object.entries(data).filter((entry) => entry[1] !== "" && entry[1] !== null)
+    );
+    const isValid = Object.keys(cleanedData).length > 0;
+
+    return { isValid, cleanedData };
+};
+
 export function TravelProvider({ children }){
+    const navigate = useNavigate();
+
+    const [travelData, setTravelData] = useState(null);
+
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMsg, setSnackbarMsg] = useState("");
 
     const [inscriptsTravel,setInscriptsTravel] = useState(null);
     const [loadingInscripts,setLoadingInscripts] = useState(false);
     const fetchInscriptosXTravel = useCallback(async (idViaje) => {
+        
         if (!idViaje) return; 
         setLoadingInscripts(true);
         try {
-            const data = ObtenerInscriptos(idViaje);
+            const data = await ObtenerInscriptosViaje(idViaje);
             setInscriptsTravel(data);
         } catch {
             setInscriptsTravel([]);
@@ -306,7 +265,31 @@ export function TravelProvider({ children }){
         setDialogSaving(true);
         setDialogError("");
         try {
-            //Evento del Body
+            const { isValid, cleanedData } = checkAndCleanDialogData(dialogData);
+
+            // Si el booleano es falso, cortamos la ejecución aquí
+            if (!isValid) {
+                setDialogError("Ocurrió un error al guardar la empresa");
+                return; 
+            }
+
+
+            const { id, ...rest } = cleanedData;
+            let id_nuevo = id ===""? 0:id;
+            
+            const body = {
+                    ...rest,
+                    id: id_nuevo
+                };
+                
+            if (dialogMode === "create")
+            {
+                await CrearEmpresa(body);
+            }
+            else{
+                await ModificarEmpresa(id_nuevo,body);
+            }
+            fetchBussiness();
             setDialogOpen(false);
             setDialogData(EMPTY_BUSSINESS);
             setSnackbarMsg(dialogMode === "create"? "Empresa creada!":"Empresa Modificada!");
@@ -324,7 +307,8 @@ export function TravelProvider({ children }){
     const fetchTravels = useCallback(async () => {
         setLoadingTravels(true);
         try {
-             const data = await ObtenerViajes(); 
+             let data = await ObtenerViajesActivos(); 
+             data = data.map(mapViajes);
              setTravels(data);
             const datosLimpios = data.map(viaje => {
             const { motivo, id_empresa, ...resto } = viaje;
@@ -344,7 +328,7 @@ export function TravelProvider({ children }){
     }, [fetchTravels]);
 
     const openCreateTravels = () => {
-        setDialogData(EMPTY_VIAJES);
+        setDialogData(EMPTY_VIAJES_FORM);
         setDialogType("travels");
         setDialogMode("create");
         setDialogError("");
@@ -354,7 +338,7 @@ export function TravelProvider({ children }){
     const openEditTravels = useCallback((row) => {
         const viajeEncontrado = travels.find(viaje => viaje.id === Number(row.id));
         if(!viajeEncontrado) return;
-        console.log("Entra");
+
         setDialogData(viajeEncontrado);
         setDialogType("travels");
         setDialogMode("edit");
@@ -362,22 +346,93 @@ export function TravelProvider({ children }){
         setDialogOpen(true);
     }, [travels]);
 
-    const openSeeDocTravels = useCallback((row) => {
-        setDialogData(row);
-        setDialogType("documents");
-        setDialogMode("edit");
-        setDialogError("");
+    const fetchDocsXTravel = useCallback(async (row) => {
+            setLoadingViajeDocs(true);
+            try {
+                const data = await ObtenerDocumentacionViaje(row.id);
+                setDocsViajeList(data);
+            } catch {
+                setDocsViajeList([]);
+            } finally {
+                setLoadingViajeDocs(false);
+            }
+        }, []);
+        useEffect(() => {
+            fetchDocsXTravel();
+        }, [fetchDocsXTravel]);
+
+    const [docsViaje, setDocsViaje] = useState("");
+    const [docsViajeList, setDocsViajeList] = useState([]);
+    const [loadingViajeDocs, setLoadingViajeDocs] = useState(false);
+    const [downloadingDocId, setDownloadingDocId] = useState(null);
+
+    const openSeeDocTravels = useCallback(async(row) => {
         setDialogOpen(true);
-    }, []);
+        setLoadingViajeDocs(true);
+        setDocsViaje(row);
+        setDialogError("");
+        setDialogType("documents");
+        try {
+            await fetchDocsXTravel(row);
+
+        } catch (err) {
+            setDialogError(err.message || "Error al cargar documentación");
+        } finally {
+            setLoadingViajeDocs(false);
+        }
+        
+    }, [fetchDocsXTravel]);
+    
+    const handleTravelSave  = async () => {
+        setDialogSaving(true);
+        setDialogError("");
+        try {
+            const { isValid, cleanedData } = checkAndCleanDialogData(dialogData);
+
+            // Si el booleano es falso, cortamos la ejecución aquí
+            if (!isValid) {
+                setDialogError("Ocurrió un error al guardar el viaje");
+                return; 
+            }
+
+            const { id,seguro, ...rest } = cleanedData;
+            let id_nuevo = id ===""? 0:id;
+            
+            const body = {
+                    ...rest,
+                    id: id_nuevo,
+                    seguro_confirmado:seguro,
+                    fecha_inicio: cleanedData.fecha_inicio
+                    ? `${cleanedData.fecha_inicio}T00:00:00`:new Date(),
+                    fecha_fin: cleanedData.fecha_fin
+                    ? `${cleanedData.fecha_fin}T00:00:00`:new Date()
+                };
+
+            if (dialogMode === "create")
+            {
+                await CrearViaje(body);
+            }
+            else{
+                await ModificarViaje(id_nuevo,body);
+            }
+            fetchTravels();
+            setDialogOpen(false);
+            setDialogData(EMPTY_VIAJES_FORM);
+            setSnackbarMsg(dialogMode === "create"? "Viaje creado!":"Viaje Modificado!");
+            setSnackbarOpen(true);
+        }
+        catch (err) {
+            setDialogError(err.message || "Ocurrió un error al guardar");
+        } finally {
+            setDialogSaving(false);
+        }
+    };
 
     const openInscripTravels = useCallback((row) => {
-        setDialogData(row);
-        fetchInscriptosXTravel(Number(row.id));
-        setDialogType("inscriptions");
-        setDialogMode("edit");
-        setDialogError("");
-        setDialogOpen(true);
-    }, [fetchInscriptosXTravel]);
+        localStorage.setItem("selectedTravel", JSON.stringify(row));
+        navigate("/Gestion-Viajes/Inscriptos");
+        
+    }, [navigate]);
     const handleOpenEditTravels = useCallback((row) => {
     openEditTravels(row);
     }, [openEditTravels]);
@@ -461,29 +516,295 @@ export function TravelProvider({ children }){
     
     useEffect(() => { fetchUsuariosXlegajo(); }, [fetchUsuariosXlegajo]);
 
-    const handleAddIncriptos = useCallback(() => {
-        if (!usuarioSelected) return;
+    const handleAddIncriptos  = async () => {
         
-        const inscript = {
-            id: Date.now(), // ID Único
-            id_viaje: dialogData.id,
-            legajo_estudiante: usuarioSelected.legajo,
-            nombre_estudiante: usuarioSelected.nombre_usuario,
-            documentacion_aprobada: false
+        if(travelData && usuarioSelected){
+            setLoadingInscripts(true);
+            try {
+                
+                const body = {
+                    id: 0,
+                    id_viaje: travelData.id,
+                    legajo_estudiante: usuarioSelected.legajo,
+                    nombre_estudiante: "",
+                    documentacion_presentada: false
+                };
+                await CrearInscriptoViaje(body);
+                setUsuarioSelected(null);
+                await fetchInscriptosXTravel(travelData.id);
+                setSnackbarMsg("Se inscribio esta persona al viaje");
+                setSnackbarOpen(true);
+                setLoadingInscripts(false);
+        }
+            catch (err) {
+                setSnackbarMsg(err.message || "Ocurrió un error al guardar");
+            } finally {
+                setDialogSaving(false);
+            }
         };
+    }
 
-        setInscriptsTravel((listaActual) => [...listaActual, inscript]);
-        setUsuarioSelected(null);
-    }, [dialogData, usuarioSelected]);
+    const [inscriptToDelete,setInscriptToDelete] = useState(null);
 
-    const handleRemoveInscriptos = useCallback((idEliminar) => {
-        setInscriptsTravel((prev) => prev.filter((inscript) => inscript.id !== idEliminar));
-    }, [setInscriptsTravel]);
-
-    const handleUpdateInscriptos = useCallback((inscript) => {
-        console.log("Actualiza: ",inscript);
-        //Lo haria que siempre sincronice con la base
+    const handleClickRemove  = useCallback((estudiante) =>{
+        setInscriptToDelete(estudiante);
+        setDialogType("inscript");
+        setDialogMode("delete");
+        setDialogError("");
+        setDialogOpen(true);        
     }, []);
+ 
+    const handleDeleteInscript  = async () => {
+        if(travelData&&inscriptToDelete){
+            setDialogSaving(true);
+            setDialogError("");
+            try {
+                let res = await EliminarInscriptosViaje(inscriptToDelete.id);
+                if(res.ok){
+                    await fetchInscriptosXTravel(travelData.id);
+                    setDialogOpen(false);
+                    setUsuarioSelected(null);
+                    setSnackbarMsg("Se elimino el estudiante");
+                    setSnackbarOpen(true);
+                }
+                else{
+                    setDialogError("Ocurrio un error al intentar eliminar este inscripto");
+                }
+            }
+            catch (err) {
+                setDialogError(err.message || "Ocurrió un error al guardar");
+            } finally {
+                setDialogSaving(false);
+            }
+        }
+        else{
+            setDialogError("Ocurrio un error no contemplado");
+        }
+    };  
+    const handleUpdateInscriptos = async (estudiante) => {
+        if(travelData && estudiante?.id){
+            setDialogSaving(true);
+            setDialogError("");
+            try {
+                await ModificarInscripto(estudiante.id,estudiante);
+                
+                setUsuarioSelected(null);
+                setSnackbarOpen(true);
+                setSnackbarMsg("Actualizado!");
+            }
+            catch (err) {
+                setDialogError(err.message || "Ocurrió un error actualizar");
+            } finally {
+                setDialogSaving(false);
+            }
+        }
+        else{
+            setDialogError("Ocurrio un error no contemplado");
+        }
+    };
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewTitle, setPreviewTitle] = useState("");
+    const [previewSrc, setPreviewSrc] = useState(null);
+    const [previewIsPdf, setPreviewIsPdf] = useState(false);
+    const [loadingPreview, setLoadingPreview] = useState(false);
+    const [previewError, setPreviewError] = useState("");
+    const [previewDocRef, setPreviewDocRef] = useState(null);
+
+    const handlePreviewDoc = useCallback(async (doc) => {
+        setPreviewTitle(doc.nombre_documento);
+        setPreviewSrc(null);
+        setPreviewError("");
+        setPreviewIsPdf(false);
+        setPreviewDocRef(doc);
+        setLoadingPreview(true);
+        setPreviewOpen(true);
+        try {
+        const data = await DescargarDocumentacionXId(doc.id);
+        const fetched = Array.isArray(data) ? data[0] : data;
+        const ext = (fetched.extension || doc.extension || "").toLowerCase();
+        // Si datos_documento ya es un dataURL (comienza con data:), usarlo como está
+        // Si no, es base64, convertirlo a dataURL
+        let src = fetched.datos_documento;
+        if (!src.startsWith("data:")) {
+            const mimeMap = {
+            pdf: "application/pdf",
+            png: "image/png",
+            jpg: "image/jpeg",
+            jpeg: "image/jpeg",
+            gif: "image/gif",
+            webp: "image/webp",
+            };
+            const mime = mimeMap[ext] || "application/octet-stream";
+            src = `data:${mime};base64,${src}`;
+        }
+        setPreviewSrc(src);
+        setPreviewIsPdf(ext === "pdf");
+        } catch (err) {
+            setDialogError("Ocurrio un error al tratar de descargar el documento");
+        setPreviewError(err.message || "Error al cargar el documento");
+        } finally {
+        setLoadingPreview(false);
+        }
+    }, []);
+
+    const handleDownloadDoc = useCallback(
+        async (id, nombreDocumento, extension) => {
+        setDownloadingDocId(id);
+        try {
+            const data = await DescargarDocumentacionXId(id);
+            const doc = Array.isArray(data) ? data[0] : data;
+            let base64 = doc.datos_documento;
+
+            // Si es un dataURL (comienza con data:), extraer la parte base64
+            if (base64.startsWith("data:")) {
+            base64 = base64.split(",")[1];
+            }
+
+            const byteChars = atob(base64);
+            const byteArray = new Uint8Array(byteChars.length);
+            for (let i = 0; i < byteChars.length; i++) {
+            byteArray[i] = byteChars.charCodeAt(i);
+            }
+            const blob = new Blob([byteArray]);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${doc.nombre_documento || nombreDocumento}.${doc.extension || extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Error al descargar documento:", err);
+            setDialogError("Ocurrio un error al tratar de descargar el documento");
+        } finally {
+            setDownloadingDocId(null);
+        }
+        },
+        [],
+    );
+    const [openPopup, setOpenPopup] = useState(false);
+    const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
+    
+    const requestDeleteDocument = (documento) => {
+        setDocumentoAEliminar(documento);
+        setOpenPopup(true);
+    };
+
+    const handleDelete = async () => {
+        try {
+            if(!documentoAEliminar)return;
+            await EliminarDocumentoViaje(documentoAEliminar.id);
+            setOpenPopup(false);
+            setLoadingViajeDocs(true);
+            await fetchDocsXTravel(docsViaje);
+
+            setSnackbarMsg("Documento Eliminado");
+        } catch  {
+
+            setSnackbarMsg("Error al eliminar el documento");
+            
+        } finally {
+            setSnackbarOpen(true);
+            setLoadingViajeDocs(false);
+        }
+    };
+    const [selectedTypeDoc,setTypeDoc] = useState(null);
+    const [travelNewFile, setTravelNewFile] = useState(null);
+    const fileInputRef = useRef(null);
+    const [documentTypes,setDocumentTypes]= useState(null);
+
+    const fetchTiposDocumento = useCallback(async () => {
+        try {
+            const data = await obtenerTiposDocumento();
+            setDocumentTypes(data);
+        } catch {
+            console.log("No se pudieron recuperar los tipos de Documento");
+            setDocumentTypes(null);
+        }
+    }, [])
+
+    useEffect(() => { fetchTiposDocumento(); }, [fetchTiposDocumento]);
+
+    const handleArchivoChange = async (idType) => {
+        const documentType = documentTypes.find(type => type.id === Number(idType.id));
+        if(!documentType) return;
+
+        if (!docsViaje||!travelNewFile || !documentType) return;
+
+        const extension = `.${travelNewFile.name.split(".").pop().toLowerCase()}`;
+        const allowedExtensions = (documentType.extension ?? "")
+        .split(",")
+        .map((value) => value.trim().toLowerCase());
+
+        if (!allowedExtensions.includes(extension)) {
+            setSnackbarMsg(`Solo se permiten archivos: ${documentType.extension}`, "warning");
+            setSnackbarOpen(true);
+            return;
+        }
+        const fileName =`${documentType.nombre.replace(/\s/g, "_")}${extension}`
+
+        const renamedFile = new File([travelNewFile], fileName, {
+            type: travelNewFile.type,
+            lastModified: travelNewFile.lastModified,
+        });
+
+        try {
+            setLoadingViajeDocs(true);
+        
+        const savedFile = await CrearDocumentoViaje(
+            docsViaje.id,
+            documentType.id,
+            renamedFile,
+        );
+
+            await fetchDocsXTravel(docsViaje);
+        
+            setSnackbarMsg("Archivo ",savedFile.nombre_documento," subido con éxito");
+            setTravelNewFile(null);
+            setTypeDoc(null);
+
+        } catch (error) {
+            console.error("Error al subir el archivo:", error);
+            setSnackbarMsg("Error al subir el archivo", "error");
+        } finally {
+            setSnackbarOpen(true);
+            setLoadingViajeDocs(false);
+        }
+    };
+    const [seletedInscripts, setSeletedInscripts] =useState(null);
+    const [docsInscript, setDocsInscript] = useState("");
+    const [loadingInscriptDocs, setLoadingInscriptDocs] = useState(false);
+
+    const fetchDocsXInscript = useCallback(async (row) => {
+            setLoadingInscriptDocs(true);
+            try {
+                const data = await listarDocumentacionXLegajo(row.legajo_estudiante);
+                setDocsInscript(data);
+            } catch {
+                setDocsInscript([]);
+            } finally {
+                setLoadingInscriptDocs(false);
+            }
+        }, []);
+        useEffect(() => {
+            fetchDocsXTravel();
+        }, [fetchDocsXTravel]);
+
+    const openSeeDocInscript = useCallback(async(row) => {
+        setDialogOpen(true);
+        console.log(row);
+        setSeletedInscripts(row);
+        setDialogError("");
+        setDialogType("documents");
+        try {
+            await fetchDocsXInscript(row);
+
+        } catch (err) {
+            
+            setDialogError(err.message || "Error al cargar documentación");
+        }
+    }, [fetchDocsXInscript]);
 
     return (
     <TravelContext.Provider
@@ -497,12 +818,14 @@ export function TravelProvider({ children }){
 
         travels,travelsRows, setTravelsRows,
         loadingTravels, setLoadingTravels,travelsColumns,
-        fetchTravels,openCreateTravels,
+        fetchTravels,openCreateTravels,handleTravelSave,
 
         usuarioSelected,setUsuarioSelected,loadingUsuario,fetchUsuariosXlegajo,
         inscriptsTravel,setInscriptsTravel,loadingInscripts,fetchInscriptosXTravel,
 
-        handleAddIncriptos,handleRemoveInscriptos,handleUpdateInscriptos,
+        handleAddIncriptos,handleDeleteInscript,handleUpdateInscriptos,handleClickRemove,
+
+        docsInscript,loadingInscriptDocs,openSeeDocInscript,seletedInscripts, setSeletedInscripts,
 
         dialogOpen, setDialogOpen,
         dialogType, setDialogType,
@@ -510,7 +833,22 @@ export function TravelProvider({ children }){
         dialogData, setDialogData,
         dialogSaving, setDialogSaving,
         dialogError, setDialogError,
-            
+
+        travelData, setTravelData,documentTypes,selectedTypeDoc,setTypeDoc,
+
+        docsViaje,docsViajeList,loadingViajeDocs,downloadingDocId,setDownloadingDocId,
+        openPopup,setOpenPopup,documentoAEliminar,requestDeleteDocument,handleDelete,
+        
+        travelNewFile, setTravelNewFile,fileInputRef,handleArchivoChange,
+
+        handlePreviewDoc,handleDownloadDoc,
+        previewOpen,setPreviewOpen,
+        previewTitle, setPreviewTitle,
+        previewSrc, setPreviewSrc,
+        previewIsPdf, setPreviewIsPdf,
+        loadingPreview, setLoadingPreview,
+        previewError, setPreviewError,
+        previewDocRef, setPreviewDocRef
         }}
     >
         {children}

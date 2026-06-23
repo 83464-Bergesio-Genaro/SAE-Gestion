@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -19,53 +18,19 @@ import ExploreIcon from "@mui/icons-material/Explore";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
-import { useAuth } from "../../shared/context/sharedContext"; 
-import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
-import { ObtenerEventosPublicos, ObtenerEventosSAE } from "../../api/JPAService";
-import { EmployedCalendar } from "./users/EmployedCalendar";  
-import { AdminUsersProvider } from "../context/providers/employProvider"; 
 import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
 import TitleBox from "../../shared/components/titleBox";
 import HeaderPageEmployed from "../../shared/components/headerPageEmployed";
-/*
-const reportOptions = [
-    {
-        name: "Reporte Deportes",
-        icon: SportsBasketballIcon,
-        disabled: true,
-        roles: [2, 5],
-    },
-    {
-        name: "Reporte Becas",
-        icon: SchoolIcon,
-        disabled: true,
-        roles: [2, 5],
-    },
-    {
-        name: "Reporte Prensa",
-        icon: AssessmentIcon,
-        disabled: true,
-        roles: [2, 5],
-    },
-    {
-        name: "Reporte JPA",
-        icon: GroupsIcon,
-        disabled: true,
-        roles: [2, 5],
-    },
-    {
-        name: "Reporte Viajes",
-        icon: ExploreIcon,
-        disabled: true,
-        roles: [2, 5],
-    },
-    {
-        name: "Reporte Trámites",
-        icon: ListAltIcon,
-        disabled: true,
-        roles: [2, 5],
-    },
-];*/
+import SAESpinner from "../../shared/components/spinner/SAESpinner";
+
+import { useAuth } from "../../shared/context/sharedContext";
+import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
+import { EmployedCalendar } from "./users/EmployedCalendar";  
+import { AdminUsersProvider } from "../context/providers/employProvider"; 
+
+import { JPAProvider } from "../context/providers/jpaProvider";
+import { useJPA } from "../context/employedContext";
+
 
 function DashboardCard({ item, onClick }) {
   const Icon = item.icon;
@@ -132,21 +97,17 @@ function DashboardCard({ item, onClick }) {
     </Card>
   );
 }
-
 export default function EmployedMain() {
+    return (
+        <JPAProvider>
+            <EmployedContent />
+        </JPAProvider>
+    );
+}
+function EmployedContent() {
   const { user } = useAuth();
-  const [eventosJPA, setEventosJPA] = useState([]);
-  useEffect(() => {
-    const ObtenerEventosPublicosApi = async () => {
-      try {
-        const data = await ObtenerEventosSAE();
-        setEventosJPA(data);
-      } catch (error) {
-        console.error("Error al traer Eventos:", error);
-      }
-    };
-    ObtenerEventosPublicosApi();
-  }, []);
+  const { eventosSAE,loadingEventosSAE, } = useJPA();
+
   return (
     <Box
       sx={{
@@ -165,17 +126,12 @@ export default function EmployedMain() {
           description=" Accedé rápidamente a las áreas de gestión, reportes y seguimiento
               diario desde una sola pantalla."
         />
-
-        {user.id_perfil === 5 && (
-          <>
-            <TitleBox
-              title="Gestión General"
-              description="Módulos operativos principales para el trabajo diario del
-                equipo."
-            />
-            <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
-          </>
-        )}
+        <TitleBox
+          title="Gestión General"
+          description="Módulos operativos principales para el trabajo diario del
+            equipo."
+        />
+        <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
         <Box sx={{ mt: 6 }}>
           <TitleBox
             title="Tus horarios y proximos eventos"
@@ -201,7 +157,14 @@ export default function EmployedMain() {
                borderRadius: 6,
             }}
           >
-            <CalendarEvent eventos={eventosJPA} />
+            {loadingEventosSAE && (
+              <Stack alignItems="center" width={"100%"} gap={1}>
+                <SAESpinner size="S" />
+              </Stack>
+            )}
+            {!loadingEventosSAE && eventosSAE && (
+              <CalendarEvent eventos={eventosSAE} />
+            )}
           </Box>
         </Box>
       </Container>

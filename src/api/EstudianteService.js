@@ -64,7 +64,6 @@ import {
   apiGet,
   apiGetFile,
   apiPostFile,
-  apiPut,
   apiPutFile,
 } from "./apiClient";
 

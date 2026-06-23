@@ -5,7 +5,7 @@ import {
 import { ConsultationContext } from "../studentContext";
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useAuth } from "../../../shared/context/sharedContext";
-import { sendConsultationEmail } from "../../../shared/services/EmailService";
+import { sendConsultationEmail } from "../../../api/EmailService";
 
 const isValidEmail = (value) =>
   /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value.trim());

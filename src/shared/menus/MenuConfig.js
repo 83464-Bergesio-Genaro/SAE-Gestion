@@ -10,6 +10,7 @@ import HubIcon from '@mui/icons-material/Hub';
 import BadgeIcon from '@mui/icons-material/Badge';
 import LocalAirportIcon from '@mui/icons-material/LocalAirport';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
 export const sharedMenu = [
   {
@@ -58,6 +59,13 @@ export const studentMenu = [
     label: "Salud",
     path: "/Mi-Salud",
     color: "#814773",
+    icon: HealthAndSafetyIcon,
+    descripcion: "Consulta servicios de salud y gestiona tus turnos médicos.",
+  },
+  {
+    label: "Viajes",
+    path: "/Mis-Viajes",
+    color: "#E5CCB1",
     icon: HealthAndSafetyIcon,
     descripcion: "Consulta servicios de salud y gestiona tus turnos médicos.",
   },
@@ -206,6 +214,13 @@ export const adminMenu = [
     color:"#e4f7d8",
     icon: BadgeIcon,
     descripcion: "Gestiona los empleados y usuarios que pueden acceder a la aplicacion.",    
+  },
+  {
+    label: "Reportes",
+    path: "/Reportes-Estadisticas",
+    color:"#e4f7d8",
+    icon: QueryStatsIcon,
+    descripcion: "Analiza el funcionamiento de cada Area.",    
   }
 
 ];

@@ -195,15 +195,18 @@ export function JPAProvider({ children }) {
     {/*Fin Seccion Eventos Publicos */}
      
     {/*Seccion Eventos SAE  */}
+    const [eventosSAE, setEventosSAE] = useState(null);
     const [eventosSAERows, setEventosSAERows] = useState([]);
     const [loadingEventosSAE, setLoadingEventosSAE] = useState(true);
     const fetchEventosSAE = useCallback(async () => {
         setLoadingEventosPublicos(true);
         try {
             const data = await ObtenerEventosSAE();
+            setEventosSAE(data);
             setEventosSAERows(generateRows(data));
         } catch {
             setEventosSAERows([]);
+            setEventosSAE([]);
         } finally {
             setLoadingEventosSAE(false);
         }
@@ -422,7 +425,7 @@ export function JPAProvider({ children }) {
         } finally {
             setDialogSaving(false);
         }
-    };           
+    };
     {/*Fin Seccion Interesados */}
 
     {/*Necesario para cargar los datos en el dialog (ALTA) */}
@@ -446,7 +449,7 @@ export function JPAProvider({ children }) {
         eventosPublicosRows,loadingEventosPublicos,
         fetchEventosPublicos,openCreateEventoPublico,openEditEventoPublico,openDeleteEvento ,handleEventoPublicoSave,
         
-        eventosSAERows,eventoColumns,loadingEventosSAE,
+        eventosSAE,eventosSAERows,eventoColumns,loadingEventosSAE,
         fetchEventosSAE,openCreateEventoSAE,openEditEventoSAE,openDeleteEventoSAE,handleEventoSAESave,
 
         standsRows,standsColumns,loadingStands,   

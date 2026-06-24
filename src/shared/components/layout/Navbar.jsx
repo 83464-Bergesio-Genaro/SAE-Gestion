@@ -64,17 +64,17 @@ export default function Navbar() {
 
   return (
     <>
-      <AppBar position="fixed" sx={{ boxShadow: 2, bgcolor: "#5B96CC", width: "100%" }}>
+      <AppBar position="fixed" sx={{ boxShadow: 2, bgcolor:"var(--primary)", width: "100%" }}>
         <Toolbar sx={{ justifyContent: "space-between" }}>
           <Box
             component={Link}
             to="/"
             sx={{
-              backgroundImage: `url('${baseUrl}saeLogo.svg')`,
+              backgroundImage: `url('${baseUrl}navbarSAE.svg')`,
               backgroundSize: "contain",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "left center",
-              width: 160,
+              width: 240,
               height: 60,
               display: "block",
               flexShrink: 0,

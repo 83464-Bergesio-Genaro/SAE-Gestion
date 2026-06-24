@@ -26,25 +26,29 @@ function getHeaders(method, body) {
 }
 
 export async function RequestAPI(endpoint, action, body = null) {
-  const res = await fetch(
-    appConfig.apiUrl + endpoint,
-    getHeaders(action, body),
-  );
+  try {
+    const res = await fetch(
+        appConfig.apiUrl + endpoint,
+        getHeaders(action, body),
+      );
 
-  if (res.ok && action === "DELETE") return res; // Para DELETE no esperamos un body, por lo que no intentamos parsear la respuesta
-  if (res.status === 204 && action === "GET") return []; // Para GET, si el status es 204 (No Content) devolvemos un array vacío para evitar errores al mapear la respuesta
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
+    if (res.ok && action === "DELETE") return res; // Para DELETE no esperamos un body, por lo que no intentamos parsear la respuesta
+    if (res.status === 204 && action === "GET") return []; // Para GET, si el status es 204 (No Content) devolvemos un array vacío para evitar errores al mapear la respuesta
+    if (!res.ok) {
+      let detail = `Error ${res.status}`;
+        const json = await res.json();
+        if (json.title) detail = `${json.title} (${res.status})`;
+        else if (json.message) detail = json.message;
+        throw new Error(detail);
     }
-    throw new Error(detail);
+    return res.json();
   }
-  return res.json();
+  catch(error){
+    
+    throw new Error(error);
+  }
+
+  
 }
 export async function ObtenerEmpleados() {
   return RequestAPI("/api/Empleados/ObtenerEmpleados/", "GET");

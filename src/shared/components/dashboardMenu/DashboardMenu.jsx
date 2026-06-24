@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { studentMenu, employedMenu } from "../../menus/MenuConfig";
+import { studentMenu, employedMenu, adminMenu } from "../../menus/MenuConfig";
 import {
   Container,
   Grid,
@@ -76,14 +76,16 @@ function DashboardCard({ item, onClick }) {
 
 export default function DashboardMenu({idPerfil}){
     const navigate = useNavigate();
-
     let menu = [];
-    if ([2,5].includes(Number(idPerfil))) {
-        menu = employedMenu;
-    } else if(idPerfil === 1 ) {
-        menu = studentMenu;
+    if (idPerfil === 1) {
+      menu = studentMenu;
+    } 
+    if(idPerfil === 2) {
+      menu = employedMenu;
+    } 
+    if(idPerfil === 5){
+      menu = adminMenu;
     }
-
     return(
         <Grid container spacing={2.5} sx={{ mt: 1 }}>
             {menu

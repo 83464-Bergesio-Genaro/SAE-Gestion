@@ -11,6 +11,7 @@ import {
   Grid
 } from "@mui/material";
 import SAEButton from "../../components/buttons/SAEButton";
+import SAESpinner from "../../components/spinner/SAESpinner";
 
 import { useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -44,15 +45,12 @@ const settingsHero = {
   dots: true,
   infinite: true,
   autoplay: true, 
-  speed: 1200,
+  speed: 1400,
   autoplaySpeed: 5000,
   fade: true,
   slidesToShow: 1,     
-  slidesToScroll: 1,
-  swipe: true,           
-  swipeToSlide: true,    
-  touchMove: true,       
-  draggable: true,  
+  slidesToScroll: 1, 
+  pauseOnHover: false,
   responsive: [
     {
       breakpoint: 1024, 
@@ -80,7 +78,8 @@ const settings = {
   autoplaySpeed: 1800,
   slidesToShow: 3,
   slidesToScroll: 1,
-  swipeToSlide: true, // OK for desktop
+  swipeToSlide: true, 
+  pauseOnHover: false,
   responsive: [
     {
       breakpoint: 1200,
@@ -339,7 +338,7 @@ function JPAContent(){
         pt: { xs: "75px" },
         pb: 4,
         minHeight: "calc(110vh - 90px)",
-        bgcolor: "#f4f8fc",
+        bgcolor: "var(--background)",
         }}
     >
         <HeroSection/>
@@ -805,7 +804,7 @@ function InterestSection(){
 }
 function EventSection(){
     const {
-    eventosJPA
+    eventosJPA,loadingEventos
   } = useJPA();
   return(
    <section key={"eventos"} id={"eventos"}
@@ -821,7 +820,7 @@ function EventSection(){
         fontWeight={800}
         textAlign={{xs:"left",md:"center"}}
         >
-        Eventos en nuestra Universisdad.
+        Eventos en nuestra Universidad.
         </Typography>
         <Typography
         variant="h6"
@@ -833,7 +832,14 @@ function EventSection(){
         La Universidad no es solo para los que ya estan sino para vos tambien, el futuro llego hoy preparate para una experiencia unica!
         </Typography>
 
-        <CalendarEvent eventos={eventosJPA} />
+        {loadingEventos && (
+          <Stack alignItems="center" width={"100%"} gap={1}>
+            <SAESpinner size="S" />
+          </Stack>
+        )}
+        {!loadingEventos && eventosJPA && (
+          <CalendarEvent eventos={eventosJPA} />
+        )}
         
       </Box>
     </section>

@@ -154,7 +154,7 @@ export default function Login() {
         flexDirection: "column",
         justifyContent: "center",
         pb: { xs: 4, md: 3 },
-        background:"linear-gradient(135deg, #92e0db 6.71%, #5b96cc 91.97%)"
+        background:"var(--gradient)"
     }}>
       { user && !isLoading && !normalizarOpen && (
       <Box

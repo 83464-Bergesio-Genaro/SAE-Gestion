@@ -4,9 +4,9 @@ import { footerStyles as sx } from "./footer.styles";
 import { appConfig } from "../../../config/appConfig"; 
 export default function Footer() {
   return (
-    <Box component="footer" sx={sx.root}>
+    <Box component="footer" sx={{bgcolor:"var(--primary)",padding:2,color:"var(--tertary)"}}>
       <Container maxWidth="xl">
-        <Grid container spacing={1} direction="row" justifyContent="space-between" alignItems="center">
+        <Grid container spacing={1} direction="row" justifyContent="space-between" alignItems="center" >
           <Grid size={{ xs: 12,md:4 }} mt={1} textAlign={{xs:"center",md:"left"}}>
             <Typography variant="body2" sx={sx.brand}>
               {FOOTER_STRINGS.brand}

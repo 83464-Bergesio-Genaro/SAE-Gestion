@@ -338,7 +338,7 @@ function JPAContent(){
         pt: { xs: "75px" },
         pb: 4,
         minHeight: "calc(110vh - 90px)",
-        bgcolor: "#f4f8fc",
+        bgcolor: "var(--background)",
         }}
     >
         <HeroSection/>
@@ -820,7 +820,7 @@ function EventSection(){
         fontWeight={800}
         textAlign={{xs:"left",md:"center"}}
         >
-        Eventos en nuestra Universisdad.
+        Eventos en nuestra Universidad.
         </Typography>
         <Typography
         variant="h6"

@@ -209,7 +209,7 @@ export  function NovedadesContent() {
         pt: "40px",
         pb: 4,
         minHeight: "100%",
-        bgcolor: "#f4f8fc",
+        bgcolor: "#D9E5F4",
       }}
     >
       <Container maxWidth="xl">

@@ -24,34 +24,86 @@ export const appConfig = {
 /* MUY IMPORTANTE, SI DESEAMOS AGREGAR UNA VARIABLE EN appConfig.js y consumirlo desde los css*/
 themes: {
     light: {
-      background: "#EFECE3",
+      background: "#D9E5F4",
+      gradient: "linear-gradient(135deg, #1538B8 0%, #40C5F2 100%)",
       text: "#1a1a1a",
-      navbar:"#1d2d4f",
-      primary: "#4A70A9",
-      secondary: "#D1DEF1",
-      tertiary: "#315282",
+      primary: "#1538B8",
+      secondary: "#0B2986",
+      tertiary: "#D9E5F4",
 
-      card: "#A2AADB",
-      cardHover: "#FADA7A",
+      neutralCard: "#E5E5E5",
+      blackText: "#191919",
+      whiteText: "#FAFAFA",
 
-      greenButton:"#8BC154",
-      greenButtonHover:"#3CA035",
-      greenButtonClick:"#6BDA5F",
+      green:"#8BC154",
+      magenta:"#D830A0",
+      orange:"#FF8E2C",
     },
         /*POR AHORA NO LOS UTILIZAMOS*/
     dark: {
-      background: "#1e1e1e",
-      text: "#f5f5f5",
-      primary: "#948979",
-      secondary: "#222831",
-      card: "#393E46",
-      cardHover: "#DFD0B8",
-      reenButton:"#8BC154",
-      greenButtonHover:"#3CA035",
-      greenButtonClick:"#6BDA5F",
+      background: "#D9E5F4",
+      gradient: "linear-gradient(135deg, #1538B8 0%, #40C5F2 100%)",
+      primary: "#1538B8",
+      secondary: "#0B2986",
+      tertiary: "#D9E5F4",
+
+      neutralCard: "#E5E5E5",
+      blackText: "#191919",
+      whiteText: "#FAFAFA",
+
+      green:"#8BC154",
+      magenta:"#D830A0",
+      orange:"#FF8E2C",
     }
   },
-
-  font: "sans-serif"
-
+  fontFamily:{
+    fontGeneral: "Barlow",
+    fontText: "Noto-Sans",
+    fontSubtitle: "JetBrain-Mono",
+    fontCitation: "Crimson-Pro"
+  },
+  typography:{
+    h1: {
+      fontWeight:700,
+      fontSize:{
+        xs:'2rem',
+        md:'3.5rem'
+      }
+    },
+    h2: {
+      fontWeight:700,
+      fontSize:{
+        xs:'1.625rem',
+        md:'2.5rem'
+      }
+    },
+    h3: {
+      fontWeight:600,
+      fontSize:{
+        xs:'1.375rem',
+        md:'2rem'
+      }
+    },
+    h4: {
+      fontWeight:600,
+      fontSize:{
+        xs:'1.25rem',
+        md:'1.5rem'
+      }
+    },
+    h5: {
+      fontWeight:500,
+      fontSize:{
+        xs:'1.125rem',
+        md:'1.25rem'
+      }
+    },
+    h6: {
+      fontWeight:600,
+      fontSize:{
+        xs:'1rem',
+        md:'1.1rem'
+      }
+    }
+  }
 };

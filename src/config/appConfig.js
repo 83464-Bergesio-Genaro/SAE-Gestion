@@ -66,43 +66,49 @@ themes: {
     h1: {
       fontWeight:700,
       fontSize:{
-        xs:'2rem',
-        md:'3.5rem'
+        xs: "3rem",
+        md: "5rem",
+        lg: "6rem"
       }
     },
     h2: {
       fontWeight:700,
       fontSize:{
         xs:'1.625rem',
-        md:'2.5rem'
+        md:'2.5rem',
+        lg: "3rem"
       }
     },
     h3: {
       fontWeight:600,
       fontSize:{
         xs:'1.375rem',
-        md:'2rem'
+        md:'2rem',
+        lg: "2.5rem"
       }
     },
     h4: {
       fontWeight:600,
       fontSize:{
         xs:'1.25rem',
-        md:'1.5rem'
+        md:'1.5rem',
+        lg: "2rem"
       }
     },
     h5: {
       fontWeight:500,
       fontSize:{
         xs:'1.125rem',
-        md:'1.25rem'
+        md:'1.25rem',
+        lg: "1.3rem"
       }
     },
     h6: {
       fontWeight:600,
       fontSize:{
         xs:'1rem',
-        md:'1.1rem'
+        md:'1.1rem',
+        lg: "1.2rem"
       }
     }
   }

@@ -474,11 +474,7 @@ function EmployedPurchasesContent() {
               alignItems: "center",
             }}
           >
-            {isDocsDialog
-              ? "Documentos de la compra"
-              : dialogMode === "create"
-                ? "Registrar Compra"
-                : "Editar Compra"}
+            {isDocsDialog ? "Documentos de la compra" : "Registrar Compra"}
             <IconButton onClick={() => setDialogOpen(false)} size="small">
               <CloseIcon />
             </IconButton>
@@ -707,7 +703,7 @@ function EmployedPurchasesContent() {
                 <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
                   Documentacion
                 </Typography>
-                {!isPurchaseDataComplete && (
+                {!isDocsDialog && !isPurchaseDataComplete && (
                   <Alert severity="info" sx={{ mb: 2 }}>
                     Completá primero los datos de la compra para adjuntar
                     documentación. El informe técnico puede quedar vacío.
@@ -734,7 +730,7 @@ function EmployedPurchasesContent() {
                         uploadDisabled={!isPurchaseDataComplete}
                         deleteDisabled={!documentType.subido}
                         showRequirement
-                        showActions
+                        showActions={!isDocsDialog}
                         notUploadedLabel="No adjunto"
                         uploadedLabel="Adjunto"
                       />
@@ -770,13 +766,15 @@ function EmployedPurchasesContent() {
                         >
                           {getFileName(file)}
                         </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemoveFactura(index)}
-                          aria-label="Quitar factura"
-                        >
-                          <CloseIcon fontSize="small" />
-                        </IconButton>
+                        {!isDocsDialog && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRemoveFactura(index)}
+                            aria-label="Quitar factura"
+                          >
+                            <CloseIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </Stack>
                     ))}
                   </Stack>
@@ -794,16 +792,18 @@ function EmployedPurchasesContent() {
             >
               Cancelar
             </SAEButton>
-            <SAEButton
-              variant="contained"
-              onClick={handleSavePurchase}
-              disabled={dialogSaving}
-              startIcon={
-                dialogSaving ? <CircularProgress size={18} /> : undefined
-              }
-            >
-              Guardar
-            </SAEButton>
+            {!isDocsDialog && (
+              <SAEButton
+                variant="contained"
+                onClick={handleSavePurchase}
+                disabled={dialogSaving}
+                startIcon={
+                  dialogSaving ? <CircularProgress size={18} /> : undefined
+                }
+              >
+                Guardar
+              </SAEButton>
+            )}
           </DialogActions>
         </Dialog>
 

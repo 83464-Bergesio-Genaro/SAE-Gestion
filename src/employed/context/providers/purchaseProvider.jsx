@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { Box, IconButton, Chip } from "@mui/material";
 
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import FolderIcon from "@mui/icons-material/Folder";
 
 import {
@@ -682,21 +681,6 @@ export function PurchaseProvider({ children }) {
     setDialogOpen(true);
   };
 
-  const openEditPurchases = useCallback((row) => {
-    setDialogData(clonePurchase(row));
-    setDialogType("purchases");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
-
-  const handleOpenEditPurchases = useCallback(
-    (row) => {
-      openEditPurchases(row);
-    },
-    [openEditPurchases],
-  );
-
   const openEditDocs = useCallback((row) => {
     setDialogData(clonePurchase(row));
     setDialogType("docs");
@@ -1065,7 +1049,7 @@ export function PurchaseProvider({ children }) {
           const nroExpediente =
             informe.nro_expediente ?? informe.nroExpediente ?? null;
 
-          if (dialogMode !== "create" && nroExpediente) {
+          if (dialogMode === "docs" && nroExpediente) {
             await ModificarInforme(nroExpediente, informeBody);
           } else {
             await CrearInforme(informeBody);
@@ -1112,7 +1096,7 @@ export function PurchaseProvider({ children }) {
             ? "Compra creada!"
             : dialogMode === "docs"
               ? "Documentos actualizados!"
-              : "Compra Modificada!",
+              : "Cambios guardados!",
         );
         setSnackbarOpen(true);
       } catch (err) {
@@ -1172,15 +1156,9 @@ export function PurchaseProvider({ children }) {
   const purchasesActions = useMemo(
     () => [
       {
-        icon: EditIcon,
-        color: "primary",
-        title: "Editar Compra",
-        onClick: handleOpenEditPurchases,
-      },
-      {
         icon: FolderIcon,
         color: "primary",
-        title: "Documentacion",
+        title: "Ver documentos",
         onClick: handleOpenEditDocs,
       },
       {
@@ -1190,7 +1168,7 @@ export function PurchaseProvider({ children }) {
         onClick: handleDeletePurchase,
       },
     ],
-    [handleOpenEditPurchases, handleOpenEditDocs, handleDeletePurchase],
+    [handleOpenEditDocs, handleDeletePurchase],
   );
 
   const purchasesColumns = useMemo(() => {

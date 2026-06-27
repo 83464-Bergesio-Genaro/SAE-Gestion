@@ -26,7 +26,7 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 import { useState } from "react";
 import SAEButton from "../../components/buttons/SAEButton";
-import { sendJPAEmailForm } from "../../services/EmailService";
+import { sendJPAEmailForm } from "../../../api/EmailService";
 
 const checkImage = `${import.meta.env.BASE_URL}images/logos/comprobado.png`;
 

@@ -4,7 +4,7 @@ import SchoolIcon from "@mui/icons-material/School";
 
 export const FOOTER_STRINGS = {
   brand: "SAE Gestión — UTN Facultad Regional Córdoba",
-  copyright: "© 2026 Cátedra de Proyecto Final · v1.0",
+  copyright: "© 2026 Cátedra de Proyecto Final",
 };
 
 export const FOOTER_LINKS = [

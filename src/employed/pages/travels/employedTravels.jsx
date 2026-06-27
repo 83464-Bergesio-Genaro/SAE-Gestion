@@ -28,6 +28,7 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
+  Tooltip
 } from "@mui/material";
 
 import { useState,useMemo } from "react";
@@ -44,8 +45,35 @@ import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import BusinessIcon from '@mui/icons-material/Business';
 import LocalAirportIcon from '@mui/icons-material/LocalAirport';
-import FolderIcon from '@mui/icons-material/Folder';
+import DownloadIcon from "@mui/icons-material/Download";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Diversity1 } from "@mui/icons-material";
+
+import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+
+const TRAVELS_REQUIRED_DOCUMENTS = [
+   {
+    id: 3,
+    nombre: "Listado de Estudiantes Viajantes",
+    extension: ".xlsx"
+  },
+  {
+    id: 4,
+    nombre: "Nota de Viaje Plantilla",
+    extension: ".docx"
+  },
+  {
+    id: 5,
+    nombre: "Nota de Viaje Cargada",
+    extension: ".pdf"
+  },
+  {
+    id: 6,
+    nombre: "Informe Tecnico Viaje",
+    extension: ".pdf"
+  },
+];
+
 
 export default function EmployedTravels() {
   return (
@@ -56,8 +84,8 @@ export default function EmployedTravels() {
 }
 
 const secciones = [
-  { key: "empresas", label: "Empresas" },
-  { key: "viajes", label: "Viajes" }
+  { key: "viajes", label: "Viajes Activos" },
+  { key: "empresas", label: "Empresas" } 
 ];
 
 function EmployedTravelsContent(){
@@ -70,12 +98,7 @@ function EmployedTravelsContent(){
 
             travelsRows,
             loadingTravels,travelsColumns,
-            openCreateTravels,
-
-            usuarioSelected,setUsuarioSelected,loadingUsuario,fetchUsuariosXlegajo,
-            inscriptsTravel,loadingInscripts,
-
-            handleAddIncriptos,
+            openCreateTravels,handleTravelSave,
 
             dialogOpen, setDialogOpen,
             dialogType, 
@@ -96,7 +119,7 @@ function EmployedTravelsContent(){
                 loading: loadingBussiness
             },
             viajes: {
-                title: "Viajes",
+                title: "Viajes Activos",
                 dialog: openCreateTravels,
                 addButton: "Nuevo Viaje",
                 icon: LocalAirportIcon,
@@ -122,15 +145,18 @@ function EmployedTravelsContent(){
       handleDialogChange(dataName, hasAddressData ? parts.join(" - ") : "");
     };
     const parseAddress = (value = "") => {
-      const parts = String(value).split(/\s+-\s+/);
-      if (parts.length < 3) return [...parts, "", "", ""].slice(0, 3);
-
-      return [parts[0], parts[1], parts[2]];
+      // Corta por el guion y elimina los espacios sobrantes alrededor
+      const parts = String(value).split("-").map(part => part.trim());
+      return [
+        parts[0] || "",
+        parts[1] || "",
+        parts[2] || ""
+      ];
     };
     const addressPartsOrigin = parseAddress(dialogData.origen);
     const addressPartsDestiny = parseAddress(dialogData.destino);
 
-    const [activeSection, setActiveSection] = useState("empresas");
+    const [activeSection, setActiveSection] = useState("viajes");
     const [busquedaGestion, setBusquedaGestion] = useState("");
     const handleSectionChange = (section) => {
         setActiveSection(section);
@@ -158,7 +184,7 @@ function EmployedTravelsContent(){
   };
 
   return(
-  <Box
+    <Box
       sx={{
         mt: "-90px",
         pt: { xs: "90px", md: "100px" },
@@ -384,8 +410,8 @@ function EmployedTravelsContent(){
                 <Grid size={{ xs: 12 }} m={0}>
                   <SAETextField
                     label="Telefono"
-                    value={dialogData.telefono}
-                    onChange={(e) => handleDialogChange("telefono", e.target.value)}
+                    value={dialogData.contacto}
+                    onChange={(e) => handleDialogChange("contacto", e.target.value)}
                     fullWidth
                   />
                 </Grid>
@@ -516,7 +542,7 @@ function EmployedTravelsContent(){
                 </Grid>
                 <Grid size={{ xs: 12, md: 2 }} m={0}>
                   <SAETextField
-                    label="Cantidad"
+                    label="Cupo"
                     type="number"
                     fullWidth
                     value={dialogData.cantidad_personas}
@@ -558,9 +584,9 @@ function EmployedTravelsContent(){
                   </Divider>
                 </Grid>
                 
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 4 }} sx={{ my: 1 }}>
                   <SAETextField
-                    label="Provincia"
+                    label="Pais/Provincia"
                     fullWidth
                     value={addressPartsOrigin[0]}
                     onChange={(e) => handleAddressChange(0, e.target.value,"origen")}
@@ -568,7 +594,7 @@ function EmployedTravelsContent(){
                     slotProps={{ htmlInput: { maxLength: 50 } }}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 4 }}  sx={{ my: 1 }}>
                   <SAETextField
                     label="Ciudad / Localidad"
                     fullWidth
@@ -579,7 +605,7 @@ function EmployedTravelsContent(){
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 4 }} sx={{ my: 1 }}>
                   <SAETextField
                     label="Complejo / Ubicacion"
                     fullWidth
@@ -589,7 +615,7 @@ function EmployedTravelsContent(){
                     slotProps={{ htmlInput: { maxLength: 80 } }}
                   />
                 </Grid>
-                <Grid size={{ xs: 12 }}>
+                <Grid size={{ xs: 12 }} >
                   <Divider variant="middle" sx={{ my: 2 }}>
                     <Chip
                       label="Destino"
@@ -598,9 +624,9 @@ function EmployedTravelsContent(){
                     />
                   </Divider>
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 4 }}  sx={{ my: 1 }}>
                   <SAETextField
-                    label="Provincia"
+                    label="Pais/Provincia"
                     fullWidth
                     value={addressPartsDestiny[0]}
                     onChange={(e) => handleAddressChange(0, e.target.value,"destino")}
@@ -608,7 +634,7 @@ function EmployedTravelsContent(){
                     slotProps={{ htmlInput: { maxLength: 50 } }}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 4 }}  sx={{ my: 1 }}>
                   <SAETextField
                     label="Ciudad / Localidad"
                     fullWidth
@@ -619,7 +645,7 @@ function EmployedTravelsContent(){
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 4 }}  sx={{ my: 1 }}>
                   <SAETextField
                     label="Complejo / Ubicacion"
                     fullWidth
@@ -648,12 +674,12 @@ function EmployedTravelsContent(){
                       // 'newValue' es el objeto completo del perfil seleccionado (o null)
                       if (newValue) {
                         handleDialogChange(
-                          "id_empresa",
+                          "id_empresa_viaje",
                           newValue.id,
                         );
                       } else {
                         // Maneja el caso de que se borre la selección
-                        handleDialogChange("id_empresa", null);
+                        handleDialogChange("id_empresa_viaje", null);
                       }
                     }}
                     // Asegura que la comparación se haga por id
@@ -662,7 +688,7 @@ function EmployedTravelsContent(){
                     }
                     value={bussiness.find(
                       (buss) =>
-                        buss.id === dialogData.id_empresa,
+                        buss.id === dialogData.id_empresa_viaje,
                     )} // Pasa el objeto completo
                     renderInput={(params) => (
                       <TextField
@@ -681,8 +707,8 @@ function EmployedTravelsContent(){
                     label="Presupuesto"
                     type="number"
                     fullWidth
-                    value={dialogData.costo_total}
-                    onChange={(e) => handleDialogChange("costo_total", e.target.value)}
+                    value={dialogData.costo_aproximado}
+                    onChange={(e) => handleDialogChange("costo_aproximado", e.target.value)} 
                     
                   />
                 </Grid>                
@@ -690,7 +716,7 @@ function EmployedTravelsContent(){
                   <FormControlLabel
                       control={
                         <Switch
-                          checked={dialogData.seguro}
+                          checked={dialogData.seguro||false}
                           onChange={(e) =>
                             handleDialogChange("seguro", e.target.checked)
                           }
@@ -727,7 +753,7 @@ function EmployedTravelsContent(){
             </SAEButton>
             <SAEButton
               variant="contained"
-              onClick={handleBussinessSave}
+              onClick={handleTravelSave}
               disabled={dialogSaving}
               startIcon={
                 dialogSaving ? (
@@ -744,219 +770,369 @@ function EmployedTravelsContent(){
           </DialogActions>
         </Dialog>
       )}
-      {/* Seccion de Inscriptos*/}
-      {dialogOpen && dialogType === "inscriptions" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="span"
-              sx={{ fontWeight: "bold" }}
-            >
-              {dialogMode === "create"
-                ? "Agregar Inscriptos"
-                : "Editar Inscriptos"}
-            </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent dividers>
-            <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
-                <Alert severity="error" onClose={() => setDialogError("")}>
-                  {dialogError}
-                </Alert>
-              )}
-              <Grid container spacing={1}>
-                <Grid size={{xs:12}} m={0}>
-                {/* CASO A: No hay usuario seleccionado -> Mostramos el buscador */}
-                { (!usuarioSelected) ? (
-                    <SAETextField
-                        label="Legajo"
-                        value={dialogData.legajo}
-                        onChange={(e) => handleDialogChange("legajo", e.target.value)}
-                        fullWidth
-                        disabled={loadingUsuario} // Deshabilita el input mientras busca
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                fetchUsuariosXlegajo(dialogData.legajo);
-                            }
-                        }}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    {loadingUsuario ? (
-                                        <CircularProgress size={24} color="inherit"/> // Spinner dentro del input
-                                    ) : (
-                                        <IconButton 
-                                            onClick={() => fetchUsuariosXlegajo(dialogData.legajo)}
-                                            edge="end"
-                                        >
-                                        <SearchIcon />
-                                        </IconButton>
-                                    )}
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                  ) : (
-                    /* CASO B: Usuario encontrado -> Mostramos resultado y opción de limpiar */
-                    <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: 1 }}>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                            Usuario Seleccionado:
-                        </Typography>
-                        {/* Reemplazá esto con los campos reales de tu objeto "usuarioSelected" */}
-                        <Typography variant="body1">
-                            {usuarioSelected.nombre_usuario}
-                        </Typography>
-                        <Stack direction={"row"} mt={2} spacing={2}>
-                          <Button 
-                            variant="contained" 
-                            size="small" 
-                            onClick={handleAddIncriptos} // Resetea para permitir volver a buscar
-                            sx={{ mt: 2 }}
-                          >
-                            Agregar Estudiante
-                          </Button>                        
-                          <Button 
-                              variant="outlined" 
-                              color="secondary" 
-                              size="small" 
-                              onClick={() => setUsuarioSelected(null)} // Resetea para permitir volver a buscar
-                              sx={{ mt: 2 }}
-                          >
-                              Volver a buscar
-                          </Button>
-                        </Stack>
-                        
-                    </Box>
-                )}
-                  {loadingInscripts && (
-                  <Stack alignItems="center" width={"100%"} gap={1}>
-                    <SAESpinner size="S" />
-                  </Stack>
-                  )}
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight="bold" p={1} my={2} >
-                        Planilla de Inscriptos
-                    </Typography>
-                  {!loadingInscripts && inscriptsTravel && inscriptsTravel.length === 0 && (
-                    <Stack alignItems="center" width={"100%"} gap={1}>
-                      <Typography variant="body2" noWrap>Sin Inscriptos</Typography>
-                    </Stack>
-                  )}
-                  {!loadingInscripts && inscriptsTravel && inscriptsTravel.length > 0 &&(
-                  <List dense disablePadding>
-                    {inscriptsTravel.map((d) => (
-                      <InscriptosCard datosEstudiante={d}/>
-                    ))}
-                    </List>
-                  )}        
-                  </Box>                
-                </Grid>
-              </Grid>
-            </Stack>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <SAEButton
-              variant="outlined"
-              onClick={() => setDialogOpen(false)}
-            >
-              Cerrar
-            </SAEButton>            
-          </DialogActions>
-        </Dialog>
+      {dialogOpen && dialogType === "documents" && (
+        <DocumentsDialog/>
       )}
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={3000}
           onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          {snackbarMsg}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={() => setSnackbarOpen(false)}
+            severity="success"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbarMsg}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );
 }
-function InscriptosCard({datosEstudiante}){
+//Lo separe para que me sea mas coherente de programar
+function DocumentsDialog(){
+  const {   
+            dialogOpen, setDialogOpen,
+            dialogError,
+            docsViaje,docsViajeList,loadingViajeDocs,downloadingDocId,
+            handlePreviewDoc,handleDownloadDoc,
+            previewOpen,setPreviewOpen,
+            previewTitle,
+            previewSrc, 
+            previewIsPdf, 
+            loadingPreview,
+            previewError,
+            previewDocRef,
+            openPopup,setOpenPopup,documentoAEliminar,requestDeleteDocument,handleDelete,
+            travelNewFile,handleArchivoChange,fileInputRef,selectedTypeDoc,setTypeDoc
+      } = useTravel();
 
-  const [estudiante,SetDatosEstudiante] = useState(datosEstudiante);
-  const handleInscriptosChange = (field, value) => {
-    SetDatosEstudiante((prev) => ({ ...prev, [field]: value }));
+  const handleComboChange = (field, value) => {
+    setTypeDoc((prev) => ({ ...prev, [field]: value }));
   };
-
-  const {handleRemoveInscriptos} = useTravel();
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
   return(
-    <ListItem
-      key={estudiante.id}
-      disablePadding
-    >
-      <ListItemButton
-        sx={{ py: 0.5 }}
+    <>
+    <DocumentPreviewDialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        title={previewTitle}
+        imageSrc={previewSrc}
+        isPdf={previewIsPdf}
+        loading={loadingPreview}
+        error={previewError}
+        onDownload={() =>
+            previewDocRef &&
+            handleDownloadDoc(
+            previewDocRef.id,
+            previewDocRef.nombre_documento,
+            previewDocRef.extension,
+          )
+        }
+      />
+
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
       >
-        <ListItemIcon sx={{ minWidth: 28 }}>
-          <Diversity1 fontSize="small" sx={{ color: "#bdbdbd", pointerEvents: "none" }} />
-        </ListItemIcon>
-        
-        <ListItemText sx={{ minWidth: 28 }}
-          primary={<Typography variant="body2" noWrap>{estudiante.nombre_estudiante || estudiante.legajo_estudiante}</Typography>}
-          secondary={
-            estudiante.nombre_estudiante
-              ? <Typography variant="caption" color="text.secondary">{estudiante.legajo_estudiante}</Typography>
-              : undefined
-          }
-        />
-          <FormControlLabel
-            sx={{ width: 200 }}
-            control={
-              <Switch
-                checked={estudiante.documentacion_presentada}
-                onChange={(e) =>
-                  handleInscriptosChange("documentacion_presentada", e.target.checked)
-                }
-                color="primary"
-              />
-            }
-            label={
-              estudiante.documentacion_presentada
-                ? "Documentacion Completa"
-                : "Falta Documentacion"
-            }
-          />
-          <IconButton sx={{ minWidth: 24,width:50 }}
-          //onClick={()=>handleRemoveInscriptos(d.id)}
-          edge="end"
-          >
-            <FolderIcon />
-          </IconButton> 
-          <IconButton  
-            onClick={()=>handleRemoveInscriptos(estudiante.id)}
-            edge="end"
-            >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
+            Documentación — {docsViaje.nombre}
+          </Typography>
+          <IconButton onClick={() => setDialogOpen(false)} size="small">
             <CloseIcon />
           </IconButton>
-      </ListItemButton>
-    </ListItem>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={1} sx={{ pt: 1 }}>
+            <Autocomplete
+                disablePortal
+                options={TRAVELS_REQUIRED_DOCUMENTS}
+                getOptionLabel={(option) => option.nombre}
+                onChange={(event, newValue) => {
+                  // 'newValue' es el objeto completo del perfil seleccionado (o null)
+                  if (newValue) {
+                    handleComboChange(
+                      "id",
+                      newValue.id,
+                    );
+                  } else {
+                    // Maneja el caso de que se borre la selección
+                    handleComboChange("id", null);
+                  }
+                }}
+                // Asegura que la comparación se haga por id
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value.id
+                }
+                value={
+                  TRAVELS_REQUIRED_DOCUMENTS.find(
+                    (doc) => doc.id === selectedTypeDoc?.id
+                  ) || null
+                } 
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Documento a Cargar"
+                    inputProps={{
+                      ...params.inputProps,
+                      readOnly: true, // Esto evita la escritura
+                    }}
+                  />
+                )}
+              />
+            {selectedTypeDoc&&(
+              <FileDropZone/>
+            )}
+
+              {selectedTypeDoc&&travelNewFile && (
+                <Grid container direction={{xs:"column",md:"row"}} spacing={1}>
+                  <Grid size={{xs:12,md:6}}>
+                    <SAEButton 
+                    fullWidth
+                    color="secondary"
+                    variant="contained" 
+                    onClick={handleButtonClick}
+                    >
+                    Cambiar archivo
+                    </SAEButton> 
+                  </Grid>
+                  <Grid size={{xs:12,md:6}}>
+                    <SAEButton 
+                    fullWidth
+                    type="button"
+                    variant="contained" 
+                    onClick={()=>handleArchivoChange(selectedTypeDoc)}
+                  >
+                      Agregar Archivo
+                  </SAEButton>
+                  </Grid>
+                </Grid>            
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogContent dividers>
+          {dialogError && (
+            <Alert severity="error">{dialogError}</Alert>
+          )}
+          {loadingViajeDocs && (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <SAESpinner size="S"/>
+            </Box>
+          )}
+
+          {!loadingViajeDocs  && docsViajeList.length === 0 && (
+            <Typography
+              color="text.secondary"
+              sx={{ py: 2, textAlign: "center" }}
+            >
+              No hay documentación disponible de este viaje.
+            </Typography>
+          )}
+          {!loadingViajeDocs && docsViajeList.length > 0 && (
+            <Stack spacing={1} sx={{ pt: 1 }}>
+              {docsViajeList.map((doc,index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    p: 1.5,
+                    borderRadius: 2,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                     {doc.nombre_documento.replace(/_/g, " ")}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {doc.extension?.toUpperCase()}
+                    </Typography>
+                  </Box>
+                  <Stack direction="row" spacing={0.5}>
+                    <Tooltip title="Ver Documentos">
+                      <IconButton
+                        size="small"
+                        onClick={() => handlePreviewDoc(doc)}
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Descargar">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          handleDownloadDoc(
+                            doc.id,
+                            doc.nombre_documento,
+                            doc.extension,
+                          )
+                        }
+                        disabled={downloadingDocId === doc.id}
+                      >
+                        {downloadingDocId === doc.id ? (
+                          <CircularProgress size={18} />
+                        ) : (
+                          <DownloadIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                    
+                    <Tooltip title="Eliminar">
+                      <IconButton
+                        size="small"
+                        onClick={() => requestDeleteDocument(doc)}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+
+                  </Stack>
+                </Box>
+              ))}
+            </Stack>
+          )}
+          
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <SAEButton
+            variant="outlined"
+            onClick={() => setDialogOpen(false)}
+          >
+            Cerrar
+          </SAEButton>
+        </DialogActions>
+        </Dialog>
+        <Dialog open={openPopup} onClose={()=>setOpenPopup(false)}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600,p:4}}>
+              EliminarDocumento
+            </Typography>
+
+          <DialogContent>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              "Esta seguro que quiere eliminar el documento: " {documentoAEliminar?.nombre_documento}
+            </Typography>
+          </DialogContent>
+
+          <DialogActions>
+            <SAEButton
+              onClick={() => setOpenPopup(false)}
+              autoFocus
+              color="outlined"
+            >
+              Cancelar
+            </SAEButton>
+            <SAEButton
+              onClick={() => handleDelete(documentoAEliminar)}
+              autoFocus
+              color="error"
+            >
+              Eliminar
+            </SAEButton>
+          </DialogActions>
+        </Dialog>      
+    </>
+  )
+}
+function FileDropZone() {
+  const [isOver, setIsOver] = useState(false);
+  const {travelNewFile, setTravelNewFile,fileInputRef} = useTravel();
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsOver(true); 
+  };
+
+  const handleDragLeave = () => {
+    setIsOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsOver(false);
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles.length > 0) {
+      setTravelNewFile(droppedFiles[0]);
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFiles = e.target.files;
+    if (selectedFiles.length > 0) {
+      setTravelNewFile(selectedFiles[0]);
+    }
+  };
+
+  return (
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      style={{
+        border: isOver ? "2px dashed #4CAF50" : "2px dashed #ccc",
+        backgroundColor: isOver ? "#e8f5e9" : "#fafafa",
+        padding: "14px 0px",
+        textAlign: "center",
+        borderRadius: "8px",
+        transition: "all 0.2s ease",
+      }}
+    >
+      {/* INPUT OCULTO: Hace el trabajo duro por detrás */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: "none" }} 
+      />
+
+      {travelNewFile ? (
+        <div>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            ✅Cargado: <strong>{travelNewFile.name}</strong>
+          </Typography>
+
+        </div>
+      ) : (
+        <div>
+          <Typography variant="body2" sx={{ fontWeight: 600,paddingBottom:"2px" }}>
+             Arrastra tu archivo aquí 📄<br/>o
+          </Typography>
+          <SAEButton 
+            type="button"
+            variant="contained" 
+            onClick={handleButtonClick}
+            sx={{
+              color: "white",
+              border: "none",
+              cursor: "pointer"
+            }}
+          >
+            Buscar Archivo
+          </SAEButton>
+        </div>
+      )}
+    </div>
   );
 }

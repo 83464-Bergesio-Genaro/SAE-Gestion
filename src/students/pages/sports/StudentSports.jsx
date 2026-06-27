@@ -19,6 +19,7 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import DocumentCard from "../../../shared/components/documents/DocumentCard";
 
 import DeportesMasonry from "../../components/deportesMasonery";
 import JsonArrayDataGrid from "../../../shared/components/jsonArrayDataGrid/jsonArrayDataGrid";
@@ -27,7 +28,6 @@ import SearchIcon from "@mui/icons-material/Search";
 
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import DocumentCard from "../../../shared/components/documents/DocumentCard";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 
 import { SPORTS_STRINGS } from "./sports.strings";

@@ -1,75 +1,240 @@
-import { Box,Container,Grid, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Box,Container,Grid, Typography,Stack,Divider} from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 import SAEButton from "../../components/buttons/SAEButton";
 import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
-import "./main.css";
+import { motion } from "framer-motion";
+const baseUrl = import.meta.env.BASE_URL;
 
 export default function Main(){
   return(
-    <div>
-    <Box className="color-container" marginTop={{xs:"-15px"}} marginBottom={{xs:2}}>
-      <Box className="image-container">
-        <Grid container xs={12} md={6} sx={{justifyContent: "center",minHeight: "50vh",paddingTop:{xs:"2vh",sm:"4vh",md:"6vh"}  }} >
-          <Grid container size={12} spacing={4} xs={12} md={12} >
-            
-            <Typography variant="h2" 
-            width={"100%"} 
-            sx={{ textAlign:{ xs: "center", sm: "left",md:"left" },
-            fontWeight: "bold",
-            color: "#000000",
-            fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4.5rem" }}}>
-              Secretaría de <br />
-              Asuntos <br />
-              Estudiantiles
-            </Typography>
-            <Typography variant="h5" width={"100%"} sx={{
-              textAlign:{ xs: "center", sm: "left",md:"left" },color: "#000000",
-              fontSize: { xs: "1.25rem", md: "1.15rem",lg:"1.2rem" }}}>
-              Universidad Tecnologica Nacional - Facultad Regional Córdoba
-            </Typography>
-            <Grid container 
-              width={"100%"} 
-              justifyContent={{ xs: "center", sm: "flex-start", md: "flex-start" }} 
-              spacing={4}
-              size={{ xs: 12, sm: 12,md:12,lg:8 }}
-              xs={12}
-              sm={12} 
-              md={8} 
-              sx={{ m: 0, p:{xs:4,sm:0} }}>
-                <Grid 
-                  container
-                  size={{ xs: 12, sm: 6 }}>
-                  <SAEButton
-                  sx={{width:"100%",textTransform: "none",textAlign: "center"}}
-                    component={Link}
-                    to="/JPA"
-                    variant="contained"
-                  >
-                    Conoce nuestra Universidad
-                  </SAEButton>
-                </Grid>
-                
-                <Grid 
-                  container
-                  size={{ xs: 12, sm: 6 }}>
-                  <SAEButton
-                    sx={{width:"100%",textTransform: "none",textAlign: "center"}}
-                    component={Link}
-                    to="/login"
-                    variant="contained"
-                    color="success"
-                  >
-                    Soy parte de la UTN
-                  </SAEButton>
-                </Grid>
-              </Grid>
-          </Grid>
-        </Grid>
-        
-      </Box>
-
-    </Box>
+    <>
+      <SAEHero/>
       <NovedadesEstudiantiles/>
-    </div>
+    </>
+  );
+}
+
+function SAEHero() {
+  const MotionImg = motion.img;
+  const navigate = useNavigate();
+  return (
+    <Box
+      sx={{
+        mt: "-90px",
+        pt: { xs: "114px", md: "100px" },
+        pb: 4,
+        minHeight: "calc(100vh - 90px)",
+        background:
+          "linear-gradient(135deg, #1538B8 0%, #40C5F2 100%)",
+        overflow: "hidden",
+      }}
+    >
+      <Container maxWidth="xl">
+        <Stack
+          justifyContent="center"
+          alignItems="center"
+          sx={{
+            minHeight: "calc(100vh - 200px)",
+          }}
+        >
+          {/* ---------------- MOBILE ---------------- */}
+
+          <Box
+            sx={{
+              display: { xs: "block", md: "none" },
+              mb: 3,
+            }}
+          >
+            <MotionImg
+            
+                src={`${baseUrl}images/principal/mobileSAE.svg`}
+                alt="Secretaría"
+                initial={{
+                  opacity: 0,
+                  x: -80,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                }}
+                transition={{
+                  duration: 1,
+                }}
+                style={{
+                  width: "100%",
+                  maxWidth: "520px",
+                }}
+              />
+          </Box>
+
+          {/* ---------------- DESKTOP ---------------- */}
+
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={{ xs: 2, md: 4 }}
+            justifyContent="center"
+            alignItems="center"
+            sx={{
+              width: "100%",
+            }}
+          >
+            {/* Texto SAE Desktop */}
+
+            <Box
+              sx={{
+                display: { xs: "none", md: "block" },
+                flex: 1,
+                textAlign: "right",
+              }}
+            >
+              <MotionImg
+                src={`${baseUrl}images/principal/desktopSAE.svg`}
+                alt="Secretaría"
+                initial={{
+                  opacity: 0,
+                  x: -80,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                }}
+                transition={{
+                  duration: 1,
+                }}
+                style={{
+                  width: "100%",
+                  maxWidth: "520px",
+                }}
+              />
+            </Box>
+            {/* Divider Desktop */}
+
+            <Divider
+              orientation="vertical"
+              flexItem
+              sx={{
+                display: { xs: "none", md: "block" },
+                bgcolor: "rgba(255,255,255,.85)",
+                width: "4px",
+                borderRadius: 3,
+              }}
+            />
+            {/* Logo SAE */}
+
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                justifyContent: {
+                  xs: "center",
+                  md: "flex-start",
+                },
+              }}
+            >
+              <MotionImg
+              
+                src={`${baseUrl}saeLogo.svg`}
+                alt="SAE"
+                initial={{
+                  opacity: 0,
+                  x: 80,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                }}
+                transition={{
+                  duration: 1,
+                }}
+                style={{
+                  width: "100%",
+                  maxWidth: "600px",
+                }}
+              />
+            </Box>
+          </Stack>
+
+          {/* ---------------- DESCRIPCIÓN ---------------- */}
+
+          <Typography
+            variant="title"
+            sx={{
+              mt: 5,
+              mb: 4,
+              maxWidth: 700,
+              textAlign: "center",
+              color: "white",
+              fontWeight: 500,
+              opacity: 0.90,
+              px: 2,
+            }}
+          >
+            Deportes, becas, salud, viajes, congresos,
+            actividades recreativas y acompañamiento
+            estudiantil para que disfrutes al máximo tu
+            experiencia universitaria.
+          </Typography>
+
+          {/* ---------------- BOTONES ---------------- */}
+
+          <Stack
+            direction={{
+              xs: "column",
+              sm: "row",
+            }}
+            spacing={2}
+            sx={{
+              width: {
+                xs: "100%",
+                sm: "auto",
+              },
+              maxWidth: 700,
+            }}
+          >
+            <SAEButton
+              onClick={()=>navigate("/JPA")}
+              variant="contained"
+              size="large"
+              sx={{
+                width:340,
+                py: 1.6,
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: "1rem",
+
+                 background:"var(--secondary)",
+              }}
+            >
+              Conocé nuestra Universidad
+            </SAEButton>
+
+            <SAEButton
+              onClick={()=>navigate("/login")}
+              variant="contained"
+              size="large"
+              sx={{
+                width:340,
+                py: 1.6,
+                borderRadius: 2,
+                textTransform: "none",
+                color: "white",
+                background:"#6FA958",
+                fontWeight: 700,
+                fontSize: "1rem",
+
+
+                "&:hover": {
+                  borderColor: "white",
+                  bgcolor: "rgba(255,255,255,.08)",
+                },
+              }}
+            >
+              Soy parte de la UTN
+            </SAEButton>
+          </Stack>
+        </Stack>
+      </Container>
+    </Box>
   );
 }

@@ -1,25 +1,31 @@
-import {useState, useEffect } from "react";
+import {useState, useEffect ,useCallback} from "react";
 import { JPAContext } from "../sharedContext"; 
 import { ObtenerEventosPublicos } from "../../../api/JPAService";
 
 export function JPAProvider({ children }) {
   const [eventosJPA, setEventosJPA] = useState([]);
-  useEffect(() => {
-    const ObtenerEventosPublicosApi = async () => {
+  const [loadingEventos, setLodingEventos] = useState(false);
+
+  const fetchEventosSAE = useCallback(async () => {
+      setLodingEventos(true);
       try {
-        const data = await ObtenerEventosPublicos();
-        setEventosJPA(data);
-      } catch (error) {
-        console.error("Error al traer Eventos:", error);
+          const data = await ObtenerEventosPublicos();
+          
+          setEventosJPA(data);
+      } catch(error) {
+          setEventosJPA([]);
+          console.error("Error al traer Eventos:", error);
       }
-    };
-    ObtenerEventosPublicosApi();
-  }, []);
+      finally{
+          setLodingEventos(false);
+      }
+  }, [])
+  useEffect(() => { fetchEventosSAE(); }, [fetchEventosSAE]);
 
   return (
     <JPAContext.Provider
       value={{
-        eventosJPA
+        eventosJPA,loadingEventos
       }}
     >
       {children}

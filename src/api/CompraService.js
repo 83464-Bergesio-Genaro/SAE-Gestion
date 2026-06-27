@@ -65,6 +65,14 @@ export async function CrearCompra(body) {
   return RequestAPI("/api/Compra/CrearCompra/", "POST", body);
 }
 
+export async function ModificarCompra(id_compra, body) {
+  return RequestAPI(
+    `/api/Compra/ModificarCompra/${encodeURIComponent(id_compra)}`,
+    "PUT",
+    body,
+  );
+}
+
 export async function EliminarCompra(id_compra) {
   return RequestAPI(
     `/api/Compra/EliminarCompra/${encodeURIComponent(id_compra)}`,

@@ -114,7 +114,7 @@ export function StudentContent() {
                     <Box
                       sx={{
                         alignItems: "center",
-                        bgcolor: "primary.main",
+                        bgcolor: "var(--primary)",
                         borderRadius: 2,
                         color: "white",
                         display: "flex",
@@ -130,7 +130,11 @@ export function StudentContent() {
                       <Typography fontWeight={800} noWrap>
                         {link.titulo}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" noWrap>
+                      <Typography
+                        variant="body2"
+                        color="var(--textSecondary)"
+                        noWrap
+                      >
                         {link.hipervinculo}
                       </Typography>
                     </Box>

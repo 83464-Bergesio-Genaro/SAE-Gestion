@@ -29,7 +29,7 @@ export default function HeaderPage({
         borderRadius: 5,
         p: { xs: 3, md: 3 },
         color: "white",
-        backgroundImage: `linear-gradient(120deg, rgba(18,54,102,.96), rgba(53,108,178,.78)), url('${baseUrl}${backgroundImage}')`,
+        backgroundImage: `linear-gradient(135deg, var(--primary) 0%, var(--lightBlue) 100%), url('${baseUrl}images/carrousel/EntradaUTN.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",

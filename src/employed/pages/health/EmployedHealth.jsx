@@ -149,7 +149,7 @@ function EmployedAdminContent(){
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #6140CB 100%)",
+              background: "var(--purpleGradient)",
               color: "white",
               px: 3,
               py: 2.5,
@@ -197,7 +197,7 @@ function EmployedAdminContent(){
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               pt: 0,
@@ -352,7 +352,7 @@ function EmployedAdminContent(){
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               py: 2.5,
@@ -508,7 +508,7 @@ function EmployedAdminContent(){
             </SAEButton>
           </DialogActions>
         </Dialog>
-      )} 
+      )}
 
       {/*DIALOG DE PERSONAL*/}
       {dialogOpen && dialogType === "personal" && (

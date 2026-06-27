@@ -174,7 +174,6 @@ function EmployedContent() {
           title="Gestión de Consultas"
           description="Revisá el contenido visible para estudiantes y planificá su administración."
         />
-        <TitleBox title="Links Frecuentes" />
         <Card
           sx={{
             borderRadius: 4,
@@ -185,7 +184,7 @@ function EmployedContent() {
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               pt: 0,
@@ -354,7 +353,7 @@ function EmployedContent() {
         </Grid>*/}
         <Typography color="text.secondary" sx={{ mt: 4 }}>
           Las consultas preparadas por estudiantes se dirigen actualmente a:{" "}
-         <strong> {SAE_EMAIL}</strong>
+          <strong> {SAE_EMAIL}</strong>
         </Typography>
 
         {dialogOpen && dialogType === "linkFrecuentes" && (

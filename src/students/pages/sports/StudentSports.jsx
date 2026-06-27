@@ -162,7 +162,7 @@ function StudentSportsContent() {
               sx={{
                 px: 3,
                 py: 2.5,
-                background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+                background: "var(--gradient)",
               }}
             >
               <Stack

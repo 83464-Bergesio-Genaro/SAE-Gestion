@@ -228,7 +228,7 @@ function EmployedPurchasesContent() {
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               pt: 0,

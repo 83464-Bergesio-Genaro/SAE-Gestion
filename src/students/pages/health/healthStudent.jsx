@@ -30,7 +30,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 import { useAuth } from "../../../shared/context/sharedContext";
-import { useHealth } from "../../context/studentContext"; 
+import { useHealth } from "../../context/studentContext";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useEffect } from "react";
 
@@ -225,25 +225,40 @@ export function EmployedStudentContent() {
     cursos,
     loadingCursos,
 
-        fetchTurnosEstudiante,estudianteTurnos,loadingTurnos,
-        turnsRows,turnsColumns,
-        openCreateTurnos,openShowTurnos,openDeleteTurnos,handleTurnosSave,
-        snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
-        dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
-
-    } = useHealth();
+    fetchTurnosEstudiante,
+    estudianteTurnos,
+    loadingTurnos,
+    turnsRows,
+    turnsColumns,
+    openCreateTurnos,
+    openShowTurnos,
+    openDeleteTurnos,
+    handleTurnosSave,
+    snackbarOpen,
+    setSnackbarOpen,
+    snackbarMsg,
+    setDialogError,
+    dialogOpen,
+    setDialogOpen,
+    dialogData,
+    setDialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+  } = useHealth();
 
   useEffect(() => {
     fetchTurnosEstudiante(user.legajo);
   }, [fetchTurnosEstudiante, user]);
 
-    const handleDialogChange = (field, value) => {
-        setDialogData((prev) => ({ ...prev, [field]: value }));
-    };   
-    
-    const horariosAgrupados = agruparPorEspecialidad(allHorarios);
-    
-    return (
+  const handleDialogChange = (field, value) => {
+    setDialogData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const horariosAgrupados = agruparPorEspecialidad(allHorarios);
+
+  return (
     <Box
       sx={{
         mt: "-90px",
@@ -271,8 +286,7 @@ export function EmployedStudentContent() {
         <Card
           sx={{
             position: "relative",
-            background:
-              "linear-gradient(135deg,#123666 0%,#2A548B 50%,#6CABDD 100%)",
+            background: "var(--gradient)",
             borderRadius: 6,
             overflow: "hidden",
             "&::before": {
@@ -497,8 +511,7 @@ export function EmployedStudentContent() {
           sx={{
             position: "relative",
             p: 2,
-            background:
-              "linear-gradient(135deg,#123666 0%,#2A548B 50%,#6CABDD 100%)",
+            background: "var(--gradient)",
             borderRadius: 6,
             overflow: "hidden",
             "&::before": {
@@ -662,8 +675,7 @@ export function EmployedStudentContent() {
         <Card
           sx={{
             position: "relative",
-            background:
-              "linear-gradient(135deg,#5B84B8 0%,#4D7DBB 50%,#6CABDD 100%)",
+            background: "var(--gradient)",
             borderRadius: 6,
             overflow: "hidden",
             "&::before": {

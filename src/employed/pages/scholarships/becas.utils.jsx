@@ -521,12 +521,15 @@ export function SectionGridCard({
   const getDialogDataFromRow = (row = {}) =>
     currentSection.columns
       .filter((col) => col.form !== false)
-      .reduce((acc, col) => {
-        if (acc[col.field] === undefined) {
-          acc[col.field] = col.defaultValue ?? "";
-        }
-        return acc;
-      }, cloneValue(row ?? {}));
+      .reduce(
+        (acc, col) => {
+          if (acc[col.field] === undefined) {
+            acc[col.field] = col.defaultValue ?? "";
+          }
+          return acc;
+        },
+        cloneValue(row ?? {}),
+      );
 
   const resetDocumentosBecario = () => {
     setDocumentosBecario({ comunes: [], economica: [] });
@@ -956,45 +959,61 @@ export function SectionGridCard({
       >
         <Box
           sx={{
-            background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+            background: "var(--gradient)",
             color: "white",
             px: 3,
           }}
         >
-          <Tabs
-            value={activeSection}
-            onChange={(_, sectionKey) => handleSectionChange(sectionKey)}
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-            sx={{
-              minHeight: 0,
-              "& .MuiTabs-indicator": {
-                bgcolor: "white",
-                height: 3,
-              },
-              "& .MuiTab-root": {
-                color: "rgba(255,255,255,0.6)",
-                minHeight: 0,
-                px: 2.5,
-                py: 1.5,
-                fontWeight: 500,
-                fontSize: "0.85rem",
-                letterSpacing: "0.05em",
-              },
-              "& .Mui-selected": {
-                color: "white",
-                fontWeight: 700,
-              },
-              "& .MuiTabs-scrollButtons": {
-                color: "white",
-              },
-            }}
+          <Stack
+            direction="row"
+            overflow={{ xs: "auto", md: "hidden" }}
+            spacing={0}
           >
             {Object.entries(card.sections).map(([key, section]) => (
-              <Tab key={key} value={key} label={section.tabTitle} />
+              <Box
+                key={key}
+                onClick={() => handleSectionChange(key)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexShrink: 0,
+                  px: 2.5,
+                  py: 1.5,
+                  cursor: "pointer",
+                  fontWeight: activeSection === key ? 700 : 500,
+                  fontSize: "0.85rem",
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                  color:
+                    activeSection === key
+                      ? "white"
+                      : "rgba(255,255,255,0.6)",
+                  borderBottom:
+                    activeSection === key
+                      ? "3px solid white"
+                      : "3px solid transparent",
+                  transition: "all 0.15s",
+                  "&:hover": {
+                    color: "white",
+                    borderBottomColor: "rgba(255,255,255,0.4)",
+                  },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontWeight: "inherit",
+                    fontSize: "inherit",
+                    letterSpacing: "inherit",
+                    textTransform: "inherit",
+                    color: "inherit",
+                    lineHeight: 1,
+                  }}
+                >
+                  {section.tabTitle}
+                </Typography>
+              </Box>
             ))}
-          </Tabs>
+          </Stack>
 
           <Stack
             direction={{ xs: "column", sm: "row" }}

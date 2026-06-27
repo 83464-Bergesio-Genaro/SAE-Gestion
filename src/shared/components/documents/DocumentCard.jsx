@@ -34,9 +34,19 @@ export default function DocumentCard({
   requiredLabel = "Requerido",
   optionalLabel = "Opcional",
   withoutFileLabel = "Sin archivo",
+  documents,
+  getDocumentName,
+  getDocumentId,
+  onDeleteDocument,
 }) {
   const previewId = getDocumentPreviewId(documento);
   const displayName = getDocumentDisplayName(documento);
+  const handlesMultipleDocuments =
+    Boolean(documento.multiple) && Array.isArray(documents);
+  const hasMultipleDocuments =
+    handlesMultipleDocuments && documents.length > 1;
+  const singleDocument =
+    handlesMultipleDocuments && documents.length === 1 ? documents[0] : null;
   const description =
     documento.descripcion ||
     (documento.extension
@@ -111,40 +121,84 @@ export default function DocumentCard({
             </SAEButton>
           )}
 
-          {previewId ? (
-            <SAEButton
-              onClick={() => onPreview?.(previewId, displayName)}
-              sx={{
-                minWidth: 0,
-                justifyContent: "flex-start",
-                mt: 0.5,
-                width: "100%",
-              }}
-            >
-              {displayName.length > 35
-                ? `${displayName.slice(0, 35)}...`
-                : displayName}
-            </SAEButton>
-          ) : (
-            <Box
-              sx={{
-                mt: 0.5,
-                px: 1.75,
-                py: 0.9,
-                minHeight: 36,
-                width: "100%",
-                color: "text.secondary",
-                display: "flex",
-                alignItems: "center",
-                minWidth: 0,
-              }}
-            >
-              <Typography variant="body2" noWrap>
-                {displayName || withoutFileLabel}
-              </Typography>
-            </Box>
-          )}
+          {!hasMultipleDocuments &&
+            (previewId || singleDocument ? (
+              <SAEButton
+                onClick={() =>
+                  onPreview?.(previewId || singleDocument, displayName)
+                }
+                sx={{
+                  minWidth: 0,
+                  justifyContent: "flex-start",
+                  mt: 0.5,
+                  width: "100%",
+                }}
+              >
+                {displayName.length > 35
+                  ? `${displayName.slice(0, 35)}...`
+                  : displayName}
+              </SAEButton>
+            ) : (
+              <Box
+                sx={{
+                  mt: 0.5,
+                  px: 1.75,
+                  py: 0.9,
+                  minHeight: 36,
+                  width: "100%",
+                  color: "text.secondary",
+                  display: "flex",
+                  alignItems: "center",
+                  minWidth: 0,
+                }}
+              >
+                <Typography variant="body2" noWrap>
+                  {displayName || withoutFileLabel}
+                </Typography>
+              </Box>
+            ))}
+          {hasMultipleDocuments && (
+            <Stack spacing={0.75} sx={{ mt: 1 }}>
+              {documents.map((document, index) => {
+                const name =
+                  getDocumentName?.(document) || `Documento ${index + 1}`;
+                const id = getDocumentId?.(document);
 
+                return (
+                  <Stack
+                    key={`${name}-${id ?? index}`}
+                    direction="row"
+                    spacing={0.5}
+                    alignItems="center"
+                  >
+                    <SAEButton
+                      onClick={() => onPreview?.(id || document, name)}
+                      sx={{
+                        minWidth: 0,
+                        flex: 1,
+                        justifyContent: "flex-start",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {name}
+                    </SAEButton>
+                    {showActions && (
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => onDeleteDocument?.(index, document)}
+                        aria-label={`Eliminar ${name}`}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Stack>
+                );
+              })}
+            </Stack>
+          )}
           {showActions && (
             <Box
               sx={{
@@ -173,14 +227,16 @@ export default function DocumentCard({
                 />
               </IconButton>
 
-              <IconButton
-                size="small"
-                color="error"
-                disabled={deleteDisabled}
-                onClick={() => onDelete?.(documento)}
-              >
-                <Delete />
-              </IconButton>
+              {!hasMultipleDocuments && (
+                <IconButton
+                  size="small"
+                  color="error"
+                  disabled={deleteDisabled}
+                  onClick={() => onDelete?.(documento)}
+                >
+                  <Delete />
+                </IconButton>
+              )}
             </Box>
           )}
         </Stack>

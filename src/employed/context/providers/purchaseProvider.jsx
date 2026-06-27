@@ -31,7 +31,7 @@ const EMPTY_PURCHASES = {
   informe: {
     nro_expediente: null,
     id_compra: null,
-    precio_real: 0,
+    precio_real: "",
     fecha_licitacion: null,
     fecha_informe: null,
     nombre_solicitante: "",
@@ -62,7 +62,7 @@ const PURCHASE_DOCUMENT_TYPES = [
     formatoNombre: "{nombreCompra}_InformeTecnico",
     extension: ".pdf",
     multiple: false,
-    required: true,
+    required: false,
   },
 ];
 
@@ -731,7 +731,39 @@ export function PurchaseProvider({ children }) {
     setPreview((previous) => ({ ...previous, open: false }));
   }, []);
 
-  const handlePreview = useCallback(async (id, nombre) => {
+  const handlePreview = useCallback(async (documentOrId, nombre) => {
+    if (isFile(documentOrId)) {
+      setPreview({
+        open: true,
+        loading: true,
+        title: nombre || getFileName(documentOrId) || "Vista previa",
+        imageSrc: null,
+        isPdf: documentOrId.type === "application/pdf",
+        error: null,
+      });
+
+      const reader = new FileReader();
+      reader.onload = () =>
+        setPreview((previous) => ({
+          ...previous,
+          loading: false,
+          imageSrc: reader.result,
+        }));
+      reader.onerror = () =>
+        setPreview((previous) => ({
+          ...previous,
+          loading: false,
+          error: "No se pudo leer el documento seleccionado.",
+        }));
+      reader.readAsDataURL(documentOrId);
+      return;
+    }
+
+    const id =
+      typeof documentOrId === "object"
+        ? getDocumentId(documentOrId)
+        : documentOrId;
+
     if (!id) {
       setPreview({
         open: true,
@@ -989,6 +1021,7 @@ export function PurchaseProvider({ children }) {
           return {
             ...documentType,
             subido: facturas.length > 0,
+            documentos: facturas,
             id_archivo:
               facturas.length === 1 ? getDocumentId(facturas[0]) : null,
             archivoNombre:
@@ -1005,6 +1038,7 @@ export function PurchaseProvider({ children }) {
         return {
           ...documentType,
           subido: Boolean(informe),
+          documentos: informe ? [informe] : [],
           id_archivo: getDocumentId(informe),
           archivoNombre: getFileName(informe),
         };
@@ -1044,7 +1078,7 @@ export function PurchaseProvider({ children }) {
         );
 
         const informe = purchaseToSave.informe || {};
-        if (hasInformeData(informe)) {
+        if (isInformeComplete(informe)) {
           const informeBody = buildInformeBody(purchaseToSave, idCompra);
           const nroExpediente =
             informe.nro_expediente ?? informe.nroExpediente ?? null;
@@ -1126,6 +1160,7 @@ export function PurchaseProvider({ children }) {
       }
 
       if (
+        dialogMode === "require-complete-informe" &&
         hasInformeData(dialogData.informe) &&
         !isInformeComplete(dialogData.informe)
       ) {
@@ -1199,6 +1234,7 @@ export function PurchaseProvider({ children }) {
         handleCurrencyInputChange,
         handleCurrencyBlur,
         isPurchaseDataComplete,
+        isInformeReady: isInformeComplete(dialogData.informe),
         purchaseDocuments,
         handleFacturaChange,
         handleInformePdfChange,

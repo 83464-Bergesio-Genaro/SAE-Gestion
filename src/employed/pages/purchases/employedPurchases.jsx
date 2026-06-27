@@ -31,7 +31,7 @@ import DocumentPreviewDialog from "../../../shared/components/documents/Document
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 export default function EmployedPurchases() {
@@ -87,6 +87,7 @@ function EmployedPurchasesContent() {
     handleCurrencyInputChange,
     handleCurrencyBlur,
     isPurchaseDataComplete,
+    isInformeReady,
     purchaseDocuments,
     handleFacturaChange,
     handleInformePdfChange,
@@ -125,6 +126,7 @@ function EmployedPurchasesContent() {
   const [activeSection, setActiveSection] = useState("compras");
   const [busquedaGestion, setBusquedaGestion] = useState("");
   const [dateRange, setDateRange] = useState(getCurrentMonthDateRange);
+  const [warningOpen, setWarningOpen] = useState(false);
   const handleSectionChange = (section) => {
     setActiveSection(section);
     setBusquedaGestion("");
@@ -170,16 +172,28 @@ function EmployedPurchasesContent() {
     );
   }, [currentSection.rows, busquedaGestion]);
 
-
   const handleSavePurchase = () => {
+    if (
+      dialogMode === "create" &&
+      isPurchaseDataComplete &&
+      (dialogData.facturas_documentos || []).length > 0 &&
+      !isInformeReady
+    ) {
+      setWarningOpen(true);
+      return;
+    }
+    handlePurchaseDialogSave(dateRange.fechaDesde, dateRange.fechaHasta);
+  };
+
+  const handleConfirmWithoutInforme = () => {
+    setWarningOpen(false);
     handlePurchaseDialogSave(dateRange.fechaDesde, dateRange.fechaHasta);
   };
 
   const selectedEmpleado = useMemo(
     () =>
       empleados.find(
-        (empleado) =>
-          String(empleado.id) === String(dialogData.id_usuario),
+        (empleado) => String(empleado.id) === String(dialogData.id_usuario),
       ) || null,
     [dialogData.id_usuario, empleados],
   );
@@ -290,12 +304,12 @@ function EmployedPurchasesContent() {
                 alignItems={{ sm: "center" }}
               >
                 <SAETextField
-                 size="small"
+                  size="small"
                   label="Fecha Desde"
                   type="date"
                   value={dateRange.fechaDesde}
                   onChange={handleFechaDesdeChange}
-                   sx={{
+                  sx={{
                     width: { xs: "100%", sm: 240, md: 220 },
                     "& .MuiOutlinedInput-root": {
                       bgcolor: "rgba(255,255,255,0.12)",
@@ -334,12 +348,12 @@ function EmployedPurchasesContent() {
                   }}
                 ></SAETextField>
                 <SAETextField
-                 size="small"
+                  size="small"
                   label="Fecha Hasta"
                   type="date"
                   value={dateRange.fechaHasta}
                   onChange={handleFechaHastaChange}
-                   sx={{
+                  sx={{
                     width: { xs: "100%", sm: 240, md: 220 },
                     "& .MuiOutlinedInput-root": {
                       bgcolor: "rgba(255,255,255,0.12)",
@@ -447,11 +461,12 @@ function EmployedPurchasesContent() {
                   minWidth: 1250,
                   borderRadius: 0,
                   border: "none",
-                  "& .MuiDataGrid-cell[data-field='actions'], & .MuiDataGrid-columnHeader[data-field='actions']": {
-                    position: "sticky",
-                    left: 0,
-                    zIndex: 2,
-                  },
+                  "& .MuiDataGrid-cell[data-field='actions'], & .MuiDataGrid-columnHeader[data-field='actions']":
+                    {
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 2,
+                    },
                   "& .MuiDataGrid-columnHeader[data-field='actions']": {
                     zIndex: 3,
                   },
@@ -493,293 +508,265 @@ function EmployedPurchasesContent() {
 
             <Stack spacing={3}>
               {showPurchaseForm && (
-              <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Datos de la compra
-                </Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                    gap: 2,
-                  }}
-                >
-                  <Autocomplete
-                    options={empleados}
-                    loading={loadingEmpleados}
-                    value={selectedEmpleado}
-                    onChange={handleEmpleadoChange}
-                    getOptionLabel={(option) => option?.nombre_empleado || ""}
-                    isOptionEqualToValue={(option, value) =>
-                      String(option.id) === String(value.id)
-                    }
-                    renderInput={(params) => (
-                      <SAETextField
-                        {...params}
-                        label="Empleado que hizo la compra"
-                        fullWidth
-                      />
-                    )}
-                    sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
-                  />
-                  <SAETextField
-                    label="Nombre de la compra"
-                    value={dialogData.nombre_compra ?? ""}
-                    onChange={(e) =>
-                      handleDialogChange("nombre_compra", e.target.value)
-                    }
-                    fullWidth
-                  />
-                  <SAETextField
-                    label="Precio sugerido"
-                    value={getCurrencyValue(
-                      "precio_sugerido",
-                      dialogData.precio_sugerido,
-                    )}
-                    onFocus={() => setFocusedCurrencyField("precio_sugerido")}
-                    onBlur={() =>
-                      handleCurrencyBlur(
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
+                    Datos de la compra
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                      gap: 2,
+                    }}
+                  >
+                    <Autocomplete
+                      options={empleados}
+                      loading={loadingEmpleados}
+                      value={selectedEmpleado}
+                      onChange={handleEmpleadoChange}
+                      getOptionLabel={(option) => option?.nombre_empleado || ""}
+                      isOptionEqualToValue={(option, value) =>
+                        String(option.id) === String(value.id)
+                      }
+                      renderInput={(params) => (
+                        <SAETextField
+                          {...params}
+                          label="Empleado que hizo la compra"
+                          required
+                          fullWidth
+                        />
+                      )}
+                      sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
+                    />
+                    <SAETextField
+                      label="Nombre de la compra"
+                      required
+                      value={dialogData.nombre_compra ?? ""}
+                      onChange={(e) =>
+                        handleDialogChange("nombre_compra", e.target.value)
+                      }
+                      fullWidth
+                    />
+                    <SAETextField
+                      label="Precio sugerido"
+                      required
+                      value={getCurrencyValue(
                         "precio_sugerido",
                         dialogData.precio_sugerido,
-                        handleDialogChange,
-                      )
-                    }
-                    onChange={(e) =>
-                      handleCurrencyInputChange(
-                        "precio_sugerido",
-                        e.target.value,
-                        handleDialogChange,
-                      )
-                    }
-                    fullWidth
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">$</InputAdornment>
-                        ),
-                      },
-                      htmlInput: {
-                        inputMode: "decimal",
-                        placeholder: "99.999,99",
-                      },
-                    }}
-                  />
-                  <SAETextField
-                    label="Motivo"
-                    value={dialogData.motivo ?? ""}
-                    onChange={(e) =>
-                      handleDialogChange("motivo", e.target.value)
-                    }
-                    fullWidth
-                    multiline
-                    minRows={3}
-                    sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
-                  />
-                  <SAETextField
-                    label="Fecha compra"
-                    type="date"
-                    value={dialogData.fecha_compra ?? ""}
-                    onChange={(e) =>
-                      handleDialogChange("fecha_compra", e.target.value)
-                    }
-                    fullWidth
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
+                      )}
+                      onFocus={() => setFocusedCurrencyField("precio_sugerido")}
+                      onBlur={() =>
+                        handleCurrencyBlur(
+                          "precio_sugerido",
+                          dialogData.precio_sugerido,
+                          handleDialogChange,
+                        )
+                      }
+                      onChange={(e) =>
+                        handleCurrencyInputChange(
+                          "precio_sugerido",
+                          e.target.value,
+                          handleDialogChange,
+                        )
+                      }
+                      fullWidth
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">$</InputAdornment>
+                          ),
+                        },
+                        htmlInput: {
+                          inputMode: "decimal",
+                          placeholder: "99.999,99",
+                        },
+                      }}
+                    />
+                    <SAETextField
+                      label="Motivo"
+                      required
+                      value={dialogData.motivo ?? ""}
+                      onChange={(e) =>
+                        handleDialogChange("motivo", e.target.value)
+                      }
+                      fullWidth
+                      multiline
+                      minRows={3}
+                      sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
+                    />
+                    <SAETextField
+                      label="Fecha compra"
+                      required
+                      type="date"
+                      value={dialogData.fecha_compra ?? ""}
+                      onChange={(e) =>
+                        handleDialogChange("fecha_compra", e.target.value)
+                      }
+                      fullWidth
+                      slotProps={{ inputLabel: { shrink: true } }}
+                      sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
+                    />
+                  </Box>
                 </Box>
-              </Box>
               )}
 
               {showPurchaseForm && (
-              <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Informe tecnico
-                </Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                    gap: 2,
-                  }}
-                >
-                  <SAETextField
-                    label="Nro expediente"
-                    value={dialogData.informe?.nro_expediente ?? ""}
-                    onChange={(e) =>
-                      handleInformeTecnicoChange(
-                        "nro_expediente",
-                        e.target.value,
-                      )
-                    }
-                    fullWidth
-                  />
-                  <SAETextField
-                    label="Precio real"
-                    value={getCurrencyValue(
-                      "precio_real",
-                      dialogData.informe?.precio_real,
-                    )}
-                    onFocus={() => setFocusedCurrencyField("precio_real")}
-                    onBlur={() =>
-                      handleCurrencyBlur(
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
+                    Informe tecnico
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                      gap: 2,
+                    }}
+                  >
+                    <SAETextField
+                      label="Nro expediente"
+                      value={dialogData.informe?.nro_expediente ?? ""}
+                      onChange={(e) =>
+                        handleInformeTecnicoChange(
+                          "nro_expediente",
+                          e.target.value,
+                        )
+                      }
+                      fullWidth
+                    />
+                    <SAETextField
+                      label="Precio real"
+                      value={getCurrencyValue(
                         "precio_real",
                         dialogData.informe?.precio_real,
-                        handleInformeTecnicoChange,
-                      )
-                    }
-                    onChange={(e) =>
-                      handleCurrencyInputChange(
-                        "precio_real",
-                        e.target.value,
-                        handleInformeTecnicoChange,
-                      )
-                    }
-                    fullWidth
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">$</InputAdornment>
-                        ),
-                      },
-                      htmlInput: {
-                        inputMode: "decimal",
-                        placeholder: "99.999,99",
-                      },
-                    }}
-                  />
-                  <SAETextField
-                    label="Nombre solicitante"
-                    value={dialogData.informe?.nombre_solicitante ?? ""}
-                    onChange={(e) =>
-                      handleInformeTecnicoChange(
-                        "nombre_solicitante",
-                        e.target.value,
-                      )
-                    }
-                    fullWidth
-                  />
-                  <SAETextField
-                    label="Nombre ganador"
-                    value={dialogData.informe?.nombre_ganador ?? ""}
-                    onChange={(e) =>
-                      handleInformeTecnicoChange(
-                        "nombre_ganador",
-                        e.target.value,
-                      )
-                    }
-                    fullWidth
-                  />
-                  <SAETextField
-                    label="Fecha licitacion"
-                    type="date"
-                    value={dialogData.informe?.fecha_licitacion ?? ""}
-                    onChange={(e) =>
-                      handleInformeTecnicoChange(
-                        "fecha_licitacion",
-                        e.target.value,
-                      )
-                    }
-                    fullWidth
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
-                  <SAETextField
-                    label="Fecha informe"
-                    type="date"
-                    value={dialogData.informe?.fecha_informe ?? ""}
-                    onChange={(e) =>
-                      handleInformeTecnicoChange(
-                        "fecha_informe",
-                        e.target.value,
-                      )
-                    }
-                    fullWidth
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
+                      )}
+                      onFocus={() => setFocusedCurrencyField("precio_real")}
+                      onBlur={() =>
+                        handleCurrencyBlur(
+                          "precio_real",
+                          dialogData.informe?.precio_real,
+                          handleInformeTecnicoChange,
+                        )
+                      }
+                      onChange={(e) =>
+                        handleCurrencyInputChange(
+                          "precio_real",
+                          e.target.value,
+                          handleInformeTecnicoChange,
+                        )
+                      }
+                      fullWidth
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">$</InputAdornment>
+                          ),
+                        },
+                        htmlInput: {
+                          inputMode: "decimal",
+                          placeholder: "99.999,99",
+                        },
+                      }}
+                    />
+                    <SAETextField
+                      label="Nombre solicitante"
+                      value={dialogData.informe?.nombre_solicitante ?? ""}
+                      onChange={(e) =>
+                        handleInformeTecnicoChange(
+                          "nombre_solicitante",
+                          e.target.value,
+                        )
+                      }
+                      fullWidth
+                    />
+                    <SAETextField
+                      label="Nombre ganador"
+                      value={dialogData.informe?.nombre_ganador ?? ""}
+                      onChange={(e) =>
+                        handleInformeTecnicoChange(
+                          "nombre_ganador",
+                          e.target.value,
+                        )
+                      }
+                      fullWidth
+                    />
+                    <SAETextField
+                      label="Fecha licitacion"
+                      type="date"
+                      value={dialogData.informe?.fecha_licitacion ?? ""}
+                      onChange={(e) =>
+                        handleInformeTecnicoChange(
+                          "fecha_licitacion",
+                          e.target.value,
+                        )
+                      }
+                      fullWidth
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                    <SAETextField
+                      label="Fecha informe"
+                      type="date"
+                      value={dialogData.informe?.fecha_informe ?? ""}
+                      onChange={(e) =>
+                        handleInformeTecnicoChange(
+                          "fecha_informe",
+                          e.target.value,
+                        )
+                      }
+                      fullWidth
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  </Box>
                 </Box>
-              </Box>
               )}
 
               {showDocumentsForm && (
-              <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Documentacion
-                </Typography>
-                {!isDocsDialog && !isPurchaseDataComplete && (
-                  <Alert severity="info" sx={{ mb: 2 }}>
-                    Completá primero los datos de la compra para adjuntar
-                    documentación. El informe técnico puede quedar vacío.
-                  </Alert>
-                )}
-                <Grid container spacing={2}>
-                  {purchaseDocuments.map((documentType) => (
-                    <Grid
-                      key={documentType.id_tipo_documento}
-                      size={{ xs: 12, md: 6 }}
-                      item
-                    >
-                      <DocumentCard
-                        documento={documentType}
-                        onFileChange={(event, item) =>
-                          item.key === "facturas"
-                            ? handleFacturaChange(event, item)
-                            : handleInformePdfChange(event, item)
-                        }
-                        onDelete={(item) =>
-                          handleDeletePurchaseDocument(item)
-                        }
-                        onPreview={handlePreview}
-                        uploadDisabled={!isPurchaseDataComplete}
-                        deleteDisabled={!documentType.subido}
-                        showRequirement
-                        showActions={!isDocsDialog}
-                        notUploadedLabel="No adjunto"
-                        uploadedLabel="Adjunto"
-                      />
-                    </Grid>
-                  ))}
-                </Grid>
-                {(dialogData.facturas_documentos || []).length > 0 && (
-                  <Stack spacing={0.75} mt={2}>
-                    <Typography variant="caption" color="text.secondary">
-                      Facturas adjuntas
-                    </Typography>
-                    {dialogData.facturas_documentos.map((file, index) => (
-                      <Stack
-                        key={`${getFileName(file)}-${index}`}
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                        justifyContent="space-between"
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
+                    Documentacion
+                  </Typography>
+                  {!isDocsDialog && !isPurchaseDataComplete && (
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                      Completá primero los datos de la compra para adjuntar
+                      documentación. El informe técnico puede quedar vacío.
+                    </Alert>
+                  )}
+                  <Grid container spacing={2}>
+                    {purchaseDocuments.map((documentType) => (
+                      <Grid
+                        key={documentType.id_tipo_documento}
+                        size={{ xs: 12, md: 6 }}
+                        item
                       >
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{
-                            cursor: getDocumentId(file) ? "pointer" : "default",
-                            textDecoration: getDocumentId(file)
-                              ? "underline"
-                              : "none",
-                          }}
-                          onClick={() =>
-                            getDocumentId(file) &&
-                            handlePreview(getDocumentId(file), getFileName(file))
+                        <DocumentCard
+                          documento={documentType}
+                          onFileChange={(event, item) =>
+                            item.key === "facturas"
+                              ? handleFacturaChange(event, item)
+                              : handleInformePdfChange(event, item)
                           }
-                        >
-                          {getFileName(file)}
-                        </Typography>
-                        {!isDocsDialog && (
-                          <IconButton
-                            size="small"
-                            onClick={() => handleRemoveFactura(index)}
-                            aria-label="Quitar factura"
-                          >
-                            <CloseIcon fontSize="small" />
-                          </IconButton>
-                        )}
-                      </Stack>
+                          onDelete={(item) =>
+                            handleDeletePurchaseDocument(item)
+                          }
+                          onPreview={handlePreview}
+                          documents={documentType.documentos}
+                          getDocumentName={getFileName}
+                          getDocumentId={getDocumentId}
+                          onDeleteDocument={(index) =>
+                            documentType.key === "facturas"
+                              ? handleRemoveFactura(index)
+                              : handleDeletePurchaseDocument(documentType)
+                          }
+                          uploadDisabled={!isPurchaseDataComplete}
+                          deleteDisabled={!documentType.subido}
+                          showRequirement
+                          showActions={!isDocsDialog}
+                          notUploadedLabel="No adjunto"
+                          uploadedLabel="Adjunto"
+                        />
+                      </Grid>
                     ))}
-                  </Stack>
-                )}
-              </Box>
+                  </Grid>
+                </Box>
               )}
             </Stack>
           </DialogContent>
@@ -804,6 +791,24 @@ function EmployedPurchasesContent() {
                 Guardar
               </SAEButton>
             )}
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={warningOpen} onClose={() => setWarningOpen(false)}>
+          <DialogTitle>Informe técnico incompleto</DialogTitle>
+          <DialogContent>
+            <Alert severity="warning">
+              Estás por crear una compra sin informe técnico. ¿Querés
+              continuar?
+            </Alert>
+          </DialogContent>
+          <DialogActions>
+            <SAEButton variant="outlined" onClick={() => setWarningOpen(false)}>
+              Volver
+            </SAEButton>
+            <SAEButton variant="contained" onClick={handleConfirmWithoutInforme}>
+              Crear sin informe
+            </SAEButton>
           </DialogActions>
         </Dialog>
 

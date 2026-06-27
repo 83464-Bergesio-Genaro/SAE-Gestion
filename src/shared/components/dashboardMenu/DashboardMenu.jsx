@@ -23,11 +23,7 @@ function DashboardCard({ item, onClick }) {
         border: "1px solid rgba(17, 53, 101, 0.08)",
       }}
     >
-      <CardActionArea
-        onClick={onClick}
-
-        sx={{ height: "100%" }}
-      >
+      <CardActionArea onClick={onClick} sx={{ height: "100%" }}>
         <CardContent sx={{ p: 3, minHeight: 170 }}>
           <Stack spacing={2} sx={{ height: "100%" }}>
             <Box
@@ -38,7 +34,7 @@ function DashboardCard({ item, onClick }) {
                 display: "grid",
                 placeItems: "center",
                 bgcolor: "rgba(76, 127, 188, 0.12)",
-                color: "#244c87",
+                color: "var(--primary)",
               }}
             >
               <Icon sx={{ fontSize: 30 }} />
@@ -47,11 +43,13 @@ function DashboardCard({ item, onClick }) {
             <Box>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 700, color: "#14325c" }}
+                sx={{ fontWeight: 700, color: "var(--text)" }}
               >
                 {item.label}
               </Typography>
-              <Typography sx={{ mt: 1, color: "#5a6f8f", minHeight: 48 }}>
+              <Typography
+                sx={{ mt: 1, color: "var(--secondary)", minHeight: 48 }}
+              >
                 {item.descripcion}
               </Typography>
             </Box>
@@ -61,8 +59,8 @@ function DashboardCard({ item, onClick }) {
                 label={"Disponible"}
                 size="small"
                 sx={{
-                  bgcolor: "#d8ebd1",
-                  color: "#2d6a18",
+                  bgcolor: "var(--lightGreen)",
+                  color: "var(--greenDark)",
                   fontWeight: 700,
                 }}
               />
@@ -74,28 +72,27 @@ function DashboardCard({ item, onClick }) {
   );
 }
 
-export default function DashboardMenu({idPerfil}){
-    const navigate = useNavigate();
-    let menu = [];
-    if (idPerfil === 1) {
-      menu = studentMenu;
-    } 
-    if(idPerfil === 2) {
-      menu = employedMenu;
-    } 
-    if(idPerfil === 5){
-      menu = adminMenu;
-    }
-    return(
-        <Grid container spacing={2.5} sx={{ mt: 1 }}>
-            {menu
-            .filter((item) => item.label !== "Inicio") //Filtra y quita el elemento "Inicio"
-            .map((item,i) => (                           
-                <Grid key={i} size={{xs:12,md:6,lg:4}}>
-                    <DashboardCard item={item} onClick={() => navigate(item.path)} />
-                </Grid>
-            ))}
-        </Grid>
-    )
-
+export default function DashboardMenu({ idPerfil }) {
+  const navigate = useNavigate();
+  let menu = [];
+  if (idPerfil === 1) {
+    menu = studentMenu;
+  }
+  if (idPerfil === 2) {
+    menu = employedMenu;
+  }
+  if (idPerfil === 5) {
+    menu = adminMenu;
+  }
+  return (
+    <Grid container spacing={2.5} sx={{ mt: 1 }}>
+      {menu
+        .filter((item) => item.label !== "Inicio") //Filtra y quita el elemento "Inicio"
+        .map((item, i) => (
+          <Grid key={i} size={{ xs: 12, md: 6, lg: 4 }}>
+            <DashboardCard item={item} onClick={() => navigate(item.path)} />
+          </Grid>
+        ))}
+    </Grid>
+  );
 }

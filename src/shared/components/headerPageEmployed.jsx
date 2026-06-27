@@ -1,7 +1,7 @@
 import { Box, Stack, Typography, Chip, IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/sharedContext"; 
+import { useAuth } from "../context/sharedContext";
 
 export default function HeaderPageEmployed({
   header,
@@ -14,13 +14,18 @@ export default function HeaderPageEmployed({
   const baseUrl = import.meta.env.BASE_URL;
   const getPerfilName = (id) => {
     if (id === undefined || id === null) return null; // Para manejar el ?? "-" externo
-    
+
     switch (id) {
-      case 0: return 'Interesado';
-      case 1: return 'Estudiante';
-      case 2: return 'Empleado';
-      case 5: return 'Administrador';
-      default: return 'Desconocido';
+      case 0:
+        return "Interesado";
+      case 1:
+        return "Estudiante";
+      case 2:
+        return "Empleado";
+      case 5:
+        return "Administrador";
+      default:
+        return "Desconocido";
     }
   };
   return (
@@ -36,7 +41,7 @@ export default function HeaderPageEmployed({
         alignItems: "center",
         justifyContent: "space-between",
         gap: 3,
-        backgroundImage: `linear-gradient(125deg, rgba(18,54,102,0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('${baseUrl}images/carrousel/EntradaUTN.jpg')`,
+        backgroundImage: `linear-gradient(135deg, var(--primary) 0%, var(--lightBlue) 100%), url('${baseUrl}images/carrousel/EntradaUTN.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         color: "white",
@@ -95,7 +100,7 @@ export default function HeaderPageEmployed({
           <Chip
             label={`Perfil ${getPerfilName(user?.id_perfil) ?? "-"}`}
             sx={{
-              bgcolor: "rgba(255,255,255,0.18)",
+              bgcolor: "var(--chipBackground)",
               color: "white",
               fontWeight: 700,
             }}
@@ -103,7 +108,7 @@ export default function HeaderPageEmployed({
           <Chip
             label={user?.legajo ? `Legajo ${user.legajo}` : "Sesión activa"}
             sx={{
-              bgcolor: "rgba(255,255,255,0.18)",
+              bgcolor: "var(--chipBackground)",
               color: "white",
               fontWeight: 700,
             }}

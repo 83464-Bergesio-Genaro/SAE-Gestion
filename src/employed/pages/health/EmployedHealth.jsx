@@ -45,72 +45,107 @@ import { EmployedCalendar } from "./HealthCalendar";
 import GestionarHorariosDialog from "./HorariosDialog";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 
+function EmployedAdminContent() {
+  const navigate = useNavigate();
+  const secciones = [
+    { key: "especialidades", label: "Especialidades" },
+    { key: "personal", label: "Personal Medico" }, //En esta seccion se le registra la falta medica
+    { key: "cursos", label: "Cursos Medicos" },
+  ];
+  const {
+    //ABM Faltas
+    SetCuilFaltas,
+    faltasRows,
+    faltasColumns,
+    loadingFaltas,
+    //ABM Especialidades
+    especialidades,
+    especialidadesActivas,
+    especialidadesRows,
+    especialidadesColumns,
+    loadingEspecialidades,
+    openCreateEspecialidades,
+    handleEspecialidadesSave,
+    //ABM de Personal
+    personalRows,
+    personalColumns,
+    loadingPersonal,
+    openCreatePersonal,
+    handlePersonalSave,
+    //ABM de Cursos
+    cursosRows,
+    cursosColumns,
+    loadingCursos,
+    openCreateCurso,
+    handleCursoSave,
+    //Valores de error, mostrar mensajes, etc.
+    snackbarOpen,
+    setSnackbarOpen,
+    snackbarMsg,
+    setDialogError,
+    dialogOpen,
+    setDialogOpen,
+    dialogData,
+    setDialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setHorariosDialogOpen,
+    horariosDialogOpen,
+  } = useHealth();
 
-
-function EmployedAdminContent(){
-    const navigate = useNavigate();
-    const secciones = [
-      { key: "especialidades", label: "Especialidades" },
-      { key: "personal", label: "Personal Medico" }, //En esta seccion se le registra la falta medica
-      { key: "cursos", label: "Cursos Medicos" },
-    ];
-    const {
-            //ABM Faltas
-             SetCuilFaltas,faltasRows,faltasColumns,loadingFaltas,
-            //ABM Especialidades
-            especialidades,especialidadesActivas,especialidadesRows,especialidadesColumns,loadingEspecialidades,openCreateEspecialidades,handleEspecialidadesSave,
-            //ABM de Personal
-            personalRows,personalColumns,loadingPersonal,openCreatePersonal,handlePersonalSave,
-            //ABM de Cursos
-            cursosRows,cursosColumns,loadingCursos,openCreateCurso,handleCursoSave,
-            //Valores de error, mostrar mensajes, etc.
-            snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
-            dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
-            setHorariosDialogOpen,horariosDialogOpen
-    } = useHealth();
-   
-    const sectionConfig = useMemo(
-            () => ({
-                especialidades: {
-                    title: "Especialidades",
-                    dialog: openCreateEspecialidades,
-                    addButton: "Nueva Especialidad",
-                    icon: MedicalServicesIcon,
-                    rows: especialidadesRows,
-                    columns: especialidadesColumns,
-                    loading: loadingEspecialidades
-                },
-                personal: {
-                    title: "Personal Medico",
-                    dialog: openCreatePersonal,
-                    addButton: "Alta de Personal",
-                    icon: PersonAddAltIcon,
-                    rows: personalRows,
-                    columns: personalColumns,
-                    loading: loadingPersonal
-                },
-                cursos:{
-                    title: "Cursos Medicos",
-                    dialog: openCreateCurso,
-                    addButton: "Nuevo Curso",
-                    icon: SchoolIcon,
-                    rows: cursosRows,
-                    columns: cursosColumns,
-                    loading: loadingCursos                    
-                }
-            }),
-            [
-                especialidadesRows,especialidadesColumns,loadingEspecialidades,openCreateEspecialidades,
-                personalRows,personalColumns,loadingPersonal,openCreatePersonal,
-                cursosRows,cursosColumns,loadingCursos,openCreateCurso
-            ]
-        );
-    const [activeSection, setActiveSection] = useState("especialidades");
-    const [busquedaGestion, setBusquedaGestion] = useState("");
-    const handleSectionChange = (section) => {
-        setActiveSection(section);
-        setBusquedaGestion("");
-    };
+  const sectionConfig = useMemo(
+    () => ({
+      especialidades: {
+        title: "Especialidades",
+        dialog: openCreateEspecialidades,
+        addButton: "Nueva Especialidad",
+        icon: MedicalServicesIcon,
+        rows: especialidadesRows,
+        columns: especialidadesColumns,
+        loading: loadingEspecialidades,
+      },
+      personal: {
+        title: "Personal Medico",
+        dialog: openCreatePersonal,
+        addButton: "Alta de Personal",
+        icon: PersonAddAltIcon,
+        rows: personalRows,
+        columns: personalColumns,
+        loading: loadingPersonal,
+      },
+      cursos: {
+        title: "Cursos Medicos",
+        dialog: openCreateCurso,
+        addButton: "Nuevo Curso",
+        icon: SchoolIcon,
+        rows: cursosRows,
+        columns: cursosColumns,
+        loading: loadingCursos,
+      },
+    }),
+    [
+      especialidadesRows,
+      especialidadesColumns,
+      loadingEspecialidades,
+      openCreateEspecialidades,
+      personalRows,
+      personalColumns,
+      loadingPersonal,
+      openCreatePersonal,
+      cursosRows,
+      cursosColumns,
+      loadingCursos,
+      openCreateCurso,
+    ],
+  );
+  const [activeSection, setActiveSection] = useState("especialidades");
+  const [busquedaGestion, setBusquedaGestion] = useState("");
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    setBusquedaGestion("");
+  };
 
   const currentSection = useMemo(
     () => sectionConfig[activeSection],
@@ -159,7 +194,7 @@ function EmployedAdminContent(){
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #6140CB 100%)",
+              background: "var(--purpleGradient)",
               color: "white",
               px: 3,
               py: 2.5,
@@ -207,7 +242,7 @@ function EmployedAdminContent(){
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               pt: 0,
@@ -362,7 +397,7 @@ function EmployedAdminContent(){
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               py: 2.5,
@@ -520,7 +555,7 @@ function EmployedAdminContent(){
             </SAEButton>
           </DialogActions>
         </Dialog>
-      )} 
+      )}
 
       {/*DIALOG DE PERSONAL*/}
       {dialogOpen && dialogType === "personal" && (

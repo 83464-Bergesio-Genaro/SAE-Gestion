@@ -16,11 +16,11 @@ export default function TitleBox({ title, description, fontweight = 800 }) {
           width: 8,
           height: fontweight === 800 ? 50 : 30,
           borderRadius: 2,
-          bgcolor: "#2A548B",
+          bgcolor: "var(--primary)",
         }}
       />
       <Box>
-        <Typography variant="h4" fontWeight={fontweight} color="#123666">
+        <Typography variant="h4" fontWeight={fontweight} color="var(--primary)">
           {title}
         </Typography>
 

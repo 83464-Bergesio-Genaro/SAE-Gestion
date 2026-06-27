@@ -314,7 +314,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
         sx={{
           px: { xs: 2, md: 3 },
           py: 2,
-          background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+          background: "var(--gradient)",
         }}
       >
         {/* IZQUIERDA */}

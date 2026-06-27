@@ -1,6 +1,6 @@
-import React, { useMemo,useState  } from 'react';
-import Diversity3Icon from '@mui/icons-material/Diversity3';
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import React, { useMemo, useState } from "react";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 
 import {
   Autocomplete,
@@ -39,7 +39,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import GroupsIcon from "@mui/icons-material/Groups";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import SearchIcon from "@mui/icons-material/Search";
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import SAEButton from "../../../shared/components/buttons/SAEButton";
@@ -49,9 +49,9 @@ import GestionarHorariosDialog from "./HorariosDialog";
 
 import { DataGrid } from "@mui/x-data-grid";
 
-import {EmployedCalendar} from "./EmployedCalendar";
-import { useEmploy } from '../../context/employedContext'; 
-import { AdminUsersProvider } from '../../context/providers/employProvider';
+import { EmployedCalendar } from "./EmployedCalendar";
+import { useEmploy } from "../../context/employedContext";
+import { AdminUsersProvider } from "../../context/providers/employProvider";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 const secciones = [
   { key: "empleados", label: "Empleados" },
@@ -60,11 +60,32 @@ const secciones = [
 // 1. ESTE SUBCOMPONENTE SÍ PUEDE USAR EL HOOK (Porque está abajo del Provider)
 function EmployedAdminContent() {
   const {
-          empleadosRows, empleadosColumns, loadingEmpleados, openCreateEmpleados,
-          usuariosRows, usuariosColumns, loadingUsuarios, openCreateUsuarios,
-          dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving,
-          horariosDialogOpen, setHorariosDialogOpen, snackbarOpen, setSnackbarOpen, snackbarMsg,setDialogError,handleUsuariosSave,handleEmpleadosSave,
-          carreras,perfiles
+    empleadosRows,
+    empleadosColumns,
+    loadingEmpleados,
+    openCreateEmpleados,
+    usuariosRows,
+    usuariosColumns,
+    loadingUsuarios,
+    openCreateUsuarios,
+    dialogOpen,
+    setDialogOpen,
+    dialogData,
+    setDialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    horariosDialogOpen,
+    setHorariosDialogOpen,
+    snackbarOpen,
+    setSnackbarOpen,
+    snackbarMsg,
+    setDialogError,
+    handleUsuariosSave,
+    handleEmpleadosSave,
+    carreras,
+    perfiles,
   } = useEmploy();
 
   const sectionConfig = useMemo(
@@ -153,7 +174,7 @@ function EmployedAdminContent() {
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               pt: 0,
@@ -307,7 +328,7 @@ function EmployedAdminContent() {
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               py: 2.5,

@@ -98,14 +98,14 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
 
         <Box sx={{ flex: 1 }}>
           <CardContent>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: "#14325c" }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: "#14325c" }}>
               {titulo}
             </Typography>
             <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
               {fecha_inicio}
             </Typography>
             <Typography
-              variant="subtitle1"
+              variant="body1"
               sx={{
                 mt: 1,
                 color: "#5a6f8f",

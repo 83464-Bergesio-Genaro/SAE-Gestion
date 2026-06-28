@@ -4,6 +4,7 @@ import { Box, IconButton, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import { formatHeader, generateRows } from "../../../shared/util";
 
 import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as ModificarCurso, ModificaEspecialidad, ModificarPersonal, ObtenerCursosMedicos, ObtenerEspecialidades ,ObtenerEstadosTurno, ObtenerPersonalMedico, EliminarCursoMedico, ObtenerHorariosCompleto, ObtenerHorariosXCUIL, CrearHorario, ModificarHorario, EliminarHorario, ObtenerTurnos, RegistrarFalta, ObtenerFaltasXCUIL, CrearTurnos, ModificarTurno, ObtenerTurnosActivos, ObtenerTurnosFinalizados, ObtenerTurnosCancelados} from "../../../api/SaludService";
 import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos} from '../../../api/formatters/SaludFormatters';
@@ -71,11 +72,6 @@ import { HealthContext } from '../employedContext';
       estado: ""
     }
     // FUNCIONES PARA LA GRILLA (SE PODRIA PONER TODO EN UN SOLO ARCHIVO)
-    const formatHeader = (key) =>
-    key
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, l => l.toUpperCase());
-
     const buildColumns = (data, 
         editAction=null,
         deleteAction = null,
@@ -164,17 +160,6 @@ import { HealthContext } from '../employedContext';
             });
         }
     return columns;
-};
-
-const generateRows = (data) => {
-
-    return [...data]
-    .sort((a, b) => a.id - b.id)
-    .map((item, index) => ({
-        id: item.id || index,
-        ...item
-    }));
- 
 };
 
 export const HealthUsersProvider = ({ children }) => {

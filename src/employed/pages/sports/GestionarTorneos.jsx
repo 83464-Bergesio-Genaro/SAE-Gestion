@@ -16,21 +16,12 @@ import { DataGrid } from "@mui/x-data-grid";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import TorneoFormDialog from "./TorneoFormDialog";
-import {
-  obtenerTorneosDeportivos,
-  crearTorneo,
-} from "../../../api/DeporteService";
+import { useSports } from "../../context/employedContext";
 
-function formatDate(isoString) {
-  if (!isoString) return "";
-  const d = new Date(isoString);
-  if (Number.isNaN(d.getTime())) return isoString;
-  return d.toLocaleDateString("es-AR");
-}
-
-
+import { formatDate } from "../../../shared/util";
 
 export default function GestionarTorneos() {
+  const { obtenerTorneosDeportivos, crearTorneo } = useSports();
   const navigate = useNavigate();
   const [torneos, setTorneos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,7 +48,7 @@ export default function GestionarTorneos() {
 
   const torneosActivos = useMemo(
     () => torneos.filter((t) => t.activo),
-    [torneos]
+    [torneos],
   );
 
   const filteredTorneos = useMemo(() => {
@@ -67,7 +58,7 @@ export default function GestionarTorneos() {
       (t) =>
         t.nombre_torneo?.toLowerCase().includes(lower) ||
         t.nombre_deporte?.toLowerCase().includes(lower) ||
-        t.docente_responsable?.toLowerCase().includes(lower)
+        t.docente_responsable?.toLowerCase().includes(lower),
     );
   }, [torneosActivos, busqueda]);
 
@@ -101,7 +92,12 @@ export default function GestionarTorneos() {
         width: 150,
         valueFormatter: (params) => formatDate(params),
       },
-      { field: "docente_responsable", headerName: "Responsable", flex: 1, minWidth: 160 },
+      {
+        field: "docente_responsable",
+        headerName: "Responsable",
+        flex: 1,
+        minWidth: 160,
+      },
       { field: "cupo_jugadores", headerName: "Cupo", width: 80 },
       {
         field: "acciones",
@@ -116,7 +112,9 @@ export default function GestionarTorneos() {
               color="primary"
               title="Ver / Editar torneo"
               onClick={() =>
-                navigate(`/Gestion-Torneos/${params.row.id}`, { state: { torneo: params.row } })
+                navigate(`/Gestion-Torneos/${params.row.id}`, {
+                  state: { torneo: params.row },
+                })
               }
             >
               <EditIcon fontSize="small" />
@@ -125,7 +123,7 @@ export default function GestionarTorneos() {
         ),
       },
     ],
-    [navigate]
+    [navigate],
   );
 
   return (
@@ -133,7 +131,7 @@ export default function GestionarTorneos() {
       {/* Header */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+          background: "var(--gradient)",
           color: "white",
           py: 4,
           px: 2,
@@ -147,7 +145,8 @@ export default function GestionarTorneos() {
                 Gestión de Torneos
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.85 }}>
-                Administrá los torneos deportivos, inscribí alumnos y consultá la información.
+                Administrá los torneos deportivos, inscribí alumnos y consultá
+                la información.
               </Typography>
             </Box>
           </Stack>

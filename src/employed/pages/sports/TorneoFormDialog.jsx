@@ -20,10 +20,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import {
-  obtenerDeportesCompleto,
-  obtenerDocentesDeportivos,
-} from "../../../api/DeporteService";
+import { useSports } from "../../context/employedContext";
 
 const EMPTY_FORM = {
   id: 0,
@@ -46,6 +43,7 @@ export default function TorneoFormDialog({
   initialData = null,
   mode = "create",
 }) {
+  const { obtenerDeportesCompleto, obtenerDocentesDeportivos } = useSports();
   const isEdit = mode === "edit";
 
   const [formData, setFormData] = useState(EMPTY_FORM);

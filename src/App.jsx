@@ -21,13 +21,13 @@ import EmployedMain from "./employed/pages/main";
 import EmployedSports from "./employed/pages/sports/EmployedSports";
 import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
 import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
+import { SportsProvider } from "./employed/context/providers/sportsProvider";
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
 import EmployedHealth from "./employed/pages/health/EmployedHealth";
 import TurnBoardHealth from "./employed/pages/health/HealthTurns";
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 import EmployedConsultations from "./employed/pages/consultations/EmployedConsultations";
 import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
-import Prensa from './employed/pages/prensa/Prensa';
 import EmployedTravels from './employed/pages/travels/employedTravels';
 import EmployedPurchases from './employed/pages/purchases/employedPurchases';
 import AdminReport from './employed/pages/reports/adminReports';
@@ -148,7 +148,9 @@ export default function App() {
           path: "Gestion-Torneos/:id",
           element: (
             <ProtectedRoute role={[2, 5]}>
-              <TorneoDetalle />
+              <SportsProvider autoLoad={false}>
+                <TorneoDetalle />
+              </SportsProvider>
             </ProtectedRoute>
           )
         },
@@ -204,7 +206,7 @@ export default function App() {
           path: "Gestion-Prensa",
           element: (
             <ProtectedRoute role={[2, 5]}>
-              <Prensa />
+              <AdministrarPrensa />
             </ProtectedRoute>
           )
         },        

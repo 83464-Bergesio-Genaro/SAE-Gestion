@@ -4,32 +4,16 @@ import { DescargarDocumentacionXId, ObtenerViajesXLegajo } from "../../../api/Tr
 import { mapViajes } from "../../../api/formatters/ViajeFormatter";
 import { useAuth } from "../../../shared/context/sharedContext";
 import { crearDocumentoEstudiante } from "../../../api/DeporteService";
-
-function isPdfDocument(data = {}) {
-  if (data.datos_documento?.startsWith("data:application/pdf")) return true;
-  return (data.extension || "").toLowerCase() === "pdf";
-}
-const INITIAL_PREVIEW = {
-  open: false,
-  loading: false,
-  title: "",
-  imageSrc: null,
-  isPdf: false,
-  error: null,
-};
+import {
+  closePreview as closePreviewState,
+  closeSnackbar as closeSnackbarState,
+  construirNombre,
+  INITIAL_PREVIEW,
+  isPdfDocument,
+  showSnackbar as showSnackbarState,
+} from "../../../shared/util";
 const MAX_SIZE_MB = 5;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-
-function construirNombre(formato, data, extension) {
-  let nombre = formato;
-
-  Object.keys(data).forEach((key) => {
-    nombre = nombre.replace(`{${key}}`, data[key]);
-  });
-
-  return `${nombre}${extension}`;
-}
-
 
 export const TravelProvider = ({ children }) => {
     const { user } = useAuth();
@@ -82,13 +66,13 @@ export const TravelProvider = ({ children }) => {
     });
 
     const showSnackbar = useCallback((message, severity = "success") => {
-        setSnackbar({ open: true, message, severity });
+        showSnackbarState(setSnackbar, message, severity);
     }, []);
     const closeSnackbar = () =>
-        setSnackbar((previous) => ({ ...previous, open: false }));
+        closeSnackbarState(setSnackbar);
 
     const closePreview = () =>
-        setPreview((previous) => ({ ...previous, open: false }));
+        closePreviewState(setPreview);
 
     const closeDeleteDialog = () => setOpenPopup(false);
 

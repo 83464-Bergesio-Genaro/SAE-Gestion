@@ -19,7 +19,7 @@ function hasRealDocumentName(value) {
 }
 
 export function getDocumentName(doc, fallback = "Archivo") {
-  const candidate = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo;
+  const candidate = doc?.nombre_documento;
   return hasRealDocumentName(candidate) ? candidate : fallback;
 }
 
@@ -34,7 +34,7 @@ function normalizeExtension(value) {
 export function getDocumentExtension(doc) {
   const directExtension = normalizeExtension(doc?.extension);
   if (directExtension) return directExtension;
-  const fileName = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo || "";
+  const fileName = doc?.nombre_documento || "";
   const parts = fileName.split(".");
   if (parts.length < 2) return "";
   return normalizeExtension(parts.pop());

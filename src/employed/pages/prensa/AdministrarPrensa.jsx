@@ -14,42 +14,92 @@ import {
   Card,
   CardContent,
   Stack,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
+import { useMemo, useState } from "react";
 
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import NuevaPublicacionDialog from "./NuevaPublicacionDialog";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { DataGrid } from "@mui/x-data-grid";
-import { useNavigate } from "react-router-dom";
 import { PRENSA_STRINGS } from "./prensa.strings";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
+import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import NewsPreviewDialog from "../../../shared/components/StudentNews/NewsPreviewDialog";
+import SchoolIcon from "@mui/icons-material/School";
 
 import { usePress } from "../../context/employedContext";
 import { PressProvider } from "../../context/providers/pressProvider";
 const C = PRENSA_STRINGS;
 
 export default function AdministrarPrensa() {
-    return (
-        <PressProvider>
-            <AdministrarPrensaContent />
-        </PressProvider>
-    );
+  return (
+    <PressProvider>
+      <AdministrarPrensaContent />
+    </PressProvider>
+  );
 }
 
 function AdministrarPrensaContent() {
-  const navigate = useNavigate();
-  const {filtroEstado,setFiltroEstado,
-    busqueda,setBusqueda,
-    nueva,rowsFiltradas,columns,loading,
-    deleteTarget,setDeleteTarget,
+  const {
+    busqueda,
+    setBusqueda,
+    publicationDialog,
+    openCreatePublication,
+    rowsFiltradas,
+    columns,
+    loading,
+    deleteTarget,
+    setDeleteTarget,
     handleDeleteConfirm,
-    snackbar,setSnackbar
-  }=usePress();
+    snackbar,
+    setSnackbar,
+    selectedPub,
+    handleClose,
+    loadingDocs,
+    documentos,
+    handleOpenPreview,
+    previewOpen,
+    handleClosePreview,
+    previewDoc,
+    previewDocName,
+    previewLoading,
+    previewError,
+    getImageSource,
+    getDocumentName,
+    getDocumentExtension,
+  } = usePress();
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    setBusqueda("");
+  };
 
+  const secciones = [{ key: "publicaciones", label: "Publicaciones" }];
+  const [activeSection, setActiveSection] = useState("publicaciones");
+  const sectionConfig = useMemo(
+    () => ({
+      publicaciones: {
+        title: "Gestion Publicaciones",
+        icon: SchoolIcon,
+        rows: rowsFiltradas,
+        columns,
+        loading,
+        dialog: openCreatePublication,
+      },
+    }),
+    [columns, loading, openCreatePublication, rowsFiltradas],
+  );
+  const currentSection = useMemo(
+    () => sectionConfig[activeSection],
+    [activeSection, sectionConfig],
+  );
   return (
     <Box
       sx={{
@@ -60,91 +110,137 @@ function AdministrarPrensaContent() {
         bgcolor: "#f4f8fc",
       }}
     >
-      <Container sx={{ py: 4 }}>
+      <Container maxWidth="xl">
         <HeaderPageEmployed
           header=" Módulo de Prensa"
           title="Gestión de Publicaciones"
           description="Permite gestionar las publicaciones en el módulo de prensa"
         />
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <IconButton onClick={() => navigate("/Prensa")}>
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-              {C.adminTitle}
-            </Typography>
-          </Box>
-        </Box>
-
         <Card
           sx={{
             borderRadius: 4,
             boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
             mb: 3,
+            overflow: "hidden",
+            position: "relative",
           }}
         >
-          <CardContent>
-            <Stack
-              direction={{ xs: "column", md: "row" }}
-              spacing={1.5}
+          {loading && (
+            <Box
               sx={{
-                mb: 2.5,
-                width: "100%",
-                justifyContent: "space-between",
-                alignItems: { xs: "stretch", md: "center" },
+                position: "absolute",
+                inset: 0,
+                zIndex: 5,
+                bgcolor: "rgba(255,255,255,0.72)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backdropFilter: "blur(1px)",
               }}
             >
-              <Stack
-                direction="row"
-                spacing={1}
-                sx={{ flexWrap: "wrap", flex: 1, minWidth: 0 }}
-              >
-                <SAEButton
-                  variant={filtroEstado === "todos" ? "contained" : "outlined"}
-                  onClick={() => setFiltroEstado("todos")}
-                  size="small"
+              <CircularProgress />
+            </Box>
+          )}
+          <Box
+            sx={{
+              background: "var(--gradient)",
+              color: "white",
+              px: 3,
+              pt: 0,
+              pb: 0,
+            }}
+          >
+            <Stack
+              direction="row"
+              overflow={{ xs: "scroll", md: "hidden" }}
+              spacing={0}
+            >
+              {secciones.map((item) => (
+                <Box
+                  key={item.key}
+                  onClick={() => handleSectionChange(item.key)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    px: 2.5,
+                    py: 1.5,
+                    cursor: "pointer",
+                    fontWeight: activeSection === item.key ? 700 : 500,
+                    fontSize: "0.85rem",
+                    letterSpacing: "0.05em",
+                    textTransform: "uppercase",
+                    color:
+                      activeSection === item.key
+                        ? "white"
+                        : "rgba(255,255,255,0.6)",
+                    borderBottom:
+                      activeSection === item.key
+                        ? "3px solid white"
+                        : "3px solid transparent",
+                    transition: "all 0.15s",
+                    "&:hover": {
+                      color: "white",
+                      borderBottomColor: "rgba(255,255,255,0.4)",
+                    },
+                  }}
                 >
-                  {C.filterAll}
-                </SAEButton>
-                <SAEButton
-                  variant={
-                    filtroEstado === "activas" ? "contained" : "outlined"
-                  }
-                  onClick={() => setFiltroEstado("activas")}
-                  size="small"
-                  color="success"
-                >
-                  {C.filterActive}
-                </SAEButton>
-                <SAEButton
-                  variant={
-                    filtroEstado === "vencidas" ? "contained" : "outlined"
-                  }
-                  onClick={() => setFiltroEstado("vencidas")}
-                  size="small"
-                  color="error"
-                >
-                  {C.filterExpired}
-                </SAEButton>
+                  <Typography
+                    sx={{
+                      fontWeight: "inherit",
+                      fontSize: "inherit",
+                      letterSpacing: "inherit",
+                      textTransform: "inherit",
+                      color: "inherit",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {item.label}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              alignItems={{ sm: "center" }}
+              justifyContent="space-between"
+              spacing={2}
+              sx={{ py: 2 }}
+            >
+              <Stack direction="row" alignItems="center" spacing={1.5}>
+                <currentSection.icon sx={{ fontSize: 30 }} />
+                <Typography variant="h6" fontWeight={700}>
+                  {currentSection.title}
+                </Typography>
               </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
+
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                alignItems={{ sm: "center" }}
+              >
                 <SAETextField
-                  placeholder={C.searchPlaceholder}
+                  placeholder="Busqueda..."
                   size="small"
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   sx={{
-                    width: { xs: "100%", sm: 250 },
-                    "& .MuiOutlinedInput-root": { height: "30px" },
-                    "& .MuiInputBase-input": { py: 0 },
+                    width: { xs: "100%", sm: 240, md: 220 },
+                    "& .MuiOutlinedInput-root": {
+                      bgcolor: "rgba(255,255,255,0.12)",
+                      color: "white",
+                      "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                      "&:hover fieldset": {
+                        borderColor: "rgba(255,255,255,0.6)",
+                      },
+                      "&.Mui-focused fieldset": { borderColor: "white" },
+                    },
+                    "& input::placeholder": {
+                      color: "rgba(255,255,255,0.7)",
+                      opacity: 1,
+                    },
+                    "& .MuiInputAdornment-root svg": {
+                      color: "rgba(255,255,255,0.7)",
+                    },
                   }}
                   slotProps={{
                     input: {
@@ -159,32 +255,68 @@ function AdministrarPrensaContent() {
                 <SAEButton
                   variant="contained"
                   startIcon={<AddIcon />}
-                  onClick={nueva.actions.open}
-                  size="small"
+                  onClick={currentSection.dialog}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    bgcolor: "rgba(255,255,255,0.18)",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+                  }}
                 >
-                  {C.newButtonLabel}
+                  Crear Publicacion
                 </SAEButton>
               </Stack>
             </Stack>
-
+          </Box>
+           <CardContent sx={{ p: 0 }}>
             <Box sx={{ width: "100%" }}>
               <DataGrid
                 rows={rowsFiltradas}
-                columns={columns}
-                loading={loading}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 10 } },
-                }}
-                pageSizeOptions={[5, 10, 25]}
-                disableRowSelectionOnClick
+                columns={currentSection.columns}
+                loading={currentSection.loading}
                 autoHeight
-                sx={{ borderRadius: 2 }}
+                disableRowSelectionOnClick
+                pageSizeOptions={[5, 10, 25]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 5 } },
+                }}
+                localeText={{ noRowsLabel: "Sin Registros" }}
+                sx={{ borderRadius: 0, border: "none" }}
               />
             </Box>
           </CardContent>
         </Card>
 
-        <NuevaPublicacionDialog state={nueva.state} actions={nueva.actions} />
+
+        <NuevaPublicacionDialog
+          state={publicationDialog.state}
+          actions={publicationDialog.actions}
+        />
+
+        <NewsPreviewDialog
+          open={!!selectedPub}
+          onClose={handleClose}
+          title={selectedPub?.titulo_publicacion}
+          date={
+            selectedPub?.fecha_inicio
+              ? new Date(selectedPub.fecha_inicio).toLocaleDateString("es-AR")
+              : ""
+          }
+          description={selectedPub?.descripcion}
+          documents={loadingDocs ? [] : documentos}
+          onPreviewDocument={handleOpenPreview}
+        />
+
+        <DocumentPreviewDialog
+          open={previewOpen}
+          onClose={handleClosePreview}
+          title={getDocumentName(previewDoc, previewDocName)}
+          imageSrc={previewDoc ? getImageSource(previewDoc) : ""}
+          isPdf={getDocumentExtension(previewDoc) === "pdf"}
+          loading={previewLoading}
+          error={previewError}
+        />
 
         {/* Delete confirm dialog */}
         <Dialog
@@ -213,11 +345,8 @@ function AdministrarPrensaContent() {
           </DialogTitle>
           <DialogContent>
             <Typography>
-              {C.deleteConfirm(deleteTarget?.titulo_publicacion)}
-              <strong>
-                {C.deleteConfirmBold(deleteTarget?.titulo_publicacion)}
-              </strong>
-              ?
+              {deleteTarget?.titulo_publicacion}
+              <strong>{deleteTarget?.titulo_publicacion}</strong>?
             </Typography>
           </DialogContent>
           <DialogActions>

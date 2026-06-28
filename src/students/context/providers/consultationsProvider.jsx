@@ -6,18 +6,12 @@ import { ConsultationContext } from "../studentContext";
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useAuth } from "../../../shared/context/sharedContext";
 import { sendConsultationEmail } from "../../../api/EmailService";
-
-const isValidEmail = (value) =>
-  /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value.trim());
-
-const generateRows = (data) => {
-  return [...data]
-    .sort((a, b) => a.id - b.id) 
-    .map((item, index) => ({
-      id: item.id || index,
-      ...item,
-    }));
-};
+import {
+  closeSnackbar as closeSnackbarState,
+  generateRows,
+  showSnackbar as showSnackbarState,
+  isValidEmail
+} from "../../../shared/util";
 
 export const ConsultationAlumnoProvider = ({ children }) => {
   const { user } = useAuth();
@@ -39,11 +33,11 @@ export const ConsultationAlumnoProvider = ({ children }) => {
   });
 
   const showSnackbar = useCallback((message, severity = "warning") => {
-    setSnackbar({ open: true, message, severity });
+    showSnackbarState(setSnackbar, message, severity);
   }, []);
 
   const closeSnackbar = useCallback(() => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
+    closeSnackbarState(setSnackbar);
   }, []);
 
   const invalidFields = useMemo(() => {

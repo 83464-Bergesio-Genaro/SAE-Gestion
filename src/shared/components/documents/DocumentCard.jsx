@@ -11,12 +11,14 @@ import { Delete, FileUpload, OpenInNew } from "@mui/icons-material";
 import SAEButton from "../buttons/SAEButton";
 
 const getDocumentPreviewId = (documento) =>
-  documento.id_archivo ?? documento.id_documento ?? documento.id ?? null;
+  documento?.id_archivo ??
+  documento?.id_documento ??
+  documento?.id ??
+  null;
 
 const getDocumentDisplayName = (documento) =>
   [
     documento.archivoNombre,
-    documento.nombre_completo_documento,
     documento.nombre_documento,
   ].find((value) => typeof value === "string" && value.trim()) ?? "";
 

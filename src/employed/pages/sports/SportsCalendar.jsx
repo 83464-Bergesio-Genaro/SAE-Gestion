@@ -12,10 +12,7 @@ import {
 } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import {
-  obtenerDeportesActivos,
-  obtenerHorariosXDeporte,
-} from "../../../api/DeporteService";
+import { useSports } from "../../context/employedContext";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 
 const HOUR_HEIGHT = 32; // px per hour
@@ -102,14 +99,15 @@ function layoutEvents(events) {
 
 const WEEKEND = new Set([0, 6]); // dia values for Sat/Sun
 
-async function fetchHorarios(deps) {
+async function fetchHorarios(deps, obtenerHorarios) {
   const results = await Promise.all(
-    deps.map((d) => obtenerHorariosXDeporte(d.id).catch(() => [])),
+    deps.map((d) => obtenerHorarios(d.id).catch(() => [])),
   );
   return results.flat();
 }
 
 export default function SportsCalendar({ subscribedSportIds = null }) {
+  const { obtenerDeportesActivos, obtenerHorariosXDeporte } = useSports();
   const [deportes, setDeportes] = useState([]);
   const [allHorarios, setAllHorarios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +123,7 @@ export default function SportsCalendar({ subscribedSportIds = null }) {
         const deps = await obtenerDeportesActivos();
         if (cancelled) return;
         setDeportes(deps);
-        const horarios = await fetchHorarios(deps);
+        const horarios = await fetchHorarios(deps, obtenerHorariosXDeporte);
         if (cancelled) return;
         setAllHorarios(horarios);
       } catch (err) {

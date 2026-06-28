@@ -30,12 +30,14 @@ import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import { PressProvider } from "../../context/providers/pressProvider";
 import { usePress } from "../../context/sharedContext";
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
+import NewsPreviewDialog from "./NewsPreviewDialog";
 
 import { ObtenerNoticiasPublicas,descargarDocumentoPorId } from "../../../api/PrensaService";
 import TitleBox from "../titleBox";
 const baseUrl = import.meta.env.BASE_URL;
 
 function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,documentos }) {
+  const { handleOpenPreview } = usePress();
   // Estado para la imagen. Empieza con la foto genérica por defecto
   const [imagenUrl, setImagenUrl] = useState(`${baseUrl}images/principal/newsGeneric.webp`);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -128,54 +130,16 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
         </Box>
       </Card>
 
-      <Dialog
+      <NewsPreviewDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle
-          sx={{
-            alignItems: "center",
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 2,
-          }}
-        >
-          <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: "#14325c" }} >
-              {titulo}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {fecha_inicio}
-            </Typography>
-          </Box>
-          <IconButton onClick={() => setDialogOpen(false)} size="small">
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <Stack spacing={2}>
-            <Box
-              component="img"
-              src={imagenUrl??"/images/principal/newsGeneric.webp"}
-              alt={portada?.name??"UTN"}
-              sx={{
-                borderRadius: 2,
-                maxHeight: 280,
-                objectFit: "cover",
-                width: "100%",
-              }}
-            />
-            <Typography color="text.secondary" sx={{ whiteSpace: "pre-line" }}>
-              {descripcion}
-            </Typography>
-            <Box onClick={(event) => event.stopPropagation()}>
-              <DocumentList listadoDocumentos={documentos} />
-            </Box>
-          </Stack>
-        </DialogContent>
-      </Dialog>
+        title={titulo}
+        date={fecha_inicio}
+        description={descripcion}
+        imageSrc={imagenUrl}
+        documents={documentos}
+        onPreviewDocument={handleOpenPreview}
+      />
     </>
   );
 }

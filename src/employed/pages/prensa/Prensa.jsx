@@ -33,7 +33,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import { useNavigate } from "react-router-dom";
-import {useAuth} from "../../../shared/context/sharedContext"; 
+import { useAuth } from "../../../shared/context/sharedContext";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
@@ -43,7 +43,11 @@ import {
   listarDocumentosPorPublicacion,
   descargarDocumentoPorId,
 } from "../../../api/PrensaService";
-import { PRENSA_STRINGS, SORT_DATE_OPTIONS, SORT_NAME_OPTIONS } from "./prensa.strings";
+import {
+  PRENSA_STRINGS,
+  SORT_DATE_OPTIONS,
+  SORT_NAME_OPTIONS,
+} from "./prensa.strings";
 import { prensaStyles as sx } from "./prensa.styles";
 import {
   getDocumentId,
@@ -59,6 +63,7 @@ import {
   downloadDocument,
 } from "./prensa.utils";
 
+import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 
 export default function Prensa() {
   const baseUrl = import.meta.env.BASE_URL;
@@ -92,7 +97,7 @@ export default function Prensa() {
 
   const publicacionesFiltradas = useMemo(
     () => filterAndSort(publicaciones, busqueda, ordenFecha, ordenNombre),
-    [publicaciones, busqueda, ordenFecha, ordenNombre]
+    [publicaciones, busqueda, ordenFecha, ordenNombre],
   );
 
   const handleCardClick = async (pub) => {
@@ -116,7 +121,9 @@ export default function Prensa() {
 
   const handleOpenPreview = async (doc) => {
     const documentId = getDocumentId(doc);
-    setPreviewDocName(getDocumentName(doc, PRENSA_STRINGS.previewFallbackTitle));
+    setPreviewDocName(
+      getDocumentName(doc, PRENSA_STRINGS.previewFallbackTitle),
+    );
     setPreviewOpen(true);
     setPreviewLoading(true);
     setPreviewError("");
@@ -155,7 +162,10 @@ export default function Prensa() {
 
   const handleDownloadPreview = () => {
     if (!previewDoc) return;
-    downloadDocument(previewDoc, previewDocName || PRENSA_STRINGS.previewFallbackName);
+    downloadDocument(
+      previewDoc,
+      previewDocName || PRENSA_STRINGS.previewFallbackName,
+    );
   };
 
   return (
@@ -175,40 +185,11 @@ export default function Prensa() {
       )}
 
       <Container maxWidth="xl">
-        <Box sx={sx.heroBanner(baseUrl)}>
-          <Box sx={sx.heroTextBox}>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
-              <IconButton
-                size="small"
-                onClick={() => navigate(PRENSA_STRINGS.backRoute)}
-                sx={sx.heroBackButton}
-              >
-                <ArrowBackIcon fontSize="small" />
-              </IconButton>
-              <Typography variant="overline" sx={sx.heroOverline}>
-                {PRENSA_STRINGS.moduleOverline}
-              </Typography>
-            </Stack>
-            <Typography variant="h3" sx={sx.heroTitle}>
-              {PRENSA_STRINGS.heroTitle}
-            </Typography>
-            <Typography sx={sx.heroSubtitle}>
-              {PRENSA_STRINGS.heroSubtitle}
-            </Typography>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 3 }}>
-              {user?.nombre && (
-                <Chip label={user.nombre} sx={sx.heroChip} />
-              )}
-              {user?.legajo && (
-                <Chip label={PRENSA_STRINGS.chipLegajo(user.legajo)} sx={sx.heroChip} />
-              )}
-              {user?.id_perfil && (
-                <Chip label={PRENSA_STRINGS.chipPerfil(user.id_perfil)} sx={sx.heroChip} />
-              )}
-            </Stack>
-          </Box>
-          <Box sx={sx.heroLogo(baseUrl)} />
-        </Box>
+        <HeaderPageEmployed
+          header=" Módulo de Prensa"
+          title="Gestión de Publicaciones"
+          description="Permite gestionar las publicaciones en el módulo de prensa"
+        />
 
         {/* Buscador sticky */}
         <Box sx={sx.searchBar}>
@@ -238,7 +219,9 @@ export default function Prensa() {
               onChange={(e) => setOrdenFecha(e.target.value)}
             >
               {SORT_DATE_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -251,7 +234,9 @@ export default function Prensa() {
               onChange={(e) => setOrdenNombre(e.target.value)}
             >
               {SORT_NAME_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -269,7 +254,11 @@ export default function Prensa() {
 
           {(busqueda || ordenFecha || ordenNombre) && (
             <IconButton
-              onClick={() => { setBusqueda(""); setOrdenFecha(""); setOrdenNombre(""); }}
+              onClick={() => {
+                setBusqueda("");
+                setOrdenFecha("");
+                setOrdenNombre("");
+              }}
               title={PRENSA_STRINGS.clearFiltersTitle}
               sx={sx.clearFiltersButton}
             >
@@ -280,7 +269,11 @@ export default function Prensa() {
 
         <Box sx={sx.publicationsBox}>
           {!loading && publicacionesFiltradas.length === 0 ? (
-            <Typography variant="body1" color="text.secondary" sx={sx.noResults}>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={sx.noResults}
+            >
               {PRENSA_STRINGS.noResults}
             </Typography>
           ) : (
@@ -305,10 +298,18 @@ export default function Prensa() {
                               label={prio.label}
                               color={prio.color}
                               size="small"
-                              icon={pub.prioridad > 0 ? <PriorityHighIcon /> : undefined}
+                              icon={
+                                pub.prioridad > 0 ? (
+                                  <PriorityHighIcon />
+                                ) : undefined
+                              }
                             />
                             {pub.no_dar_baja && (
-                              <Chip label={PRENSA_STRINGS.chipFija} size="small" variant="outlined" />
+                              <Chip
+                                label={PRENSA_STRINGS.chipFija}
+                                size="small"
+                                variant="outlined"
+                              />
                             )}
                           </Box>
 
@@ -330,7 +331,10 @@ export default function Prensa() {
                             )}
                             <Box sx={sx.cardViewsBox}>
                               <VisibilityIcon sx={sx.cardViewsIcon} />
-                              <Typography variant="caption" sx={sx.cardViewsText}>
+                              <Typography
+                                variant="caption"
+                                sx={sx.cardViewsText}
+                              >
                                 {pub.visualizaciones ?? 0}
                               </Typography>
                             </Box>
@@ -345,10 +349,21 @@ export default function Prensa() {
           )}
         </Box>
 
-        <Dialog open={!!selectedPub} onClose={handleClose} maxWidth="sm" fullWidth>
+        <Dialog
+          open={!!selectedPub}
+          onClose={handleClose}
+          maxWidth="sm"
+          fullWidth
+        >
           {selectedPub && (
             <>
-              <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <DialogTitle
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   {selectedPub.titulo_publicacion}
                 </Typography>
@@ -364,7 +379,11 @@ export default function Prensa() {
                     size="small"
                   />
                   {selectedPub.no_dar_baja && (
-                    <Chip label={PRENSA_STRINGS.chipFija} size="small" variant="outlined" />
+                    <Chip
+                      label={PRENSA_STRINGS.chipFija}
+                      size="small"
+                      variant="outlined"
+                    />
                   )}
                   <Box sx={sx.dialogViewsBox}>
                     <VisibilityIcon fontSize="small" color="action" />
@@ -423,7 +442,11 @@ export default function Prensa() {
                           </Box>
                         </ListItemIcon>
                         <ListItemText
-                          primary={doc.nombre_documento || doc.titulo || `Documento ${i + 1}`}
+                          primary={
+                            doc.nombre_documento ||
+                            doc.titulo ||
+                            `Documento ${i + 1}`
+                          }
                           secondary={doc.tipo_documento || null}
                         />
                       </ListItem>
@@ -438,7 +461,10 @@ export default function Prensa() {
         <DocumentPreviewDialog
           open={previewOpen}
           onClose={handleClosePreview}
-          title={getDocumentName(previewDoc, previewDocName || PRENSA_STRINGS.previewFallbackTitle)}
+          title={getDocumentName(
+            previewDoc,
+            previewDocName || PRENSA_STRINGS.previewFallbackTitle,
+          )}
           imageSrc={previewDoc ? getImageSource(previewDoc) : ""}
           isPdf={getDocumentExtension(previewDoc) === "pdf"}
           loading={previewLoading}

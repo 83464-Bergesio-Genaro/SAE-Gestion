@@ -18,6 +18,29 @@ import {
 } from "../../../api/CompraService";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
 import { PurchaseContext } from "../employedContext";
+import {
+  buildDocumentName,
+  closePreview as closePreviewState,
+  createInitialPreview,
+  formatCurrency,
+  formatCurrencyInput,
+  formatDateForDisplay,
+  formatDateForInput,
+  formatHeader,
+  generateRows as generateBaseRows,
+  getDocumentId,
+  getDocumentName,
+  getFileExtension,
+  getFileName,
+  isFile,
+  isPdfDocument,
+  MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_MB,
+  normalizeCurrencyValue,
+  renameFile,
+  sanitizeCurrencyInput,
+  sanitizeFileNamePart,
+} from "../../../shared/util";
 
 const EMPTY_PURCHASES = {
   id: null,
@@ -39,9 +62,6 @@ const EMPTY_PURCHASES = {
     documento_pdf: null,
   },
 };
-
-const MAX_DOCUMENT_SIZE_MB = 5;
-const MAX_DOCUMENT_SIZE_BYTES = MAX_DOCUMENT_SIZE_MB * 1024 * 1024;
 
 const PURCHASE_DOCUMENT_TYPES = [
   {
@@ -75,118 +95,6 @@ const clonePurchase = (purchase = EMPTY_PURCHASES) => ({
     ...(purchase.informe || {}),
   },
 });
-const formatHeader = (key) =>
-  key.replaceAll("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
-
-const currencyFormatter = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-const formatCurrency = (value) => {
-  if (value === null || value === undefined || value === "") return "";
-
-  const numberValue = Number(value);
-  return Number.isNaN(numberValue) ? "" : currencyFormatter.format(numberValue);
-};
-
-const formatCurrencyInput = (value) => {
-  if (value === null || value === undefined || value === "") return "";
-
-  const numberValue = Number(value);
-  if (Number.isNaN(numberValue)) return "";
-
-  return numberValue.toLocaleString("es-AR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
-
-const formatDateForInput = (value) => {
-  if (!value) return "";
-  if (typeof value === "string") {
-    const isoDate = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (isoDate) return isoDate[0];
-
-    const localDate = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (localDate) return `${localDate[3]}-${localDate[2]}-${localDate[1]}`;
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-const formatDateForDisplay = (value) => {
-  const inputDate = formatDateForInput(value);
-  if (!inputDate) return "";
-
-  const [year, month, day] = inputDate.split("-");
-  return `${day}/${month}/${year}`;
-};
-
-const parseCurrencyInput = (value) => {
-  const normalized = String(value)
-    .replace(/[^\d,.]/g, "")
-    .replace(/\./g, "")
-    .replace(",", ".");
-
-  if (!normalized) return "";
-
-  const numberValue = Number(normalized);
-  return Number.isNaN(numberValue) ? "" : numberValue;
-};
-
-const normalizeCurrencyValue = (value) =>
-  typeof value === "string" ? parseCurrencyInput(value) : value;
-
-const sanitizeCurrencyInput = (value) => {
-  const cleanValue = String(value).replace(/[^\d,.]/g, "");
-  const [integerPart, ...decimalParts] = cleanValue.split(",");
-
-  return decimalParts.length === 0
-    ? integerPart
-    : `${integerPart},${decimalParts.join("").replace(/,/g, "")}`;
-};
-
-const sanitizeFileNamePart = (value) =>
-  String(value || "compra")
-    .trim()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-zA-Z0-9_-]/g, "") || "compra";
-
-const buildDocumentName = (format, data, extension) => {
-  let fileName = format;
-
-  Object.keys(data).forEach((key) => {
-    fileName = fileName.replace(`{${key}}`, data[key]);
-  });
-
-  return `${fileName}${extension}`;
-};
-
-const getFileExtension = (file) =>
-  `.${file.name.split(".").pop().toLowerCase()}`;
-
-const renameFile = (file, fileName) =>
-  new File([file], fileName, {
-    type: file.type,
-    lastModified: file.lastModified,
-  });
-
-const getFileName = (file) => {
-  if (typeof file === "string") return file;
-
-  return getDocumentName(file) || "Ningun archivo seleccionado";
-};
-
 const isRequiredPurchaseDataComplete = (purchase) => {
   const precioSugerido = normalizeCurrencyValue(purchase.precio_sugerido);
 
@@ -228,30 +136,6 @@ const getPurchaseId = (purchase = {}) => {
 
   return (
     safePurchase.id_compra ?? safePurchase.idCompra ?? safePurchase.id ?? null
-  );
-};
-
-const getDocumentId = (document = {}) => {
-  const safeDocument = document ?? {};
-
-  return (
-    safeDocument.id_documento ??
-    safeDocument.idDocumento ??
-    safeDocument.id_archivo ??
-    safeDocument.id ??
-    null
-  );
-};
-
-const getDocumentName = (document = {}) => {
-  const safeDocument = document ?? {};
-
-  return (
-    safeDocument.nombre_documento ??
-    safeDocument.nombreDocumento ??
-    safeDocument.archivoNombre ??
-    safeDocument.name ??
-    ""
   );
 };
 
@@ -411,22 +295,6 @@ const buildInformeBody = (purchase = {}, idCompra = null) => {
   };
 };
 
-const isFile = (value) => typeof File !== "undefined" && value instanceof File;
-
-const INITIAL_PREVIEW = {
-  open: false,
-  loading: false,
-  title: "",
-  imageSrc: null,
-  isPdf: false,
-  error: null,
-};
-
-const isPdfDocument = (data = {}) => {
-  if (data.datos_documento?.startsWith("data:application/pdf")) return true;
-  return String(data.extension || "").toLowerCase() === "pdf";
-};
-
 const generateColumns = (data, actionsConfig = []) => {
   const sample = Array.isArray(data) ? data[0] : data;
 
@@ -577,17 +445,13 @@ const generateColumns = (data, actionsConfig = []) => {
 };
 
 const generateRows = (data) => {
-  return [...data]
-    .sort((a, b) => a.id - b.id)
-    .map((item, index) => ({
-      id: item.id || index,
-      ...item,
+  return generateBaseRows(data, (item) => ({
       precio_real: item.informe?.precio_real ?? "",
       fecha_licitacion: item.informe?.fecha_licitacion ?? "",
       fecha_informe: item.informe?.fecha_informe ?? "",
       nombre_solicitante: item.informe?.nombre_solicitante || "",
       nombre_ganador: item.informe?.nombre_ganador || "",
-    }));
+  }));
 };
 
 export function PurchaseProvider({ children }) {
@@ -725,10 +589,10 @@ export function PurchaseProvider({ children }) {
   const [dialogSaving, setDialogSaving] = useState(false);
   const [dialogError, setDialogError] = useState("");
   const [focusedCurrencyField, setFocusedCurrencyField] = useState("");
-  const [preview, setPreview] = useState(INITIAL_PREVIEW);
+  const [preview, setPreview] = useState(createInitialPreview);
 
   const closePreview = useCallback(() => {
-    setPreview((previous) => ({ ...previous, open: false }));
+    closePreviewState(setPreview);
   }, []);
 
   const handlePreview = useCallback(async (documentOrId, nombre) => {
@@ -865,8 +729,8 @@ export function PurchaseProvider({ children }) {
       return `Solo se permiten archivos: ${documentType.extension}`;
     }
 
-    if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
-      return `El archivo no puede superar los ${MAX_DOCUMENT_SIZE_MB} MB.`;
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return `El archivo no puede superar los ${MAX_FILE_SIZE_MB} MB.`;
     }
 
     return "";

@@ -41,6 +41,10 @@ import {
   Diversity3,
   School,
 } from "@mui/icons-material";
+import {
+  closePreview as closePreviewState,
+  showSnackbar as showSnackbarState,
+} from "../../../shared/util";
 
 export function ScholarshipsProvider({ children }) {
 
@@ -96,7 +100,7 @@ export function ScholarshipsProvider({ children }) {
         }).map(([, label]) => label);
 
     function closePreview() {
-        setPreview((prev) => ({ ...prev, open: false }));
+        closePreviewState(setPreview);
     }
     const { user } = useAuth();
     const [perfilEstudiante, setPerfilEstudiante] = useState(null);
@@ -132,7 +136,7 @@ export function ScholarshipsProvider({ children }) {
 
   // Helper para no repetir setSnackbar en cada try/catch.
   const showSnackbar = useCallback((message, severity = "success") => {
-    setSnackbar({ open: true, message, severity });
+    showSnackbarState(setSnackbar, message, severity);
   }, []);
 
 
@@ -182,9 +186,7 @@ export function ScholarshipsProvider({ children }) {
             ? {
                 ...doc,
                 archivo: documentoGuardado.archivo,
-                archivoNombre:
-                  documentoGuardado.nombre_completo_documento ??
-                  documentoGuardado.nombre_documento,
+                archivoNombre: documentoGuardado.nombre_documento,
                 subido: true,
                 id_archivo: documentoGuardado.id,
                 extension: documentoGuardado.extension ?? doc.extension,
@@ -199,9 +201,7 @@ export function ScholarshipsProvider({ children }) {
             ? {
                 ...doc,
                 archivo: documentoGuardado.archivo,
-                archivoNombre:
-                  documentoGuardado.nombre_completo_documento ??
-                  documentoGuardado.nombre_documento,
+                archivoNombre: documentoGuardado.nombre_documento,
                 subido: true,
                 id_archivo: documentoGuardado.id,
                 extension: documentoGuardado.extension ?? doc.extension,

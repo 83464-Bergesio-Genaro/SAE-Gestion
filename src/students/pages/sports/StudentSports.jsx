@@ -33,6 +33,7 @@ import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import { SPORTS_STRINGS } from "./sports.strings";
 
 import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
+import { SportsProvider as EmployedSportsProvider } from "../../../employed/context/providers/sportsProvider";
 import { useSportsContext } from "../../context/studentContext";
 import { SportsProvider } from "../../context/providers/sportsProvider";
 
@@ -241,7 +242,9 @@ function StudentSportsContent() {
               title={C.horariosTitle}
               description={C.horariosSubTitle}
             />
-            <SportsCalendar subscribedSportIds={subscribedSportIds} />
+            <EmployedSportsProvider>
+              <SportsCalendar subscribedSportIds={subscribedSportIds} />
+            </EmployedSportsProvider>
           </>
         )}
 

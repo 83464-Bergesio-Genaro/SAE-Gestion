@@ -11,72 +11,21 @@ import {
 import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
 import { ProfileContext } from "../../../students/context/studentContext";
 import { useAuth } from "../sharedContext";
-
-function getInitials(nombre = "") {
-  return nombre
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
-const onlyDigits = (value = "", maxLength) =>
-  value.replace(/\D/g, "").slice(0, maxLength);
-
-const formatDni = (value = "") =>
-  onlyDigits(String(value), 8).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-const formatCuil = (value = "") => {
-  const digits = onlyDigits(String(value), 11);
-  const parts = [digits.slice(0, 2), digits.slice(2, 10), digits.slice(10, 11)];
-
-  return parts.filter(Boolean).join("-");
-};
-
-const formatPhone = (value = "") => {
-  const digits = onlyDigits(String(value), 12);
-  if (!digits) return "";
-
-  const parts = [
-    digits.slice(0, 2),
-    digits.slice(2, 5),
-    digits.slice(5, 8),
-    digits.slice(8, 12),
-  ];
-
-  return `+${parts.filter(Boolean).join(" ")}`.replace(
-    /(\+\d{2} \d{3} \d{3}) (\d{1,4})$/,
-    "$1-$2",
-  );
-};
-
-const parseAddress = (value = "") => {
-  let parts = String(value).split(" - ");
-
-  if (parts.length < 4) {
-    parts = String(value).split(/\s+-\s+/);
-  }
-
-  if (parts.length < 4) return [...parts, "", "", ""].slice(0, 4);
-
-  return [parts[0], parts[1], parts.slice(2, -1).join(" "), parts.at(-1)];
-};
-
-const sanitizeAddressPart = (value = "") =>
-  value.replace(/\s*-\s*/g, " ").replace(/\s{2,}/g, " ");
-
-const isValidEmail = (value) =>
-  /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(value);
-
-const isValidPhone = (value) => value.replace(/\D/g, "").length === 12;
-
-const isValidAddress = (value) => {
-  const parts = value.split(/\s+-\s+/);
-  return parts.length === 4
-    && parts.every((part) => part.trim() !== "")
-    && /^\d+$/.test(parts[3]);
-};
+import {
+  cleanField,
+  cleanNumericField,
+  formatCuil,
+  formatDni,
+  formatPhone,
+  getInitials,
+  isEmpty,
+  isValidAddress,
+  isValidEmail,
+  isValidPhone,
+  onlyDigits,
+  parseAddress,
+  sanitizeAddressPart,
+} from "../../util";
 
 const REQUIRED_FIELDS = [
   ["legajo", "Legajo"],
@@ -144,16 +93,6 @@ export const ProfileContextProvider = ({ children }) => {
     [datosPerfil.direccion, handleChange],
   );
 
-  const cleanField = (field) => {
-    if (field === null || field === undefined) return null;
-
-    const cleaned = String(field).trim();
-    return cleaned === "" ? null : cleaned;
-  };
-  const cleanNumericField = (field) => {
-    const cleaned = cleanField(field);
-    return cleaned ? cleaned.replace(/\D/g, "") : null;
-  };
   const handleProfileSave = async () => {
     setSaveAttempted(true);
     setFormError("");
@@ -224,7 +163,6 @@ export const ProfileContextProvider = ({ children }) => {
 
   const today = new Date().toLocaleDateString("en-CA");
   const addressParts = parseAddress(datosPerfil.direccion);
-  const isEmpty = (value) => !value || String(value).trim() === "";
   const requiredError = (value) => saveAttempted && isEmpty(value);
   const emailHasError =
     requiredError(datosPerfil.email) ||

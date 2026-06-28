@@ -8,6 +8,7 @@ import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario,
 import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService";
 import {mapEmpleadoSAE,mapHorarioSAE} from "../../../api/formatters/EmpleadoFormatter";
 import { EmployContext } from '../employedContext';
+import { formatHeader, generateRows } from "../../../shared/util";
 
 const EMPTY_FORM = {
     dia: 1,
@@ -15,11 +16,6 @@ const EMPTY_FORM = {
     hora_fin: "",
     activo: true
 };
-const formatHeader = (key) =>
-key
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, l => l.toUpperCase());
-
 const buildColumns = (data, editAction) => {
 if (!data || data.length === 0) return [];
 
@@ -76,17 +72,6 @@ columns.push({
 });
 
 return columns;
-};
-
-const generateRows = (data) => {
-
-    return [...data]
-    .sort((a, b) => a.id - b.id)
-    .map((item, index) => ({
-        id: item.id || index,
-        ...item
-    }));
- 
 };
 
 const EMPTY_EMPLEADO =    

@@ -20,21 +20,114 @@ html{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+@font-face {
+  font-family: 'Barlow';
+  src: url('./assets/fonts/barlow/Barlow-Bold.ttf') format('truetype');
+  font-weight: 700; /* Bold */
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Barlow';
+  src: url('./assets/fonts/barlow/Barlow-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Barlow';
+  src: url('./assets/fonts/barlow/Barlow-Regular.ttf') format('truetype');
+  font-weight: 400; /* Normal */
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Barlow';
+  src: url('./assets/fonts/barlow/Barlow-SemiBold.ttf') format('truetype');
+  font-weight: 600; 
+  font-style: normal;
+  font-display: swap;
+}
 
-h1 {
-  font-size: 2.5em;
-  line-height: 1.1;
+/* FIN BARLOW */
+
+/* INICIO CRIMSON PRO */
+@font-face {
+  font-family: 'Crimson Pro';
+  src: url('./assets/fonts/crimsonPro/CrimsonPro-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
 }
-h2 {
-  font-size: 1.5em;
-  line-height: 1;
+@font-face {
+  font-family: 'Crimson Pro';
+  src: url('./assets/fonts/crimsonPro/CrimsonPro-SemiBoldItalic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
 }
-h3 {
-  font-size: 1em;
-  line-height: 0.5;
+@font-face {
+  font-family: 'Crimson Pro';
+  src: url('./assets/fonts/crimsonPro/CrimsonPro-Regular.ttf') format('truetype');
+  font-weight: 400; /* Normal */
+  font-style: normal;
+  font-display: swap;
 }
-/* MAIN CONTENT */
-.main-content {
-  width: 100%;
-  min-height: 65vh; /* This makes the root at least 100% of the viewport height */
+@font-face {
+  font-family: 'Crimson Pro';
+  src: url('./assets/fonts/crimsonPro/CrimsonPro-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*FIN DE CRIMSON PRO*/
+
+/*INICIO JETBRAINS MONO*/
+@font-face {
+  font-family: 'Jetbrains Mono';
+  src: url('./assets/fonts/jetbrainsMono/JetbrainsMono-Regular.ttf') format('truetype');
+  font-weight: 400; /* Normal */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family:'Jetbrains Mono';
+  src: url('./assets/fonts/jetbrainsMono/JetBrainsMono-SemiBold.ttf') format('truetype');
+  font-weight: 600; 
+  font-style: normal;
+  font-display: swap;
+}
+
+/*FIN DE JETBRAINS*/
+
+/*INICIO NOTO SANS*/
+@font-face {
+  font-family:'Noto Sans';
+  src: url('./assets/fonts/notoSans/NotoSans-Bold.ttf') format('truetype');
+  font-weight: 700; /* Bold */
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('./assets/fonts/notoSans/NotoSans-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('./assets/fonts/notoSans/NotoSans-Regular.ttf') format('truetype');
+  font-weight: 400; /* Normal */
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('./assets/fonts/notoSans/NotoSans-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
 }

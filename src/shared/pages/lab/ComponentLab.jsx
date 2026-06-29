@@ -12,6 +12,8 @@ import SAETextField from "../../components/inputs/SAETextField";
 import SAESpinner from "../../components/spinner/SAESpinner";
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
 import utnLogo from "../../../assets/utn.png";
+import { SAETypography } from "../../components/typography/SAETypography";
+import SAEPage from "../../components/page/SAEPage";
 
 export default function ComponentLab() {
   const [viewerMode, setViewerMode] = useState(null);
@@ -25,7 +27,7 @@ export default function ComponentLab() {
   }, []);
 
   return (
-    <Container sx={{ py: 4 }}>
+    <SAEPage>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
         Laboratorio de Componentes
       </Typography>
@@ -290,8 +292,56 @@ export default function ComponentLab() {
         </SAEButton>
       </Stack>
 
-      <Divider sx={{ mb: 4 }} />
+      <Divider sx={{ my: 4 }} />
+      <Stack direction={"column"} gap={2}>
+        <SAETypography variant="h1">
+          Titulos H1 en la UTN FRC (negrita)
+        </SAETypography>
+        <SAETypography variant="h2">
+          H2 para los subtitulos
+        </SAETypography>
+        <SAETypography variant="h3">
+          Para los indecisos h3
+        </SAETypography>
+        <SAETypography variant="h4">
+          El menos usado h4
+        </SAETypography>
+        <SAETypography variant="h5" fontWeight="bold">
+          Tambien usado poco, usemos bold
+        </SAETypography>
+        <SAETypography variant="h6">
+           Para algunas cosas no muy grandes
+        </SAETypography>
 
+        <SAETypography variant="body1">
+          Esto es para los textos que son muuuuuy largos como los lorem ipsum que pones cuando estas sin ideas o como cuando describis todo lo que puede hacer la aplicacion de SAE Gestion.
+        </SAETypography>
+        <SAETypography variant="body2">
+          Esto es una variante para decir BOCA YO TE AMO y esas cosas que no te animas porque estas mojado por la vida. A veces los problemas nos parecen mas de lo que realmente son, es dificil no tratar de medirse con todos los demas
+        </SAETypography>
+        <SAETypography variant="subtitle1">
+          Esto son simplemente subtitulos
+        </SAETypography>
+        <SAETypography variant="subtitle2">
+          El subtitulo 2 para probar
+        </SAETypography>
+        <SAETypography variant="button">
+          Ojala los botones se cambiaran solos
+        </SAETypography>
+        <SAETypography variant="caption">
+          Hey esto es una caption
+        </SAETypography>
+        <SAETypography variant="overline">
+          No se que es un overline
+        </SAETypography>
+        <SAETypography variant="quote" fontWeight={"bold"} >
+          Es acaso un hombre prisionero de su destino
+        </SAETypography>
+        <SAETypography variant="quote">
+          O el navegante en un mar de opciones
+        </SAETypography>
+      </Stack>
+      <Divider sx={{ mb: 4 }}/>
       <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
         Variantes SAETextField
       </Typography>
@@ -356,6 +406,6 @@ export default function ComponentLab() {
         error="No se pudo cargar el archivo de prueba."
         onDownload={() => {}}
       />
-    </Container>
+    </SAEPage>
   );
 }

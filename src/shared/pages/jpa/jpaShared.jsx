@@ -38,6 +38,7 @@ import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
+import { SAETypography } from "../../components/typography/SAETypography";
 
 const baseUrl = import.meta.env.BASE_URL;
 const settingsHero = {
@@ -338,7 +339,7 @@ function JPAContent(){
         pt: { xs: "75px" },
         pb: 4,
         minHeight: "calc(110vh - 90px)",
-        bgcolor: "var(--background)",
+        bgcolor: "var(--background)",//No uso el SAEPage porque me da fiaca re configurar el HeroSection
         }}
     >
         <HeroSection/>
@@ -394,7 +395,7 @@ function HeroSection(){
                     <Box
                         sx={{
                         position: 'absolute',
-                        px:{xs:1,md:6},
+                        px:{xs:2,md:6},
                         top: 0,
                         left: 0,
                         width: '100%',
@@ -419,35 +420,23 @@ function HeroSection(){
                             }}
                             />
 
-                            <Typography
-                            sx={{
-                                color: "white",
-                                fontWeight: 700,
-                                fontSize: {
-                                xs: "3rem",
-                                md: "5rem",
-                                lg: "6rem",
-                                },
-                                lineHeight: 1,
-                                maxWidth: "900px",
-                            }}
+                            <SAETypography
+                            variant="h1"
+                            color="white"
                             >
                             Ingeniería es más
                             <br />
                             que una carrera
-                            </Typography>
+                            </SAETypography>
 
-                            <Typography
-                            sx={{
-                                color: "rgba(255,255,255,.85)",
-                                fontSize: {xs:"1rem", md:"1.4rem"},
-                                maxWidth: "700px",
-                            }}
+                             <SAETypography
+                             variant="subtitle1"
+                             color="white"
                             >
                             Formate en una de las intituciones educativas mas importantes de la Argentina y descubrí una experiencia
                             universitaria que va mucho más allá del aula.
 
-                            </Typography>
+                            </SAETypography>
                             <Stack
                             direction="row"
                             spacing={{xs:1,md:2}}
@@ -498,7 +487,7 @@ function HeroSection(){
                         </Stack>
                     </Box>
                 </Box>
-            )})}          
+            )})}
             </Slider>
             
         </Box>
@@ -722,16 +711,15 @@ function DegreesCarrousel() {
                         }}
                         className="hover-overlay"
                         >
-                            <Typography
+                            <SAETypography
+                            variant="overline"
                             sx={{
                                 color: "white",
-                                fontWeight: 700,
-                                fontSize: "1.2rem",
                                 letterSpacing: 1,
                             }}
                             >
                             Empeza tu aventura hoy →
-                            </Typography>
+                            </SAETypography>
                         </Box>                  
                     </Card>
                     )})}
@@ -752,9 +740,7 @@ function StatCard({ number, label }) {
       }}
     >
       <Typography
-      fontSize={{xs:"1.3rem",md:"2.5rem"}}
         variant="h4"
-        fontWeight={{xs:700,md:900}}
         color="#123666"
       >
         {number}
@@ -762,7 +748,6 @@ function StatCard({ number, label }) {
 
       <Typography
         color="text.secondary"
-        fontWeight={{xs:500,md:800}}
       >
         {label}
       </Typography>
@@ -778,8 +763,6 @@ function InterestSection(){
       >
       <Typography
       variant="h3"
-      fontSize={{xs:"1.5rem",md:'2.3rem'}}
-      fontWeight={800}
       textAlign={{xs:"left",md:"center"}}
       >
       Una carrera te forma.
@@ -816,21 +799,17 @@ function EventSection(){
       >
         <Typography
         variant="h3"
-        fontSize={{xs:"1.5rem",md:'2.3rem'}}
-        fontWeight={800}
         textAlign={{xs:"left",md:"center"}}
         >
         Eventos en nuestra Universidad.
         </Typography>
-        <Typography
+        <SAETypography
         variant="h6"
-        fontSize={{xs:"1rem",md:"1.5rem"}}
         textAlign={{xs:"left",md:"center"}}
         color="text.secondary"
-        sx={{ my: 3 }}
         >
         La Universidad no es solo para los que ya estan sino para vos tambien, el futuro llego hoy preparate para una experiencia unica!
-        </Typography>
+        </SAETypography>
 
         {loadingEventos && (
           <Stack alignItems="center" width={"100%"} gap={1}>
@@ -851,7 +830,6 @@ function JourneySection(){
       <Box textAlign="center" mb={8} sx={{position:"relative",zIndex:1,mt: {xs:4,md:12},p:{xs:2,md:4}}}>
         <Typography
           variant="h2"
-          fontWeight={900}
         >
           Tu camino en la UTN
         </Typography>
@@ -927,7 +905,6 @@ function JourneySection(){
                   </Avatar>
                   <Typography
                     mt={2}
-                    fontWeight={700}
                   >
                     {step.title}
                   </Typography>
@@ -978,7 +955,6 @@ function JourneySection(){
                   <Box p={5}>
                     <Typography
                       variant="h4"
-                      fontWeight={800}
                     >
                       {studentJourney[selectedStep].title}
                     </Typography>
@@ -999,43 +975,3 @@ function JourneySection(){
       </Box>
     );
   }
-/* LO DEJO GUARDADO ACA DESPUES LO IMPLEMENTAMOS
-import { createTheme } from '@mui/material/styles';
-
-const theme = createTheme({
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    
-    h1: {
-      fontWeight: 700,
-      fontSize: '2rem', // 32px
-      '@media (min-width:960px)': { fontSize: '3.5rem' }, // 56px
-    },
-    h2: {
-      fontWeight: 700,
-      fontSize: '1.625rem', // 26px
-      '@media (min-width:960px)': { fontSize: '2.5rem' }, // 40px
-    },
-    h3: {
-      fontWeight: 600,
-      fontSize: '1.375rem', // 22px
-      '@media (min-width:960px)': { fontSize: '2rem' }, // 32px
-    },
-    h4: {
-      fontWeight: 600,
-      fontSize: '1.25rem', // 20px
-      '@media (min-width:960px)': { fontSize: '1.5rem' }, // 24px
-    },
-    h5: {
-      fontWeight: 500,
-      fontSize: '1.125rem', // 18px
-      '@media (min-width:960px)': { fontSize: '1.25rem' }, // 20px
-    },
-    h6: {
-      fontWeight: 600,
-      fontSize: '1rem', // 16px (Se queda igual en ambos porque ya es un tamaño base)
-    },
-  },
-});
-
-export default theme;*/

@@ -56,9 +56,9 @@ export const appConfig = {
       blackText: "#191919",
       whiteText: "#FAFAFA",
 
-      green:"#8BC154",
-      magenta:"#D830A0",
-      orange:"#FF8E2C",
-    }
-  }
+      green: "#8BC154",
+      magenta: "#D830A0",
+      orange: "#FF8E2C",
+    },
+  },
 };

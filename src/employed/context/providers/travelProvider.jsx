@@ -19,6 +19,11 @@ import { ObtenerEmpresas,ObtenerViajesActivos,ObtenerInscriptosViaje, EliminarIn
 import { mapViajes } from "../../../api/formatters/ViajeFormatter";
 import { useNavigate } from "react-router-dom";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
+import {
+  cleanObjectFields,
+  formatHeader,
+  generateRows,
+} from "../../../shared/util";
 
 const EMPTY_BUSSINESS = {
     id: "-1",
@@ -68,11 +73,6 @@ const EMPTY_DOCUMENTACION_ESTUDIANTE = {
     datos:"",
     ruta:"",
 }
-const formatHeader = (key) =>
-key
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, l => l.toUpperCase());
-
 // Definición de tipos sugerida (si usas TypeScript)
 // type ActionConfig = {
 //   icon: React.ElementType;
@@ -171,27 +171,7 @@ const generateColumns = (data, actionsConfig = []) => {
 
   return columns;
 };
-const generateRows = (data) => {
-
-    return [...data]
-    .sort((a, b) => a.id - b.id)
-    .map((item, index) => ({
-        id: item.id || index,
-        ...item
-    }));
-
-};
-const checkAndCleanDialogData = (data) => {
-
-    if (!data) return { isValid: false, cleanedData: {} };
-
-    const cleanedData = Object.fromEntries(
-        Object.entries(data).filter((entry) => entry[1] !== "" && entry[1] !== null)
-    );
-    const isValid = Object.keys(cleanedData).length > 0;
-
-    return { isValid, cleanedData };
-};
+const checkAndCleanDialogData = (data) => cleanObjectFields(data);
 
 export function TravelProvider({ children }){
     const navigate = useNavigate();

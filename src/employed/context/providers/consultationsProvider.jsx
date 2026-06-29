@@ -17,6 +17,8 @@ import {
   getLinkFrecuenteIconByIndex,
 } from "../../../shared/pages/consultations/linkFrecuentesIcons";
 
+import { generateRows, formatHeader } from "../../../shared/util";
+
 const EMPTY_LINKFRECUENTE = {
   id: 0,
   titulo: "",
@@ -24,9 +26,6 @@ const EMPTY_LINKFRECUENTE = {
   hipervinculo: "",
   contador_clicks: 0,
 };
-
-const formatHeader = (key) =>
-  key.replaceAll("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
 const buildColumns = (
   data,
@@ -205,14 +204,6 @@ const buildColumns = (
     });
   }
   return columns;
-};
-const generateRows = (data) => {
-  return [...data]
-    .sort((a, b) => a.id - b.id)
-    .map((item, index) => ({
-      id: item.id || index,
-      ...item,
-    }));
 };
 
 export const ConsultationProvider = ({ children }) => {

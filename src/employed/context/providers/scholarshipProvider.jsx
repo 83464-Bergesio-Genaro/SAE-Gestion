@@ -23,6 +23,10 @@ import {
   EditarBecarioInvestigacion,
   EditarBecarioServicio,
 } from "../../../api/BecasService";
+import {
+  getFirstRecord as getFirstRecordUtil,
+  valuesAreEqual as valuesAreEqualUtil,
+} from "../../../shared/util";
 
 
 export function ScholarshipProvider({ children }) {
@@ -30,8 +34,7 @@ export function ScholarshipProvider({ children }) {
     const getFirstRecord = (value) => {
     // Los endpoints pueden devolver un objeto, una lista o una respuesta vacía.
     // El editor necesita siempre un objeto para poder pintar correctamente los campos.
-    if (Array.isArray(value)) return value[0] ?? null;
-    return value ?? null;
+    return getFirstRecordUtil(value);
     };
 
     async function handleBuscarBecario(legajo) {
@@ -97,7 +100,7 @@ export function ScholarshipProvider({ children }) {
     });
 
     const valuesAreEqual = (current, original) =>
-    JSON.stringify(current ?? null) === JSON.stringify(original ?? null);
+    valuesAreEqualUtil(current, original);
 
     const getBecaId = (beca = {}) => beca.datos?.id ?? beca.id;
 

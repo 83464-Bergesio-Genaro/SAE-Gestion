@@ -80,9 +80,7 @@ const buildDocumentsFromConfig = (
       archivoNombre: firstNonEmptyText(
         previousDocument?.archivoNombre,
         documentConfig.archivoNombre,
-        documentConfig.nombre_completo_documento,
         documentConfig.nombre_documento,
-        uploadedDocument?.nombre_completo_documento,
         uploadedDocument?.nombre_documento,
       ),
       subido: Boolean(
@@ -406,9 +404,7 @@ export default function ScholarshipsForm({
                 ...doc,
                 archivo: documentoGuardado.archivo,
                 archivoNombre:
-                  documentoGuardado.nombre_completo_documento ??
-                  documentoGuardado.nombre_documento ??
-                  nombreArchivo,
+                  documentoGuardado.nombre_documento ?? nombreArchivo,
                 subido: true,
                 visible: true,
                 id_archivo: documentoGuardado.id,

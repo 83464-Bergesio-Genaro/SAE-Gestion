@@ -45,26 +45,9 @@ import DocumentPreviewDialog from "../../../shared/components/documents/Document
 import TorneoFormDialog from "./TorneoFormDialog";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import {
-  obtenerTorneoXId,
-  obtenerDeportistasXTorneo,
-  modificarTorneo,
-  crearInscripcionTorneo,
-  eliminarInscripcionTorneo,
-  obtenerDeportistas,
-} from "../../../api/DeporteService";
+import { useSports } from "../../context/employedContext";
 
-function formatDate(isoString) {
-  if (!isoString) return "";
-  const d = new Date(isoString);
-  if (Number.isNaN(d.getTime())) return isoString;
-  return d.toLocaleDateString("es-AR");
-}
-
-function isoToInputDate(isoString) {
-  if (!isoString) return "";
-  return isoString.split("T")[0];
-}
+import { formatDate, isoToInputDate } from "../../../shared/util";
 
 const baseUrl = import.meta.env.BASE_URL;
 
@@ -85,6 +68,14 @@ function buildFormData(t) {
 }
 
 export default function TorneoDetalle() {
+  const {
+    obtenerTorneoXId,
+    obtenerDeportistasXTorneo,
+    modificarTorneo,
+    crearInscripcionTorneo,
+    eliminarInscripcionTorneo,
+    obtenerDeportistas,
+  } = useSports();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -95,8 +86,6 @@ export default function TorneoDetalle() {
   const [torneo, setTorneo] = useState(null);
   const [loadingTorneo, setLoadingTorneo] = useState(true);
   const [torneoError, setTorneoError] = useState("");
-
-
 
   // Athletes
   const [deportistas, setDeportistas] = useState([]);
@@ -163,7 +152,11 @@ export default function TorneoDetalle() {
 
   const handleGenerarPdf = useCallback(async () => {
     const { jsPDF } = await import("jspdf");
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
     const margin = 14;
     const pageW = doc.internal.pageSize.getWidth();
 
@@ -177,7 +170,8 @@ export default function TorneoDetalle() {
     doc.setFont("helvetica", "normal");
     doc.text(
       `${torneo.nombre_deporte ?? ""} · Responsable: ${torneo.docente_responsable ?? ""} · Generado: ${new Date().toLocaleDateString("es-AR")}`,
-      margin, 22
+      margin,
+      22,
     );
 
     doc.setTextColor(40, 40, 40);
@@ -185,7 +179,9 @@ export default function TorneoDetalle() {
     doc.setFont("helvetica", "normal");
     const inicio = torneo.fecha_inicio ? formatDate(torneo.fecha_inicio) : "—";
     const fin = torneo.fecha_fin ? formatDate(torneo.fecha_fin) : "—";
-    const limite = torneo.fecha_limite_inscripcion ? formatDate(torneo.fecha_limite_inscripcion) : "—";
+    const limite = torneo.fecha_limite_inscripcion
+      ? formatDate(torneo.fecha_limite_inscripcion)
+      : "—";
     doc.setFont("helvetica", "bold");
     doc.text("Inicio:", margin, 35);
     doc.setFont("helvetica", "normal");
@@ -203,7 +199,11 @@ export default function TorneoDetalle() {
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(20, 50, 92);
-    doc.text(`Inscriptos: ${deportistas.length} / ${torneo.cupo_jugadores} cupos`, margin, 43);
+    doc.text(
+      `Inscriptos: ${deportistas.length} / ${torneo.cupo_jugadores} cupos`,
+      margin,
+      43,
+    );
 
     // colX: Legajo(14) | Nombre(72) | Habilitado(152) | Venc.Ficha(172)
     const colX = [margin, 72, 152, 172];
@@ -232,10 +232,20 @@ export default function TorneoDetalle() {
       doc.setTextColor(40, 40, 40);
       doc.text(String(d.legajo ?? ""), colX[0], y);
       doc.text(String(d.nombre_deportista ?? "").substring(0, 32), colX[1], y);
-      doc.setTextColor(d.habilitado_deporte ? 30 : 180, d.habilitado_deporte ? 130 : 30, 30);
+      doc.setTextColor(
+        d.habilitado_deporte ? 30 : 180,
+        d.habilitado_deporte ? 130 : 30,
+        30,
+      );
       doc.text(d.habilitado_deporte ? "Sí" : "No", colX[2], y);
       doc.setTextColor(80, 80, 80);
-      doc.text(d.vencimiento_ficha ? new Date(d.vencimiento_ficha).toLocaleDateString("es-AR") : "-", colX[3], y);
+      doc.text(
+        d.vencimiento_ficha
+          ? new Date(d.vencimiento_ficha).toLocaleDateString("es-AR")
+          : "-",
+        colX[3],
+        y,
+      );
       y += 7;
     });
 
@@ -249,7 +259,7 @@ export default function TorneoDetalle() {
         `Página ${p} / ${totalPages}`,
         pageW / 2,
         doc.internal.pageSize.getHeight() - 6,
-        { align: "center" }
+        { align: "center" },
       );
     }
 
@@ -273,7 +283,7 @@ export default function TorneoDetalle() {
       };
       await crearInscripcionTorneo(torneo.id, selectedDeportista.id, body);
       setInscribirSuccess(
-        `${selectedDeportista.nombre_deportista || selectedDeportista.legajo} inscripto correctamente.`
+        `${selectedDeportista.nombre_deportista || selectedDeportista.legajo} inscripto correctamente.`,
       );
       setSelectedDeportista(null);
       fetchDeportistas(id);
@@ -295,7 +305,7 @@ export default function TorneoDetalle() {
     return disponibles.filter(
       (d) =>
         d.legajo?.toLowerCase().includes(lower) ||
-        d.nombre_deportista?.toLowerCase().includes(lower)
+        d.nombre_deportista?.toLowerCase().includes(lower),
     );
   }, [disponibles, busquedaDisponibles]);
 
@@ -305,7 +315,7 @@ export default function TorneoDetalle() {
     return deportistas.filter(
       (d) =>
         d.legajo?.toLowerCase().includes(lower) ||
-        d.nombre_deportista?.toLowerCase().includes(lower)
+        d.nombre_deportista?.toLowerCase().includes(lower),
     );
   }, [deportistas, busquedaInscriptos]);
 
@@ -353,7 +363,7 @@ export default function TorneoDetalle() {
       }
       setInscribirMasivo(false);
     },
-    [torneo, id, fetchDeportistas]
+    [torneo, id, fetchDeportistas],
   );
 
   const handleMoveSelected = async () => {
@@ -371,14 +381,16 @@ export default function TorneoDetalle() {
       setDraggingId(null);
       if (!draggedDep) return;
       if (selectedAvailable.has(draggedDep.id) && selectedAvailable.size > 0) {
-        const toInscribe = disponibles.filter((d) => selectedAvailable.has(d.id));
+        const toInscribe = disponibles.filter((d) =>
+          selectedAvailable.has(d.id),
+        );
         setSelectedAvailable(new Set());
         await inscribirMultiple(toInscribe);
       } else {
         await inscribirMultiple([draggedDep]);
       }
     },
-    [draggingId, disponibles, selectedAvailable, inscribirMultiple]
+    [draggingId, disponibles, selectedAvailable, inscribirMultiple],
   );
 
   const handleEliminar = useCallback(
@@ -387,7 +399,9 @@ export default function TorneoDetalle() {
       try {
         await eliminarInscripcionTorneo(dep.id);
         await fetchDeportistas(id);
-        setSnackMsg(`${dep.nombre_deportista || dep.legajo} eliminado de la inscripción`);
+        setSnackMsg(
+          `${dep.nombre_deportista || dep.legajo} eliminado de la inscripción`,
+        );
         setSnackSeverity("success");
         setSnackOpen(true);
       } catch (err) {
@@ -398,7 +412,7 @@ export default function TorneoDetalle() {
         setDeletingId(null);
       }
     },
-    [id, fetchDeportistas]
+    [id, fetchDeportistas],
   );
 
   const handleSelectAll = () =>
@@ -429,7 +443,9 @@ export default function TorneoDetalle() {
       try {
         await eliminarInscripcionTorneo(dep.id);
         ok += 1;
-      } catch { /* continue */ }
+      } catch {
+        /* continue */
+      }
     }
     setSelectedInscriptos(new Set());
     await fetchDeportistas(id);
@@ -479,7 +495,10 @@ export default function TorneoDetalle() {
               sx={{ py: 0.5 }}
             >
               <ListItemIcon sx={{ minWidth: 28 }}>
-                <DragIndicatorIcon fontSize="small" sx={{ color: "#bdbdbd", pointerEvents: "none" }} />
+                <DragIndicatorIcon
+                  fontSize="small"
+                  sx={{ color: "#bdbdbd", pointerEvents: "none" }}
+                />
               </ListItemIcon>
               <Checkbox
                 size="small"
@@ -489,11 +508,17 @@ export default function TorneoDetalle() {
                 sx={{ p: 0.5 }}
               />
               <ListItemText
-                primary={<Typography variant="body2" noWrap>{d.nombre_deportista || d.legajo}</Typography>}
+                primary={
+                  <Typography variant="body2" noWrap>
+                    {d.nombre_deportista || d.legajo}
+                  </Typography>
+                }
                 secondary={
-                  d.nombre_deportista
-                    ? <Typography variant="caption" color="text.secondary">{d.legajo}</Typography>
-                    : undefined
+                  d.nombre_deportista ? (
+                    <Typography variant="caption" color="text.secondary">
+                      {d.legajo}
+                    </Typography>
+                  ) : undefined
                 }
               />
             </ListItemButton>
@@ -514,7 +539,9 @@ export default function TorneoDetalle() {
     inscriptosContent = (
       <Box sx={{ p: 2 }}>
         <Typography variant="body2" color="text.secondary" textAlign="center">
-          {deportistas.length === 0 ? "Ningún deportista inscripto" : "Sin resultados"}
+          {deportistas.length === 0
+            ? "Ningún deportista inscripto"
+            : "Sin resultados"}
         </Typography>
       </Box>
     );
@@ -549,11 +576,17 @@ export default function TorneoDetalle() {
               sx={{ p: 0.5, mr: 0.5 }}
             />
             <ListItemText
-              primary={<Typography variant="body2" noWrap>{d.nombre_deportista || d.legajo}</Typography>}
+              primary={
+                <Typography variant="body2" noWrap>
+                  {d.nombre_deportista || d.legajo}
+                </Typography>
+              }
               secondary={
-                d.nombre_deportista
-                  ? <Typography variant="caption" color="text.secondary">{d.legajo}</Typography>
-                  : undefined
+                d.nombre_deportista ? (
+                  <Typography variant="caption" color="text.secondary">
+                    {d.legajo}
+                  </Typography>
+                ) : undefined
               }
             />
             <Chip
@@ -571,7 +604,18 @@ export default function TorneoDetalle() {
   // ── Render ──
   if (loadingTorneo) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%", bgcolor: "#f4f8fc", mt: "-90px", pt: "90px" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          width: "100%",
+          bgcolor: "#f4f8fc",
+          mt: "-90px",
+          pt: "90px",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -596,7 +640,15 @@ export default function TorneoDetalle() {
   if (!torneo) return null;
 
   return (
-    <Box sx={{ pb: 8, mt: "-90px", pt: "90px", minHeight: "100%", bgcolor: "#f4f8fc" }}>
+    <Box
+      sx={{
+        pb: 8,
+        mt: "-90px",
+        pt: "90px",
+        minHeight: "100%",
+        bgcolor: "#f4f8fc",
+      }}
+    >
       <Container maxWidth="lg">
         <Box
           sx={{
@@ -606,7 +658,7 @@ export default function TorneoDetalle() {
             py: { xs: 4, md: 5 },
             minHeight: 260,
             backgroundImage: torneo.activo
-              ? `linear-gradient(125deg, rgba(18,54,102,0.97) 0%, rgba(53,108,178,0.93) 58%, rgba(108,171,221,0.88) 100%), url('${baseUrl}images/varias/campus.jpg')`
+              ? `linear-gradient(125deg, var(--primary), var(--lightBlue)), url('${baseUrl}images/varias/campus.jpg')`
               : `linear-gradient(125deg, rgba(60,60,60,0.97) 0%, rgba(100,100,100,0.93) 58%, rgba(150,150,150,0.88) 100%), url('${baseUrl}images/varias/campus.jpg')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -614,7 +666,11 @@ export default function TorneoDetalle() {
           }}
         >
           {/* Top row: back arrow + overline + edit pencil */}
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
             <Stack direction="row" alignItems="center" spacing={1}>
               <IconButton
                 size="small"
@@ -651,19 +707,29 @@ export default function TorneoDetalle() {
           <Box sx={{ mt: 1.5 }}>
             <Typography
               variant="h3"
-              sx={{ fontWeight: 800, lineHeight: 1.1, fontSize: { xs: "2rem", md: "3rem" } }}
+              sx={{
+                fontWeight: 800,
+                lineHeight: 1.1,
+                fontSize: { xs: "2rem", md: "3rem" },
+              }}
             >
               {torneo.nombre_torneo}
             </Typography>
-            <Typography sx={{ mt: 1.5, fontSize: { xs: 15, md: 17 }, opacity: 0.92 }}>
-              {torneo.nombre_deporte} · Responsable: {torneo.docente_responsable || "—"}{torneo.cuil_responsable ? ` — ${torneo.cuil_responsable}` : ""}
+            <Typography
+              sx={{ mt: 1.5, fontSize: { xs: 15, md: 17 }, opacity: 0.92 }}
+            >
+              {torneo.nombre_deporte} · Responsable:{" "}
+              {torneo.docente_responsable || "—"}
+              {torneo.cuil_responsable ? ` — ${torneo.cuil_responsable}` : ""}
             </Typography>
             <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 2.5 }}>
               <Chip
                 label={torneo.activo ? "Activo" : "Inactivo"}
                 size="small"
                 sx={{
-                  bgcolor: torneo.activo ? "rgba(76,175,80,0.28)" : "rgba(211,47,47,0.55)",
+                  bgcolor: torneo.activo
+                    ? "rgba(76,175,80,0.28)"
+                    : "rgba(211,47,47,0.55)",
                   color: "white",
                   fontWeight: 700,
                   border: "1px solid rgba(255,255,255,0.4)",
@@ -686,14 +752,24 @@ export default function TorneoDetalle() {
                 <Chip
                   label={`Inicio: ${formatDate(torneo.fecha_inicio)}`}
                   size="small"
-                  sx={{ bgcolor: "rgba(255,255,255,0.18)", color: "white", fontWeight: 700, border: "1px solid rgba(255,255,255,0.4)" }}
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.18)",
+                    color: "white",
+                    fontWeight: 700,
+                    border: "1px solid rgba(255,255,255,0.4)",
+                  }}
                 />
               )}
               {torneo.fecha_fin && (
                 <Chip
                   label={`Fin: ${formatDate(torneo.fecha_fin)}`}
                   size="small"
-                  sx={{ bgcolor: "rgba(255,255,255,0.18)", color: "white", fontWeight: 700, border: "1px solid rgba(255,255,255,0.4)" }}
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.18)",
+                    color: "white",
+                    fontWeight: 700,
+                    border: "1px solid rgba(255,255,255,0.4)",
+                  }}
                 />
               )}
             </Stack>
@@ -702,14 +778,23 @@ export default function TorneoDetalle() {
 
         <Stack spacing={4} sx={{ mt: 5 }}>
           <Paper sx={{ p: 2, borderRadius: 2 }}>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mb: 1 }}
+            >
               <PersonAddIcon color="success" fontSize="small" />
               <Typography variant="subtitle1" fontWeight={700}>
                 Inscribir Alumno
               </Typography>
             </Stack>
 
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="stretch">
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              alignItems="stretch"
+            >
               {loadingAll ? (
                 <CircularProgress size={24} />
               ) : (
@@ -725,7 +810,12 @@ export default function TorneoDetalle() {
                   value={selectedDeportista}
                   onChange={(_, val) => setSelectedDeportista(val)}
                   renderInput={(params) => (
-                    <SAETextField {...params} size="small" label="Buscar deportista por legajo o nombre" fullWidth />
+                    <SAETextField
+                      {...params}
+                      size="small"
+                      label="Buscar deportista por legajo o nombre"
+                      fullWidth
+                    />
                   )}
                   isOptionEqualToValue={(opt, val) => opt.id === val.id}
                 />
@@ -764,7 +854,13 @@ export default function TorneoDetalle() {
           <Divider />
 
           <Paper sx={{ p: 3, borderRadius: 2 }}>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }} flexWrap="wrap">
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mb: 2 }}
+              flexWrap="wrap"
+            >
               <GroupsIcon color="primary" />
               <Typography variant="h6" fontWeight={700}>
                 Gestionar Inscripciones
@@ -772,7 +868,11 @@ export default function TorneoDetalle() {
               <Chip
                 size="small"
                 label={`${deportistas.length} / ${torneo.cupo_jugadores} cupos`}
-                color={deportistas.length >= torneo.cupo_jugadores ? "error" : "success"}
+                color={
+                  deportistas.length >= torneo.cupo_jugadores
+                    ? "error"
+                    : "success"
+                }
                 sx={{ ml: 1 }}
               />
             </Stack>
@@ -786,7 +886,14 @@ export default function TorneoDetalle() {
               }}
             >
               {/* Left: disponibles */}
-              <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                }}
+              >
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="subtitle2" fontWeight={700}>
                     Disponibles
@@ -848,7 +955,10 @@ export default function TorneoDetalle() {
                   py: { md: 2 },
                 }}
               >
-                <Badge badgeContent={selectedAvailable.size || undefined} color="primary">
+                <Badge
+                  badgeContent={selectedAvailable.size || undefined}
+                  color="primary"
+                >
                   <IconButton
                     color="primary"
                     onClick={handleMoveSelected}
@@ -857,7 +967,10 @@ export default function TorneoDetalle() {
                       bgcolor: "#5B96CC",
                       color: "white",
                       "&:hover": { bgcolor: "#477EAF" },
-                      "&.Mui-disabled": { bgcolor: "#e0e0e0", color: "#9e9e9e" },
+                      "&.Mui-disabled": {
+                        bgcolor: "#e0e0e0",
+                        color: "#9e9e9e",
+                      },
                     }}
                   >
                     {inscribirMasivo ? (
@@ -867,7 +980,11 @@ export default function TorneoDetalle() {
                     )}
                   </IconButton>
                 </Badge>
-                <Typography variant="caption" color="text.secondary" textAlign="center">
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  textAlign="center"
+                >
                   o arrastrá
                 </Typography>
               </Box>
@@ -890,7 +1007,11 @@ export default function TorneoDetalle() {
                   <Typography variant="subtitle2" fontWeight={700}>
                     Inscriptos
                   </Typography>
-                  <Chip size="small" label={deportistas.length} color="primary" />
+                  <Chip
+                    size="small"
+                    label={deportistas.length}
+                    color="primary"
+                  />
                 </Stack>
                 <Stack direction="row" spacing={0.5} alignItems="center">
                   <SAETextField
@@ -928,11 +1049,15 @@ export default function TorneoDetalle() {
                         size="small"
                         color="error"
                         onClick={handleEliminarSeleccionados}
-                        disabled={selectedInscriptos.size === 0 || deletingMultiple}
+                        disabled={
+                          selectedInscriptos.size === 0 || deletingMultiple
+                        }
                       >
-                        {deletingMultiple
-                          ? <CircularProgress size={16} color="error" />
-                          : <DeleteSweepIcon fontSize="small" />}
+                        {deletingMultiple ? (
+                          <CircularProgress size={16} color="error" />
+                        ) : (
+                          <DeleteSweepIcon fontSize="small" />
+                        )}
                       </IconButton>
                     </span>
                   </Tooltip>
@@ -941,7 +1066,9 @@ export default function TorneoDetalle() {
                   sx={{
                     height: 360,
                     overflow: "auto",
-                    border: isDragOver ? "2px dashed #2d6da3" : "1px solid #e0e0e0",
+                    border: isDragOver
+                      ? "2px dashed #2d6da3"
+                      : "1px solid #e0e0e0",
                     borderRadius: 1,
                     bgcolor: isDragOver ? "#e8f4fd" : "#fafafa",
                     transition: "border 0.15s, background 0.15s",
@@ -975,7 +1102,12 @@ export default function TorneoDetalle() {
 
           {/* ── Athletes detail table ── */}
           <Paper sx={{ p: 3, borderRadius: 2 }}>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mb: 2 }}
+            >
               <GroupsIcon color="primary" />
               <Typography variant="h6" fontWeight={700}>
                 Deportistas Inscriptos
@@ -1039,10 +1171,18 @@ export default function TorneoDetalle() {
                 <Table size="small">
                   <TableHead sx={{ bgcolor: "#f0f4f8" }}>
                     <TableRow>
-                      <TableCell><b>Legajo</b></TableCell>
-                      <TableCell><b>Nombre</b></TableCell>
-                      <TableCell align="center"><b>Habilitado</b></TableCell>
-                      <TableCell><b>Venc. Ficha</b></TableCell>
+                      <TableCell>
+                        <b>Legajo</b>
+                      </TableCell>
+                      <TableCell>
+                        <b>Nombre</b>
+                      </TableCell>
+                      <TableCell align="center">
+                        <b>Habilitado</b>
+                      </TableCell>
+                      <TableCell>
+                        <b>Venc. Ficha</b>
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -1069,7 +1209,11 @@ export default function TorneoDetalle() {
       </Container>
       <DocumentPreviewDialog
         open={pdfOpen}
-        onClose={() => { setPdfOpen(false); URL.revokeObjectURL(pdfSrc); setPdfSrc(""); }}
+        onClose={() => {
+          setPdfOpen(false);
+          URL.revokeObjectURL(pdfSrc);
+          setPdfSrc("");
+        }}
         title={`Inscriptos — ${torneo?.nombre_torneo ?? ""}`}
         imageSrc={pdfSrc}
         isPdf

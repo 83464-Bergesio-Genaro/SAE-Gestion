@@ -32,15 +32,9 @@ import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAETimeField from "../../../shared/components/inputs/SAETimeField";
 
-import {
-  obtenerDeportesActivos,
-  obtenerHorariosXDeporte,
-  crearHorarioDeportivo,
-  modificarHorarioDeportivo,
-  eliminarHorarioDeportivo,
-  obtenerDocentesDeportivos,
-  obtenerEspaciosDeportivos,
-} from "../../../api/DeporteService";
+import { useSports } from "../../context/employedContext";
+
+import { toTimeInput, toApiTime } from "../../../shared/util";
 
 const DIAS_LABEL = {
   0: "Domingo",
@@ -70,16 +64,6 @@ const EMPTY_FORM = {
   cuil_docente: "",
   activo: true,
 };
-
-function toTimeInput(str) {
-  if (!str) return "";
-  return str.slice(0, 5);
-}
-
-function toApiTime(str) {
-  if (!str) return "";
-  return str.length === 5 ? `${str}:00` : str;
-}
 
 function HorarioFormFields({ form, onChange, espacios, docentes }) {
   return (
@@ -167,6 +151,7 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
 }
 
 function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
+  const { modificarHorarioDeportivo, eliminarHorarioDeportivo } = useSports();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -190,7 +175,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
       await eliminarHorarioDeportivo(horario.id);
       setConfirmDelete(false);
       onDeleted();
-    } catch (err) {
+    } catch {
       setDeleting(false);
       setConfirmDelete(false);
     }
@@ -506,6 +491,7 @@ function NuevoHorarioCard({
   onCreated,
   onCancel,
 }) {
+  const { crearHorarioDeportivo } = useSports();
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -618,6 +604,12 @@ function NuevoHorarioCard({
 }
 
 export default function GestionarHorariosDialog({ open, onClose }) {
+  const {
+    obtenerDeportesActivos,
+    obtenerHorariosXDeporte,
+    obtenerDocentesDeportivos,
+    obtenerEspaciosDeportivos,
+  } = useSports();
   const [deportes, setDeportes] = useState([]);
   const [espacios, setEspacios] = useState([]);
   const [docentes, setDocentes] = useState([]);

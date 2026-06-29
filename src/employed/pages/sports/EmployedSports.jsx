@@ -1,11 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  validateDocente,
-  validateEspacio,
-  validateDeportista,
-  validateDeporte,
-} from "./sports.validations";
+import { useMemo, useState } from "react";
 import {
   Box,
   Container,
@@ -49,25 +42,9 @@ import SAETextField from "../../../shared/components/inputs/SAETextField";
 import TorneoFormDialog from "./TorneoFormDialog";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
-import {
-  obtenerDocentesDeportivos,
-  crearDocenteDeportivo,
-  modificarDocenteDeportivo,
-  obtenerEspaciosDeportivos,
-  crearEspacioDeportivo,
-  modificarEspacioDeportivo,
-  obtenerDeportistas,
-  crearDeportista,
-  modificarDeportista,
-  listarDocumentacionXLegajo,
-  descargarDocumentacionXId,
-  obtenerTorneosDeportivos,
-  crearTorneo,
-  obtenerDeportesCompleto,
-  crearDeporte,
-  modificarDeporte,
-} from "../../../api/DeporteService";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
+import { SportsProvider } from "../../context/providers/sportsProvider";
+import { useSports } from "../../context/employedContext";
 
 const EMPTY_DOCENTE = {
   cuil: "",
@@ -99,646 +76,78 @@ const EMPTY_DEPORTE = {
   activo: true,
 };
 
-function formatDate(isoString) {
-  if (!isoString) return "";
-  const d = new Date(isoString);
-  if (isNaN(d)) return isoString;
-  return d.toLocaleDateString("es-AR");
-}
-
-function isoToInputDate(isoString) {
-  if (!isoString) return "";
-  return isoString.split("T")[0];
-}
-
 export default function EmployedSports() {
-  const navigate = useNavigate();
+  return (
+    <SportsProvider>
+      <EmployedSportsContent />
+    </SportsProvider>
+  );
+}
+
+function EmployedSportsContent() {
   const [activeSection, setActiveSection] = useState("profesores");
   const [busquedaGestion, setBusquedaGestion] = useState("");
   const [busquedaDeportes, setBusquedaDeportes] = useState("");
+  const {
+    torneosRows,
+    loadingTorneos,
+    torneoFormOpen,
+    setTorneoFormOpen,
+    fetchTorneos,
+    profesoresRows,
+    loadingProfesores,
+    espaciosRows,
+    loadingEspacios,
+    deportistasRows,
+    loadingDeportistas,
+    deportesRows,
+    loadingDeportes,
+    dialogOpen,
+    setDialogOpen,
+    dialogType,
+    dialogMode,
+    dialogData,
+    dialogSaving,
+    dialogError,
+    setDialogError,
+    dialogFieldErrors,
+    horariosDialogOpen,
+    setHorariosDialogOpen,
+    docsDialogOpen,
+    setDocsDialogOpen,
+    docsLegajo,
+    docsList,
+    loadingDocs,
+    docsError,
+    downloadingDocId,
+    previewOpen,
+    setPreviewOpen,
+    previewTitle,
+    previewSrc,
+    previewIsPdf,
+    loadingPreview,
+    previewError,
+    previewDocRef,
+    snackbarOpen,
+    setSnackbarOpen,
+    snackbarMsg,
+    openCreateDocente,
+    openCreateEspacio,
+    openCreateDeportista,
+    openCreateDeporte,
+    handlePreviewDoc,
+    handleDownloadDoc,
+    handleDialogChange,
+    handleDialogSave,
+    profesoresColumns,
+    espaciosColumns,
+    deportistasColumns,
+    deportesColumns,
+    torneosColumns,
+    crearTorneo,
+  } = useSports();
 
-  const [torneosRows, setTorneosRows] = useState([]);
-  const [loadingTorneos, setLoadingTorneos] = useState(false);
-  const [torneoFormOpen, setTorneoFormOpen] = useState(false);
-
-  const [profesoresRows, setProfesoresRows] = useState([]);
-  const [loadingProfesores, setLoadingProfesores] = useState(false);
-
-  const [espaciosRows, setEspaciosRows] = useState([]);
-  const [loadingEspacios, setLoadingEspacios] = useState(false);
-
-  const [deportistasRows, setDeportistasRows] = useState([]);
-  const [loadingDeportistas, setLoadingDeportistas] = useState(false);
-
-  const [deportesRows, setDeportesRows] = useState([]);
-  const [loadingDeportes, setLoadingDeportes] = useState(false);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState("docente"); // "docente" | "espacio" | "deportista" | "deporte"
-  const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState("create");
-  const [dialogData, setDialogData] = useState(EMPTY_DOCENTE);
-  const [dialogSaving, setDialogSaving] = useState(false);
-  const [dialogError, setDialogError] = useState("");
-  const [dialogFieldErrors, setDialogFieldErrors] = useState({});
-
-  const [docsDialogOpen, setDocsDialogOpen] = useState(false);
-  const [docsLegajo, setDocsLegajo] = useState("");
-  const [docsList, setDocsList] = useState([]);
-  const [loadingDocs, setLoadingDocs] = useState(false);
-  const [docsError, setDocsError] = useState("");
-  const [downloadingDocId, setDownloadingDocId] = useState(null);
-
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewTitle, setPreviewTitle] = useState("");
-  const [previewSrc, setPreviewSrc] = useState(null);
-  const [previewIsPdf, setPreviewIsPdf] = useState(false);
-  const [loadingPreview, setLoadingPreview] = useState(false);
-  const [previewError, setPreviewError] = useState("");
-  const [previewDocRef, setPreviewDocRef] = useState(null);
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
-
-  const fetchProfesores = useCallback(async () => {
-    setLoadingProfesores(true);
-    try {
-      const data = await obtenerDocentesDeportivos();
-      setProfesoresRows(data.map((d, i) => ({ ...d, id: d.cuil || i })));
-    } catch {
-      setProfesoresRows([]);
-    } finally {
-      setLoadingProfesores(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProfesores();
-  }, [fetchProfesores]);
-
-  const fetchEspacios = useCallback(async () => {
-    setLoadingEspacios(true);
-    try {
-      const data = await obtenerEspaciosDeportivos();
-      setEspaciosRows(data.map((e) => ({ ...e, id: e.id })));
-    } catch {
-      setEspaciosRows([]);
-    } finally {
-      setLoadingEspacios(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchEspacios();
-  }, [fetchEspacios]);
-
-  const fetchTorneos = useCallback(async () => {
-    setLoadingTorneos(true);
-    try {
-      const data = await obtenerTorneosDeportivos();
-      setTorneosRows(data.map((t) => ({ ...t, id: t.id })));
-    } catch {
-      setTorneosRows([]);
-    } finally {
-      setLoadingTorneos(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchTorneos();
-  }, [fetchTorneos]);
-
-  const fetchDeportistas = useCallback(async () => {
-    setLoadingDeportistas(true);
-    try {
-      const data = await obtenerDeportistas();
-      setDeportistasRows(data.map((d) => ({ ...d, id: d.id })));
-    } catch {
-      setDeportistasRows([]);
-    } finally {
-      setLoadingDeportistas(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDeportistas();
-  }, [fetchDeportistas]);
-
-  const fetchDeportes = useCallback(async () => {
-    setLoadingDeportes(true);
-    try {
-      const data = await obtenerDeportesCompleto();
-      setDeportesRows(data.map((d) => ({ ...d, id: d.id })));
-    } catch {
-      setDeportesRows([]);
-    } finally {
-      setLoadingDeportes(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDeportes();
-  }, [fetchDeportes]);
-
-  const openCreateDocente = () => {
-    setDialogData(EMPTY_DOCENTE);
-    setDialogType("docente");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  };
-
-  const openEditDocente = useCallback((row) => {
-    setDialogData({
-      cuil: row.cuil,
-      nombres: row.nombres,
-      apellidos: row.apellidos,
-      activo: row.activo,
-      fecha_nacimiento: isoToInputDate(row.fecha_nacimiento),
-    });
-    setDialogType("docente");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  }, []);
-
-  const openCreateEspacio = () => {
-    setDialogData(EMPTY_ESPACIO);
-    setDialogType("espacio");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  };
-
-  const openEditEspacio = useCallback((row) => {
-    setDialogData({
-      id: row.id,
-      nombre: row.nombre,
-      domicilio: row.domicilio,
-      activo: row.activo,
-      url_maps: row.url_maps,
-    });
-    setDialogType("espacio");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  }, []);
-
-  const openDocsDialog = useCallback(async (legajo) => {
-    setDocsLegajo(legajo);
-    setDocsList([]);
-    setDocsError("");
-    setLoadingDocs(true);
-    setDocsDialogOpen(true);
-    try {
-      const data = await listarDocumentacionXLegajo(legajo);
-      setDocsList(data);
-    } catch (err) {
-      setDocsError(err.message || "Error al cargar documentación");
-    } finally {
-      setLoadingDocs(false);
-    }
-  }, []);
-
-  const handlePreviewDoc = useCallback(async (doc) => {
-    setPreviewTitle(doc.nombre_documento);
-    setPreviewSrc(null);
-    setPreviewError("");
-    setPreviewIsPdf(false);
-    setPreviewDocRef(doc);
-    setLoadingPreview(true);
-    setPreviewOpen(true);
-    try {
-      const data = await descargarDocumentacionXId(doc.id);
-      const fetched = Array.isArray(data) ? data[0] : data;
-      const ext = (fetched.extension || doc.extension || "").toLowerCase();
-      // Si datos_documento ya es un dataURL (comienza con data:), usarlo como está
-      // Si no, es base64, convertirlo a dataURL
-      let src = fetched.datos_documento;
-      if (!src.startsWith("data:")) {
-        const mimeMap = {
-          pdf: "application/pdf",
-          png: "image/png",
-          jpg: "image/jpeg",
-          jpeg: "image/jpeg",
-          gif: "image/gif",
-          webp: "image/webp",
-        };
-        const mime = mimeMap[ext] || "application/octet-stream";
-        src = `data:${mime};base64,${src}`;
-      }
-      setPreviewSrc(src);
-      setPreviewIsPdf(ext === "pdf");
-    } catch (err) {
-      setPreviewError(err.message || "Error al cargar el documento");
-    } finally {
-      setLoadingPreview(false);
-    }
-  }, []);
-
-  const handleDownloadDoc = useCallback(
-    async (id, nombreDocumento, extension) => {
-      setDownloadingDocId(id);
-      try {
-        const data = await descargarDocumentacionXId(id);
-        const doc = Array.isArray(data) ? data[0] : data;
-        let base64 = doc.datos_documento;
-
-        // Si es un dataURL (comienza con data:), extraer la parte base64
-        if (base64.startsWith("data:")) {
-          base64 = base64.split(",")[1];
-        }
-
-        const byteChars = atob(base64);
-        const byteArray = new Uint8Array(byteChars.length);
-        for (let i = 0; i < byteChars.length; i++) {
-          byteArray[i] = byteChars.charCodeAt(i);
-        }
-        const blob = new Blob([byteArray]);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${doc.nombre_documento || nombreDocumento}.${doc.extension || extension}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        console.error("Error al descargar documento:", err);
-      } finally {
-        setDownloadingDocId(null);
-      }
-    },
-    [],
-  );
-
-  const openCreateDeportista = () => {
-    setDialogData(EMPTY_DEPORTISTA);
-    setDialogType("deportista");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  };
-
-  const openEditDeportista = useCallback((row) => {
-    setDialogData({
-      id: row.id,
-      legajo: row.legajo,
-      habilitado_deportado: row.habilitado_deportado,
-      vencimiento_ficha: isoToInputDate(row.vencimiento_ficha),
-      habilitado_deporte: row.habilitado_deporte,
-    });
-    setDialogType("deportista");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  }, []);
-
-  const openCreateDeporte = () => {
-    setDialogData(EMPTY_DEPORTE);
-    setDialogType("deporte");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  };
-
-  const openEditDeporte = useCallback((row) => {
-    setDialogData({
-      id: row.id,
-      nombre: row.nombre,
-      activo: row.activo,
-    });
-    setDialogType("deporte");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  }, []);
-
-  const handleDialogChange = (field, value) => {
-    setDialogData((prev) => ({ ...prev, [field]: value }));
-    if (dialogFieldErrors[field]) {
-      setDialogFieldErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const handleDialogSave = () => {
-    setDialogError("");
-
-    // Validación sincrónica — return garantizado antes de cualquier await
-    const validatorsMap = {
-      docente: () => validateDocente(dialogData, dialogMode),
-      espacio: () => validateEspacio(dialogData),
-      deportista: () => validateDeportista(dialogData, dialogMode),
-      deporte: () => validateDeporte(dialogData),
-    };
-
-    const validator = validatorsMap[dialogType];
-    if (validator) {
-      const errors = validator();
-      setDialogFieldErrors(errors);
-      if (Object.keys(errors).length > 0) {
-        return;
-      }
-    }
-
-    executeDialogSave();
-  };
-
-  const executeDialogSave = async () => {
-    setDialogSaving(true);
-    try {
-      if (dialogType === "docente") {
-        const body = {
-          ...dialogData,
-          fecha_nacimiento: dialogData.fecha_nacimiento
-            ? `${dialogData.fecha_nacimiento}T00:00:00`
-            : null,
-        };
-        if (dialogMode === "create") {
-          await crearDocenteDeportivo(body);
-        } else {
-          await modificarDocenteDeportivo(dialogData.cuil, body);
-        }
-        setDialogOpen(false);
-        fetchProfesores();
-      } else if (dialogType === "espacio") {
-        const body = { ...dialogData };
-        if (dialogMode === "create") {
-          await crearEspacioDeportivo(body);
-        } else {
-          await modificarEspacioDeportivo(dialogData.id, body);
-        }
-        setDialogOpen(false);
-        fetchEspacios();
-      } else if (dialogType === "deportista") {
-        const body = {
-          ...dialogData,
-          vencimiento_ficha: dialogData.vencimiento_ficha
-            ? `${dialogData.vencimiento_ficha}T00:00:00`
-            : null,
-        };
-        if (dialogMode === "create") {
-          await crearDeportista(body);
-        } else {
-          await modificarDeportista(dialogData.id, body);
-        }
-        setDialogOpen(false);
-        fetchDeportistas();
-      } else if (dialogType === "deporte") {
-        const body = { ...dialogData };
-        if (dialogMode === "create") {
-          await crearDeporte(body);
-        } else {
-          await modificarDeporte(dialogData.id, body);
-          setSnackbarMsg("Deporte modificado correctamente");
-          setSnackbarOpen(true);
-        }
-        setDialogOpen(false);
-        fetchDeportes();
-      }
-    } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-    } finally {
-      setDialogSaving(false);
-    }
-  };
-
-  const profesoresColumns = useMemo(
-    () => [
-      { field: "cuil", headerName: "CUIL", width: 150 },
-      { field: "nombres", headerName: "Nombres", flex: 1, minWidth: 150 },
-      { field: "apellidos", headerName: "Apellidos", flex: 1, minWidth: 150 },
-      {
-        field: "activo",
-        headerName: "Estado",
-        width: 110,
-        renderCell: (params) => (
-          <Chip
-            size="small"
-            label={params.value ? "Activo" : "Inactivo"}
-            color={params.value ? "success" : "default"}
-          />
-        ),
-      },
-      {
-        field: "fecha_nacimiento",
-        headerName: "Fecha de nacimiento",
-        width: 170,
-        renderCell: (params) => formatDate(params.value),
-      },
-      {
-        field: "acciones",
-        headerName: "Acciones",
-        width: 70,
-        sortable: false,
-        filterable: false,
-        alignItem: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <IconButton
-              size="small"
-              onClick={() => openEditDocente(params.row)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        ),
-      },
-    ],
-    [openEditDocente],
-  );
-
-  const espaciosColumns = useMemo(
-    () => [
-      { field: "nombre", headerName: "Nombre", flex: 1, minWidth: 160 },
-      { field: "domicilio", headerName: "Domicilio", flex: 1, minWidth: 180 },
-      {
-        field: "activo",
-        headerName: "Estado",
-        width: 110,
-        renderCell: (params) => (
-          <Chip
-            size="small"
-            label={params.value ? "Activo" : "Inactivo"}
-            color={params.value ? "success" : "default"}
-          />
-        ),
-      },
-      { field: "url_maps", headerName: "URL Maps", flex: 1, minWidth: 180 },
-      {
-        field: "acciones",
-        headerName: "Acciones",
-        width: 70,
-        sortable: false,
-        filterable: false,
-        alignItem: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <IconButton
-              size="small"
-              onClick={() => openEditEspacio(params.row)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        ),
-      },
-    ],
-    [openEditEspacio],
-  );
-
-  const deportistasColumns = useMemo(
-    () => [
-      { field: "legajo", headerName: "Legajo", width: 130 },
-      {
-        field: "nombre_deportista",
-        headerName: "Nombre",
-        flex: 1,
-        minWidth: 160,
-      },
-      {
-        field: "habilitado_deportado",
-        headerName: "Habilitado",
-        width: 120,
-        renderCell: (params) => (
-          <Chip
-            size="small"
-            label={params.value ? "Sí" : "No"}
-            color={params.value ? "success" : "default"}
-          />
-        ),
-      },
-      {
-        field: "habilitado_deporte",
-        headerName: "Hab. deporte",
-        width: 130,
-        renderCell: (params) => (
-          <Chip
-            size="small"
-            label={params.value ? "Sí" : "No"}
-            color={params.value ? "success" : "default"}
-          />
-        ),
-      },
-      {
-        field: "vencimiento_ficha",
-        headerName: "Venc. ficha",
-        width: 140,
-        renderCell: (params) => formatDate(params.value),
-      },
-      {
-        field: "acciones",
-        headerName: "Acciones",
-        width: 110,
-        sortable: false,
-        filterable: false,
-        alignItem: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <Stack direction="row" spacing={0.5}>
-              <IconButton
-                size="small"
-                onClick={() => openEditDeportista(params.row)}
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-              <IconButton
-                size="small"
-                title="Ver documentación"
-                onClick={() => openDocsDialog(params.row.legajo)}
-              >
-                <FolderOpenIcon fontSize="small" />
-              </IconButton>
-            </Stack>
-          </Box>
-        ),
-      },
-    ],
-    [openEditDeportista, openDocsDialog],
-  );
-
-  const deportesColumns = useMemo(
-    () => [
-      { field: "nombre", headerName: "Nombre", flex: 1, minWidth: 200 },
-      {
-        field: "activo",
-        headerName: "Estado",
-        width: 110,
-        renderCell: (params) => (
-          <Chip
-            size="small"
-            label={params.value ? "Activo" : "Inactivo"}
-            color={params.value ? "success" : "default"}
-          />
-        ),
-      },
-      {
-        field: "acciones",
-        headerName: "Acciones",
-        width: 70,
-        sortable: false,
-        filterable: false,
-        alignItem: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <IconButton
-              size="small"
-              onClick={() => openEditDeporte(params.row)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        ),
-      },
-    ],
-    [openEditDeporte],
-  );
-
-  const sectionConfig = useMemo(
+   const sectionConfig = useMemo(
     () => ({
       profesores: {
         title: "Gestión Profesores",
@@ -821,62 +230,7 @@ export default function EmployedSports() {
     );
   }, [torneosRows, busquedaDeportes]);
 
-  const torneosColumns = useMemo(
-    () => [
-      { field: "nombre_torneo", headerName: "Torneo", flex: 1, minWidth: 200 },
-      { field: "nombre_deporte", headerName: "Deporte", width: 150 },
-      {
-        field: "fecha_inicio",
-        headerName: "Inicio",
-        width: 120,
-        valueFormatter: (v) => formatDate(v),
-      },
-      {
-        field: "fecha_fin",
-        headerName: "Fin",
-        width: 120,
-        valueFormatter: (v) => formatDate(v),
-      },
-      {
-        field: "docente_responsable",
-        headerName: "Responsable",
-        flex: 1,
-        minWidth: 160,
-      },
-      { field: "cupo_jugadores", headerName: "Cupo", width: 80 },
-      {
-        field: "acciones",
-        headerName: "Acciones",
-        width: 80,
-        sortable: false,
-        filterable: false,
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <IconButton
-              size="small"
-              color="primary"
-              title="Ver / Editar torneo"
-              onClick={() => navigate(`/Gestion-Torneos/${params.row.id}`)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        ),
-      },
-    ],
-    [navigate],
-  );
-
-  return (
+ return (
     <Box
       sx={{
         mt: "-90px",
@@ -905,7 +259,7 @@ export default function EmployedSports() {
           {/* Gradient header */}
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               pt: 0,
@@ -1112,7 +466,7 @@ export default function EmployedSports() {
           {/* Card header */}
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               py: 2.5,
@@ -1223,7 +577,7 @@ export default function EmployedSports() {
         >
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1a3a5c 0%, #2d6da3 100%)",
+              background: "var(--gradient)",
               color: "white",
               px: 3,
               py: 2.5,

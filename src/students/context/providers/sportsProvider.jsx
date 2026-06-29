@@ -25,6 +25,11 @@ import {
   SPORTS_TOURNAMENT_COLUMNS,
 } from "../../pages/sports/sports.utils";
 import { SportsContext } from "../studentContext";
+import {
+  closePreview as closePreviewState,
+  closeSnackbar as closeSnackbarState,
+  showSnackbar as showSnackbarState,
+} from "../../../shared/util";
 
 const C = SPORTS_STRINGS;
 
@@ -50,13 +55,13 @@ export function SportsProvider({ children }) {
   });
 
   const showSnackbar = useCallback((message, severity = "success") => {
-    setSnackbar({ open: true, message, severity });
+    showSnackbarState(setSnackbar, message, severity);
   }, []);
   const closeSnackbar = () =>
-    setSnackbar((previous) => ({ ...previous, open: false }));
+    closeSnackbarState(setSnackbar);
 
   const closePreview = () =>
-    setPreview((previous) => ({ ...previous, open: false }));
+    closePreviewState(setPreview);
 
   const closeDeleteDialog = () => setOpenPopup(false);
 

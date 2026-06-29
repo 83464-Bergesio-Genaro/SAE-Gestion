@@ -17,7 +17,7 @@ export function PressProvider({ children }) {
     }
 
     function getDocumentName(doc, fallback = "Archivo") {
-    const candidate = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo;
+    const candidate = doc?.nombre_documento;
     return hasRealDocumentName(candidate) ? candidate : fallback;
     }
 
@@ -39,7 +39,7 @@ export function PressProvider({ children }) {
         const directExtension = normalizeExtension(doc?.extension);
         if (directExtension) return directExtension;
 
-        const fileName = doc?.nombre_documento || doc?.nombreDocumento || doc?.titulo || "";
+        const fileName = doc?.nombre_documento || "";
         const parts = fileName.split(".");
         if (parts.length < 2) return "";
 
@@ -172,7 +172,8 @@ export function PressProvider({ children }) {
           if (!imageSource) return;
           const link = document.createElement("a");
           link.href = imageSource;
-          link.download = documento.nombre_documento || documento.nombreDocumento || documento.name || `documento_${documento.id}`;
+          link.download =
+            documento.nombre_documento || `documento_${documento.id}`;
           document.body.appendChild(link);
           console.log(link);
           link.click();

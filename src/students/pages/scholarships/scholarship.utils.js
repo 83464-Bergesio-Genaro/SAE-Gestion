@@ -1,14 +1,12 @@
-export const INITIAL_PREVIEW = {
-  open: false,
-  loading: false,
-  title: "",
-  imageSrc: null,
-  isPdf: false,
-  error: null,
-};
-
-export const MAX_SIZE_MB = 5;
-export const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+export {
+  construirNombre,
+  formatDate,
+  INITIAL_PREVIEW,
+  isFile as isSelectedFile,
+  isPdfDocument,
+  MAX_FILE_SIZE_BYTES as MAX_SIZE_BYTES,
+  MAX_FILE_SIZE_MB as MAX_SIZE_MB,
+} from "../../../shared/util";
 
 export const ESTADO_BECA = {
   SOLICITADO: "solicitado",
@@ -77,31 +75,6 @@ export function getEstadoBecaDesdeBecario(becario = {}) {
 export const isValidObjectResponse = (value) =>
   Boolean(value && typeof value === "object" && value.id);
 
-export function formatDate(dateValue) {
-  if (!dateValue) return "-";
-
-  const date = new Date(dateValue);
-  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString();
-}
-
-export function isPdfDocument(data = {}) {
-  if (data.datos_documento?.startsWith("data:application/pdf")) return true;
-  return (data.extension || "").toLowerCase() === "pdf";
-}
-
-export function construirNombre(formato, data, extension) {
-  let nombre = formato;
-
-  Object.keys(data).forEach((key) => {
-    nombre = nombre.replace(
-      new RegExp(`\\{${key}\\}`, "gi"),
-      data[key] ?? "",
-    );
-  });
-
-  return `${nombre}${extension}`;
-}
-
 export function obtenerLegajoDesdeEmail(email = "") {
   return email.split("@")[0] ?? "";
 }
@@ -119,9 +92,6 @@ export function getErrorMessage(error, fallback) {
 export const firstNonEmptyText = (...values) =>
   values.find((value) => String(value ?? "").trim()) ?? "";
 
-export const isSelectedFile = (archivo) =>
-  typeof File !== "undefined" && archivo instanceof File;
-
 export const hasDocumentFile = (documento) =>
   Boolean(
     documento.subido ||
@@ -136,7 +106,6 @@ export const getDocumentPreviewId = (documento) =>
 export const getDocumentDisplayName = (documento) =>
   firstNonEmptyText(
     documento.archivoNombre,
-    documento.nombre_completo_documento,
     documento.nombre_documento,
   );
 
@@ -167,9 +136,7 @@ export function asignarArchivosADocumentos(documentosBase, documentosSubidos) {
     return {
       ...doc,
       archivo: documentFound.archivo,
-      archivoNombre:
-        documentFound.nombre_completo_documento ??
-        documentFound.nombre_documento,
+      archivoNombre: documentFound.nombre_documento,
       subido: true,
       id_archivo: documentFound.id,
       extension: documentFound.extension,

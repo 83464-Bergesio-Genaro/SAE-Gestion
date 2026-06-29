@@ -9,6 +9,7 @@ import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as Modifica
 import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos} from '../../../api/formatters/SaludFormatters';
 
 import { ObtenerUsuariosXLegajo } from '../../../api/EmpleadoService';
+import { formatHeader } from "../../../shared/util";
 
 
 
@@ -27,11 +28,6 @@ const EMPTY_TURNO =
     estado: ""
 }
  // FUNCIONES PARA LA GRILLA (SE PODRIA PONER TODO EN UN SOLO ARCHIVO)
-const formatHeader = (key) =>
-    key
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, l => l.toUpperCase());
-
 const buildColumns = (data, 
         editAction=null,
         deleteAction = null,

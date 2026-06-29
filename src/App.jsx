@@ -1,19 +1,22 @@
 import { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './shared/context/providers/authProvider';
+import { ThemeProvider } from '@mui/material/styles';
+import { theme, applyCssVariables } from './config/theme';
+
 import MainLayout from "./shared/components/layout/MainLayout";
 
 import SharedMain from "./shared/pages/home/main";
 import Login from "./shared/pages/login/login"; 
 import SharedJPA from "./shared/pages/jpa/jpaShared"; 
-import SharedJPASistemas from "./shared/pages/degrees/systems";
-import SharedJPAQuimica from "./shared/pages/degrees/chemical";
-import SharedJPACivil from "./shared/pages/degrees/civil";
-import SharedJPAElectric from "./shared/pages/degrees/electrical";
-import SharedJPAElectrical from "./shared/pages/degrees/electrical";
-import SharedJPAIndustrial from "./shared/pages/degrees/industrial";
-import SharedJPAMecanic from "./shared/pages/degrees/mecanic";
-import SharedJPAMetalurgic from "./shared/pages/degrees/metalurgic";
+import SharedJPASistemas from "./shared/pages/jpa/degrees/systems";
+import SharedJPAQuimica from "./shared/pages/jpa/degrees/chemical";
+import SharedJPACivil from "./shared/pages/jpa/degrees/civil";
+import SharedJPAElectric from "./shared/pages/jpa/degrees/electrical";
+import SharedJPAElectrical from "./shared/pages/jpa/degrees/electrical";
+import SharedJPAIndustrial from "./shared/pages/jpa/degrees/industrial";
+import SharedJPAMecanic from "./shared/pages/jpa/degrees/mecanic";
+import SharedJPAMetalurgic from "./shared/pages/jpa/degrees/metalurgic";
 import SharedJPAParticipar from "./shared/pages/jpa/participar";
 import ComponentLab from "./shared/pages/lab/ComponentLab";
 
@@ -50,6 +53,10 @@ export default function App() {
   const routerBaseName = import.meta.env.BASE_URL === '/' 
     ? '/' 
     : import.meta.env.BASE_URL.replace(/\/$/, '');
+  
+  useEffect(() => {
+    applyCssVariables();
+  }, []);
 
   // 2. Efecto para inicializar los colores del tema
   useEffect(() => {
@@ -308,8 +315,11 @@ export default function App() {
 
   // 4. El retorno es limpio y delegamos el control al RouterProvider moderno
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <ThemeProvider theme={theme}>
+      <AuthProvider>
+            <RouterProvider router={router} />
+      </AuthProvider>
+    </ThemeProvider>
+    
   );
 }

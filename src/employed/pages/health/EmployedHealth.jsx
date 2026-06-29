@@ -45,6 +45,8 @@ import { EmployedCalendar } from "./HealthCalendar";
 import GestionarHorariosDialog from "./HorariosDialog";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 
+import SAEPage from "../../../shared/components/page/SAEPage";
+
 function EmployedAdminContent() {
   const navigate = useNavigate();
   const secciones = [
@@ -167,17 +169,8 @@ function EmployedAdminContent() {
     setDialogData((prev) => ({ ...prev, [field]: value }));
   };
   return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "90px", md: "100px" },
-        pb: 4,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
-        <HeaderPageEmployed
+    <SAEPage>
+<HeaderPageEmployed
           header=" Módulo de Salud"
           title="Gestión de las capacidades medicas de nuestra area"
           description="Permite cargar especialidades, personal, cursos, horarios para el personal y gestionar los turnos de los estudiantes"
@@ -439,9 +432,7 @@ function EmployedAdminContent() {
         </Card>
         {/*CALENDARIO */}
         <EmployedCalendar />
-      </Container>
-      {/*DIALOG DE ESPECIALIDADES*/}
-      {dialogOpen && dialogType === "especialidades" && (
+{dialogOpen && dialogType === "especialidades" && (
         <Dialog
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
@@ -1006,8 +997,8 @@ function EmployedAdminContent() {
         >
           {snackbarMsg}
         </Alert>
-      </Snackbar>
-    </Box>
+      </Snackbar>        
+    </SAEPage>
   );
 }
 // Este componente solo inicializa el Proveedor y llama al contenido interno

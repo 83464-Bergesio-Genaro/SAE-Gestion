@@ -166,7 +166,7 @@ function EventoCard({ evento }) {
 
       
         </Box>
-        <Box sx={{ height: "45px", overflow: "hidden", pt:3 }}> 
+        <Box sx={{ height: "45px", overflow: "hidden", pt:2 }}> 
           <Typography sx={{textAlign:"left" }}>
             <strong>Expositor: </strong>{evento.encargado}
           </Typography>  

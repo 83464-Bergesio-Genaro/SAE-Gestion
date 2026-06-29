@@ -31,6 +31,7 @@ function SAEHero() {
     >
       <Container maxWidth="xl">
         <Stack
+          py={{xs:0,md:4}}
           justifyContent="center"
           alignItems="center"
           sx={{
@@ -40,13 +41,12 @@ function SAEHero() {
           {/* ---------------- MOBILE ---------------- */}
 
           <Box
+          display={{xs:"block",md:"none"}}
             sx={{
-              display: { xs: "block", md: "none" },
               mb: 3,
             }}
           >
             <MotionImg
-            
                 src={`${baseUrl}images/principal/mobileSAE.svg`}
                 alt="Secretaría"
                 initial={{
@@ -74,21 +74,24 @@ function SAEHero() {
             spacing={{ xs: 2, md: 4 }}
             justifyContent="center"
             alignItems="center"
+            
             sx={{
-              width: "100%",
+              width: "75%",
             }}
           >
             {/* Texto SAE Desktop */}
 
             <Box
+            
               sx={{
-                display: { xs: "none", md: "block" },
+                display: "block",
                 flex: 1,
                 textAlign: "right",
+                
               }}
             >
               <MotionImg
-                src={`${baseUrl}images/principal/desktopSAE.svg`}
+                src={`${baseUrl}saeLogo.svg`}
                 alt="Secretaría"
                 initial={{
                   opacity: 0,
@@ -104,6 +107,7 @@ function SAEHero() {
                 style={{
                   width: "100%",
                   maxWidth: "520px",
+                  
                 }}
               />
             </Box>
@@ -124,7 +128,7 @@ function SAEHero() {
             <Box
               sx={{
                 flex: 1,
-                display: "flex",
+                display: { xs: "none", md: "flex" },
                 justifyContent: {
                   xs: "center",
                   md: "flex-start",
@@ -132,8 +136,8 @@ function SAEHero() {
               }}
             >
               <MotionImg
-              
-                src={`${baseUrl}saeLogo.svg`}
+                src={`${baseUrl}images/principal/desktopSAE.svg`}              
+                
                 alt="SAE"
                 initial={{
                   opacity: 0,
@@ -182,14 +186,12 @@ function SAEHero() {
               xs: "column",
               sm: "row",
             }}
-            spacing={2}
-            sx={{
-              width: {
-                xs: "100%",
-                sm: "auto",
-              },
-              maxWidth: 700,
-            }}
+              alignItems="center"
+              justifyContent="center"
+              spacing={2}
+              sx={{
+                width: "100%"
+              }}
           >
             <SAEButton
               onClick={()=>navigate("/JPA")}

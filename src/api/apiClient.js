@@ -1,10 +1,81 @@
-// src/api/apiClient.js
-class ApiError extends Error {
+import { appConfig } from "../config/appConfig";
+
+export class ApiError extends Error {
   constructor(message, status, data = null) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.data = data;
+  }
+}
+
+function getSessionToken() {
+  const storedSession = localStorage.getItem("session");
+  if (!storedSession) return null;
+
+  try {
+    const session = JSON.parse(storedSession);
+    if (session.expiration && Date.now() > session.expiration) {
+      localStorage.removeItem("session");
+      return null;
+    }
+    return session.token ?? null;
+  } catch {
+    localStorage.removeItem("session");
+    return null;
+  }
+}
+
+export function resolveApiUrl(endpoint) {
+  if (/^https?:\/\//i.test(endpoint)) return endpoint;
+  const baseUrl = appConfig.apiUrl.replace(/\/$/, "");
+  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  return `${baseUrl}${path}`;
+}
+
+async function parseErrorResponse(response) {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
+}
+
+function getErrorMessage(response, errorData) {
+  if (errorData?.errors && typeof errorData.errors === "object") {
+    return Object.entries(errorData.errors)
+      .map(([field, errors]) => `${field}: ${[].concat(errors).join(", ")}`)
+      .join(" | ");
+  }
+  return (
+    errorData?.message ||
+    errorData?.title ||
+    `Error ${response.status}: ${response.statusText || "Solicitud fallida"}`
+  );
+}
+
+async function parseResponse(response, responseType) {
+  if (response.status === 204) return null;
+  if (responseType === "raw") return response;
+  if (responseType === "blob") return response.blob();
+  if (responseType === "text") return response.text();
+
+  const contentType = (
+    response.headers.get("Content-Type") || ""
+  ).toLowerCase();
+
+  if (responseType === "auto" && !contentType.includes("json")) {
+    return response.blob();
+  }
+
+  const text = await response.text();
+  if (!text.trim()) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return responseType === "json" ? text : new Blob([text]);
   }
 }
 
@@ -14,165 +85,100 @@ export async function apiRequest(
     method = "GET",
     body,
     token,
+    auth = true,
     mapper,
-    warning,
-    allowEmpty = true,
-    emptyMessage = "La respuesta vino vacía",
+    warning = true,
+    headers: customHeaders = {},
+    signal,
     includeHeaders = false,
-    responseType = "json", // "json" | "blob" | "auto"
+    responseType = "json",
   } = {},
 ) {
   const isFormData = body instanceof FormData;
-
+  const authorizationToken = token ?? (auth ? getSessionToken() : null);
   const headers = {
-    ...(!isFormData && body ? { "Content-Type": "application/json" } : {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(warning ? { "ngrok-skip-browser-warning": "true" } : {}),
+    ...(!isFormData && body != null
+      ? { "Content-Type": "application/json" }
+      : {}),
+    ...(authorizationToken
+      ? { Authorization: `Bearer ${authorizationToken}` }
+      : {}),
+    ...customHeaders,
   };
 
-  try {
-    const response = await fetch(endpoint, {
-      method,
-      headers,
-      body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
-    });
+  const response = await fetch(resolveApiUrl(endpoint), {
+    method,
+    headers,
+    signal,
+    body:
+      body == null ? undefined : isFormData ? body : JSON.stringify(body),
+  });
 
-    if (!response.ok) {
-      let errorData = null;
+  if (!response.ok) {
+    const errorData = await parseErrorResponse(response);
+    throw new ApiError(
+      getErrorMessage(response, errorData),
+      response.status,
+      errorData,
+    );
+  }
 
-      try {
-        const errorText = await response.text();
-        errorData = errorText ? JSON.parse(errorText) : null;
-      } catch {
-        errorData = null;
-      }
-
-      throw new ApiError(
-        errorData?.message || `Error HTTP: ${response.status}`,
-        response.status,
-        errorData,
-      );
-    }
-
-    const contentType = (
-      response.headers.get("Content-Type") || ""
-    ).toLowerCase();
-
-    let data = null;
-
-    if (responseType === "blob") {
-      data = await response.blob();
-    } else if (responseType === "auto") {
-      if (
-        contentType.includes("application/json") ||
-        contentType.includes("text/json")
-      ) {
-        try {
-          const text = await response.text();
-          data = text ? JSON.parse(text) : null;
-        } catch {
-          data = null;
-        }
-      } else {
-        data = await response.blob();
-      }
-    } else {
-      try {
-        const text = await response.text();
-        data = text ? JSON.parse(text) : null;
-      } catch {
-        data = null;
-      }
-    }
-
-    const estaVacio =
-      data == null ||
-      (Array.isArray(data) && data.length === 0) ||
-      (typeof data === "object" &&
-        !(data instanceof Blob) &&
-        !Array.isArray(data) &&
-        Object.keys(data).length === 0);
-
-    if (estaVacio) {
-      if (!allowEmpty) {
-        throw new ApiError(emptyMessage, 404, data);
-      }
-
-      return includeHeaders ? { data: [], headers: response.headers } : [];
-    }
-
-    const result = mapper
+  const data = await parseResponse(response, responseType);
+  const result =
+    mapper && data != null
       ? Array.isArray(data)
         ? data.map(mapper)
-        : mapper(data, response.headers, contentType)
+        : mapper(data, response.headers)
       : data;
 
-    return includeHeaders
-      ? { data: result, headers: response.headers }
-      : result;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  return includeHeaders
+    ? { data: result, headers: response.headers, status: response.status }
+    : result;
 }
 
-export function apiGet(endpoint, options = {}) {
-  return apiRequest(endpoint, {
-    ...options,
-    method: "GET",
-  });
+// Entrada común para los servicios que trabajan con JSON.
+export async function RequestAPI(
+  endpoint,
+  action,
+  body = null,
+  options = {},
+) {
+  const method = action.toUpperCase();
+  const data = await apiRequest(endpoint, { ...options, method, body });
+  if (data == null) return method === "GET" ? [] : {};
+  return data;
+}
+
+export async function apiGet(endpoint, options = {}) {
+  const result = await apiRequest(endpoint, { ...options, method: "GET" });
+
+  if (options.includeHeaders && result?.data == null) {
+    return { ...result, data: [] };
+  }
+
+  return result ?? [];
 }
 
 export function apiPost(endpoint, body, options = {}) {
-  console.log(body);
-  return apiRequest(endpoint, {
-    ...options,
-    token: body.token,
-    mapper: body.mapper,
-    method: "POST",
-    warning: body.warning,
-    body: body.body,
-  });
+  return apiRequest(endpoint, { ...options, method: "POST", body });
 }
 
 export function apiPut(endpoint, body, options = {}) {
-  return apiRequest(endpoint, {
-    ...options,
-    token: body.token,
-    mapper: body.mapper,
-    method: "PUT",
-    body,
-  });
+  return apiRequest(endpoint, { ...options, method: "PUT", body });
 }
 
-export function apiDelete(endpoint, body, options = {}) {
-  return apiRequest(endpoint, {
-    ...options,
-    token: body.token,
-    mapper: body.mapper,
-    method: "DELETE",
-  });
+export function apiDelete(endpoint, options = {}) {
+  return apiRequest(endpoint, { ...options, method: "DELETE" });
 }
 
-export function apiPostFile(endpoint, addOns, options = {}) {
-  return apiRequest(endpoint, {
-    ...options,
-    method: "POST",
-    token: addOns.token,
-    mapper: addOns.mapper,
-    warning: addOns.warning,
-    body: addOns.body,
-  });
+// Compatibilidad con los servicios de documentos que ya usan estos helpers.
+export function apiPostFile(endpoint, addOns = {}, options = {}) {
+  return apiRequest(endpoint, { ...options, ...addOns, method: "POST" });
 }
-export function apiPutFile(endpoint, addOns, options = {}) {
-  return apiRequest(endpoint, {
-    ...options,
-    method: "PUT",
-    token: addOns.token,
-    mapper: addOns.mapper,
-    warning: addOns.warning,
-    body: addOns.body,
-  });
+
+export function apiPutFile(endpoint, addOns = {}, options = {}) {
+  return apiRequest(endpoint, { ...options, ...addOns, method: "PUT" });
 }
 
 export function apiGetFile(endpoint, options = {}) {
@@ -182,4 +188,64 @@ export function apiGetFile(endpoint, options = {}) {
     responseType: "blob",
   });
 }
-export { ApiError };
+
+export function apiUploadFile(
+  endpoint,
+  file,
+  { fieldName = "archivo", method = "POST", ...options } = {},
+) {
+  const formData = file instanceof FormData ? file : new FormData();
+  if (!(file instanceof FormData)) formData.append(fieldName, file);
+  return apiRequest(endpoint, { ...options, method, body: formData });
+}
+
+export function apiDeleteFile(endpoint, options = {}) {
+  return apiRequest(endpoint, { ...options, method: "DELETE" });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function getFileName(headers, fallback = "documento") {
+  const disposition = headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
+  if (!match?.[1]) return fallback;
+  try {
+    return decodeURIComponent(match[1].replace(/"/g, ""));
+  } catch {
+    return match[1].replace(/"/g, "");
+  }
+}
+
+export async function apiDownloadDocument(endpoint, { id, ...options } = {}) {
+  const response = await apiRequest(endpoint, {
+    ...options,
+    method: "GET",
+    responseType: "auto",
+    includeHeaders: true,
+  });
+
+  if (!(response.data instanceof Blob)) return response.data;
+
+  const contentType = (
+    response.headers.get("Content-Type") ||
+    response.data.type ||
+    "application/octet-stream"
+  ).toLowerCase();
+  const extension = contentType.includes("application/pdf")
+    ? "pdf"
+    : contentType.split("/")[1]?.split(";")[0] || "bin";
+
+  return {
+    id,
+    nombre_documento: getFileName(response.headers),
+    datos_documento: await blobToDataUrl(response.data),
+    extension,
+  };
+}

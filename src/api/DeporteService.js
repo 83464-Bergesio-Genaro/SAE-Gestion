@@ -1,57 +1,5 @@
-import { appConfig } from "../config/appConfig";
+import { apiUploadFile, apiDownloadDocument, RequestAPI } from "./apiClient";
 import { mapHorarios } from "./formatters/DeportesFormatters";
-
-export const URLApiCotroller = `${appConfig.apiUrl}/api/Deporte`;
-
-function getToken() {
-  const stored = localStorage.getItem("session");
-  if (!stored) return null;
-  const parsed = JSON.parse(stored);
-  if (Date.now() > parsed.expiration) {
-    localStorage.removeItem("session");
-    return null;
-  }
-  return parsed.token;
-}
-
-function getHeaders(method, body) {
-  const token = getToken();
-  const isFormData = body instanceof FormData;
-  const headers = { "ngrok-skip-browser-warning": "true" };
-  if (!isFormData) headers["Content-Type"] = "application/json";
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const options = { method, headers };
-  if (body) options.body = isFormData ? body : JSON.stringify(body);
-  return options;
-}
-
-export async function RequestAPI(endpoint, action, body = null) {
-  const res = await fetch(appConfig.apiUrl + endpoint, getHeaders(action, body));
-
-  if (res.status === 204 && action === "GET") return [];
-  if (res.status === 204) return {};
-
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-
-  const text = await res.text();
-  if (!text?.trim()) return action === "GET" ? [] : {};
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-}
 
 // DOCENTES DEPORTIVOS
 export async function obtenerDocentesDeportivos() {
@@ -263,73 +211,17 @@ export async function listarDocumentacionXLegajo(legajo) {
   );
 }
 
-export async function descargarDocumentacionXId(id) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Estudiante/DescargarDocumentacionXId/${encodeURIComponent(id)}`,
-    getHeaders("GET"),
+export function descargarDocumentacionXId(id) {
+  return apiDownloadDocument(
+    `/api/Estudiante/DescargarDocumentacionXId/${encodeURIComponent(id)}`,
+    { id },
   );
-
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      if (json.title) detail = `${json.title} (${res.status})`;
-      else if (json.message) detail = json.message;
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-
-  const contentType = (res.headers.get("Content-Type") || "").toLowerCase();
-
-  if (contentType.includes("application/json")) {
-    return res.json();
-  }
-
-  if (
-    contentType.startsWith("image/") ||
-    contentType.includes("application/pdf")
-  ) {
-    const blob = await res.blob();
-    const dataUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-
-    const disposition = res.headers.get("Content-Disposition") || "";
-    const fileNameMatch = disposition.match(
-      /filename\*?=(?:UTF-8''|"?)([^";]+)/i,
-    );
-    const fileName = fileNameMatch?.[1]
-      ? decodeURIComponent(fileNameMatch[1].replace(/"/g, ""))
-      : "documento";
-    const extension = contentType.includes("application/pdf")
-      ? "pdf"
-      : contentType.split("/")[1] || "jpg";
-
-    return {
-      id,
-      nombre_documento: fileName,
-      datos_documento: dataUrl,
-      extension,
-    };
-  }
-
-  throw new Error("Formato de respuesta no soportado");
 }
 
 export async function crearDocumentoEstudiante(id_tipo_documento, archivo) {
-  const body = new FormData();
-  body.append("archivo", archivo);
-
-  return RequestAPI(
-    "/api/Estudiante/CrearDocumentoEstudiante/" +
-      encodeURIComponent(id_tipo_documento),
-    "POST",
-    body,
+  return apiUploadFile(
+    `/api/Estudiante/CrearDocumentoEstudiante/${encodeURIComponent(id_tipo_documento)}`,
+    archivo,
   );
 }
 

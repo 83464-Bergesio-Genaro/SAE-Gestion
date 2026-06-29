@@ -446,11 +446,20 @@ const generateColumns = (data, actionsConfig = []) => {
 
 const generateRows = (data) => {
   return generateBaseRows(data, (item) => ({
-      precio_real: item.informe?.precio_real ?? "",
-      fecha_licitacion: item.informe?.fecha_licitacion ?? "",
-      fecha_informe: item.informe?.fecha_informe ?? "",
-      nombre_solicitante: item.informe?.nombre_solicitante || "",
-      nombre_ganador: item.informe?.nombre_ganador || "",
+    id_compra: item.id_compra ?? item.id,
+    id_usuario: item.id_usuario,
+    nombre_usuario: item.nombre_usuario ?? "",
+    nombre_compra: item.nombre_compra ?? "",
+    precio_sugerido: item.precio_sugerido ?? "",
+    motivo: item.motivo ?? "",
+    fecha_compra: item.fecha_compra ?? "",
+    facturas_documentos: item.facturas_documentos ?? [],
+    informe: item.informe ?? {},
+    precio_real: item.informe?.precio_real ?? "",
+    fecha_licitacion: item.informe?.fecha_licitacion ?? "",
+    fecha_informe: item.informe?.fecha_informe ?? "",
+    nombre_solicitante: item.informe?.nombre_solicitante || "",
+    nombre_ganador: item.informe?.nombre_ganador || "",
   }));
 };
 
@@ -500,6 +509,7 @@ export function PurchaseProvider({ children }) {
       setLoadingPurchase(true);
       try {
         const data = await ObtenerComprasXFecha(fechaDesde, fechaHasta);
+        console.log(data);
         const purchases = Array.isArray(data) ? data : [];
         const hydratedPurchases = await Promise.all(
           purchases.map(async (purchase) => {

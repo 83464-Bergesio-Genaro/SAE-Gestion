@@ -1,14 +1,14 @@
-import { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { AuthProvider } from './shared/context/providers/authProvider';
-import { ThemeProvider } from '@mui/material/styles';
-import { theme, applyCssVariables } from './config/theme';
+import { useEffect } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { AuthProvider } from "./shared/context/providers/authProvider";
+import { ThemeProvider } from "@mui/material/styles";
+import { theme, applyCssVariables } from "./config/theme";
 
 import MainLayout from "./shared/components/layout/MainLayout";
 
 import SharedMain from "./shared/pages/home/main";
-import Login from "./shared/pages/login/login"; 
-import SharedJPA from "./shared/pages/jpa/jpaShared"; 
+import Login from "./shared/pages/login/login";
+import SharedJPA from "./shared/pages/jpa/jpaShared";
 import SharedJPASistemas from "./shared/pages/jpa/degrees/systems";
 import SharedJPAQuimica from "./shared/pages/jpa/degrees/chemical";
 import SharedJPACivil from "./shared/pages/jpa/degrees/civil";
@@ -31,29 +31,29 @@ import TurnBoardHealth from "./employed/pages/health/HealthTurns";
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 import EmployedConsultations from "./employed/pages/consultations/EmployedConsultations";
 import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
-import EmployedTravels from './employed/pages/travels/employedTravels';
-import EmployedPurchases from './employed/pages/purchases/employedPurchases';
-import AdminReport from './employed/pages/reports/adminReports';
+import EmployedTravels from "./employed/pages/travels/employedTravels";
+import EmployedPurchases from "./employed/pages/purchases/employedPurchases";
+import AdminReport from "./employed/pages/reports/adminReports";
 
 import StudentMain from "./students/pages/main";
 import StudentSports from "./students/pages/sports/StudentSports";
 import Scholarships from "./students/pages/scholarships/Scholarships";
 import StudentHealth from "./students/pages/health/healthStudent";
-import StudentTravels from './students/pages/trips/studentTravels';
-import MyProfile from './students/pages/profile/Profile';
+import StudentTravels from "./students/pages/trips/studentTravels";
+import MyProfile from "./students/pages/profile/Profile";
 import StudentConsultations from "./students/pages/consultations/StudentConsultations";
-import ProtectedRoute from "./shared/auth/ProtectedRoute"; 
+import ProtectedRoute from "./shared/auth/ProtectedRoute";
 
 import { appConfig } from "./config/appConfig";
 import "./index.css";
-import EmployedTravelInscripts from './employed/pages/travels/employedInscripts';
+import EmployedTravelInscripts from "./employed/pages/travels/employedInscripts";
 export default function App() {
-  
   // 1. Calculamos el basename dinámico para que Docker use cualquier subruta
-  const routerBaseName = import.meta.env.BASE_URL === '/' 
-    ? '/' 
-    : import.meta.env.BASE_URL.replace(/\/$/, '');
-  
+  const routerBaseName =
+    import.meta.env.BASE_URL === "/"
+      ? "/"
+      : import.meta.env.BASE_URL.replace(/\/$/, "");
+
   useEffect(() => {
     applyCssVariables();
   }, []);
@@ -67,259 +67,297 @@ export default function App() {
   }, []);
 
   // 3. Declaración de la estructura del árbol de rutas por objetos
-  const router = createBrowserRouter([
+  const router = createBrowserRouter(
+    [
+      {
+        path: "/",
+        handle: { title: "SAE Gestión" },
+        element: <MainLayout />, // El Layout envuelve de forma persistente a todas las rutas hijas
+        children: [
+          /* === PUBLIC ROUTES === */
+          {
+            index: true, // Esto reemplaza al path: "/" (Ruta raíz por defecto)
+            handle: { title: "Inicio" },
+            element: <SharedMain />,
+          },
+          {
+            path: "login", // NOTA: Quitamos la barra "/" inicial en los hijos para evitar conflictos relativos
+            handle: { title: "Iniciar sesión" },
+            element: <Login />,
+          },
+          {
+            path: "JPA",
+            handle: { title: "Jornada De Puertas Abiertas" },
+            element: <SharedJPA />,
+          },
+          {
+            path: "JPA/sistemas",
+            handle: { title: "Ingeniería en Sistemas" },
+            element: <SharedJPASistemas />,
+          },
+          {
+            path: "JPA/quimica",
+            handle: { title: "Ingeniería Química" },
+            element: <SharedJPAQuimica />,
+          },
+          {
+            path: "JPA/civil",
+            handle: { title: "Ingeniería Civil" },
+            element: <SharedJPACivil />,
+          },
+          {
+            path: "JPA/electrica",
+            handle: { title: "Ingeniería Eléctrica" },
+            element: <SharedJPAElectric />,
+          },
+          {
+            path: "JPA/electronica",
+            handle: { title: "Ingeniería Electrónica" },
+            element: <SharedJPAElectrical />,
+          },
+          {
+            path: "JPA/industrial",
+            handle: { title: "Ingeniería Industrial" },
+            element: <SharedJPAIndustrial />,
+          },
+          {
+            path: "JPA/mecanica",
+            handle: { title: "Ingeniería Mecánica" },
+            element: <SharedJPAMecanic />,
+          },
+          {
+            path: "JPA/metalurgica",
+            handle: { title: "Ingeniería Metalúrgica" },
+            element: <SharedJPAMetalurgic />,
+          },
+          {
+            path: "JPA/participar",
+            handle: { title: "Participar en JPA" },
+            element: <SharedJPAParticipar />,
+          },
+          {
+            path: "lab/componentes",
+            handle: { title: "Laboratorio de componentes" },
+            element: <ComponentLab />,
+          },
+
+          /* === EMPLOYED ROUTES === */
+          {
+            path: "Inicio",
+            handle: { title: "Panel SAE Empleado" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedMain />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Deportes",
+            handle: { title: "Gestión de deportes" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedSports />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Becas",
+            handle: { title: "Gestión de becas" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedScholarships />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Torneos/:id",
+            handle: { title: "Detalle del torneo" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <SportsProvider autoLoad={false}>
+                  <TorneoDetalle />
+                </SportsProvider>
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-JPA",
+            handle: { title: "Gestión JPA" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedJPA />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Salud",
+            handle: { title: "Gestión de salud" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedHealth />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Compras",
+            handle: { title: "Gestión de compras" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedPurchases />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Viajes",
+            handle: { title: "Gestión de viajes" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedTravels />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Viajes/Inscriptos",
+            handle: { title: "Inscriptos a viajes" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedTravelInscripts />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Salud/Turnos",
+            handle: { title: "Turnos de salud" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <TurnBoardHealth />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Prensa",
+            handle: { title: "Gestión de prensa" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <AdministrarPrensa />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Prensa/Administrar",
+            handle: { title: "Administrar prensa" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <AdministrarPrensa />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Usuarios",
+            handle: { title: "Gestión de usuarios" },
+            element: (
+              <ProtectedRoute role={5}>
+                <UsuariosAdmin />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Consultas",
+            handle: { title: "Gestión de consultas" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedConsultations />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Reportes-Estadisticas",
+            handle: { title: "Reportes y estadísticas" },
+            element: (
+              <ProtectedRoute role={5}>
+                <AdminReport />
+              </ProtectedRoute>
+            ),
+          },
+
+          /* === STUDENT ROUTES === */
+          {
+            path: "Principal",
+            handle: { title: "Panel de SAE Alumnos" },
+            element: (
+              <ProtectedRoute role={1}>
+                <StudentMain />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Mis-Deportes",
+            handle: { title: "Mis deportes" },
+            element: (
+              <ProtectedRoute role={1}>
+                <StudentSports />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Mis-Becas",
+            handle: { title: "Mis becas" },
+            element: (
+              <ProtectedRoute role={1}>
+                <Scholarships />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Mi-Salud",
+            handle: { title: "Mi salud" },
+            element: (
+              <ProtectedRoute role={1}>
+                <StudentHealth />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Mi-Perfil",
+            handle: { title: "Mi perfil" },
+            element: (
+              <ProtectedRoute role={[1, 2, 5]}>
+                <MyProfile />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Mis-Viajes",
+            handle: { title: "Mis viajes" },
+            element: (
+              <ProtectedRoute role={1}>
+                <StudentTravels />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Consultas",
+            handle: { title: "Mis consultas" },
+            element: (
+              <ProtectedRoute role={1}>
+                <StudentConsultations />
+              </ProtectedRoute>
+            ),
+          },
+        ],
+      },
+    ],
     {
-      path: "/",
-      element: <MainLayout />, // El Layout envuelve de forma persistente a todas las rutas hijas
-      children: [
-        /* === PUBLIC ROUTES === */
-        {
-          index: true, // Esto reemplaza al path: "/" (Ruta raíz por defecto)
-          element: <SharedMain />
-        },
-        {
-          path: "login", // NOTA: Quitamos la barra "/" inicial en los hijos para evitar conflictos relativos
-          element: <Login />
-        },
-        {
-          path: "JPA",
-          element: <SharedJPA />
-        },
-        {
-          path: "JPA/sistemas",
-          element: <SharedJPASistemas />
-        },
-        {
-          path: "JPA/quimica",
-          element: <SharedJPAQuimica />
-        },
-        {
-          path: "JPA/civil",
-          element: <SharedJPACivil />
-        },
-        {
-          path: "JPA/electrica",
-          element: <SharedJPAElectric />
-        },
-        {
-          path: "JPA/electronica",
-          element: <SharedJPAElectrical />
-        },
-        {
-          path: "JPA/industrial",
-          element: <SharedJPAIndustrial />
-        },
-        {
-          path: "JPA/mecanica",
-          element: <SharedJPAMecanic />
-        },
-        {
-          path: "JPA/metalurgica",
-          element: <SharedJPAMetalurgic />
-        },
-        {
-          path: "JPA/participar",
-          element: <SharedJPAParticipar />
-        },
-        {
-          path: "lab/componentes",
-          element: <ComponentLab />
-        },
-
-        /* === EMPLOYED ROUTES === */
-        {
-          path: "Inicio",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedMain />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Deportes",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedSports />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Becas",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedScholarships />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Torneos/:id",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <SportsProvider autoLoad={false}>
-                <TorneoDetalle />
-              </SportsProvider>
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-JPA",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedJPA />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Salud",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedHealth />
-            </ProtectedRoute>
-          )
-        },
-                {
-          path: "Gestion-Compras",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedPurchases />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Viajes",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedTravels />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Viajes/Inscriptos",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedTravelInscripts />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Salud/Turnos",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <TurnBoardHealth />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Prensa",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <AdministrarPrensa />
-            </ProtectedRoute>
-          )
-        },        
-        {
-          path: "Gestion-Prensa/Administrar",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <AdministrarPrensa />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Usuarios",
-          element: (
-            <ProtectedRoute role={5}>
-              <UsuariosAdmin />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Gestion-Consultas",
-          element: (
-            <ProtectedRoute role={[2, 5]}>
-              <EmployedConsultations />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Reportes-Estadisticas",
-          element: (
-            <ProtectedRoute role={5}>
-              <AdminReport />
-            </ProtectedRoute>
-          )
-        },
-
-        /* === STUDENT ROUTES === */
-        {
-          path: "Principal",
-          element: (
-            <ProtectedRoute role={1}>
-              <StudentMain />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Mis-Deportes",
-          element: (
-            <ProtectedRoute role={1}>
-              <StudentSports />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Mis-Becas",
-          element: (
-            <ProtectedRoute role={1}>
-              <Scholarships />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Mi-Salud",
-          element: (
-            <ProtectedRoute role={1}>
-              <StudentHealth />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Mi-Perfil",
-          element: (
-            <ProtectedRoute role={[1,2,5]}>
-              <MyProfile />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Mis-Viajes",
-          element: (
-            <ProtectedRoute role={1}>
-              <StudentTravels />
-            </ProtectedRoute>
-          )
-        },
-        {
-          path: "Consultas",
-          element: (
-            <ProtectedRoute role={1}>
-              <StudentConsultations />
-            </ProtectedRoute>
-          )
-        }
-      ]
-    }
-  ], {
-    basename: routerBaseName // Aquí se inyecta la subruta de forma global
-  });
+      basename: routerBaseName, // Aquí se inyecta la subruta de forma global
+    },
+  );
 
   // 4. El retorno es limpio y delegamos el control al RouterProvider moderno
   return (
     <ThemeProvider theme={theme}>
       <AuthProvider>
-            <RouterProvider router={router} />
+        <RouterProvider router={router} />
       </AuthProvider>
     </ThemeProvider>
-    
   );
 }

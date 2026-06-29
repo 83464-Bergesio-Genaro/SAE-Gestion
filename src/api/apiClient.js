@@ -1,5 +1,7 @@
 import { appConfig } from "../config/appConfig";
 
+export const SESSION_EXPIRED_EVENT = "sae:session-expired";
+
 export class ApiError extends Error {
   constructor(message, status, data = null) {
     super(message);
@@ -9,6 +11,11 @@ export class ApiError extends Error {
   }
 }
 
+function notifySessionExpired() {
+  localStorage.removeItem("session");
+  window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+}
+
 function getSessionToken() {
   const storedSession = localStorage.getItem("session");
   if (!storedSession) return null;
@@ -16,12 +23,12 @@ function getSessionToken() {
   try {
     const session = JSON.parse(storedSession);
     if (session.expiration && Date.now() > session.expiration) {
-      localStorage.removeItem("session");
+      notifySessionExpired();
       return null;
     }
     return session.token ?? null;
   } catch {
-    localStorage.removeItem("session");
+    notifySessionExpired();
     return null;
   }
 }
@@ -117,6 +124,11 @@ export async function apiRequest(
 
   if (!response.ok) {
     const errorData = await parseErrorResponse(response);
+
+    if (auth && response.status === 401) {
+      notifySessionExpired();
+    }
+
     throw new ApiError(
       getErrorMessage(response, errorData),
       response.status,

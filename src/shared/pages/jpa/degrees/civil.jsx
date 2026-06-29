@@ -1,21 +1,4 @@
-import ListEngineer from "../../../components/lists/listEngineer";
-import MateriasXAnoList from "../../../components/lists/listMaterias";
-import CircleIcon from "@mui/icons-material/Circle";
-import {
-  Container,
-  Typography,
-  List,
-  ListItem,
-  Paper,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-
-import "./degrees.css";
+import DegreePageTemplate from "../../../components/degrees/DegreePageTemplate";
 
 export default function SharedJPACivil() {
   const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngCivilBanner.png`;
@@ -94,175 +77,24 @@ export default function SharedJPACivil() {
     "También entenderá en la seguridad, mantenimiento y operación, modernización, planificación, control ecológico y eficiente remplazo de la infraestructura, teniendo en cuenta los aspectos técnicos-económicos.",
   ];
 
-  return (
-    <Container style={{ padding: "3%" }}>
-      <Paper className="paper-container">
-        <Box
-          sx={{
-            backgroundImage: `url(${imageDirBanner})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: "black",
-            height: 400,
-          }}
-          className="banner-image"
-        ></Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Card>
-          <CardContent>
-            <div style={{ alignContent: "center", padding: "10px" }}>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Descripción
-              </Typography>
-
-              <Typography
-                variant="body1"
-                className="typography-text"
-                gutterBottom
-              >
-                Está capacitado para proyectar, mensurar, planificar, dirigir,
-                construir, auditar, etc, el desarrollo de todo tipo de obras de
-                infraestructura y sus instalaciones tales como: viviendas,
-                edificios, naves industriales, estaciones de servicio,
-                carreteras, puentes, obras ferroviarias, canales, diques,
-                puertos, aeropuertos, desarrollos urbanos, entre otras.
-              </Typography>
-              <ListEngineer
-                degree={"Título - Ingeniero Civil"}
-                duration={"Duracion - 5 Años y medio"}
-                video={"https://www.youtube.com/watch?v=Y-CLFhciSwc"}
-                link={"https://www.institucional.frc.utn.edu.ar/civil/"}
-                world={
-                  "Programa de doble titulación con el Instituto Politécnico de Bragança (Portugal - Unión Europea)"
-                }
-              ></ListEngineer>
-            </div>
-          </CardContent>
-        </Card>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Materias de la Carrera
-              </Typography>
-              <List>
-                <MateriasXAnoList
-                  listaMaterias={materias1Año}
-                  ano="Primer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias2Año}
-                  ano="Segundo Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias3Año}
-                  ano="Tercer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias4Año}
-                  ano="Cuarto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias5Año}
-                  ano="Quinto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materiasElectivas}
-                  ano="Electivas"
-                />
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Incumbencias/ Alcance
-              </Typography>
-
-              <List component="div" disablePadding>
-                {alcances.map((row) => {
-                  return (
-                    <ListItem disablePadding alignItems="flex-start">
-                      <ListItemIcon sx={{ ml: 2 }}>
-                        <CircleIcon sx={{ width: 18, height: 18 }} />
-                      </ListItemIcon>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Perfil del Egresado
-              </Typography>
-
-              <List component="div" disablePadding>
-                {perfil.map((row) => {
-                  return (
-                    <ListItem>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Charla Departamental 2021
-              </Typography>
-            </CardContent>
-            <CardMedia
-              component="iframe"
-              width="560"
-              height="610"
-              title="YouTube video player"
-              src="https://www.youtube.com/embed/Y-CLFhciSwc?si=WKpNEfpsLWXjtRav"
-            ></CardMedia>
-          </Card>
-        </Box>
-      </Paper>
-    </Container>
+  const curriculum = [
+    { year: "Primer Año", subjects: materias1Año },
+    { year: "Segundo Año", subjects: materias2Año },
+    { year: "Tercer Año", subjects: materias3Año },
+    { year: "Cuarto Año", subjects: materias4Año },
+    { year: "Quinto Año", subjects: materias5Año },
+    { year: "Electivas", subjects: materiasElectivas },
+  ];
+return (
+    <DegreePageTemplate
+      title="Ingeniería Civil"
+      image={imageDirBanner}
+      description="Está capacitado para proyectar, mensurar, planificar, dirigir, construir y auditar el desarrollo de obras de infraestructura y sus instalaciones: viviendas, edificios, naves industriales, estaciones de servicio, carreteras, puentes, obras ferroviarias, canales, diques, puertos, aeropuertos y desarrollos urbanos."
+      degreeInfo={{ degree: "Título — Ingeniero Civil", duration: "Duración — 5 años y medio", video: "https://www.youtube.com/watch?v=Y-CLFhciSwc", link: "https://www.institucional.frc.utn.edu.ar/civil/", world: "Programa de doble titulación con el Instituto Politécnico de Bragança (Portugal — Unión Europea)" }}
+      curriculum={curriculum}
+      scopes={alcances}
+      profile={perfil}
+      video={{ title: "Charla del Departamento de Ingeniería Civil", src: "https://www.youtube.com/embed/Y-CLFhciSwc?si=WKpNEfpsLWXjtRav" }}
+    />
   );
 }

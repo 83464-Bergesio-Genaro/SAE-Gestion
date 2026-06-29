@@ -13,7 +13,7 @@ import SharedJPASistemas from "./shared/pages/jpa/degrees/systems";
 import SharedJPAQuimica from "./shared/pages/jpa/degrees/chemical";
 import SharedJPACivil from "./shared/pages/jpa/degrees/civil";
 import SharedJPAElectric from "./shared/pages/jpa/degrees/electrical";
-import SharedJPAElectrical from "./shared/pages/jpa/degrees/electrical";
+import SharedJPAElectrical from "./shared/pages/jpa/degrees/electric";
 import SharedJPAIndustrial from "./shared/pages/jpa/degrees/industrial";
 import SharedJPAMecanic from "./shared/pages/jpa/degrees/mecanic";
 import SharedJPAMetalurgic from "./shared/pages/jpa/degrees/metalurgic";

@@ -1,21 +1,19 @@
 import ListEngineer from "../../components/lists/listEngineer";
 import MateriasXAnoList from "../../components/lists/listMaterias";
-import CircleIcon from "@mui/icons-material/Circle";
 import {
-  Container,
-  Typography,
-  List,
-  ListItem,
-  Paper,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-
-import "./degrees.css";
+  DegreeBulletList,
+  DegreeHero,
+  DegreePage,
+  DegreeSection,
+  DegreeVideo,
+} from "../../components/degrees/DegreePageSections";
+import EngineeringOutlinedIcon from "@mui/icons-material/EngineeringOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
+import PlayCircleOutlineRoundedIcon from "@mui/icons-material/PlayCircleOutlineRounded";
+import List from "@mui/material/List";
+import Typography from "@mui/material/Typography";
 
 export default function SharedJPAQuimica() {
   const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngQuimicaBanner.png`;
@@ -100,175 +98,76 @@ export default function SharedJPAQuimica() {
     "No se descuida la dimensión humana del profesional, que también es capaz de dirigir como gerente una planta, por lo que unos conjuntos de materias electivas están destinadas a la conducción de personal, dinámica de grupos humanos, administración de recursos humanos.",
   ];
 
+  const curriculum = [
+    ["Primer Año", materias1Año],
+    ["Segundo Año", materias2Año],
+    ["Tercer Año", materias3Año],
+    ["Cuarto Año", materias4Año],
+    ["Quinto Año", materias5Año],
+    ["Electivas", materiasElectivas],
+  ];
+
   return (
-    <Container style={{ padding: "3%" }}>
-      <Paper className="paper-container">
-        <Box
+    <DegreePage>
+      <DegreeHero image={imageDirBanner} title="Ingeniería Química" />
+
+      <DegreeSection title="Sobre la carrera" icon={InfoOutlinedIcon}>
+        <Typography
           sx={{
-            backgroundImage: `url(${imageDirBanner})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: "black",
-            height: 400,
+            color: "text.secondary",
+            fontSize: { xs: "1rem", sm: "1.075rem" },
+            lineHeight: 1.8,
           }}
-          className="banner-image"
-        ></Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Card>
-          <CardContent>
-            <div style={{ alignContent: "center", padding: "10px" }}>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Descripción
-              </Typography>
+        >
+          Esta rama de la Ingeniería se dedica al estudio, síntesis, desarrollo,
+          diseño, operación y optimización de todos aquellos procesos
+          industriales que producen cambios físicos, químicos y/o bioquímicos
+          en los materiales.
+        </Typography>
+        <ListEngineer
+          degree="Título — Ingeniero Químico"
+          duration="Duración — 5 años"
+          link="https://www.institucional.frc.utn.edu.ar/quimica/"
+          intermedio="Título intermedio — Técnico Universitario en Química (3.er año)"
+          world="Programa de doble titulación con el Instituto Politécnico de Bragança (Portugal — Unión Europea)"
+        />
+      </DegreeSection>
 
-              <Typography
-                variant="body1"
-                className="typography-text"
-                gutterBottom
-              >
-                Esta rama de la Ingeniería se dedica al estudio, síntesis,
-                desarrollo, diseño, operación y optimización de todos aquellos
-                procesos industriales que producen cambios física, químicos y/o
-                bioquímicos en los materiales.
-              </Typography>
-              <ListEngineer
-                degree={"Título - Ingeniero Químico"}
-                duration={"Duración - 5 Años "}
-                link={"https://www.institucional.frc.utn.edu.ar/quimica/"}
-                intermedio={
-                  "Título intermedio - Técnico Universitario en Química (3er año)"
-                }
-                world={
-                  "Programa de doble titulación con el Instituto Politécnico de Bragança (Portugal - Unión Europea)"
-                }
-              ></ListEngineer>
-            </div>
-          </CardContent>
-        </Card>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Materias de la Carrera
-              </Typography>
-              <List>
-                <MateriasXAnoList
-                  listaMaterias={materias1Año}
-                  ano="Primer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias2Año}
-                  ano="Segundo Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias3Año}
-                  ano="Tercer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias4Año}
-                  ano="Cuarto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias5Año}
-                  ano="Quinto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materiasElectivas}
-                  ano="Electivas"
-                />
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
+      <DegreeSection title="Plan de estudios" icon={MenuBookOutlinedIcon}>
+        <List disablePadding>
+          {curriculum.map(([year, subjects]) => (
+            <MateriasXAnoList
+              key={year}
+              ano={year}
+              listaMaterias={subjects}
+            />
+          ))}
+        </List>
+      </DegreeSection>
 
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Incumbencias/ Alcance
-              </Typography>
+      <DegreeSection
+        title="Incumbencias y alcance profesional"
+        icon={EngineeringOutlinedIcon}
+      >
+        <DegreeBulletList items={alcances} numbered />
+      </DegreeSection>
 
-              <List component="div" disablePadding>
-                {alcances.map((row) => {
-                  return (
-                    <ListItem disablePadding alignItems="flex-start">
-                      <ListItemIcon sx={{ ml: 2 }}>
-                        <CircleIcon sx={{ width: 18, height: 18 }} />
-                      </ListItemIcon>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Perfil del Egresado
-              </Typography>
+      <DegreeSection
+        title="Perfil del graduado"
+        icon={PersonOutlineRoundedIcon}
+      >
+        <DegreeBulletList items={perfil} collapsible />
+      </DegreeSection>
 
-              <List component="div" disablePadding>
-                {perfil.map((row) => {
-                  return (
-                    <ListItem>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Charla Departamental 2021
-              </Typography>
-            </CardContent>
-            <CardMedia
-              component="iframe"
-              width="560"
-              height="610"
-              title="YouTube video player"
-              src="https://www.youtube.com/embed/D9wiPbJ4jhQ?si=WEqk314a0aRyEgBV"
-            ></CardMedia>
-          </Card>
-        </Box>
-      </Paper>
-    </Container>
+      <DegreeSection
+        title="Conocé el Departamento"
+        icon={PlayCircleOutlineRoundedIcon}
+      >
+        <DegreeVideo
+          title="Charla del Departamento de Ingeniería Química"
+          src="https://www.youtube.com/embed/D9wiPbJ4jhQ?si=WEqk314a0aRyEgBV"
+        />
+      </DegreeSection>
+    </DegreePage>
   );
 }

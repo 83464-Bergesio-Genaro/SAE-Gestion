@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import SAEButton from "../../components/buttons/SAEButton";
 import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
 import { motion } from "framer-motion";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 const baseUrl = import.meta.env.BASE_URL;
 
 export default function Main(){
@@ -197,6 +198,7 @@ function SAEHero() {
               onClick={()=>navigate("/JPA")}
               variant="contained"
               size="large"
+              startIcon={<SchoolOutlinedIcon />}
               sx={{
                 width:340,
                 py: 1.6,
@@ -215,6 +217,20 @@ function SAEHero() {
               onClick={()=>navigate("/login")}
               variant="contained"
               size="large"
+              startIcon={
+                <Box
+                  component="img"
+                  src={`${baseUrl}logoUTN.svg`}
+                  alt=""
+                  aria-hidden="true"
+                  sx={{
+                    width: 22,
+                    height: 24,
+                    objectFit: "contain",
+                    filter: "brightness(0) invert(1)",
+                  }}
+                />
+              }
               sx={{
                 width:340,
                 py: 1.6,

@@ -13,7 +13,7 @@ import {
 import SAEButton from "../../components/buttons/SAEButton";
 import SAESpinner from "../../components/spinner/SAESpinner";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useJPA } from "../../context/sharedContext";
 import { JPAProvider } from "../../context/providers/jpaProvider";
@@ -504,19 +504,19 @@ function HeroSection() {
         >
           <Grid container>
             <Grid item size={3}>
-              <StatCard number="8" label="Carreras" />
+              <StatCard value={8} label="Carreras" />
             </Grid>
 
             <Grid item size={3}>
-              <StatCard number="10K" label="Estudiantes" />
+              <StatCard value={10} suffix="K" label="Estudiantes" />
             </Grid>
 
             <Grid item size={3}>
-              <StatCard number="+150" label="Convenios" />
+              <StatCard value={150} prefix="+" label="Convenios" />
             </Grid>
 
             <Grid item size={3}>
-              <StatCard number="+50" label="Años" />
+              <StatCard value={50} prefix="+" label="Años" />
             </Grid>
           </Grid>
         </Paper>
@@ -707,7 +707,69 @@ function DegreesCarrousel() {
   );
 }
 
-function StatCard({ number, label }) {
+function AnimatedNumber({
+  value,
+  prefix = "",
+  suffix = "",
+  duration = 1400,
+}) {
+  const elementRef = useRef(null);
+  const [displayValue, setDisplayValue] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element || hasStarted) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasStarted(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.45 },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [hasStarted]);
+
+  useEffect(() => {
+    if (!hasStarted) return undefined;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const timeout = window.setTimeout(() => setDisplayValue(value), 0);
+      return () => window.clearTimeout(timeout);
+    }
+
+    let animationFrame;
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(value * easedProgress));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [duration, hasStarted, value]);
+
+  return (
+    <span ref={elementRef}>
+      {prefix}
+      {displayValue}
+      {suffix}
+    </span>
+  );
+}
+
+function StatCard({ value, label, prefix, suffix }) {
   return (
     <Box
       sx={{
@@ -716,8 +778,8 @@ function StatCard({ number, label }) {
         bgcolor: "white",
       }}
     >
-      <Typography variant="h4" color="#123666">
-        {number}
+      <Typography variant="h4" color="#123666" fontWeight={800}>
+        <AnimatedNumber value={value} prefix={prefix} suffix={suffix} />
       </Typography>
 
       <Typography color="text.secondary">{label}</Typography>

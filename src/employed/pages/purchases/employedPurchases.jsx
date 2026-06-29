@@ -214,8 +214,8 @@ function EmployedPurchasesContent() {
     >
       <Container maxWidth="xl">
         <HeaderPageEmployed
-          header=" Módulo de Compras"
-          title="Administracion de las Compras"
+          header="Módulo de Compras"
+          title="Gestion de las Compras"
           description="En este módulo se registran todas las compras que hace la secretaria."
         />
         <Card
@@ -798,15 +798,17 @@ function EmployedPurchasesContent() {
           <DialogTitle>Informe técnico incompleto</DialogTitle>
           <DialogContent>
             <Alert severity="warning">
-              Estás por crear una compra sin informe técnico. ¿Querés
-              continuar?
+              Estás por crear una compra sin informe técnico. ¿Querés continuar?
             </Alert>
           </DialogContent>
           <DialogActions>
             <SAEButton variant="outlined" onClick={() => setWarningOpen(false)}>
               Volver
             </SAEButton>
-            <SAEButton variant="contained" onClick={handleConfirmWithoutInforme}>
+            <SAEButton
+              variant="contained"
+              onClick={handleConfirmWithoutInforme}
+            >
               Crear sin informe
             </SAEButton>
           </DialogActions>

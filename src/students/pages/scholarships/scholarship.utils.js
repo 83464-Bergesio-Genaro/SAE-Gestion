@@ -1,6 +1,8 @@
 export {
   construirNombre,
+  formatDate,
   INITIAL_PREVIEW,
+  isFile as isSelectedFile,
   isPdfDocument,
   MAX_FILE_SIZE_BYTES as MAX_SIZE_BYTES,
   MAX_FILE_SIZE_MB as MAX_SIZE_MB,
@@ -73,13 +75,6 @@ export function getEstadoBecaDesdeBecario(becario = {}) {
 export const isValidObjectResponse = (value) =>
   Boolean(value && typeof value === "object" && value.id);
 
-export function formatDate(dateValue) {
-  if (!dateValue) return "-";
-
-  const date = new Date(dateValue);
-  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString();
-}
-
 export function obtenerLegajoDesdeEmail(email = "") {
   return email.split("@")[0] ?? "";
 }
@@ -96,9 +91,6 @@ export function getErrorMessage(error, fallback) {
 // Helpers compartidos por la card y el formulario de documentos.
 export const firstNonEmptyText = (...values) =>
   values.find((value) => String(value ?? "").trim()) ?? "";
-
-export const isSelectedFile = (archivo) =>
-  typeof File !== "undefined" && archivo instanceof File;
 
 export const hasDocumentFile = (documento) =>
   Boolean(

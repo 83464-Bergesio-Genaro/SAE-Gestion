@@ -1,4 +1,4 @@
-import {useEffect, useState,useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Card,
@@ -32,14 +32,33 @@ import { usePress } from "../../context/sharedContext";
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
 import NewsPreviewDialog from "./NewsPreviewDialog";
 
-import { ObtenerNoticiasPublicas,descargarDocumentoPorId } from "../../../api/PrensaService";
+import {
+  ObtenerNoticiasPublicas,
+  descargarDocumentoPorId,
+} from "../../../api/PrensaService";
 import TitleBox from "../titleBox";
 const baseUrl = import.meta.env.BASE_URL;
+const MAX_DESCRIPTION_PREVIEW_LENGTH = 440;
 
-function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,documentos }) {
+function ItemNovedad({
+  titulo,
+  descripcion,
+  fecha_inicio,
+  invertida,
+  portada,
+  documentos,
+}) {
   const { handleOpenPreview } = usePress();
+  const fullDescription = String(descripcion ?? "").trim();
+  const isDescriptionTruncated =
+    fullDescription.length > MAX_DESCRIPTION_PREVIEW_LENGTH;
+  const descriptionPreview = isDescriptionTruncated
+    ? fullDescription.slice(0, MAX_DESCRIPTION_PREVIEW_LENGTH).trimEnd()
+    : fullDescription;
   // Estado para la imagen. Empieza con la foto genérica por defecto
-  const [imagenUrl, setImagenUrl] = useState(`${baseUrl}images/principal/newsGeneric.webp`);
+  const [imagenUrl, setImagenUrl] = useState(
+    `${baseUrl}images/principal/newsGeneric.webp`,
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -52,12 +71,11 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
       try {
         // Llamamos a tu función del provider
         const resultado = await descargarDocumentoPorId(portada.id);
-        
+
         // Tu función devuelve un objeto con 'datos_documento' (que es el DataURL)
         if (resultado && resultado.datos_documento) {
           setImagenUrl(resultado.datos_documento);
         }
-
       } catch (error) {
         console.error("No se pudo cargar la imagen de portada:", error);
         // Si hay un error en la API, se mantiene la imagen por defecto
@@ -67,7 +85,6 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
 
     cargarImagen();
   }, [portada]);
-
 
   return (
     <>
@@ -94,8 +111,10 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
             objectFit: "cover",
           }}
           component="img"
-          image={imagenUrl??`url('${baseUrl}/images/principal/newsGeneric.webp')`}
-          alt={portada?.name??"UTN"}
+          image={
+            imagenUrl ?? `url('${baseUrl}/images/principal/newsGeneric.webp')`
+          }
+          alt={portada?.name ?? "UTN"}
         />
 
         <Box sx={{ flex: 1 }}>
@@ -112,13 +131,22 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
                 mt: 1,
                 color: "#5a6f8f",
                 minHeight: 48,
-                display: { xs: "-webkit-box", md: "block" },
-                WebkitBoxOrient: "vertical",
-                WebkitLineClamp: { xs: 3, md: "unset" },
-                overflow: { xs: "hidden", md: "visible" },
               }}
             >
-              {descripcion}
+              {descriptionPreview}
+              {isDescriptionTruncated && (
+                <Box
+                  component="span"
+                  sx={{
+                    color: "#14325c",
+                    fontWeight: 700,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {" "}
+                  ... Ver más
+                </Box>
+              )}
             </Typography>
             <Box
               onClick={(event) => event.stopPropagation()}
@@ -144,9 +172,8 @@ function ItemNovedad({ titulo, descripcion,fecha_inicio, invertida, portada,docu
   );
 }
 
-export  function NovedadesContent() {
-
-  const {isLoading, novedades} = usePress();
+export function NovedadesContent() {
+  const { isLoading, novedades } = usePress();
   const [paginaActual, setPaginaActual] = useState(1);
   const itemsPorPagina = 3;
 
@@ -173,7 +200,6 @@ export  function NovedadesContent() {
         pt: "40px",
         pb: 4,
         minHeight: "100%",
-        bgcolor: "#D9E5F4",
       }}
     >
       <Container maxWidth="xl">
@@ -190,20 +216,19 @@ export  function NovedadesContent() {
           )}
           {!isLoading && (
             <>
-            <Stack>
-            {novedadesPaginadas.map((item,i) => (
-              <ItemNovedad
-                key={item.id}
-
-                titulo={item.titulo}
-                fecha_inicio={item.fecha_inicio}
-                descripcion={item.descripcion}
-                invertida={i%2 === 0}
-                portada={item.portada}
-                documentos={item.documentos}
-              />
-            ))}
-          </Stack>
+              <Stack>
+                {novedadesPaginadas.map((item, i) => (
+                  <ItemNovedad
+                    key={item.id}
+                    titulo={item.titulo}
+                    fecha_inicio={item.fecha_inicio}
+                    descripcion={item.descripcion}
+                    invertida={i % 2 === 0}
+                    portada={item.portada}
+                    documentos={item.documentos}
+                  />
+                ))}
+              </Stack>
 
               <Box
                 sx={{
@@ -240,11 +265,22 @@ export  function NovedadesContent() {
   );
 }
 
-export function DocumentList(listadoDocumentos){
-     const { previewOpen,previewDoc,previewDocName,previewLoading,previewError,
-                handleOpenPreview,handleClosePreview,handleDownloadPreview,handleDownload,
-              getDocumentName,getImageSource,getDocumentExtension} = usePress();
-    return (
+export function DocumentList(listadoDocumentos) {
+  const {
+    previewOpen,
+    previewDoc,
+    previewDocName,
+    previewLoading,
+    previewError,
+    handleOpenPreview,
+    handleClosePreview,
+    handleDownloadPreview,
+    handleDownload,
+    getDocumentName,
+    getImageSource,
+    getDocumentExtension,
+  } = usePress();
+  return (
     <div>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2, mb: 1 }}>
         {listadoDocumentos.listadoDocumentos?.length > 0 && (
@@ -319,9 +355,9 @@ export function DocumentList(listadoDocumentos){
 }
 // Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function NovedadesEstudiantiles() {
-    return (
-        <PressProvider>
-            <NovedadesContent />
-        </PressProvider>
-    );
+  return (
+    <PressProvider>
+      <NovedadesContent />
+    </PressProvider>
+  );
 }

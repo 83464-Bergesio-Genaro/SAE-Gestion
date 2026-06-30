@@ -1,16 +1,26 @@
-import { Box,Container,Grid, Typography,Stack,Divider} from "@mui/material";
+import {
+  Box,
+  Container,
+  Grid,
+  Typography,
+  Stack,
+  Divider,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import SAEButton from "../../components/buttons/SAEButton";
 import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
 import { motion } from "framer-motion";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 const baseUrl = import.meta.env.BASE_URL;
+import SAEPage from "../../components/page/SAEPage";
 
-export default function Main(){
-  return(
+export default function Main() {
+  return (
     <>
-      <SAEHero/>
-      <NovedadesEstudiantiles/>
+      <SAEHero />
+      <Container maxWidth="xl">
+        <NovedadesEstudiantiles />
+      </Container>
     </>
   );
 }
@@ -25,14 +35,13 @@ function SAEHero() {
         pt: { xs: "114px", md: "100px" },
         pb: 4,
         minHeight: "calc(100vh - 90px)",
-        background:
-          "linear-gradient(135deg, #1538B8 0%, #40C5F2 100%)",
+        background: "var(--gradient)",
         overflow: "hidden",
       }}
     >
-      <Container maxWidth="xl">
+      <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>
         <Stack
-          py={{xs:0,md:4}}
+          py={{ xs: 0, md: 4 }}
           justifyContent="center"
           alignItems="center"
           sx={{
@@ -42,30 +51,30 @@ function SAEHero() {
           {/* ---------------- MOBILE ---------------- */}
 
           <Box
-          display={{xs:"block",md:"none"}}
+            display={{ xs: "block", md: "none" }}
             sx={{
               mb: 3,
             }}
           >
             <MotionImg
-                src={`${baseUrl}images/principal/mobileSAE.svg`}
-                alt="Secretaría"
-                initial={{
-                  opacity: 0,
-                  x: -80,
-                }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                }}
-                transition={{
-                  duration: 1,
-                }}
-                style={{
-                  width: "100%",
-                  maxWidth: "520px",
-                }}
-              />
+              src={`${baseUrl}images/principal/mobileSAE.svg`}
+              alt="Secretaría"
+              initial={{
+                opacity: 0,
+                x: -80,
+              }}
+              animate={{
+                opacity: 1,
+                x: 0,
+              }}
+              transition={{
+                duration: 1,
+              }}
+              style={{
+                width: "100%",
+                maxWidth: "520px",
+              }}
+            />
           </Box>
 
           {/* ---------------- DESKTOP ---------------- */}
@@ -75,7 +84,6 @@ function SAEHero() {
             spacing={{ xs: 2, md: 4 }}
             justifyContent="center"
             alignItems="center"
-            
             sx={{
               width: "75%",
             }}
@@ -83,12 +91,10 @@ function SAEHero() {
             {/* Texto SAE Desktop */}
 
             <Box
-            
               sx={{
                 display: "block",
                 flex: 1,
                 textAlign: "right",
-                
               }}
             >
               <MotionImg
@@ -108,7 +114,6 @@ function SAEHero() {
                 style={{
                   width: "100%",
                   maxWidth: "520px",
-                  
                 }}
               />
             </Box>
@@ -137,8 +142,7 @@ function SAEHero() {
               }}
             >
               <MotionImg
-                src={`${baseUrl}images/principal/desktopSAE.svg`}              
-                
+                src={`${baseUrl}images/principal/desktopSAE.svg`}
                 alt="SAE"
                 initial={{
                   opacity: 0,
@@ -170,13 +174,12 @@ function SAEHero() {
               textAlign: "center",
               color: "white",
               fontWeight: 500,
-              opacity: 0.90,
+              opacity: 0.9,
               px: 2,
             }}
           >
-            Deportes, becas, salud, viajes, congresos,
-            actividades recreativas y acompañamiento
-            estudiantil para que disfrutes al máximo tu
+            Deportes, becas, salud, viajes, congresos, actividades recreativas y
+            acompañamiento estudiantil para que disfrutes al máximo tu
             experiencia universitaria.
           </Typography>
 
@@ -187,34 +190,34 @@ function SAEHero() {
               xs: "column",
               sm: "row",
             }}
-              alignItems="center"
-              justifyContent="center"
-              spacing={2}
-              sx={{
-                width: "100%"
-              }}
+            alignItems="center"
+            justifyContent="center"
+            spacing={2}
+            sx={{
+              width: "100%",
+            }}
           >
             <SAEButton
-              onClick={()=>navigate("/JPA")}
+              onClick={() => navigate("/JPA")}
               variant="contained"
               size="large"
               startIcon={<SchoolOutlinedIcon />}
               sx={{
-                width:340,
+                width: 340,
                 py: 1.6,
                 borderRadius: 2,
                 textTransform: "none",
                 fontWeight: 700,
                 fontSize: "1rem",
 
-                 background:"var(--secondary)",
+                background: "var(--secondary)",
               }}
             >
               Conocé nuestra Universidad
             </SAEButton>
 
             <SAEButton
-              onClick={()=>navigate("/login")}
+              onClick={() => navigate("/login")}
               variant="contained"
               size="large"
               startIcon={
@@ -232,15 +235,14 @@ function SAEHero() {
                 />
               }
               sx={{
-                width:340,
+                width: 340,
                 py: 1.6,
                 borderRadius: 2,
                 textTransform: "none",
                 color: "white",
-                background:"#6FA958",
+                background: "#6FA958",
                 fontWeight: 700,
                 fontSize: "1rem",
-
 
                 "&:hover": {
                   borderColor: "white",

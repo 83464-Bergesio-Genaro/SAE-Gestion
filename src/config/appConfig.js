@@ -34,6 +34,9 @@ export const appConfig = {
       neutralCard: "#E5E5E5",
       blackText: "#191919",
       whiteText: "#FAFAFA",
+      ligthBlueSecondary: "#40C5F2",
+      darkBlueSecondary: "#0A3F60",
+      lightligthBlueSecondary: "#E2F6F9",
 
       green: "#8BC154",
       magenta: "#D830A0",
@@ -41,7 +44,7 @@ export const appConfig = {
       greenDark: "#2d6a18",
       lightGreen: "#d8ebd1",
       lightBlue: "rgba(64, 197, 242, 0.75)",
-      chipBackground:"rgba(255,255,255,0.18)"
+      chipBackground: "rgba(255,255,255,0.18)",
     },
     /*POR AHORA NO LOS UTILIZAMOS*/
     dark: {

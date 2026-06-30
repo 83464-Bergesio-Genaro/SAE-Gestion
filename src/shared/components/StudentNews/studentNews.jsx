@@ -202,65 +202,63 @@ export function NovedadesContent() {
         minHeight: "100%",
       }}
     >
-      <Container maxWidth="xl">
-        <TitleBox
-          title="Novedades Estudiantiles"
-          description="Información actualizada sobre actividades, comunicados y novedades
+      <TitleBox
+        title="Novedades Estudiantiles"
+        description="Información actualizada sobre actividades, comunicados y novedades
             académicas."
-        />
-        <Box sx={{ mt: 1 }}>
-          {isLoading && (
-            <Stack alignItems="center" width={"100%"} gap={1}>
-              <SAESpinner size="S" />
+      />
+      <Box sx={{ mt: 1 }}>
+        {isLoading && (
+          <Stack alignItems="center" width={"100%"} gap={1}>
+            <SAESpinner size="S" />
+          </Stack>
+        )}
+        {!isLoading && (
+          <>
+            <Stack>
+              {novedadesPaginadas.map((item, i) => (
+                <ItemNovedad
+                  key={item.id}
+                  titulo={item.titulo}
+                  fecha_inicio={item.fecha_inicio}
+                  descripcion={item.descripcion}
+                  invertida={i % 2 === 0}
+                  portada={item.portada}
+                  documentos={item.documentos}
+                />
+              ))}
             </Stack>
-          )}
-          {!isLoading && (
-            <>
-              <Stack>
-                {novedadesPaginadas.map((item, i) => (
-                  <ItemNovedad
-                    key={item.id}
-                    titulo={item.titulo}
-                    fecha_inicio={item.fecha_inicio}
-                    descripcion={item.descripcion}
-                    invertida={i % 2 === 0}
-                    portada={item.portada}
-                    documentos={item.documentos}
-                  />
-                ))}
-              </Stack>
 
-              <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  gap: 0.5,
-                }}
+            <Box
+              sx={{
+                mt: 2,
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: 0.5,
+              }}
+            >
+              <Typography sx={{ fontSize: "0.95rem", color: "#333" }}>
+                {paginaActual} de {totalPaginas}
+              </Typography>
+
+              <IconButton
+                onClick={irPaginaAnterior}
+                disabled={paginaActual === 1}
               >
-                <Typography sx={{ fontSize: "0.95rem", color: "#333" }}>
-                  {paginaActual} de {totalPaginas}
-                </Typography>
+                <ChevronLeftIcon />
+              </IconButton>
 
-                <IconButton
-                  onClick={irPaginaAnterior}
-                  disabled={paginaActual === 1}
-                >
-                  <ChevronLeftIcon />
-                </IconButton>
-
-                <IconButton
-                  onClick={irPaginaSiguiente}
-                  disabled={paginaActual === totalPaginas}
-                >
-                  <ChevronRightIcon />
-                </IconButton>
-              </Box>
-            </>
-          )}
-        </Box>
-      </Container>
+              <IconButton
+                onClick={irPaginaSiguiente}
+                disabled={paginaActual === totalPaginas}
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+          </>
+        )}
+      </Box>
     </Box>
   );
 }

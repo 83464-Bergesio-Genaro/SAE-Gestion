@@ -27,24 +27,19 @@ export default function SessionExpiredDialog() {
 
   return (
     <Dialog open={sessionExpired} maxWidth="sm" fullWidth disableEscapeKeyDown>
-      <DialogTitle sx={{ fontWeight: "bold", color: "warning.dark" }}>
+      <DialogTitle sx={{ fontWeight: "bold", color: "var(--primary)" }}>
         La sesión está por expirar
       </DialogTitle>
       <DialogContent dividers>
         <Alert severity="warning" sx={{ mb: 2 }}>
           Tu sesión se cerrará pronto por seguridad.
         </Alert>
-        <Typography color="text.secondary">
-          Podés renovar el tiempo disponible o cerrar sesión y volver a
-          iniciar.
+        <Typography color="text.secondary" variant="body2">
+          Podés renovar el tiempo disponible o cerrar sesión y volver a iniciar.
         </Typography>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-        <SAEButton
-          variant="outlined"
-          onClick={logout}
-          disabled={extending}
-        >
+        <SAEButton variant="outlined" onClick={logout} disabled={extending}>
           Cerrar sesión
         </SAEButton>
         <SAEButton

@@ -21,9 +21,23 @@ function DashboardCard({ item, onClick }) {
         borderRadius: 4,
         boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
         border: "1px solid rgba(17, 53, 101, 0.08)",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+        "&:hover": {
+          transform: "translateY(-6px)",
+          boxShadow: 6,
+        },
       }}
     >
-      <CardActionArea onClick={onClick} sx={{ height: "100%" }}>
+      <CardActionArea
+        onClick={onClick}
+        disableRipple
+        sx={{
+          height: "100%",
+          bgcolor: "transparent",
+          "&:hover": { bgcolor: "transparent" },
+          "& .MuiCardActionArea-focusHighlight": { opacity: 0 },
+        }}
+      >
         <CardContent sx={{ p: 3, minHeight: 170 }}>
           <Stack spacing={2} sx={{ height: "100%" }}>
             <Box

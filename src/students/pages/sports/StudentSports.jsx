@@ -40,7 +40,7 @@ import { SportsProvider } from "../../context/providers/sportsProvider";
 import HeaderPage from "../../../shared/components/headerPage";
 import TitleBox from "../../../shared/components/titleBox";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
-
+import SAEPage from "../../../shared/components/page/SAEPage";
 const C = SPORTS_STRINGS;
 
 function StudentSportsContent() {
@@ -71,16 +71,7 @@ function StudentSportsContent() {
   } = useSportsContext();
 
   return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "114px", md: "100px" },
-        pb: 8,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
+<SAEPage>
         <HeaderPage
           title={C.bigTitle}
           description={C.bigSubtitle}
@@ -293,8 +284,7 @@ function StudentSportsContent() {
             {snackbar.message}
           </Alert>
         </Snackbar>
-      </Container>
-    </Box>
+      </SAEPage>
   );
 }
 

@@ -132,7 +132,7 @@ function horariosPorUbicacionToTexto(ubicaciones) {
               display: "grid",
               placeItems: "center",
               bgcolor: alpha(theme.palette.primary.main, 0.1),
-              color: "primary.main",
+              color: "var(--primary)",
             })}
           >
             <LocationOnOutlinedIcon />
@@ -145,16 +145,10 @@ function horariosPorUbicacionToTexto(ubicaciones) {
               rel="noopener noreferrer"
               target="_blank"
               sx={{
-                color: "#2A548B",
-                fontWeight: 800,
-                lineHeight: 1.2,
+                color: "var(--secondary)",
               }}
             >
-              <Typography
-                component="span"
-                variant="subtitle1"
-                sx={{ fontWeight: 600 }}
-              >
+              <Typography variant="subtitle1">
                 {ubicacion.espacio_deportivo}
               </Typography>
             </Link>
@@ -164,10 +158,10 @@ function horariosPorUbicacionToTexto(ubicaciones) {
                 alignItems: "center",
                 gap: 0.75,
                 mt: 0.25,
-                color: "text.secondary",
+                color: "var(--primary)",
               }}
             >
-              <AccessTimeOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+              <AccessTimeOutlinedIcon sx={{ fontSize: 18 }} />
               <Typography component="div" variant="body2">
                 {horariosToTexto(ubicacion.horarios)}
               </Typography>
@@ -417,8 +411,8 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                       borderRadius: "50%",
                       display: "grid",
                       placeItems: "center",
-                      bgcolor: "primary.main",
-                      color: "primary.contrastText",
+                      bgcolor: "var(--primary)",
+                      color: "var(--whiteText)",
                       flexShrink: 0,
                     }}
                   >
@@ -427,7 +421,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                   <Box>
                     <Typography
                       sx={{
-                        color: "#2A548B",
+                        color: "var(--primary)",
                         fontSize: { xs: 16, md: 22 },
                         fontWeight: 700,
                         lineHeight: 1.05,
@@ -442,7 +436,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                         height: 4,
                         mt: 1,
                         borderRadius: 999,
-                        bgcolor: "primary.main",
+                        bgcolor: "var(--primary)",
                       }}
                     />
                   </Box>
@@ -460,18 +454,20 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                     pt: 2,
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <GroupsRoundedIcon color="primary" />
-                    <Typography
-                      sx={{ color: "#15203c", fontWeight: 600 }}
-                      variant="subtitle1"
-                    >
-                      Profesores
-                    </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      color: "var(--secondary)",
+                    }}
+                  >
+                    <GroupsRoundedIcon />
+                    <Typography variant="subtitle1">Profesores</Typography>
                   </Box>
                   <Box
                     sx={{
-                      color: "text.secondary",
+                      color: "var(--secondary)",
                       fontSize: 14,
                       mt: 0.5,
                       "& ul": { mb: 0 },

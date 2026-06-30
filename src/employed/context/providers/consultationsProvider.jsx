@@ -65,9 +65,10 @@ const buildColumns = (
                 display: "flex",
                 height: "100%",
                 justifyContent: "center",
+                color: "var(--primary)",
               }}
             >
-              <Icon color="primary" fontSize="small" />
+              <Icon fontSize="small" />
             </Box>
           );
         },
@@ -89,21 +90,23 @@ const buildColumns = (
               height: "100%",
               minWidth: 0,
               width: "100%",
+              color: "var(--primary)",
             }}
           >
             <Tooltip title="Copiar hipervinculo">
               <IconButton
                 size="small"
-                color="primary"
                 onClick={(event) => {
                   event.stopPropagation();
                   copyAction?.(params.value);
                 }}
+                sx={{color: "var(--primary)",}}
               >
                 <ContentCopyIcon fontSize="small" />
               </IconButton>
             </Tooltip>
             <Typography
+              variant="subtitle3"
               component={params.value ? "a" : "span"}
               href={params.value || undefined}
               target={params.value ? "_blank" : undefined}
@@ -112,7 +115,7 @@ const buildColumns = (
               onClick={(event) => event.stopPropagation()}
               sx={{
                 bgcolor: "transparent",
-                color: "primary.main",
+                color: "var(--primary)",
                 cursor: params.value ? "pointer" : "default",
                 flex: 1,
                 font: "inherit",

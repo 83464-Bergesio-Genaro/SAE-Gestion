@@ -16,7 +16,7 @@ import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import TitleBox from "../../../shared/components/titleBox";
 import SaveIcon from "@mui/icons-material/Save";
-
+import SAEPage from "../../../shared/components/page/SAEPage";
 import { useMyProfile } from "../../context/studentContext";
 import { ProfileContextProvider } from "../../../shared/context/providers/profileProvider";
 
@@ -50,16 +50,7 @@ export function MyProfileContent() {
   } = useMyProfile();
 
   return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "114px", md: "100px" },
-        pb: 4,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
+<SAEPage>
         <Card
           sx={{
             borderRadius: 4,
@@ -426,8 +417,7 @@ export function MyProfileContent() {
             {snackbarMsg}
           </Alert>
         </Snackbar>
-      </Container>
-    </Box>
+     </SAEPage>
   );
 }
 

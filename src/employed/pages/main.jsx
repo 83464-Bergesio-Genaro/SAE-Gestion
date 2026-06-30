@@ -25,12 +25,12 @@ import SAESpinner from "../../shared/components/spinner/SAESpinner";
 
 import { useAuth } from "../../shared/context/sharedContext";
 import { CalendarEvent } from "../../shared/components/calendarEvent/calendarEvent";
-import { EmployedCalendar } from "./users/EmployedCalendar";  
-import { AdminUsersProvider } from "../context/providers/employProvider"; 
+import { EmployedCalendar } from "./users/EmployedCalendar";
+import { AdminUsersProvider } from "../context/providers/employProvider";
 
 import { JPAProvider } from "../context/providers/jpaProvider";
 import { useJPA } from "../context/employedContext";
-
+import SAEPage from "../../shared/components/page/SAEPage";
 
 function DashboardCard({ item, onClick }) {
   const Icon = item.icon;
@@ -98,76 +98,46 @@ function DashboardCard({ item, onClick }) {
   );
 }
 export default function EmployedMain() {
-    return (
-        <JPAProvider>
-            <EmployedContent />
-        </JPAProvider>
-    );
+  return (
+    <JPAProvider>
+      <EmployedContent />
+    </JPAProvider>
+  );
 }
 function EmployedContent() {
   const { user } = useAuth();
-  const { eventosSAE,loadingEventosSAE, } = useJPA();
+  const { eventosSAE, loadingEventosSAE } = useJPA();
 
   return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "90px", md: "100px" },
-        pb: 4,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
-        <HeaderPageEmployed
-          hideBackButton={true}
-          header="PANEL SAE EMPLEADOS"
-          title={`Bienvenido${user?.nombre ? `, ${user.nombre}` : ""}`}
-          description=" Accedé rápidamente a las áreas de gestión, reportes y seguimiento
+    <SAEPage>
+      <HeaderPageEmployed
+        hideBackButton={true}
+        header="PANEL SAE EMPLEADOS"
+        title={`Bienvenido${user?.nombre ? `, ${user.nombre}` : ""}`}
+        description=" Accedé rápidamente a las áreas de gestión, reportes y seguimiento
               diario desde una sola pantalla."
-        />
-        <TitleBox
-          title="Gestión General"
-          description="Módulos operativos principales para el trabajo diario del
+      />
+      <TitleBox
+        title="Gestión General"
+        description="Módulos operativos principales para el trabajo diario del
             equipo."
-        />
-        <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
-        <Box sx={{ mt: 6 }}>
-          <TitleBox
-            title="Tus horarios y proximos eventos"
-            description="Permite visualizar tus horarios y los eventos proximos"
-          />
-          <Box
-            sx={{
-              mt: 3,
-              p: { xs: 1.5, md: 2.5 },
-              borderRadius: 6,
-              bgcolor: "white",
-              boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            }}
-          >
-            <AdminUsersProvider>
-              <EmployedCalendar legajoEmpleado={user.email} />
-            </AdminUsersProvider>
-          </Box>
-          <Box
-            sx={{
-              mt: 3,
-              bgcolor:"lightgray",
-               borderRadius: 6,
-            }}
-          >
-            {loadingEventosSAE && (
-              <Stack alignItems="center" width={"100%"} gap={1}>
-                <SAESpinner size="S" />
-              </Stack>
-            )}
-            {!loadingEventosSAE && eventosSAE && (
-              <CalendarEvent eventos={eventosSAE} />
-            )}
-          </Box>
-        </Box>
-      </Container>
-    </Box>
+      />
+      <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
+      <TitleBox
+        title="Tus horarios y proximos eventos"
+        description="Permite visualizar tus horarios y los eventos proximos"
+      />
+      <AdminUsersProvider>
+        <EmployedCalendar legajoEmpleado={user.email} />
+      </AdminUsersProvider>
+        {loadingEventosSAE && (
+          <Stack alignItems="center" width={"100%"} gap={1}>
+            <SAESpinner size="S" />
+          </Stack>
+        )}
+        {!loadingEventosSAE && eventosSAE && (
+          <CalendarEvent eventos={eventosSAE} />
+        )}
+    </SAEPage>
   );
 }

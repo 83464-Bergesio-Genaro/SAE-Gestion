@@ -2,27 +2,27 @@ import {
   mapResponseCrearDocumento,
   mapResponseEliminarDocumento,
   mapResponseListarDocumentacionXLegajo,
-} from "./formatters/EstudianteFormatters";
+} from './formatters/EstudianteFormatters';
 import {
   apiDeleteFile,
   apiDownloadDocument,
   apiUploadFile,
   RequestAPI,
-} from "./apiClient";
+} from './apiClient';
 
 export { RequestAPI };
 
 export function ObtenerPerfilXLegajo(legajo) {
   return RequestAPI(
     `/api/Estudiante/BuscarPerfilEstudiante/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
 export function ModificarPerfilEstudiante(legajo, body) {
   return RequestAPI(
     `/api/Estudiante/ModificarPerfilEstudiante/${encodeURIComponent(legajo)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
@@ -44,7 +44,7 @@ export function EliminarDocumentoEstudiante(idArchivo, token) {
 export function ListarDocumentacionXLegajo(legajo, token) {
   return RequestAPI(
     `/api/Estudiante/ListarDocumentacionXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
     null,
     { token, mapper: mapResponseListarDocumentacionXLegajo },
   );
@@ -54,7 +54,7 @@ export function ModificarDocumentoEstudiante(idDocumento, archivo, token) {
   return apiUploadFile(
     `/api/Estudiante/ModificarDocumento/${encodeURIComponent(idDocumento)}`,
     archivo,
-    { method: "PUT", token, mapper: mapResponseCrearDocumento },
+    { method: 'PUT', token, mapper: mapResponseCrearDocumento },
   );
 }
 

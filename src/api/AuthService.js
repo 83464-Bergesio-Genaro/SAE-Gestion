@@ -1,30 +1,30 @@
-import { ApiError, apiRequest } from "./apiClient";
+import { ApiError, apiRequest } from './apiClient';
 
 const LOGIN_ERROR_MESSAGES = {
-  204: "Usuario no encontrado",
-  401: "Credenciales incorrectas",
-  409: "Conflicto en la sesión",
-  500: "Error interno del servidor",
+  204: 'Usuario no encontrado',
+  401: 'Credenciales incorrectas',
+  409: 'Conflicto en la sesión',
+  500: 'Error interno del servidor',
 };
 
 const UPDATE_USER_ERROR_MESSAGES = {
-  400: "Datos inválidos",
-  401: "No autorizado",
-  404: "Usuario no encontrado",
-  500: "Error interno del servidor",
+  400: 'Datos inválidos',
+  401: 'No autorizado',
+  404: 'Usuario no encontrado',
+  500: 'Error interno del servidor',
 };
 
 function errorResult(error, messages) {
   if (error instanceof ApiError) {
     return {
       success: false,
-      message: messages[error.status] ?? error.message ?? "Respuesta desconocida",
+      message: messages[error.status] ?? error.message ?? 'Respuesta desconocida',
     };
   }
 
   return {
     success: false,
-    message: "Error de conexión",
+    message: 'Error de conexión',
     error,
   };
 }
@@ -46,7 +46,7 @@ export default async function ObtenerTokenJWT(legajo, dominio, password) {
     return {
       success: false,
       message:
-        LOGIN_ERROR_MESSAGES[response.status] ?? "Respuesta desconocida",
+        LOGIN_ERROR_MESSAGES[response.status] ?? 'Respuesta desconocida',
     };
   } catch (error) {
     return errorResult(error, LOGIN_ERROR_MESSAGES);
@@ -58,7 +58,7 @@ export async function ModificarUsuario(id, payload, token) {
     const response = await apiRequest(
       `/api/Usuarios/ModificarUsuario/${encodeURIComponent(id)}`,
       {
-        method: "PUT",
+        method: 'PUT',
         body: payload,
         token,
         includeHeaders: true,
@@ -73,7 +73,7 @@ export async function ModificarUsuario(id, payload, token) {
       success: false,
       message:
         UPDATE_USER_ERROR_MESSAGES[response.status] ??
-        "Respuesta desconocida",
+        'Respuesta desconocida',
     };
   } catch (error) {
     return errorResult(error, UPDATE_USER_ERROR_MESSAGES);

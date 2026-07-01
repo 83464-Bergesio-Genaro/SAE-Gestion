@@ -11,6 +11,24 @@ export class ApiError extends Error {
   }
 }
 
+export const HTTP_ERROR_MESSAGES = {
+  400: "La solicitud contiene datos inválidos.",
+  401: "Tu sesión no es válida o venció. Volvé a iniciar sesión.",
+  403: "No tenés permisos para realizar esta acción.",
+  404: "No se encontró el recurso solicitado.",
+  405: "La operación solicitada no está permitida.",
+  408: "La solicitud tardó demasiado tiempo. Intentá nuevamente.",
+  409: "La operación genera un conflicto con los datos existentes.",
+  413: "El archivo o contenido enviado es demasiado grande.",
+  415: "El formato del contenido enviado no es compatible.",
+  422: "No se pudieron procesar los datos enviados.",
+  429: "Se realizaron demasiadas solicitudes. Esperá unos segundos.",
+  500: "Ocurrió un error interno en el servidor.",
+  502: "El servidor recibió una respuesta inválida.",
+  503: "El servicio no está disponible temporalmente.",
+  504: "El servidor tardó demasiado tiempo en responder.",
+};
+
 function notifySessionExpired() {
   localStorage.removeItem("session");
   window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
@@ -59,6 +77,7 @@ function getErrorMessage(response, errorData) {
   return (
     errorData?.message ||
     errorData?.title ||
+    HTTP_ERROR_MESSAGES[response.status] ||
     `Error ${response.status}: ${response.statusText || "Solicitud fallida"}`
   );
 }

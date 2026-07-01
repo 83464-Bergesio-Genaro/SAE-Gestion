@@ -3,44 +3,44 @@ import {
   apiDownloadDocument,
   apiUploadFile,
   RequestAPI,
-} from "./apiClient";
+} from './apiClient';
 
 export { RequestAPI };
 
 export function ObtenerViajesXLegajo(legajo) {
   return RequestAPI(
     `/api/Viaje/ObtenerViajesXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
 export function ObtenerViajesActivos() {
-  return RequestAPI("/api/Viaje/ObtenerViajesActivo/", "GET");
+  return RequestAPI('/api/Viaje/ObtenerViajesActivo/', 'GET');
 }
 
 export function ModificarViaje(id, body) {
   return RequestAPI(
     `/api/Viaje/ModificarViaje/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
 
 export function CrearViaje(body) {
-  return RequestAPI("/api/Viaje/CrearViaje", "POST", body);
+  return RequestAPI('/api/Viaje/CrearViaje', 'POST', body);
 }
 
 export function ObtenerDocumentacionViaje(id) {
   return RequestAPI(
     `/api/Viaje/ListarDocumentacionXViaje/${encodeURIComponent(id)}`,
-    "GET",
+    'GET',
   );
 }
 
 export function listarDocumentacionXLegajo(legajo) {
   return RequestAPI(
     `/api/Estudiante/ListarDocumentacionXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
@@ -65,43 +65,43 @@ export function EliminarDocumentoViaje(idArchivo) {
 }
 
 export function ObtenerEmpresas() {
-  return RequestAPI("/api/Viaje/ObtenerEmpresasViaje/", "GET");
+  return RequestAPI('/api/Viaje/ObtenerEmpresasViaje/', 'GET');
 }
 
 export function ModificarEmpresa(id, body) {
   return RequestAPI(
     `/api/Viaje/ModificarEmpresa/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
 
 export function CrearEmpresa(body) {
-  return RequestAPI("/api/Viaje/CrearEmpresa", "POST", body);
+  return RequestAPI('/api/Viaje/CrearEmpresa', 'POST', body);
 }
 
 export function ObtenerInscriptosViaje(idViaje) {
   return RequestAPI(
     `/api/Viaje/ObtenerInscriptosViaje/${encodeURIComponent(idViaje)}`,
-    "GET",
+    'GET',
   );
 }
 
 export function EliminarInscriptosViaje(idInscripto) {
   return RequestAPI(
     `/api/Viaje/EliminarInscriptos/${encodeURIComponent(idInscripto)}`,
-    "DELETE",
+    'DELETE',
   );
 }
 
 export function CrearInscriptoViaje(body) {
-  return RequestAPI("/api/Viaje/CrearInscriptoViaje", "POST", body);
+  return RequestAPI('/api/Viaje/CrearInscriptoViaje', 'POST', body);
 }
 
 export function ModificarInscripto(id, body) {
   return RequestAPI(
     `/api/Viaje/ModificarInscripto/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }

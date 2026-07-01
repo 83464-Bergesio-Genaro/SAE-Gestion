@@ -3,29 +3,29 @@ import {
   apiDownloadDocument,
   apiUploadFile,
   RequestAPI,
-} from "./apiClient";
+} from './apiClient';
 
 export { RequestAPI };
 
 export const ObtenerProyectosInvestigacion = () =>
-  RequestAPI("/api/Beca/ObtenerProyectosInvestigacion", "GET");
+  RequestAPI('/api/Beca/ObtenerProyectosInvestigacion', 'GET');
 
 export const ObtenerServiciosInternos = () =>
-  RequestAPI("/api/Beca/ObtenerServiciosInternos", "GET");
+  RequestAPI('/api/Beca/ObtenerServiciosInternos', 'GET');
 
 export const ObtenerBecariosCompleto = () =>
-  RequestAPI("/api/Beca/ObtenerBecariosCompleto", "GET");
+  RequestAPI('/api/Beca/ObtenerBecariosCompleto', 'GET');
 
 export const CrearServicioInterno = (body) =>
-  RequestAPI("/api/Beca/CrearServicioInterno", "POST", body);
+  RequestAPI('/api/Beca/CrearServicioInterno', 'POST', body);
 
 export const CrearProyectoInvestigacion = (body) =>
-  RequestAPI("/api/Beca/CrearProyectoInvestigacion", "POST", body);
+  RequestAPI('/api/Beca/CrearProyectoInvestigacion', 'POST', body);
 
 export function EditarProyectoInvestigacion(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarProyecto/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
@@ -33,7 +33,7 @@ export function EditarProyectoInvestigacion(id, body) {
 export function EditarServicioInterno(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarServicio/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
@@ -41,45 +41,45 @@ export function EditarServicioInterno(id, body) {
 export function ObtenerBecariosEconomicaXLegajo(legajo) {
   return RequestAPI(
     `/api/Beca/ObtenerBecariosEconomicaXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
 export function ObtenerBecariosServiciosXLegajo(legajo) {
   return RequestAPI(
     `/api/Beca/ObtenerBecariosServiciosXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
 export function ObtenerBecariosInvestigacionXLegajo(legajo) {
   return RequestAPI(
     `/api/Beca/ObtenerBecariosInvestigacionXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
 export function ObtenerBecariosXLegajo(legajo) {
   return RequestAPI(
     `/api/Beca/ObtenerBecariosXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
 export function ObtenerUsuariosXLegajo(legajo) {
   return RequestAPI(
     `/api/Usuarios/ObtenerUsuarioXlegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
 export const CrearBecarioSAE = (body) =>
-  RequestAPI("/api/Beca/CrearBecarioSAE", "POST", body);
+  RequestAPI('/api/Beca/CrearBecarioSAE', 'POST', body);
 
 export function EditarBecarioSAE(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarBecarioSAE/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
@@ -87,14 +87,14 @@ export function EditarBecarioSAE(id, body) {
 export function CrearBecarioEconomica(idBecario) {
   return RequestAPI(
     `/api/Beca/CrearBecarioEconomica/${encodeURIComponent(idBecario)}`,
-    "POST",
+    'POST',
   );
 }
 
 export function EditarBecarioEconomica(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarBecarioEconomica/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
@@ -102,14 +102,14 @@ export function EditarBecarioEconomica(id, body) {
 export function CrearBecarioInvestigacion(idBecario, idProyecto) {
   return RequestAPI(
     `/api/Beca/CrearBecarioInvestigacion/${encodeURIComponent(idBecario)}/${encodeURIComponent(idProyecto)}`,
-    "POST",
+    'POST',
   );
 }
 
 export function EditarBecarioInvestigacion(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarBecarioInvestigacion/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
@@ -117,14 +117,14 @@ export function EditarBecarioInvestigacion(id, body) {
 export function CrearBecarioServicio(idBecario, idServicio) {
   return RequestAPI(
     `/api/Beca/CrearBecarioServicio/${encodeURIComponent(idBecario)}/${encodeURIComponent(idServicio)}`,
-    "POST",
+    'POST',
   );
 }
 
 export function EditarBecarioServicio(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarBecarioServicio/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
@@ -132,7 +132,7 @@ export function EditarBecarioServicio(id, body) {
 export function listarDocumentacionXLegajo(legajo) {
   return RequestAPI(
     `/api/Estudiante/ListarDocumentacionXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 

@@ -1,4 +1,4 @@
-import { mapPublicacionPublica } from "./formatters/PrensaFormatter.js";
+import { mapPublicacionPublica } from './formatters/PrensaFormatter.js';
 import {
   ApiError,
   apiDownloadDocument,
@@ -6,28 +6,28 @@ import {
   apiUploadFile,
   RequestAPI,
   resolveApiUrl,
-} from "./apiClient";
+} from './apiClient';
 
 export const listarPublicacionesCompleto = () =>
-  RequestAPI("/api/Prensa/ListarPublicacionesCompleto", "GET");
+  RequestAPI('/api/Prensa/ListarPublicacionesCompleto', 'GET');
 
 export const listarPublicacionesActivas = () =>
-  RequestAPI("/api/Prensa/ListarPublicacionesActivas", "GET");
+  RequestAPI('/api/Prensa/ListarPublicacionesActivas', 'GET');
 
 export function obtenerPublicacionPorId(id) {
   return RequestAPI(
     `/api/Prensa/ObtenerPublicacionXId/${encodeURIComponent(id)}`,
-    "GET",
+    'GET',
   );
 }
 
 export const crearPublicacion = (body) =>
-  RequestAPI("/api/Prensa/CrearPublicacion", "POST", body);
+  RequestAPI('/api/Prensa/CrearPublicacion', 'POST', body);
 
 export function modificarPublicacion(id, body) {
   return RequestAPI(
     `/api/Prensa/ModificarPublicacion/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
@@ -35,23 +35,23 @@ export function modificarPublicacion(id, body) {
 export function eliminarPublicacion(id) {
   return RequestAPI(
     `/api/Prensa/EliminarPublicacion/${encodeURIComponent(id)}`,
-    "DELETE",
+    'DELETE',
   );
 }
 
 export function listarDocumentosPorPublicacion(idPublicacion) {
   return RequestAPI(
     `/api/Prensa/ListarDocumentoXPublicacion/${encodeURIComponent(idPublicacion)}`,
-    "GET",
+    'GET',
   );
 }
 
 export const listarDocumentosSinData = () =>
-  RequestAPI("/api/Prensa/ListarDocumentosSinData", "GET");
+  RequestAPI('/api/Prensa/ListarDocumentosSinData', 'GET');
 
 export function crearDocumentoPrensa(formData) {
   return apiUploadFile(
-    "/api/Prensa/CrearDocumentoPrensaLibre",
+    '/api/Prensa/CrearDocumentoPrensaLibre',
     formData,
   );
 }
@@ -59,7 +59,7 @@ export function crearDocumentoPrensa(formData) {
 export function crearVinculoDocPubli(idPublicacion, idDocumento) {
   return RequestAPI(
     `/api/Prensa/CrearVinculoDocPubli/${encodeURIComponent(idPublicacion)}/${encodeURIComponent(idDocumento)}`,
-    "POST",
+    'POST',
   );
 }
 
@@ -71,16 +71,16 @@ export function descargarDocumentoPorId(idDocumento) {
 }
 
 const PUBLIC_NEWS_ERRORS = {
-  400: "Se enviaron parámetros a una vista",
-  401: "El endpoint requiere autenticación",
-  409: "Conflicto en la base de datos",
-  500: "Error interno del servidor",
+  400: 'Se enviaron parámetros a una vista',
+  401: 'El endpoint requiere autenticación',
+  409: 'Conflicto en la base de datos',
+  500: 'Error interno del servidor',
 };
 
 export async function ObtenerNoticiasPublicas() {
   try {
     const response = await apiRequest(
-      "/api/Prensa/ListarPublicacionesActivas",
+      '/api/Prensa/ListarPublicacionesActivas',
       { auth: false, includeHeaders: true },
     );
 
@@ -88,7 +88,7 @@ export async function ObtenerNoticiasPublicas() {
       return {
         success: false,
         data: [],
-        message: "No hay publicaciones a listar",
+        message: 'No hay publicaciones a listar',
       };
     }
 
@@ -96,7 +96,7 @@ export async function ObtenerNoticiasPublicas() {
       .map(mapPublicacionPublica)
       .sort((a, b) => b.prioridad - a.prioridad);
 
-    return { success: true, data: publications, message: "" };
+    return { success: true, data: publications, message: '' };
   } catch (error) {
     return {
       success: false,
@@ -104,7 +104,7 @@ export async function ObtenerNoticiasPublicas() {
       message:
         error instanceof ApiError
           ? PUBLIC_NEWS_ERRORS[error.status] ?? error.message
-          : "Error no contemplado",
+          : 'Error no contemplado',
     };
   }
 }

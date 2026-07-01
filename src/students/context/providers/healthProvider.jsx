@@ -6,168 +6,36 @@ import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 
 import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as ModificarCurso, ModificaEspecialidad, ModificarPersonal, ObtenerCursosMedicos, ObtenerEspecialidades ,ObtenerEstadosTurno, ObtenerPersonalMedico, EliminarCursoMedico, ObtenerHorariosCompleto, ObtenerHorariosXCUIL, CrearHorario, ModificarHorario, EliminarHorario, ObtenerTurnos, RegistrarFalta, ObtenerFaltasXCUIL, CrearTurnos, ModificarTurno, ObtenerTurnosActivos, ObtenerTurnosFinalizados, ObtenerTurnosCancelados, ObtenerTurnosEstudiante, ObtenerEspecialidadesActivas} from "../../../api/SaludService";
-import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos} from '../../../api/formatters/SaludFormatters';
+import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos, mapTurnosPaciente} from '../../../api/formatters/SaludFormatters';
 
 import { ObtenerUsuariosXLegajo } from '../../../api/EmpleadoService';
-import { formatHeader } from "../../../shared/util";
-
-
-
-const EMPTY_TURNO =
-{
-    id: 0,
-    cuil_medico: "",
-    especialista: "",
-    legajo: "",
-    paciente: "",
-    fecha_solicitud: "",
-    fecha_atencion: "",
-    hora_atencion: "",
-    asunto: "",
-    id_estado_turno: 0,
-    estado: ""
-}
- // FUNCIONES PARA LA GRILLA (SE PODRIA PONER TODO EN UN SOLO ARCHIVO)
-const buildColumns = (data, 
-        editAction=null,
-        deleteAction = null,
-        registAction = null,
-        ) => {
-    if (!data || data.length === 0) return [];
-
-    const columns = Object.keys(data).map((key) => {
-        const isId = key.toLowerCase().startsWith("id");
-        const isShort = ["estado",
-             "cupo",
-              "duracion",
-               "horario_inicio",
-                "horario_fin"].includes(key.toLowerCase());
-        
-        if (key.toLowerCase() === "activo") {
-            return {
-                field: "activo",
-                headerName: "Estado",
-                align: "center",
-                headerAlign: "center",
-                width: 100,
-                renderCell: (params) => (
-                    <Chip
-                        size="small"
-                        label={params.value ? "Activo" : "Inactivo"}
-                        color={params.value ? "success" : "default"}
-                    />
-                )
-            };
-        } else {
-            return {
-                field: key,
-                headerName: formatHeader(key),
-                flex: isId ? 0.3 : 1,
-                minWidth: isId || isShort? 50 : 120,
-                maxWidth: isId ? 70 : isShort ? 100 : NaN,
-                align: isId || isShort ? "center" : "left",
-                headerAlign: isId || isShort ? "center" : "left",
-            };
-        }
-    });
-    //Puseah la columna de acciones si alguna de estas acciones existe.
-        if(editAction||deleteAction||registAction)
-        {
-            columns.push({
-                field: "actions",
-                headerName: "Acciones",
-                sortable: false,
-                filterable: false,
-                width: 100,
-                renderCell: (params) => (
-                    <Box>
-                    {editAction && (
-                        <IconButton
-                            size="small"
-                            color="primary"
-                            title="Ver / Editar"
-                            onClick={() => editAction(params.row)}
-                        >
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    )}
-                    {deleteAction && 
-                        (<IconButton
-                            size="small"
-                            color="primary"
-                            title="Eliminar"
-                            onClick={() => deleteAction(params.row)}
-                        >
-                            <CloseIcon fontSize="small" />
-                        </IconButton>    
-                        )}
-                    {registAction && 
-                        (<IconButton
-                            size="small"
-                            color="primary"
-                            title="Registrar Falta"
-                            onClick={() => registAction(params.row)}
-                        >
-                            <EditNoteIcon fontSize="small" />
-                        </IconButton>    
-                        )}
-                    </Box>  
-                )
-            });
-        }
-    return columns;
-};
-
-const generateRows = (data) => {
-    return [...data]
-    .sort((a, b) => a.id - b.id)
-    .map((item, index) => {
-        // 1. Creamos un nuevo objeto limpiando los nulos
-        const cleanedItem = {};
-        
-        for (const key in item) {
-            const value = item[key];
-            // Controla null, undefined o strings vacíos (quitando espacios)
-            if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
-                cleanedItem[key] = "-";
-            } else {
-                cleanedItem[key] = value;
-            }
-        }
-
-        // 2. Retornamos el objeto con su ID correspondiente
-        return {
-            ...cleanedItem,
-            id: item.id || index
-        };
-    });
-};
+import { formatHeader, generateColumns, generateRows } from "../../../utils/util";
+import { useNotification } from '../../../shared/context/sharedContext';
+import { calendarDays, EMPTY_TURNO_PACIENTE} from '../../../utils/constants';
 
 export const HealthUsersProvider = ({ children }) => {
-    const DAYS = [
-        { label: "Lunes",     value: 1 },
-        { label: "Martes",    value: 2 },
-        { label: "Miércoles", value: 3 },
-        { label: "Jueves",    value: 4 },
-        { label: "Viernes",   value: 5 }
-    ];
-    // Estados globales de Diálogo compartidos por ambas secciones
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogData, setDialogData] = useState({});
-    const [dialogType, setDialogType] = useState(""); 
-    const [dialogMode, setDialogMode] = useState(""); 
-    const [dialogError, setDialogError] = useState(null);
-    const [dialogSaving, setDialogSaving] = useState(false);
-    // Estados de Notificación
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMsg, setSnackbarMsg] = useState("");
-
+    const { 
+        showNotification, 
+        dialogOpen, 
+        dialogData, 
+        dialogType, 
+        dialogMode, 
+        dialogError, 
+        dialogSaving,
+        setDialogOpen, 
+        setDialogData, 
+        setDialogType, 
+        setDialogMode, 
+        setDialogError, 
+        setDialogSaving,
+        handleDataChange,
+        openDialog,
+        closeDialog } = useNotification();
     //ESTADOS
     const [estadosTurno, setEstados] = useState([]);
     const fetchEstadosTurno= useCallback(async () => {
         try {
-            const data = await ObtenerEstadosTurno();  
-  
+            const data = await ObtenerEstadosTurno();    
             setEstados(data.map(mapEstado));
         } catch {
             setEstados([]);
@@ -187,61 +55,49 @@ export const HealthUsersProvider = ({ children }) => {
     const openCreateTurnos = useCallback((legajo = null,id_especialidad = null,diasYHorarios = null) => {
 
         //Solo realiza una operacion si existen estos valores
-        if(legajo && id_especialidad && diasYHorarios && diasYHorarios.length > 0){
+        if(legajo && id_especialidad != null && diasYHorarios && diasYHorarios.length > 0){
             setUsuarioSelected(legajo);
             const hoy = new Date();
             const ISO = hoy.toLocaleDateString('sv-SE');
-            setDialogMode("create");
-            setDialogType("turnos");
-            setDialogData(  {id: 0,
-                            cuil_medico: null,
-                            especialista: "",
-                            legajo: legajo,
-                            paciente: "",
-                            fecha_solicitud: ISO,
-                            fecha_atencion: null,
-                            hora_atencion: null,
-                            asunto: "",
-                            id_estado_turno: 0,
-                            estado: "PENDIENTE",
-                            id_especialidad:id_especialidad,
-                            horarios_disponibles:diasYHorarios[0],
-                            dia_selecionado: diasYHorarios[0].dia,
-                            horario_disponible:diasYHorarios[0].hora_inicio}); 
-            
-            setDialogError("");
-            setTimeout(() => setDialogOpen(true), 0);
+            openDialog("turnos","create",
+            {id: 0,
+            cuil_medico: null,
+            especialista: "",
+            legajo: legajo,
+            paciente: "",
+            fecha_solicitud: ISO,
+            fecha_atencion: null,
+            hora_atencion: null,
+            asunto: "",
+            id_estado_turno: 0,
+            estado: "PENDIENTE",
+            id_especialidad:id_especialidad,
+            horarios_disponibles:diasYHorarios[0],
+            dia_selecionado: diasYHorarios[0].dia,
+            horario_disponible:diasYHorarios[0].hora_inicio});
         }
-
-    }, []);
+    }, [openDialog,setUsuarioSelected]);
 
     const openShowTurnos = useCallback((row) => {
-        setDialogMode("show");
-        setDialogType("turnos");
-        setDialogData(row); 
-        setDialogError("");
-        setDialogOpen(true);
-    }, []);
+        openDialog("turnos","show",row);
+    }, [openDialog]);
 
     const openDeleteTurnos = useCallback((row) => {
-        setDialogMode("delete");
-        setDialogType("turnos");
-        setDialogData(row); 
-        setDialogError("");
-        setDialogOpen(true);
-    }, []);
+        openDialog("turnos","delete",row);
+    }, [openDialog]);
 
     const fetchTurnosEstudiante = useCallback(async (legajo) => {
         if(!legajo) return;
         setLoadingTurnos(true);
         try {
-            let data = await ObtenerTurnosEstudiante(legajo);  
-            data = data.map(mapTurnos);
-            let activeTurnos=data.filter(item => [0,1,3,5].includes(item.id_estado_turno));
-            setEstudianteTurnos(activeTurnos)
+            
+        let data = (await ObtenerTurnosEstudiante(legajo)) || [];
 
-            //Genera una tabla de aquellos eturnos que esten cancelados o finalizados
-            setTurnsRows(generateRows(data.filter(item => [2, 4].includes(item.id_estado_turno))));
+        const finishTurns = data.filter(item => [2, 4].includes(item.estadosTurno.id));
+        const activeTurnos = data.filter(item => [0, 1, 3, 5].includes(item.estadosTurno.id));
+
+        setEstudianteTurnos(activeTurnos);
+        setTurnsRows(generateRows(finishTurns.map(mapTurnosPaciente)));
 
         } catch {
             setEstudianteTurnos([]);
@@ -256,29 +112,15 @@ export const HealthUsersProvider = ({ children }) => {
         fetchTurnosEstudiante();
     }, [fetchTurnosEstudiante]);
 
-    const turnsColumns = useMemo(() => buildColumns(EMPTY_TURNO, null,null), []);
-    /*Envolvemos handleValidation en useCallback para que no cambie en cada render
-    const handleValidation = useCallback(() => {
-        if (dialogData.id_estado_turno >= 0 && dialogMode) {
-            if (dialogMode === "edit" && (!dialogData?.id || dialogData.id < 0)) return false;
-            if (dialogData?.legajo?.trim() === "" || dialogData?.asunto?.trim() === "") return false;
+    const turnsColumns = useMemo(() => {
+        return generateColumns(EMPTY_TURNO_PACIENTE, null);
+    }, [ null]);
 
-            // Validaciones para estados específicos (Asignado, En Curso, Finalizado, Reprogramado)
-            if ([1, 2, 3, 5].includes(dialogData.id_estado_turno)) {
-                if (!dialogData?.cuil_medico?.trim() || !dialogData?.fecha_atencion?.trim() || !dialogData?.hora_atencion?.trim()) {
-                    return false; 
-                }
-            }
-            return true;
-        }
-        return false;
-    }, [dialogData, dialogMode]);*/
     const [especialidadesActivas,setEspecialidadesActivas] = useState([]);
 
     const handleTurnosSave = useCallback(async () => {
 
         setDialogSaving(true);
-        setDialogError("");
         
         try {
             if (dialogMode === "create" && !usuarioSelected) {
@@ -291,16 +133,9 @@ export const HealthUsersProvider = ({ children }) => {
                 setDialogSaving(false);
                 return;
             }
-            const dias = [
-                { label: "Lunes",     value: 1 },
-                { label: "Martes",    value: 2 },
-                { label: "Miércoles", value: 3 },
-                { label: "Jueves",    value: 4 },
-                { label: "Viernes",   value: 5 }
-            ];
-            console.log(dias,especialidadesActivas,dialogData);
+
             const especialidad = especialidadesActivas?.find(esp => esp.id === dialogData?.id_especialidad)?.nombre?? "Especialidad no Valida";
-            const dia_selec = dias?.find(di => di.value === Number(dialogData?.dia_selecionado))?.label??"lunes";
+            const dia_selec = calendarDays?.find(di => di.value === Number(dialogData?.dia_selecionado))?.label??"lunes";
 
             const id_nuevo = dialogData.id === "" ? 0 : Number(dialogData.id);
             const hoy = new Date();
@@ -335,11 +170,8 @@ export const HealthUsersProvider = ({ children }) => {
                await ModificarTurno(id_nuevo, body);
             }
             fetchTurnosEstudiante(usuarioSelected);
-            // Éxito: Limpieza de formulario y feedback visual
-            setDialogOpen(false);
-            setDialogData(EMPTY_TURNO);
-            setSnackbarMsg(dialogMode === "create" ? "Turno Creado!" : "Turno Actualizado!");
-            setSnackbarOpen(true);
+            closeDialog();
+            useNotification(dialogMode === "create" ? "Turno Creado!" : "Turno Actualizado!","sucess");
 
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
@@ -404,32 +236,29 @@ export const HealthUsersProvider = ({ children }) => {
     useEffect(() => { fetchCursos(); }, [fetchCursos]);
 
      //---- HORARIOS ---- //
-        const [allHorarios, setAllHorarios] = useState([]);
-        const [loadingHorarios, setLoadingHorarios]= useState(true);
+    const [allHorarios, setAllHorarios] = useState([]);
+    const [loadingHorarios, setLoadingHorarios]= useState(true);
 
-        const [selectedHorarios, setSelectedHorarios] = useState([]);
-    
-        const fetchHorarios = useCallback(async () => {
-            setLoadingHorarios(true);
-            try {
-                
-                let data = await ObtenerHorariosCompleto();  
-                data = data.map(mapHorarioSalud);
-                setAllHorarios(data)       
-            } catch {
-                setDialogError("Error recuperando los horarios");
-                setAllHorarios([]);
-            } finally {
-                setLoadingHorarios(false);
-            }
-        }, []);
-        useEffect(() => { fetchHorarios(); }, [fetchHorarios]);
-    
+    const [selectedHorarios, setSelectedHorarios] = useState([]);
 
-    // ---------
+    const fetchHorarios = useCallback(async () => {
+        setLoadingHorarios(true);
+        try {
+            
+            let data = await ObtenerHorariosCompleto();  
+            data = data.map(mapHorarioSalud);
+            setAllHorarios(data)       
+        } catch {
+            setDialogError("Error recuperando los horarios");
+            setAllHorarios([]);
+        } finally {
+            setLoadingHorarios(false);
+        }
+    }, []);
+    useEffect(() => { fetchHorarios(); }, [fetchHorarios]);
+    
     return (
         <HealthContext.Provider value={{
-            DAYS,
             // ABM de Turnos
             estadosTurno,
             estudianteTurnos,loadingTurnos,fetchTurnosEstudiante,turnsRows,turnsColumns,
@@ -444,11 +273,6 @@ export const HealthUsersProvider = ({ children }) => {
             cursos,loadingCursos,
 
             allHorarios,loadingHorarios,selectedHorarios,setSelectedHorarios, //General
-           
-            //Valores de error, mostrar mensajes, etc.
-            snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
-            dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving
-            
         }}>
             {children}
         </HealthContext.Provider>

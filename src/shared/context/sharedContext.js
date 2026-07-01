@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 
 export const AuthContext = createContext(null);
+export const NotificationContext = createContext(null);
 export const PressContext = createContext(null);
 export const JPAContext = createContext(null);
 
@@ -8,6 +9,14 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth debe usarse dentro de un AuthProvider');
+  }
+  return context;
+};
+
+export const useNotification = () => {
+  const context = useContext(NotificationContext);
+  if (!context) {
+    throw new Error('useNotification debe usarse dentro de un NotificationProvider');
   }
   return context;
 };

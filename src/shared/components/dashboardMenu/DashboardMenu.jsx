@@ -11,6 +11,7 @@ import {
   CardContent,
   Chip,
 } from "@mui/material";
+import { SAETypography } from "../typography/SAETypography";
 function DashboardCard({ item, onClick }) {
   const Icon = item.icon;
 
@@ -21,11 +22,10 @@ function DashboardCard({ item, onClick }) {
         borderRadius: 4,
         boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
         border: "1px solid rgba(17, 53, 101, 0.08)",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-        "&:hover": {
-          transform: "translateY(-6px)",
-          boxShadow: 6,
-        },
+         "&:hover": {
+            transform: "scale(1.01)",
+            boxShadow: "0 15px 25px rgba(0,0,0,.15)",
+            }
       }}
     >
       <CardActionArea
@@ -55,17 +55,16 @@ function DashboardCard({ item, onClick }) {
             </Box>
 
             <Box>
-              <Typography
+              <SAETypography
                 variant="h6"
-                sx={{ fontWeight: 700, color: "var(--text)" }}
               >
                 {item.label}
-              </Typography>
-              <Typography
+              </SAETypography>
+              <SAETypography
                 sx={{ mt: 1, color: "var(--secondary)", minHeight: 48 }}
               >
                 {item.descripcion}
-              </Typography>
+              </SAETypography>
             </Box>
 
             <Box sx={{ mt: "auto" }}>

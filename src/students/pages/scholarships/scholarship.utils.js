@@ -6,7 +6,7 @@ export {
   isPdfDocument,
   MAX_FILE_SIZE_BYTES as MAX_SIZE_BYTES,
   MAX_FILE_SIZE_MB as MAX_SIZE_MB,
-} from "../../../shared/util";
+} from "../../../utils/util.jsx";;
 
 export const ESTADO_BECA = {
   SOLICITADO: "solicitado",

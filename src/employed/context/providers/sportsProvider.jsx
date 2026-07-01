@@ -11,15 +11,24 @@ import {
   validateEspacio,
 } from "../../pages/sports/sports.validations";
 import { SportsContext } from "../employedContext";
-import {
-  formatDate,
-  generateColumns,
-} from "../../../shared/util";
+import { formatDate, generateColumns } from "../../../utils/util.jsx";
 
 const EMPTY = {
-  docente: { cuil: "", nombres: "", apellidos: "", activo: true, fecha_nacimiento: "" },
+  docente: {
+    cuil: "",
+    nombres: "",
+    apellidos: "",
+    activo: true,
+    fecha_nacimiento: "",
+  },
   espacio: { id: 0, nombre: "", domicilio: "", activo: true, url_maps: "" },
-  deportista: { id: 0, legajo: "", habilitado_deportado: true, vencimiento_ficha: "", habilitado_deporte: true },
+  deportista: {
+    id: 0,
+    legajo: "",
+    habilitado_deportado: true,
+    vencimiento_ficha: "",
+    habilitado_deporte: true,
+  },
   deporte: { id: 0, nombre: "", activo: true },
 };
 const inputDate = (value) => (value ? value.split("T")[0] : "");
@@ -65,55 +74,170 @@ export function SportsProvider({ children, autoLoad = true }) {
 
   const load = useCallback(async (setter, loading, request, map = (x) => x) => {
     loading(true);
-    try { setter((await request()).map(map)); } catch { setter([]); }
-    finally { loading(false); }
+    try {
+      setter((await request()).map(map));
+    } catch {
+      setter([]);
+    } finally {
+      loading(false);
+    }
   }, []);
-  const fetchProfesores = useCallback(() => load(setProfesoresRows, setLoadingProfesores, api.obtenerDocentesDeportivos, (x, i) => ({ ...x, id: x.cuil || i })), [load]);
-  const fetchEspacios = useCallback(() => load(setEspaciosRows, setLoadingEspacios, api.obtenerEspaciosDeportivos), [load]);
-  const fetchTorneos = useCallback(() => load(setTorneosRows, setLoadingTorneos, api.obtenerTorneosDeportivos), [load]);
-  const fetchDeportistas = useCallback(() => load(setDeportistasRows, setLoadingDeportistas, api.obtenerDeportistas), [load]);
-  const fetchDeportes = useCallback(() => load(setDeportesRows, setLoadingDeportes, api.obtenerDeportesCompleto), [load]);
+  const fetchProfesores = useCallback(
+    () =>
+      load(
+        setProfesoresRows,
+        setLoadingProfesores,
+        api.obtenerDocentesDeportivos,
+        (x, i) => ({ ...x, id: x.cuil || i }),
+      ),
+    [load],
+  );
+  const fetchEspacios = useCallback(
+    () =>
+      load(setEspaciosRows, setLoadingEspacios, api.obtenerEspaciosDeportivos),
+    [load],
+  );
+  const fetchTorneos = useCallback(
+    () => load(setTorneosRows, setLoadingTorneos, api.obtenerTorneosDeportivos),
+    [load],
+  );
+  const fetchDeportistas = useCallback(
+    () =>
+      load(setDeportistasRows, setLoadingDeportistas, api.obtenerDeportistas),
+    [load],
+  );
+  const fetchDeportes = useCallback(
+    () =>
+      load(setDeportesRows, setLoadingDeportes, api.obtenerDeportesCompleto),
+    [load],
+  );
 
   useEffect(() => {
     if (!autoLoad) return;
-    fetchProfesores(); fetchEspacios(); fetchTorneos(); fetchDeportistas(); fetchDeportes();
-  }, [autoLoad, fetchDeportes, fetchDeportistas, fetchEspacios, fetchProfesores, fetchTorneos]);
+    fetchProfesores();
+    fetchEspacios();
+    fetchTorneos();
+    fetchDeportistas();
+    fetchDeportes();
+  }, [
+    autoLoad,
+    fetchDeportes,
+    fetchDeportistas,
+    fetchEspacios,
+    fetchProfesores,
+    fetchTorneos,
+  ]);
 
   const open = useCallback((type, mode, data) => {
-    setDialogType(type); setDialogMode(mode); setDialogData(data);
-    setDialogError(""); setDialogFieldErrors({}); setDialogOpen(true);
+    setDialogType(type);
+    setDialogMode(mode);
+    setDialogData(data);
+    setDialogError("");
+    setDialogFieldErrors({});
+    setDialogOpen(true);
   }, []);
-  const openCreateDocente = useCallback(() => open("docente", "create", EMPTY.docente), [open]);
-  const openCreateEspacio = useCallback(() => open("espacio", "create", EMPTY.espacio), [open]);
-  const openCreateDeportista = useCallback(() => open("deportista", "create", EMPTY.deportista), [open]);
-  const openCreateDeporte = useCallback(() => open("deporte", "create", EMPTY.deporte), [open]);
-  const openEditDocente = useCallback((x) => open("docente", "edit", { cuil: x.cuil, nombres: x.nombres, apellidos: x.apellidos, activo: x.activo, fecha_nacimiento: inputDate(x.fecha_nacimiento) }), [open]);
-  const openEditEspacio = useCallback((x) => open("espacio", "edit", { id: x.id, nombre: x.nombre, domicilio: x.domicilio, activo: x.activo, url_maps: x.url_maps }), [open]);
-  const openEditDeportista = useCallback((x) => open("deportista", "edit", { id: x.id, legajo: x.legajo, habilitado_deportado: x.habilitado_deportado, vencimiento_ficha: inputDate(x.vencimiento_ficha), habilitado_deporte: x.habilitado_deporte }), [open]);
-  const openEditDeporte = useCallback((x) => open("deporte", "edit", { id: x.id, nombre: x.nombre, activo: x.activo }), [open]);
+  const openCreateDocente = useCallback(
+    () => open("docente", "create", EMPTY.docente),
+    [open],
+  );
+  const openCreateEspacio = useCallback(
+    () => open("espacio", "create", EMPTY.espacio),
+    [open],
+  );
+  const openCreateDeportista = useCallback(
+    () => open("deportista", "create", EMPTY.deportista),
+    [open],
+  );
+  const openCreateDeporte = useCallback(
+    () => open("deporte", "create", EMPTY.deporte),
+    [open],
+  );
+  const openEditDocente = useCallback(
+    (x) =>
+      open("docente", "edit", {
+        cuil: x.cuil,
+        nombres: x.nombres,
+        apellidos: x.apellidos,
+        activo: x.activo,
+        fecha_nacimiento: inputDate(x.fecha_nacimiento),
+      }),
+    [open],
+  );
+  const openEditEspacio = useCallback(
+    (x) =>
+      open("espacio", "edit", {
+        id: x.id,
+        nombre: x.nombre,
+        domicilio: x.domicilio,
+        activo: x.activo,
+        url_maps: x.url_maps,
+      }),
+    [open],
+  );
+  const openEditDeportista = useCallback(
+    (x) =>
+      open("deportista", "edit", {
+        id: x.id,
+        legajo: x.legajo,
+        habilitado_deportado: x.habilitado_deportado,
+        vencimiento_ficha: inputDate(x.vencimiento_ficha),
+        habilitado_deporte: x.habilitado_deporte,
+      }),
+    [open],
+  );
+  const openEditDeporte = useCallback(
+    (x) =>
+      open("deporte", "edit", { id: x.id, nombre: x.nombre, activo: x.activo }),
+    [open],
+  );
 
   const openDocsDialog = useCallback(async (legajo) => {
-    setDocsLegajo(legajo); setDocsList([]); setDocsError(""); setLoadingDocs(true); setDocsDialogOpen(true);
-    try { setDocsList(await api.listarDocumentacionXLegajo(legajo)); }
-    catch (e) { setDocsError(e.message || "Error al cargar documentación"); }
-    finally { setLoadingDocs(false); }
+    setDocsLegajo(legajo);
+    setDocsList([]);
+    setDocsError("");
+    setLoadingDocs(true);
+    setDocsDialogOpen(true);
+    try {
+      setDocsList(await api.listarDocumentacionXLegajo(legajo));
+    } catch (e) {
+      setDocsError(e.message || "Error al cargar documentación");
+    } finally {
+      setLoadingDocs(false);
+    }
   }, []);
 
   const handlePreviewDoc = useCallback(async (doc) => {
-    setPreviewTitle(doc.nombre_documento); setPreviewSrc(null); setPreviewError("");
-    setPreviewIsPdf(false); setPreviewDocRef(doc); setLoadingPreview(true); setPreviewOpen(true);
+    setPreviewTitle(doc.nombre_documento);
+    setPreviewSrc(null);
+    setPreviewError("");
+    setPreviewIsPdf(false);
+    setPreviewDocRef(doc);
+    setLoadingPreview(true);
+    setPreviewOpen(true);
     try {
       const response = await api.descargarDocumentacionXId(doc.id);
       const data = Array.isArray(response) ? response[0] : response;
       const ext = (data.extension || doc.extension || "").toLowerCase();
       let src = data.datos_documento;
       if (!src.startsWith("data:")) {
-        const mime = { pdf: "application/pdf", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp" }[ext] || "application/octet-stream";
+        const mime =
+          {
+            pdf: "application/pdf",
+            png: "image/png",
+            jpg: "image/jpeg",
+            jpeg: "image/jpeg",
+            gif: "image/gif",
+            webp: "image/webp",
+          }[ext] || "application/octet-stream";
         src = `data:${mime};base64,${src}`;
       }
-      setPreviewSrc(src); setPreviewIsPdf(ext === "pdf");
-    } catch (e) { setPreviewError(e.message || "Error al cargar el documento"); }
-    finally { setLoadingPreview(false); }
+      setPreviewSrc(src);
+      setPreviewIsPdf(ext === "pdf");
+    } catch (e) {
+      setPreviewError(e.message || "Error al cargar el documento");
+    } finally {
+      setLoadingPreview(false);
+    }
   }, []);
 
   const handleDownloadDoc = useCallback(async (id, name, extension) => {
@@ -127,41 +251,88 @@ export function SportsProvider({ children, autoLoad = true }) {
       const bytes = Uint8Array.from(chars, (char) => char.charCodeAt(0));
       const url = URL.createObjectURL(new Blob([bytes]));
       const anchor = document.createElement("a");
-      anchor.href = url; anchor.download = `${data.nombre_documento || name}.${data.extension || extension}`;
-      document.body.appendChild(anchor); anchor.click(); anchor.remove(); URL.revokeObjectURL(url);
-    } finally { setDownloadingDocId(null); }
+      anchor.href = url;
+      anchor.download = `${data.nombre_documento || name}.${data.extension || extension}`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloadingDocId(null);
+    }
   }, []);
 
   const handleDialogChange = useCallback((field, value) => {
     setDialogData((x) => ({ ...x, [field]: value }));
-    setDialogFieldErrors((x) => x[field] ? { ...x, [field]: undefined } : x);
+    setDialogFieldErrors((x) => (x[field] ? { ...x, [field]: undefined } : x));
   }, []);
 
   const executeSave = useCallback(async () => {
     setDialogSaving(true);
     try {
       if (dialogType === "docente") {
-        const body = { ...dialogData, fecha_nacimiento: dialogData.fecha_nacimiento ? `${dialogData.fecha_nacimiento}T00:00:00` : null };
-        await (dialogMode === "create" ? api.crearDocenteDeportivo(body) : api.modificarDocenteDeportivo(dialogData.cuil, body)); await fetchProfesores();
+        const body = {
+          ...dialogData,
+          fecha_nacimiento: dialogData.fecha_nacimiento
+            ? `${dialogData.fecha_nacimiento}T00:00:00`
+            : null,
+        };
+        await (dialogMode === "create"
+          ? api.crearDocenteDeportivo(body)
+          : api.modificarDocenteDeportivo(dialogData.cuil, body));
+        await fetchProfesores();
       } else if (dialogType === "espacio") {
-        await (dialogMode === "create" ? api.crearEspacioDeportivo(dialogData) : api.modificarEspacioDeportivo(dialogData.id, dialogData)); await fetchEspacios();
+        await (dialogMode === "create"
+          ? api.crearEspacioDeportivo(dialogData)
+          : api.modificarEspacioDeportivo(dialogData.id, dialogData));
+        await fetchEspacios();
       } else if (dialogType === "deportista") {
-        const body = { ...dialogData, vencimiento_ficha: dialogData.vencimiento_ficha ? `${dialogData.vencimiento_ficha}T00:00:00` : null };
-        await (dialogMode === "create" ? api.crearDeportista(body) : api.modificarDeportista(dialogData.id, body)); await fetchDeportistas();
+        const body = {
+          ...dialogData,
+          vencimiento_ficha: dialogData.vencimiento_ficha
+            ? `${dialogData.vencimiento_ficha}T00:00:00`
+            : null,
+        };
+        await (dialogMode === "create"
+          ? api.crearDeportista(body)
+          : api.modificarDeportista(dialogData.id, body));
+        await fetchDeportistas();
       } else {
-        await (dialogMode === "create" ? api.crearDeporte(dialogData) : api.modificarDeporte(dialogData.id, dialogData));
-        if (dialogMode === "edit") { setSnackbarMsg("Deporte modificado correctamente"); setSnackbarOpen(true); }
+        await (dialogMode === "create"
+          ? api.crearDeporte(dialogData)
+          : api.modificarDeporte(dialogData.id, dialogData));
+        if (dialogMode === "edit") {
+          setSnackbarMsg("Deporte modificado correctamente");
+          setSnackbarOpen(true);
+        }
         await fetchDeportes();
       }
       setDialogOpen(false);
-    } catch (e) { setDialogError(e.message || "Ocurrió un error al guardar"); }
-    finally { setDialogSaving(false); }
-  }, [dialogData, dialogMode, dialogType, fetchDeportes, fetchDeportistas, fetchEspacios, fetchProfesores]);
+    } catch (e) {
+      setDialogError(e.message || "Ocurrió un error al guardar");
+    } finally {
+      setDialogSaving(false);
+    }
+  }, [
+    dialogData,
+    dialogMode,
+    dialogType,
+    fetchDeportes,
+    fetchDeportistas,
+    fetchEspacios,
+    fetchProfesores,
+  ]);
 
   const handleDialogSave = useCallback(() => {
-    const validators = { docente: () => validateDocente(dialogData, dialogMode), espacio: () => validateEspacio(dialogData), deportista: () => validateDeportista(dialogData, dialogMode), deporte: () => validateDeporte(dialogData) };
+    const validators = {
+      docente: () => validateDocente(dialogData, dialogMode),
+      espacio: () => validateEspacio(dialogData),
+      deportista: () => validateDeportista(dialogData, dialogMode),
+      deporte: () => validateDeporte(dialogData),
+    };
     const errors = validators[dialogType]?.() || {};
-    setDialogFieldErrors(errors); setDialogError("");
+    setDialogFieldErrors(errors);
+    setDialogError("");
     if (!Object.keys(errors).length) executeSave();
   }, [dialogData, dialogMode, dialogType, executeSave]);
 
@@ -286,19 +457,65 @@ export function SportsProvider({ children, autoLoad = true }) {
   );
 
   const value = {
-    torneosRows, loadingTorneos, torneoFormOpen, setTorneoFormOpen, fetchTorneos,
-    profesoresRows, loadingProfesores, espaciosRows, loadingEspacios,
-    deportistasRows, loadingDeportistas, deportesRows, loadingDeportes,
-    dialogOpen, setDialogOpen, dialogType, dialogMode, dialogData, dialogSaving,
-    dialogError, setDialogError, dialogFieldErrors, horariosDialogOpen, setHorariosDialogOpen,
-    docsDialogOpen, setDocsDialogOpen, docsLegajo, docsList, loadingDocs, docsError,
-    downloadingDocId, previewOpen, setPreviewOpen, previewTitle, previewSrc,
-    previewIsPdf, loadingPreview, previewError, previewDocRef,
-    snackbarOpen, setSnackbarOpen, snackbarMsg, openCreateDocente, openEditDocente,
-    openCreateEspacio, openEditEspacio, openCreateDeportista, openEditDeportista,
-    openCreateDeporte, openEditDeporte, openDocsDialog, handlePreviewDoc,
-    handleDownloadDoc, handleDialogChange, handleDialogSave,
-    profesoresColumns, espaciosColumns, deportistasColumns, deportesColumns,
+    torneosRows,
+    loadingTorneos,
+    torneoFormOpen,
+    setTorneoFormOpen,
+    fetchTorneos,
+    profesoresRows,
+    loadingProfesores,
+    espaciosRows,
+    loadingEspacios,
+    deportistasRows,
+    loadingDeportistas,
+    deportesRows,
+    loadingDeportes,
+    dialogOpen,
+    setDialogOpen,
+    dialogType,
+    dialogMode,
+    dialogData,
+    dialogSaving,
+    dialogError,
+    setDialogError,
+    dialogFieldErrors,
+    horariosDialogOpen,
+    setHorariosDialogOpen,
+    docsDialogOpen,
+    setDocsDialogOpen,
+    docsLegajo,
+    docsList,
+    loadingDocs,
+    docsError,
+    downloadingDocId,
+    previewOpen,
+    setPreviewOpen,
+    previewTitle,
+    previewSrc,
+    previewIsPdf,
+    loadingPreview,
+    previewError,
+    previewDocRef,
+    snackbarOpen,
+    setSnackbarOpen,
+    snackbarMsg,
+    openCreateDocente,
+    openEditDocente,
+    openCreateEspacio,
+    openEditEspacio,
+    openCreateDeportista,
+    openEditDeportista,
+    openCreateDeporte,
+    openEditDeporte,
+    openDocsDialog,
+    handlePreviewDoc,
+    handleDownloadDoc,
+    handleDialogChange,
+    handleDialogSave,
+    profesoresColumns,
+    espaciosColumns,
+    deportistasColumns,
+    deportesColumns,
     torneosColumns,
     obtenerTorneosDeportivos: api.obtenerTorneosDeportivos,
     crearTorneo: api.crearTorneo,
@@ -317,5 +534,7 @@ export function SportsProvider({ children, autoLoad = true }) {
     obtenerEspaciosDeportivos: api.obtenerEspaciosDeportivos,
     obtenerDeportesCompleto: api.obtenerDeportesCompleto,
   };
-  return <SportsContext.Provider value={value}>{children}</SportsContext.Provider>;
+  return (
+    <SportsContext.Provider value={value}>{children}</SportsContext.Provider>
+  );
 }

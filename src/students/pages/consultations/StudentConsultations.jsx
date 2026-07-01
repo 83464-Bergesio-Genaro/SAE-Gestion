@@ -10,9 +10,7 @@ import {
   Chip,
   Container,
   Grid,
-  Snackbar,
   Stack,
-  Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
@@ -20,18 +18,23 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SendIcon from "@mui/icons-material/Send";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { useConsultationContext } from "../../context/studentContext";
+
 import {
   CONSULTATION_FAQS,
   QUICK_CONSULTATION_FAQS,
   SAE_EMAIL,
 } from "../../../shared/pages/consultations/consultations.config";
-import { getLinkFrecuenteIconByIndex } from "../../../shared/pages/consultations/linkFrecuentesIcons";
-import HeaderPage from "../../../shared/components/headerPage";
+
+import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
 import TitleBox from "../../../shared/components/titleBox";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
+import { SAETypography } from "../../../shared/components/typography/SAETypography";
+
+import { getLinkFrecuenteIconByIndex } from "../../../shared/pages/consultations/linkFrecuentesIcons";
 import { ConsultationAlumnoProvider } from "../../../students/context/providers/consultationsProvider";
+import { useConsultationContext } from "../../context/studentContext";
 import SAEPage from "../../../shared/components/page/SAEPage";
+
 export function StudentContent() {
   const navigate = useNavigate();
   const baseUrl = import.meta.env.BASE_URL;
@@ -44,21 +47,19 @@ export function StudentContent() {
     handleChange,
     handleSubmit,
     handleLinkFrecuenteClick,
-    snackbar,
-    closeSnackbar,
   } = useConsultationContext();
 
   return (
     <SAEPage>
-      <HeaderPage
+      <StudentHeaderPage
         title="Consultas SAE"
         description="Encontrá respuestas rápidas o escribinos para recibir ayuda personalizada."
-        backgroundImage="images/carrousel/AuditorioUTN.jpeg"
-        icon={<ContactSupportIcon />}
+        backgroundImage="images/buildings/inchaurrondo/FrenteVidriado.jpg"
+        icon={ContactSupportIcon}
       />
       <TitleBox
         title="Links frecuentes"
-        description="Accesos rapidos a recursos utiles de SAE."
+        description="Accesos rápidos a recursos útiles de SAE."
       />
 
       {loadingLinksFrecuentes ? (
@@ -107,7 +108,7 @@ export function StudentContent() {
                       alignItems: "center",
                       bgcolor: "var(--primary)",
                       borderRadius: 2,
-                      color: "white",
+                      color: "var(--textWhite)",
                       display: "flex",
                       flexShrink: 0,
                       height: 46,
@@ -117,17 +118,21 @@ export function StudentContent() {
                   >
                     <Icon fontSize="small" />
                   </Box>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography fontWeight={800} noWrap>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <SAETypography
+                      variant="subtitle1"
+                      fontWeight={600}
+                      noWrap
+                    >
                       {link.titulo}
-                    </Typography>
-                    <Typography
+                    </SAETypography>
+                    <SAETypography
                       variant="body2"
-                      color="var(--textSecondary)"
+                      color="var(--secondary)"
                       noWrap
                     >
                       {link.hipervinculo}
-                    </Typography>
+                    </SAETypography>
                   </Box>
                 </Box>
               </Grid>
@@ -164,10 +169,14 @@ export function StudentContent() {
                 <Chip label={faq.category} size="small" color="primary" />
                 <Accordion elevation={0} disableGutters sx={{ mt: 1 }}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography fontWeight={700}>{faq.question}</Typography>
+                    <SAETypography fontWeight={700}>
+                      {faq.question}
+                    </SAETypography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Typography color="text.secondary">{faq.answer}</Typography>
+                    <SAETypography color="var(--textSecondary)">
+                      {faq.answer}
+                    </SAETypography>
                     <SAEButton
                       endIcon={<OpenInNewIcon />}
                       onClick={() => navigate(faq.link)}
@@ -203,12 +212,18 @@ export function StudentContent() {
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Stack direction="row" spacing={1.5} alignItems="center">
-                <Chip label={faq.category} size="small" variant="outlined" />
-                <Typography fontWeight={700}>{faq.question}</Typography>
+                <Chip
+                  label={faq.category}
+                  size="small"
+                  color="var(--chipBackground)"
+                />
+                <SAETypography variant="subtitle2" fontWeight={700}>
+                  {faq.question}
+                </SAETypography>
               </Stack>
             </AccordionSummary>
             <AccordionDetails>
-              <Typography color="text.secondary">{faq.answer}</Typography>
+              <SAETypography color="text.secondary">{faq.answer}</SAETypography>
             </AccordionDetails>
           </Accordion>
         ))}
@@ -216,12 +231,12 @@ export function StudentContent() {
 
       <Card sx={{ mt: 5, borderRadius: 4 }}>
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-          <Typography variant="h5" fontWeight={800}>
+          <SAETypography variant="h5" fontWeight={800}>
             Enviar una consulta
-          </Typography>
-          <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
+          </SAETypography>
+          <SAETypography color="var(--textSecondary)" sx={{ mt: 1, mb: 3 }}>
             Tu consulta se enviará por correo a {SAE_EMAIL}.
-          </Typography>
+          </SAETypography>
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
@@ -281,20 +296,6 @@ export function StudentContent() {
           </Box>
         </CardContent>
       </Card>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={closeSnackbar}
-      >
-        <Alert
-          severity={snackbar.severity}
-          variant="filled"
-          onClose={closeSnackbar}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </SAEPage>
   );
 }

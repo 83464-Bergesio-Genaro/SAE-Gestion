@@ -48,6 +48,17 @@ export const mapTurnos = (turno) => ({
   estado: turno.estadosTurno.estado_turno
 });
 
+export const mapTurnosPaciente = (turno) => ({
+  id: turno.id,
+  especialista: turno.especialista.replace(",",""),
+  fecha_solicitud: removerHoras(turno.fecha_solicitud),
+  fecha_atencion:removerHoras(turno.fecha_atencion),
+  hora_atencion: turno.hora_atencion,
+  asunto: turno.asunto,
+  estado: turno.estadosTurno.estado_turno
+});
+
+
 function removerHoras(isoString) {
     if (!isoString) return "";  
     const [year, month, day] = (isoString.split("T")[0]).split("-");

@@ -17,7 +17,7 @@ import {
   getLinkFrecuenteIconByIndex,
 } from "../../../shared/pages/consultations/linkFrecuentesIcons";
 
-import { generateRows, formatHeader } from "../../../shared/util";
+import { generateRows, formatHeader } from "../../../utils/util.jsx";;
 
 const EMPTY_LINKFRECUENTE = {
   id: 0,

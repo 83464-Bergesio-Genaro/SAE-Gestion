@@ -34,7 +34,7 @@ import SAETimeField from "../../../shared/components/inputs/SAETimeField";
 
 import { useSports } from "../../context/employedContext";
 
-import { toTimeInput, toApiTime } from "../../../shared/util";
+import { toTimeInput, toApiTime } from "../../../utils/util.jsx";;
 
 const DIAS_LABEL = {
   0: "Domingo",

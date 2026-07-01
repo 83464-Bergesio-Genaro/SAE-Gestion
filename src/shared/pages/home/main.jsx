@@ -1,26 +1,23 @@
-import {
-  Box,
-  Container,
-  Grid,
-  Typography,
-  Stack,
-  Divider,
-} from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
-import SAEButton from "../../components/buttons/SAEButton";
-import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
+import { Box, Container, Typography, Stack, Divider } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
+import SAEButton from "../../components/buttons/SAEButton";
+import SAEPage from "../../components/page/SAEPage";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 const baseUrl = import.meta.env.BASE_URL;
-import SAEPage from "../../components/page/SAEPage";
 
 export default function Main() {
   return (
     <>
       <SAEHero />
-      <Container maxWidth="xl">
+      <Box
+        px={
+          "2vw" //Poniendo la SAE Page queda muy chico y no me gusta
+        }
+      >
         <NovedadesEstudiantiles />
-      </Container>
+      </Box>
     </>
   );
 }
@@ -39,69 +36,6 @@ function SAEHero() {
         overflow: "hidden",
         position: "relative",
         isolation: "isolate",
-        "@keyframes rotateHeroBackground": {
-          "0%": {
-            transform: "translate(-50%, -50%) rotate(0deg) scale(1)",
-          },
-          "50%": {
-            transform: "translate(-50%, -50%) rotate(180deg) scale(1.06)",
-          },
-          "100%": {
-            transform: "translate(-50%, -50%) rotate(360deg) scale(1)",
-          },
-        },
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          zIndex: 0,
-          top: "50%",
-          left: "50%",
-          width: "180vmax",
-          height: "180vmax",
-          borderRadius: "50%",
-          background: `
-            radial-gradient(
-              circle at 25% 30%,
-              rgba(255, 255, 255, 0.16),
-              transparent 28%
-            ),
-            radial-gradient(
-              circle at 75% 65%,
-              rgba(90, 190, 255, 0.2),
-              transparent 32%
-            ),
-            var(--gradient)
-          `,
-          animation: "rotateHeroBackground 28s linear infinite",
-          willChange: "transform",
-        },
-        "&::after": {
-          content: '""',
-          position: "absolute",
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: "none",
-          background: `
-            radial-gradient(
-              circle at center,
-              transparent 40%,
-              rgba(4, 20, 45, 0.22) 100%
-            ),
-            repeating-linear-gradient(
-              135deg,
-              rgba(255, 255, 255, 0.018) 0,
-              rgba(255, 255, 255, 0.018) 1px,
-              transparent 1px,
-              transparent 5px
-            )
-          `,
-        },
-        "@media (prefers-reduced-motion: reduce)": {
-          "&::before": {
-            animation: "none",
-            willChange: "auto",
-          },
-        },
       }}
     >
       <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>
@@ -231,14 +165,13 @@ function SAEHero() {
           {/* ---------------- DESCRIPCIÓN ---------------- */}
 
           <Typography
-            variant="title"
+            variant="subtitle2"
             sx={{
               mt: 5,
               mb: 4,
-              maxWidth: 700,
+              maxWidth: "60vw",
               textAlign: "center",
-              color: "white",
-              fontWeight: 500,
+              color: "var(--textWhite)",
               opacity: 0.9,
               px: 2,
             }}

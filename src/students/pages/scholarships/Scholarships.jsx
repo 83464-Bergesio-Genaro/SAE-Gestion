@@ -43,7 +43,7 @@ import {
   ECONOMIC_OPTIONAL_DOCUMENTS,
 } from "./scholarship.configs";
 
-import HeaderPage from "../../../shared/components/headerPage";
+import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
 import DocumentCard from "../../../shared/components/documents/DocumentCard";
 import TitleBox from "../../../shared/components/titleBox";
@@ -117,12 +117,12 @@ function ScholarshipsContent() {
 
   return (
     <SAEPage>
-      <HeaderPage
-        title={C.bigTitle}
-        description={C.bigSubtitle}
-        backgroundImage="images/carrousel/EntradaUTN.jpg"
-        icon={<Diversity3Icon />}
-      />
+        <StudentHeaderPage
+          title={C.bigTitle}
+          description={C.bigSubtitle}
+          backgroundImage="images/carrousel/EntradaUTN.jpg"
+          icon={Diversity3Icon}
+        />
 
       <TitleBox
         title={C.documentationTitle}

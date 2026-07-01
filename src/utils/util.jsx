@@ -1,3 +1,57 @@
+import {SAETypography} from "../shared/components/typography/SAETypography";
+import { Chip } from "@mui/material";
+export const mostrarHorasMinutos = (horario) => {
+  const [h1, m1] = horario.split(":").map(Number);
+  if (m1 === 0) return `${h1}:00hs`;
+  return `${h1}:${m1}hs`;
+};
+export const formatearFecha = (fechaString) => {
+  if (!fechaString) return "";
+
+  // Convertimos el texto "2026-05-07" a un objeto de fecha real
+  // Usamos el reemplazo de guiones por barras para evitar problemas de zona horaria
+  const fecha = new Date(fechaString.replace(/-/g, "/"));
+
+  // Le pedimos a JavaScript que solo nos devuelva el día y el mes en español
+  return fecha.toLocaleDateString("es-ES", {
+    day: "2-digit", // Fuerza a que el día tenga 2 dígitos (ej: "07")
+    month: "long", // Muestra el nombre completo del mes (ej: "Mayo")
+  });
+};
+export function ScaleText({ text, maxWidth, maxHeight, minFontSize = "8px", maxFontSize = "20px" }) {
+  if (!text) return null;
+
+  // La fórmula mágica depende de tu fuente, pero esta es una base sólida:
+  // Ancho aproximado de un carácter ≈ fontSize * 0.6 (para fuentes estándar)
+  
+  let calculatedSize = maxFontSize;
+
+  // Iteración simple para encontrar el tamaño que cabe (sin medir DOM, solo matemática)
+  // Probamos desde el tamaño máximo hacia abajo hasta que la estimación quepa
+  for (let size = maxFontSize; size >= minFontSize; size -= 0.5) {
+    // Estimación de ancho: caracteres * factor de ancho medio (0.6 es estándar para sans-serif)
+    // Si tu fuente es monoespaciada, usa 1.0. Si es muy estrecha, usa 0.5.
+    const estimatedWidth = text.length * size * 0.6; 
+    const estimatedHeight = size * 1.2; // Line-height aprox
+
+    if (estimatedWidth <= maxWidth && estimatedHeight <= maxHeight) {
+      calculatedSize = size;
+      break; // Encontramos el tamaño más grande que cabe
+    }
+  }
+  return (
+    <SAETypography 
+    variant="body2"
+    sx={{ 
+      fontSize: `${calculatedSize}px`, 
+      lineHeight: 1,
+      width: '100%',
+      height: '100%'
+    }}>
+      {text}
+    </SAETypography>
+  );
+}
 /**
  * Utilidades candidatas para centralizar lógica repetida entre providers.
  *
@@ -37,12 +91,37 @@ export const generateRows = (data = [], mapRow = (item) => item) =>
       ...mapRow(item, index),
     }));
 
+export const generateRows2 = (data) => {
+    return [...data]
+    .sort((a, b) => a.id - b.id)
+    .map((item, index) => {
+        // 1. Creamos un nuevo objeto limpiando los nulos
+        const cleanedItem = {};
+        
+        for (const key in item) {
+            const value = item[key];
+            // Controla null, undefined o strings vacíos (quitando espacios)
+            if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
+                cleanedItem[key] = "-";
+            } else {
+                cleanedItem[key] = value;
+            }
+        }
+
+        // 2. Retornamos el objeto con su ID correspondiente
+        return {
+            ...cleanedItem,
+            id: item.id || index
+        };
+    });
+};
+
 /**
  * Repetida en:
  * - employed/context/providers/purchaseProvider.jsx
  * - students/context/providers/travelProvider.jsx
- * - students/pages/sports/sports.utils.js
- * - students/pages/scholarships/scholarship.utils.js
+ * - students/pages/sports/sports.utils.jsx
+ * - students/pages/scholarships/scholarship.utils.jsx
  */
 export const createInitialPreview = () => ({
   open: false,
@@ -72,8 +151,8 @@ export const isPdfDocument = (data = {}) => {
  * Repetida como `buildDocumentName` o `construirNombre` en:
  * - employed/context/providers/purchaseProvider.jsx
  * - students/context/providers/travelProvider.jsx
- * - students/pages/sports/sports.utils.js
- * - students/pages/scholarships/scholarship.utils.js
+ * - students/pages/sports/sports.utils.jsx
+ * - students/pages/scholarships/scholarship.utils.jsx
  */
 export const buildDocumentName = (format = "", data = {}, extension = "") => {
   const name = Object.entries(data).reduce(
@@ -468,22 +547,93 @@ export const getDisplayDocumentName = (document = {}, fallback = "Archivo") =>
     ? document.nombre_documento
     : fallback;
 
-export const generateColumns = (
-  data,
-  { exclude = ["id"], overrides = {}, actions = null } = {},
-) => {
-  const sample = Array.isArray(data) ? data[0] : data;
-  if (!sample) return actions ? [actions] : [];
+export const generateColumns = (data, actionsConfig = []) => {
+ const sample =
+    Array.isArray(data)
+      ? data[0]
+      : data;
 
-  const columns = Object.keys(sample)
-    .filter((field) => !exclude.includes(field))
-    .map((field) => ({
-      field,
-      headerName: formatHeader(field),
-      flex: 1,
-      minWidth: 130,
-      ...(overrides[field] || {}),
-    }));
+  if (!sample) return [];
 
-  return actions ? [...columns, actions] : columns;
+  const columns = Object.keys(sample).map((key) => {
+    // Nota: Se asume que data es un array, por eso data[0] para las keys
+    const isId = key.toLowerCase().includes("id");
+    const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(key.toLowerCase());
+    
+    if (key.toLowerCase() === "activo" ) {
+    return {
+        field: "activo",
+        headerName: "Estado",
+        align: "center",
+        headerAlign: "center",
+        width: 100,
+        renderCell: (params) => (
+            <Chip
+                size="small"
+                label={params.value ? "Activo" : "Inactivo"}
+                color={params.value ? "success" : "default"}
+            />
+        )
+        };
+    } 
+    else if (key.toLowerCase() === "seguro"){
+     return {
+        field: "seguro",
+        headerName: "Seguro",
+        align: "center",
+        headerAlign: "center",
+        width: 100,
+        renderCell: (params) => (
+            <Chip
+                size="small"
+                label={params.value ? "Tiene" : "Falta"}
+                color={params.value ? "success" : "default"}
+            />
+        )
+        };       
+    }
+    else {
+        return {
+            field: key,
+            headerName: formatHeader(key),
+            flex: isId ? 0.4 : 1,
+            minWidth: isId || isShort? 50 : 120,
+            maxWidth: isId ? 70 : isShort ? 100 : NaN,
+            align: isId || isShort ? "center" : "left",
+            headerAlign: isId || isShort ? "center" : "left",
+        };
+    }
+  });
+
+  if (actionsConfig !== null && actionsConfig.length > 0) {
+    columns.push({
+      field: "actions",
+      headerName: "Acciones",
+      headerAlign:"center",
+      sortable: false,
+      filterable: false,
+      minWidth:60 * actionsConfig.length,
+      maxWidth: 65 * actionsConfig.length,
+      renderCell: (params) => (
+        <Box sx={{display:"block",textAlign:"center"}}>
+          {actionsConfig.map((action, index) => {
+            const IconComponent = action.icon;
+            return (
+              <IconButton
+                key={index}
+                size="small"
+                color={action.color || "primary"}
+                title={action.title}
+                onClick={() => action.onClick(params.row)}
+              >
+                <IconComponent fontSize="small" />
+              </IconButton>
+            );
+          })}
+        </Box>
+      ),
+    });
+  }
+
+  return columns;
 };

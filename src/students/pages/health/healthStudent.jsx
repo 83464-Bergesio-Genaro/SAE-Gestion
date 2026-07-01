@@ -1,16 +1,12 @@
 import {
-  Avatar,
   Box,
   Container,
   Divider,
   Stack,
-  Typography,
   Card,
-  CardActionArea,
   CardContent,
   Chip,
   Grid,
-  InputAdornment,
   InputLabel,
   Select,
   Dialog,
@@ -18,33 +14,33 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  FormControlLabel,
-  Switch,
-  CircularProgress,
   MenuItem,
   Alert,
   Snackbar,
-  useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-import { useAuth } from "../../../shared/context/sharedContext";
+import {
+  useAuth,
+  useNotification,
+} from "../../../shared/context/sharedContext";
 import { useHealth } from "../../context/studentContext";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 
+import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
+import SAEPage from "../../../shared/components/page/SAEPage";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
+import TitleBox from "../../../shared/components/titleBox";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
-import EditIcon from "@mui/icons-material/Edit";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SearchIcon from "@mui/icons-material/Search";
 import SchoolIcon from "@mui/icons-material/School";
@@ -59,11 +55,14 @@ import ScienceIcon from "@mui/icons-material/Science";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import BloodtypeIcon from "@mui/icons-material/Bloodtype";
 
-import HeaderPage from "../../../shared/components/headerPage";
+import { calendarDays } from "../../../utils/constants";
+import { SAETypography } from "../../../shared/components/typography/SAETypography";
+import {
+  formatearFecha,
+  mostrarHorasMinutos,
+  ScaleText,
+} from "../../../utils/util";
 import { DataGrid } from "@mui/x-data-grid";
-
-import TitleBox from "../../../shared/components/titleBox";
-import SAEPage from "../../../shared/components/page/SAEPage";
 
 const PALETTE = [
   "#8A8A8A", //Pendiente
@@ -74,13 +73,12 @@ const PALETTE = [
   "#F1C6A3", //Reprogramado
 ];
 
-const COURSE_PALLETE = [
-  "#C8C1DF", //Pendiente
-  "#BFEBA2", //Asignado
-  "#AB95EE", //Cancelado
-  "#AC829F", //En curso
-  "#F6F399", //Finalizado
-  "#B3A4A4", //Reprogramado
+const COURSE_PALETTE = [
+  "#C8C1DF",
+  "#BFEBA2",
+  "#AB95EE",
+  "#F6F399",
+  "#F1C6A3",
 ];
 
 const settings = {
@@ -138,24 +136,6 @@ const settingsSchedule = {
     },
   ],
 };
-const mostrarHorasMinutos = (horario) => {
-  const [h1, m1] = horario.split(":").map(Number);
-  if (m1 === 0) return `${h1}:00hs`;
-  return `${h1}:${m1}hs`;
-};
-const formatearFecha = (fechaString) => {
-  if (!fechaString) return "";
-
-  // Convertimos el texto "2026-05-07" a un objeto de fecha real
-  // Usamos el reemplazo de guiones por barras para evitar problemas de zona horaria
-  const fecha = new Date(fechaString.replace(/-/g, "/"));
-
-  // Le pedimos a JavaScript que solo nos devuelva el día y el mes en español
-  return fecha.toLocaleDateString("es-ES", {
-    day: "2-digit", // Fuerza a que el día tenga 2 dígitos (ej: "07")
-    month: "long", // Muestra el nombre completo del mes (ej: "Mayo")
-  });
-};
 
 const MEDICINE_ICONS = [
   LocalHospitalIcon, // Cruz de hospital / medicina general
@@ -199,102 +179,12 @@ const agruparPorEspecialidad = (horariosMapeados) => {
   return Object.values(agrupado);
 };
 
-function ScaleText({
-  text,
-  isMobile,
-  maxFontSize,
-  minFontSize,
-  fontWeight,
-  noWrap = false,
-  maxLines,
-}) {
-  const containerRef = useRef(null);
-  const textRef = useRef(null);
-  const maxSize = maxFontSize ?? (isMobile ? 17 : 15);
-  const minSize = minFontSize ?? (isMobile ? 14 : 12);
-  const [fontSize, setFontSize] = useState(maxSize);
-
-  useLayoutEffect(() => {
-    const container = containerRef.current;
-    const textElement = textRef.current;
-    if (!container || !textElement || !text) return undefined;
-
-    const fitText = () => {
-      let lowerSize = minSize;
-      let upperSize = maxSize;
-
-      while (upperSize - lowerSize > 0.1) {
-        const testSize = (lowerSize + upperSize) / 2;
-        textElement.style.fontSize = `${testSize}px`;
-
-        const fits =
-          textElement.scrollHeight <= container.clientHeight &&
-          textElement.scrollWidth <= container.clientWidth;
-
-        if (fits) lowerSize = testSize;
-        else upperSize = testSize;
-      }
-
-      setFontSize(Number(lowerSize.toFixed(1)));
-    };
-
-    fitText();
-    const resizeObserver = new ResizeObserver(fitText);
-    resizeObserver.observe(container);
-
-    return () => resizeObserver.disconnect();
-  }, [text, maxSize, minSize]);
-
-  if (!text) return null;
-
-  return (
-    <Box
-      ref={containerRef}
-      sx={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: noWrap || maxLines ? "center" : "flex-start",
-        justifyContent: "flex-start",
-      }}
-    >
-      <Typography
-        ref={textRef}
-        noWrap={noWrap}
-        sx={{
-          fontSize: `${fontSize}px`,
-          fontWeight,
-          lineHeight: 1.2,
-          textAlign: "left",
-          width: "100%",
-          maxWidth: "100%",
-          minWidth: 0,
-          overflow: "hidden",
-          overflowWrap: "anywhere",
-          ...(maxLines && {
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            WebkitLineClamp: maxLines,
-          }),
-        }}
-      >
-        {text}
-      </Typography>
-    </Box>
-  );
-}
-
 export function EmployedStudentContent() {
   const { user } = useAuth();
-  const isMobile = useMediaQuery("(max-width:599px)");
-  const isTablet = useMediaQuery("(max-width:1023px)");
-  const serviceSlidesToShow = isMobile ? 1 : isTablet ? 2 : 4;
-  const courseSlidesToShow = isMobile ? 1 : isTablet ? 2 : 3;
 
   const {
     allHorarios,
     loadingHorarios,
-    DAYS,
 
     cursos,
     loadingCursos,
@@ -307,47 +197,30 @@ export function EmployedStudentContent() {
     openCreateTurnos,
     openShowTurnos,
     openDeleteTurnos,
-    handleTurnosSave,
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
-    setDialogError,
-    dialogOpen,
-    setDialogOpen,
-    dialogData,
-    setDialogData,
-    dialogType,
-    dialogMode,
-    dialogError,
-    dialogSaving,
   } = useHealth();
 
   useEffect(() => {
     fetchTurnosEstudiante(user.legajo);
   }, [fetchTurnosEstudiante, user]);
 
-  const handleDialogChange = (field, value) => {
-    setDialogData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const horariosAgrupados = agruparPorEspecialidad(allHorarios);
 
   return (
     <SAEPage>
-      <HeaderPage
+      <StudentHeaderPage
         title={"Salud"}
         description={
-          "Permite sacar turnos medicos y ver los cursos disponibles"
+          "Permite sacar turnos médicos y ver los cursos disponibles"
         }
-        backgroundImage="images/carrousel/EntradaUTN.jpg"
-        icon={<HealingIcon />}
+        backgroundImage="images/varias/campus.jpg"
+        icon={HealingIcon}
       />
 
       <TitleBox
         title="Servicios para Alumnos"
         description="Especialidades médicas disponibles para solicitar turnos"
       />
-      {/*Tarjeta de Medicos */}
+
       <Card
         sx={{
           position: "relative",
@@ -370,7 +243,7 @@ export function EmployedStudentContent() {
           direction={{ xs: "column", md: "row" }}
           alignItems="center"
           spacing={1.5}
-          p={{ xs: 1, sm: 3, md: 2 }}
+          p={5}
         >
           {loadingHorarios && (
             <Stack alignItems="center" width={"100%"} gap={1}>
@@ -380,7 +253,7 @@ export function EmployedStudentContent() {
           {!loadingHorarios && (
             <Box
               sx={{
-                px: { xs: 0, sm: 4 },
+                px: { xs: 2, sm: 4 },
                 width: "100%",
                 boxSizing: "border-box",
                 overflow: "hidden",
@@ -389,10 +262,10 @@ export function EmployedStudentContent() {
                   touchAction: "pan-y",
                 },
                 "& .slick-list": {
-                  margin: { xs: 0, sm: "0 -10px" },
+                  margin: "0 -10px",
                 },
                 "& .slick-slide": {
-                  padding: { xs: "0 5px", sm: "0 10px" },
+                  padding: "0 10px",
                   boxSizing: "border-box",
                   height: "auto",
                   "& > div": {
@@ -401,11 +274,7 @@ export function EmployedStudentContent() {
                 },
               }}
             >
-              <Slider
-                {...settingsSchedule}
-                responsive={[]}
-                slidesToShow={serviceSlidesToShow}
-              >
+              <Slider {...settingsSchedule}>
                 {horariosAgrupados.map((especialidad, index) => {
                   const IconoDinamico =
                     MEDICINE_ICONS[index % MEDICINE_ICONS.length];
@@ -414,16 +283,14 @@ export function EmployedStudentContent() {
                       key={especialidad.id_especialidad}
                       variant="outlined"
                       sx={{
-                        width: { xs: "calc(100% - 10px)", sm: 300 },
-                        minWidth: { xs: 0, sm: 300 },
-                        maxWidth: { xs: "none", sm: 300 },
-                        minHeight: { xs: 420, sm: 400 },
-                        maxHeight: { xs: "none", sm: 400 },
-                        borderRadius: { xs: 3, sm: 4 },
-                        my: { xs: 2, sm: 3, md: 1.5 },
-                        mx: { xs: "auto", sm: 0 },
+                        minWidth: 300,
+                        maxWidth: 300,
+                        minHeight: 400,
+                        maxHeight: 400,
+                        borderRadius: 4,
+                        my: 3,
                         background:
-                          "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)",
+                          "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)", //GRADIENTE??
                         border: "1px solid #DCE7F5",
                         boxShadow: "0 10px 25px rgba(18,54,102,0.12)",
                         transition: "all .3s ease",
@@ -455,9 +322,8 @@ export function EmployedStudentContent() {
                         >
                           <Box
                             sx={{
-                              width: 60,
+                              width: 55,
                               height: 60,
-                              flexShrink: 0,
                               borderRadius: "50%",
                               bgcolor: "#E7F1FF",
                               display: "flex",
@@ -469,17 +335,9 @@ export function EmployedStudentContent() {
                               sx={{ fontSize: 30, color: "#2A548B" }}
                             />
                           </Box>
-                          <Typography
-                            variant="h6"
-                            fontWeight="bold"
-                            sx={{
-                              fontSize: { xs: "1.25rem", sm: "1.35rem" },
-                              lineHeight: 1.2,
-                              overflowWrap: "anywhere",
-                            }}
-                          >
+                          <SAETypography variant="h6" fontWeight="bold" noWrap>
                             {especialidad.nombre_especialidad}
-                          </Typography>
+                          </SAETypography>
                         </Stack>
 
                         <Divider sx={{ my: 1 }} />
@@ -494,10 +352,11 @@ export function EmployedStudentContent() {
                           {/* SECCIÓN 2: DESCRIPCIÓN (Le damos un alto fijo para que no mueva lo demás) */}
                           <Box sx={{ height: "80px", overflow: "hidden" }}>
                             <ScaleText
-                              isMobile={isMobile}
                               text={
                                 especialidad?.descripcion_especialidad ?? ""
                               }
+                              maxWidth={"300px"}
+                              maxHeight={"80px"}
                             />
                           </Box>
 
@@ -512,16 +371,16 @@ export function EmployedStudentContent() {
                             }}
                             my={2}
                           >
-                            <Typography
+                            <SAETypography
                               variant="body2"
                               fontWeight="bold"
-                              color="text.secondary"
+                              color="var(--secondary)"
                             >
                               Horarios de Atención:
-                            </Typography>
+                            </SAETypography>
 
                             {especialidad.diasYHorarios.map((item, index) => {
-                              const diaEncontrado = DAYS.find(
+                              const diaEncontrado = calendarDays.find(
                                 (d) => d.value === item.dia,
                               );
                               const nombreDia = diaEncontrado
@@ -540,25 +399,25 @@ export function EmployedStudentContent() {
                                     fontSize="small"
                                     color="action"
                                   />
-                                  <Typography variant="body2">
+                                  <SAETypography variant="body2">
                                     <strong>{nombreDia}:</strong>{" "}
                                     {mostrarHorasMinutos(item.hora_inicio)} a{" "}
                                     {mostrarHorasMinutos(item.hora_fin)}
-                                  </Typography>
+                                  </SAETypography>
                                 </Stack>
                               );
                             })}
                           </Box>
-                          <Typography variant="body2" sx={{ pt: 1.5 }}>
+                          <SAETypography variant="body2" sx={{ pt: 1.5 }}>
                             <strong>{"Profesional: "}</strong>
                             {especialidad.especialista}
-                          </Typography>
+                          </SAETypography>
                           {/* SECCIÓN EN EL FONDO: EL BOTÓN (Queda alineado abajo siempre igual) */}
                           <SAEButton
                             variant="contained"
                             onClick={() =>
                               openCreateTurnos(
-                                user.email,
+                                user.legajo,
                                 especialidad.id_especialidad,
                                 especialidad.diasYHorarios,
                               )
@@ -585,7 +444,7 @@ export function EmployedStudentContent() {
 
       <TitleBox
         title="Turnos Activos"
-        description="Podras ver aquellos turnos que tengas activos en estos dias."
+        description="Podrás ver aquellos turnos que tengas activos en estos días."
       />
 
       <Card
@@ -618,7 +477,7 @@ export function EmployedStudentContent() {
           </Grid>
         )}
         {!loadingTurnos && estudianteTurnos.length === 0 && (
-          <Typography
+          <SAETypography
             variant="h3"
             fontWeight="bold"
             sx={{
@@ -629,7 +488,7 @@ export function EmployedStudentContent() {
             }}
           >
             No hay turnos activos
-          </Typography>
+          </SAETypography>
         )}
         <Stack
           direction={{ xs: "column", md: "row" }}
@@ -648,7 +507,7 @@ export function EmployedStudentContent() {
                 sx={{
                   minWidth: 350,
                   maxWidth: 350,
-                  color: "black",
+                  color: "var(--textBlack)",
                   my: 2,
                   borderRadius: 2,
                   p: 1.1,
@@ -664,20 +523,20 @@ export function EmployedStudentContent() {
                     alignItems="center"
                     mb={1.5}
                   >
-                    <Typography
+                    <SAETypography
                       variant="subtitle1"
                       fontWeight="bold"
                       noWrap
                       sx={{ maxWidth: "140px" }}
                     >
                       {turno.fecha_solicitud || "Fecha Solicitud"}
-                    </Typography>
+                    </SAETypography>
                     <Chip
                       label={turno.estado || "Sin Definir"}
                       size="small"
                       sx={{
                         bgcolor: PALETTE[turno.id_estado_turno],
-                        color: "white",
+                        color: "var(--textBlack)",
                         fontSize: "0.75rem",
                         fontWeight: 600,
                       }}
@@ -688,33 +547,33 @@ export function EmployedStudentContent() {
 
                   {/* Datos Mínimos: Fecha y Hora */}
                   <Stack spacing={1} mt={1.5}>
-                    <Typography variant="body2">
+                    <SAETypography variant="body2">
                       <strong>{"Solicitante: "}</strong>
                       <br />
                       {turno.paciente || "Error recuperando el nombre"}
-                    </Typography>
-                    <Typography variant="body2">
+                    </SAETypography>
+                    <SAETypography variant="body2">
                       <strong>{"Asunto: "}</strong>
                       <br />
                       {turno.asunto || "Turno sin Asunto"}
-                    </Typography>
-                    <Typography variant="body2">
+                    </SAETypography>
+                    <SAETypography variant="body2">
                       <strong>{"Atiende: "}</strong>
                       <br />
-                      {turno.especialista || "Sin medico asignado"}
-                    </Typography>
+                      {turno.especialista || "Sin médico asignado"}
+                    </SAETypography>
                     <Stack direction="row" alignItems="center" gap={1}>
                       <CalendarMonthIcon fontSize="medium" />
-                      <Typography variant="body2">
+                      <SAETypography variant="body2">
                         {turno.fecha_atencion || "Sin Fecha Asignada"}
-                      </Typography>
+                      </SAETypography>
                     </Stack>
 
                     <Stack direction="row" alignItems="center" gap={1}>
                       <AccessTimeIcon fontSize="medium" />
-                      <Typography variant="body2">
+                      <SAETypography variant="body2">
                         {turno.hora_atencion || "Sin Horario Asignado"}
-                      </Typography>
+                      </SAETypography>
                     </Stack>
                   </Stack>
                   <Stack spacing={2} mt={1.5} p={2}>
@@ -723,7 +582,7 @@ export function EmployedStudentContent() {
                       onClick={() => openShowTurnos(turno)}
                       sx={{
                         whiteSpace: "nowrap",
-                        color: "white",
+                        color: "var(--textWhite)",
                         border: "1px solid rgba(255,255,255,0.4)",
                       }}
                     >
@@ -771,140 +630,174 @@ export function EmployedStudentContent() {
           },
         }}
       >
-        {loadingCursos && (
-          <Stack alignItems="center" width={"100%"} gap={1}>
-            <SAESpinner size="S" />
-          </Stack>
-        )}
-        {!loadingCursos && cursos.length === 0 && (
-          <Typography
-            variant="h3"
-            fontWeight="bold"
-            sx={{
-              pt: { xs: 2, md: 4 },
-              fontSize: { xs: "0.5em", md: "1.5em" },
-              textAlign: { xs: "center" },
-            }}
-          >
-            No hay cursos actualmente activos
-          </Typography>
-        )}
-        {!loadingTurnos && cursos.length > 0 && (
-          <Box
-            sx={{
-              px: { xs: 2, sm: 4 },
-              py: 3,
-              width: "100%",
-              boxSizing: "border-box",
-              overflow: "hidden",
-              "& .slick-slider": {
-                width: "100%",
-                touchAction: "pan-y",
-              },
-              "& .slick-list": {
-                margin: "0 -10px",
-              },
-              "& .slick-slide": {
-                padding: "0 10px",
-                boxSizing: "border-box",
-                height: "auto",
-                "& > div": {
-                  width: "100%",
-                },
-              },
-            }}
-          >
-            <Slider
-              {...settings}
-              responsive={[]}
-              slidesToShow={courseSlidesToShow}
+        <Stack>
+          {loadingCursos && (
+            <Stack alignItems="center" width={"100%"} gap={1}>
+              <SAESpinner size="S" />
+            </Stack>
+          )}
+          {!loadingCursos && cursos.length === 0 && (
+            <SAETypography
+              variant="h3"
+              fontWeight="bold"
+              sx={{
+                pt: { xs: 2, md: 4 },
+                fontSize: { xs: "0.5em", md: "1.5em" },
+                textAlign: { xs: "center" },
+              }}
             >
-              {cursos.map((curso, index) => (
-                <div key={curso.id || index} style={{ width: "100%" }}>
-                  <Card
-                    sx={{
-                      minWidth: "300px",
-                      height: 220,
-                      borderRadius: 4,
-                      background:
-                        "linear-gradient(180deg,#1D3557 0%,#2A548B 100%)",
-                      color: "white",
-                      cursor: "pointer",
-                      transition: "all .3s ease",
-                      overflow: "hidden",
-                      display: "flex", // Añadido para asegurar consistencia interna
-                      flexDirection: "column",
-                      "&:hover": {
-                        transform: "scale(1.01)",
-                        boxShadow: "0 15px 35px rgba(0,0,0,.05)",
-                      },
-                    }}
-                  >
-                    <Box
+              No hay cursos actualmente activos
+            </SAETypography>
+          )}
+          {!loadingCursos && cursos.length > 0 && (
+            <Box
+              sx={{
+                px: { xs: 0, sm: 4 },
+                width: "100%",
+                boxSizing: "border-box",
+                overflow: "hidden",
+                "& .slick-slider": {
+                  width: "100%",
+                  touchAction: "pan-y",
+                },
+                "& .slick-list": {
+                  margin: { xs: 0, sm: "0 -10px" },
+                },
+                "& .slick-slide": {
+                  padding: { xs: "0 5px", sm: "0 10px" },
+                  boxSizing: "border-box",
+                  height: "auto",
+                  "& > div": {
+                    width: "100%",
+                  },
+                },
+              }}
+            >
+              <Slider {...settings}>
+                {cursos.map((curso, index) => {
+                  return (
+                    <Card
+                      key={curso.id || index}
+                      variant="outlined"
                       sx={{
-                        p: 2,
+                        width: { xs: "calc(100% - 10px)", sm: 300 },
+                        minWidth: { xs: 0, sm: 300 },
+                        maxWidth: { xs: "none", sm: 300 },
+                        height: 210,
+                        borderRadius: { xs: 3, sm: 4 },
+                        my: { xs: 2, sm: 3, md: 1.5 },
+                        mx: "auto",
+                        background:
+                          "linear-gradient(180deg,#1D3557 0%,#2A548B 100%)", // GRADIENT
+                        color: "white",
+                        cursor: "pointer",
+                        transition: "all .3s ease",
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: "0 18px 40px rgba(18,54,102,0.20)",
+                        },
+                        // NUEVO: Hacemos que la tarjeta sea un contenedor Flex vertical
                         display: "flex",
-                        alignItems: "center",
-                        gap: 2,
+                        flexDirection: "column",
                       }}
                     >
-                      <SchoolIcon
+                      {/* NUEVO: Forzamos a CardContent a ocupar el 100% del alto y usar Flexbox */}
+
+                      {/* SECCIÓN 1: CABECERA (Alto fijo implícito por el icono de 55px) */}
+                      <Stack
+                        direction="row"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                        spacing={1.5}
+                        sx={{ px: 1.5, pt: 1.5, pb: 1 }}
+                      >
+                        <Box
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            flexShrink: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <SchoolIcon
+                            sx={{
+                              fontSize: 28,
+                              color:
+                                COURSE_PALETTE[index % COURSE_PALETTE.length],
+                            }}
+                          />
+                        </Box>
+                        <SAETypography
+                          variant="h6"
+                          fontWeight="bold"
+                          sx={{
+                            fontSize: { xs: "1rem", sm: "1.1rem" },
+                            lineHeight: 1.2,
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {curso.nombre_curso}
+                        </SAETypography>
+                      </Stack>
+
+                      <Divider
                         sx={{
-                          fontSize: 45,
-                          color: COURSE_PALLETE[index],
+                          borderColor:
+                            COURSE_PALETTE[index % COURSE_PALETTE.length],
                         }}
                       />
-                      <Box sx={{ flex: 1, minWidth: 0, height: 60 }}>
-                        <ScaleText
-                          text={curso.nombre_curso}
-                          isMobile={isMobile}
-                          maxFontSize={isMobile ? 24 : 26}
-                          minFontSize={13}
-                          fontWeight={600}
-                          maxLines={2}
-                        />
-                      </Box>
-                    </Box>
-                    <Divider
-                      sx={{
-                        borderColor: COURSE_PALLETE[index],
-                      }}
-                    />
-                    <CardContent>
-                      <Stack spacing={2}>
-                        <Chip
-                          label={`${curso.cupo_maximo} Vacantes`}
-                          sx={{
-                            width: "fit-content",
-                            bgcolor: "#FFD54F",
-                            color: "#1D3557",
-                            fontWeight: 700,
-                          }}
-                        />
-                        <Typography variant="body2">
-                          Docente:<strong> 👨‍🏫 {curso.nombre_docente}</strong>
-                        </Typography>
-                        <Typography variant="body2">
-                          Desde el: 📅
-                          <strong>
-                            {" "}
-                            {formatearFecha(curso.fecha_inicio)}
-                          </strong>{" "}
-                          hasta el:{" "}
-                          <strong>{formatearFecha(curso.fecha_fin)}</strong>
-                        </Typography>
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
-            </Slider>
-          </Box>
-        )}
+
+                      {/* NUEVO: Stack intermedio que se estira para ocupar el espacio y empujar el botón */}
+                      <CardContent
+                        sx={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                          px: 1.5,
+                          pt: 1,
+                          pb: 1.5,
+                          "&:last-child": { pb: 1.5 },
+                        }}
+                      >
+                        <Stack spacing={1}>
+                          <Chip
+                            label={`${curso.cupo_maximo} Vacantes`}
+                            sx={{
+                              width: "fit-content",
+                              height: 28,
+                              bgcolor: "#FFD54F",
+                              color: "#1D3557",
+                              fontWeight: 700,
+                            }}
+                          />
+                          <SAETypography variant="body2">
+                            Docente:<strong> 👨‍🏫 {curso.nombre_docente}</strong>
+                          </SAETypography>
+                          <SAETypography variant="body2">
+                            Desde el: 📅
+                            <strong>
+                              {" "}
+                              {formatearFecha(curso.fecha_inicio)}
+                            </strong>{" "}
+                            hasta el:{" "}
+                            <strong>{formatearFecha(curso.fecha_fin)}</strong>
+                          </SAETypography>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </Slider>
+            </Box>
+          )}
+        </Stack>
       </Card>
 
       <TitleBox
-        title="Historico de Turnos"
+        title="Histórico de Turnos"
         description="Turnos cancelados o finalizados"
       />
       <Card
@@ -917,7 +810,7 @@ export function EmployedStudentContent() {
       >
         <CardContent sx={{ p: 0 }}>
           <Box sx={{ width: "100%" }}>
-            <DataGrid
+            <DataGrid //Este data grid no lo uso con el componente porque es para tener varias secciones
               rows={turnsRows}
               columns={turnsColumns}
               loading={loadingTurnos}
@@ -933,13 +826,28 @@ export function EmployedStudentContent() {
           </Box>
         </CardContent>
       </Card>
+      <DialogHealth />
+    </SAEPage>
+  );
+}
+
+function DialogHealth() {
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setDialogError,
+    handleDataChange,
+    closeDialog,
+  } = useNotification();
+  const { handleTurnosSave } = useHealth();
+  return (
+    <>
       {dialogOpen && dialogType === "turnos" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="x1"
-          fullWidth
-        >
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="md" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -947,7 +855,7 @@ export function EmployedStudentContent() {
               alignItems: "center",
             }}
           >
-            <Typography
+            <SAETypography
               variant="h6"
               component="span"
               sx={{ fontWeight: "bold" }}
@@ -955,8 +863,8 @@ export function EmployedStudentContent() {
               {dialogMode === "cancelados"
                 ? "Turnos Cancelados"
                 : "Turnos Finalizados"}
-            </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            </SAETypography>
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -979,19 +887,22 @@ export function EmployedStudentContent() {
                           }}
                         >
                           <CardContent sx={{ p: 2 }}>
-                            <Typography
-                              variant="subtitle2"
-                              color="textPrimary"
-                              fontWeight={600}
+                            <SAETypography
+                              variant="subtitle1"
+                              color="var(--textBlack)"
                               gutterBottom
+                              fontWeight={600}
                             >
-                              ¡ATENCION!
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              Una vez generado el turno no podra ser modificado.
-                              En caso de equivocacion debera eliminarlo y
+                              ¡ATENCIÓN!
+                            </SAETypography>
+                            <SAETypography
+                              variant="body2"
+                              color="var(--textBlack)"
+                            >
+                              Una vez generado el turno no podrá ser modificado.
+                              En caso de equivocación debera eliminarlo y
                               despues volverlo a crear
-                            </Typography>
+                            </SAETypography>
                           </CardContent>
                         </Card>
                       </Grid>
@@ -1005,7 +916,7 @@ export function EmployedStudentContent() {
                           fullWidth
                           value={dialogData.legajo}
                           onChange={(e) =>
-                            handleDialogChange("legajo", e.target.value)
+                            handleDataChange("legajo", e.target.value)
                           }
                           disabled={true}
                         />
@@ -1016,10 +927,7 @@ export function EmployedStudentContent() {
                           type="date"
                           value={dialogData.fecha_solicitud}
                           onChange={(e) =>
-                            handleDialogChange(
-                              "fecha_solicitud",
-                              e.target.value,
-                            )
+                            handleDataChange("fecha_solicitud", e.target.value)
                           }
                           fullWidth
                           disabled={true}
@@ -1035,13 +943,10 @@ export function EmployedStudentContent() {
                           label="Dia"
                           fullWidth
                           onChange={(e) =>
-                            handleDialogChange(
-                              "dia_selecionado",
-                              e.target.value,
-                            )
+                            handleDataChange("dia_selecionado", e.target.value)
                           }
                         >
-                          {DAYS.map((d) => (
+                          {calendarDays.map((d) => (
                             <MenuItem key={d.value} value={d.value}>
                               {d.label}
                             </MenuItem>
@@ -1055,7 +960,7 @@ export function EmployedStudentContent() {
                           fullWidth
                           value={dialogData.horario_disponible}
                           onChange={(e) =>
-                            handleDialogChange(
+                            handleDataChange(
                               "horario_disponible",
                               e.target.value,
                             )
@@ -1067,7 +972,7 @@ export function EmployedStudentContent() {
                             "Revisar los horarios de inicio y fin del especialista"
                           }
                           sx={{
-                            bgcolor: "rgba(255,255,255,0.18)",
+                            bgcolor: "var(--chipBackground)",
                             color: "white",
                             fontWeight: 700,
                           }}
@@ -1082,7 +987,7 @@ export function EmployedStudentContent() {
                           label="Explique su dolencia"
                           value={dialogData.asunto}
                           onChange={(e) =>
-                            handleDialogChange("asunto", e.target.value)
+                            handleDataChange("asunto", e.target.value)
                           }
                           multiline
                           fullWidth
@@ -1101,24 +1006,20 @@ export function EmployedStudentContent() {
                           }}
                         >
                           <CardContent sx={{ p: 2 }}>
-                            <Typography
+                            <SAETypography
                               variant="subtitle2"
                               color="textPrimary"
                               fontWeight={600}
                               gutterBottom
                               fontSize={"22px"}
                             >
-                              ¡ATENCION!
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              fontSize={"18px"}
-                              color="textSecondary"
-                            >
+                              ¡ATENCIÓN!
+                            </SAETypography>
+                            <SAETypography variant="body2">
                               Esta por cancelar el turno, toda la informacion
                               que se haya utilizado en este turno se perdera
                               como tambien la disponibilidad.
-                            </Typography>
+                            </SAETypography>
                           </CardContent>
                         </Card>
                       </Grid>
@@ -1133,7 +1034,7 @@ export function EmployedStudentContent() {
                           fullWidth
                           value={dialogData.id}
                           onChange={(e) =>
-                            handleDialogChange("id", e.target.value)
+                            handleDataChange("id", e.target.value)
                           }
                           disabled={true}
                         />
@@ -1143,7 +1044,7 @@ export function EmployedStudentContent() {
                           label="Legajo Estudiante"
                           value={dialogData.legajo}
                           onChange={(e) =>
-                            handleDialogChange("legajo", e.target.value)
+                            handleDataChange("legajo", e.target.value)
                           }
                           fullWidth
                           disabled={true}
@@ -1154,7 +1055,7 @@ export function EmployedStudentContent() {
                           label="Paciente"
                           value={dialogData.paciente}
                           onChange={(e) =>
-                            handleDialogChange("paciente", e.target.value)
+                            handleDataChange("paciente", e.target.value)
                           }
                           fullWidth
                           disabled={true}
@@ -1162,11 +1063,11 @@ export function EmployedStudentContent() {
                       </Grid>
                       <Grid size={{ xs: 12, md: 6 }}>
                         <SAETextField
-                          label="Fecha de Atencion"
+                          label="Fecha de Atención"
                           type="date"
                           value={dialogData.fecha_atencion}
                           onChange={(e) =>
-                            handleDialogChange("fecha_atencion", e.target.value)
+                            handleDataChange("fecha_atencion", e.target.value)
                           }
                           fullWidth
                           disabled={true}
@@ -1174,13 +1075,13 @@ export function EmployedStudentContent() {
                       </Grid>
                       <Grid size={{ xs: 12, md: 6 }}>
                         <SAETextField
-                          label="Horario de Atencion"
+                          label="Horario de Atención"
                           type="time"
                           value={
                             dialogData?.hora_atencion?.split?.("hs")?.[0] || ""
                           }
                           onChange={(e) =>
-                            handleDialogChange("hora_atencion", e.target.value)
+                            handleDataChange("hora_atencion", e.target.value)
                           }
                           slotProps={{ inputLabel: { shrink: true } }}
                           fullWidth
@@ -1192,7 +1093,7 @@ export function EmployedStudentContent() {
                           label="Asunto"
                           value={dialogData.asunto}
                           onChange={(e) =>
-                            handleDialogChange("asunto", e.target.value)
+                            handleDataChange("asunto", e.target.value)
                           }
                           multiline
                           fullWidth
@@ -1209,10 +1110,19 @@ export function EmployedStudentContent() {
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={
+                dialogSaving ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : null
+              }
             >
-              {dialogMode === "show" ? "Cerrar" : "Cancelar"}
+              {dialogMode === "create"
+                ? "Crear"
+                : dialogMode === "delete"
+                  ? "Eliminar"
+                  : "Cerrar"}
             </SAEButton>
             {dialogMode !== "show" && (
               <SAEButton
@@ -1235,26 +1145,10 @@ export function EmployedStudentContent() {
           </DialogActions>
         </Dialog>
       )}
-
-      {/* MENSAJE DE EXITO */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackbarMsg}
-        </Alert>
-      </Snackbar>
-    </SAEPage>
+    </>
   );
 }
+
 // Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function StudentHealth() {
   return (

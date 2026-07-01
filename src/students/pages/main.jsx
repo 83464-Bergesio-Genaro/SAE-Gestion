@@ -1,39 +1,31 @@
-import {
-  Container,
-  Grid,
-  Typography,
-  Box,
-  Stack,
-  Card,
-  CardActionArea,
-  CardContent,
-  Chip,
-} from "@mui/material";
+import { Container, Box, Card} from "@mui/material";
 import { useAuth } from "../../shared/context/sharedContext";
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+
 import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
 import NovedadesEstudiantiles from "../../shared/components/StudentNews/studentNews";
 import TitleBox from "../../shared/components/titleBox";
-import HeaderPageEmployed from "../../shared/components/HeaderPageEmployed";
-import SAEPage from "../../shared/components/page/SAEPage";
+import SAEPage from "../../shared/components/page/SAEPage"
+import StudentHeaderPage from "../components/studentHeaderPage/studentHeaderPage";
+
 export default function StudentMain() {
   const { user } = useAuth();
-
+  
   return (
     <SAEPage>
-      <HeaderPageEmployed
-        hideBackButton={true}
-        header="PANEL SAE ALUMNOS"
-        title={`Bienvenido${user?.nombre ? `, ${user.nombre}` : ""}`}
-        description="Tu vida estudiantil, organizada en una sola pantalla."
-      />
+        <StudentHeaderPage
+          title={"Pantalla Principal"}
+          description={"Bienvenido "+user.nombre+"!"}
+          backgroundImage="images/carrousel/EntradaUTN.jpg"
+          icon={LightbulbIcon}
+        />
+        <TitleBox 
+          title=" Tú Gestión"
+          description=" Administra tu vida estudiantil desde un solo lugar"
+        />
 
-      <TitleBox
-        title=" Gestión Alumnos"
-        description=" Módulos operativos principales para el trabajo diario del equipo."
-      />
-
-      <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
-      <NovedadesEstudiantiles />
+        <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>
+        <NovedadesEstudiantiles />
     </SAEPage>
   );
 }

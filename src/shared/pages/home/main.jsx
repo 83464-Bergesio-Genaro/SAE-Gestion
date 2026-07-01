@@ -37,6 +37,71 @@ function SAEHero() {
         minHeight: "calc(100vh - 90px)",
         background: "var(--gradient)",
         overflow: "hidden",
+        position: "relative",
+        isolation: "isolate",
+        "@keyframes rotateHeroBackground": {
+          "0%": {
+            transform: "translate(-50%, -50%) rotate(0deg) scale(1)",
+          },
+          "50%": {
+            transform: "translate(-50%, -50%) rotate(180deg) scale(1.06)",
+          },
+          "100%": {
+            transform: "translate(-50%, -50%) rotate(360deg) scale(1)",
+          },
+        },
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          zIndex: 0,
+          top: "50%",
+          left: "50%",
+          width: "180vmax",
+          height: "180vmax",
+          borderRadius: "50%",
+          background: `
+            radial-gradient(
+              circle at 25% 30%,
+              rgba(255, 255, 255, 0.16),
+              transparent 28%
+            ),
+            radial-gradient(
+              circle at 75% 65%,
+              rgba(90, 190, 255, 0.2),
+              transparent 32%
+            ),
+            var(--gradient)
+          `,
+          animation: "rotateHeroBackground 28s linear infinite",
+          willChange: "transform",
+        },
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+          background: `
+            radial-gradient(
+              circle at center,
+              transparent 40%,
+              rgba(4, 20, 45, 0.22) 100%
+            ),
+            repeating-linear-gradient(
+              135deg,
+              rgba(255, 255, 255, 0.018) 0,
+              rgba(255, 255, 255, 0.018) 1px,
+              transparent 1px,
+              transparent 5px
+            )
+          `,
+        },
+        "@media (prefers-reduced-motion: reduce)": {
+          "&::before": {
+            animation: "none",
+            willChange: "auto",
+          },
+        },
       }}
     >
       <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>

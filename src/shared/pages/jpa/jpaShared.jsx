@@ -9,6 +9,7 @@ import {
   Chip,
   Paper,
   Grid,
+  useMediaQuery,
 } from "@mui/material";
 import SAEButton from "../../components/buttons/SAEButton";
 import SAESpinner from "../../components/spinner/SAESpinner";
@@ -70,7 +71,6 @@ const settingsHero = {
   ],
 };
 const settings = {
-  mobileFirst: true,
   dots: false,
   infinite: true,
   swipe: true,
@@ -91,7 +91,7 @@ const settings = {
       },
     },
     {
-      breakpoint: 768, // Mobile
+      breakpoint: 933, // Mobile
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1,
@@ -417,9 +417,14 @@ function HeroSection() {
                     />
 
                     <SAETypography variant="h1" color="white">
-                      Ingeniería es más
-                      <br />
-                      que una carrera
+                      Ingeniería
+                      <Box
+                        component="br"
+                        sx={{ display: { xs: "block", md: "none" } }}
+                      />
+                      {" es más"}
+                      <Box component="br" />
+                      {" que una carrera"}
                     </SAETypography>
 
                     <SAETypography variant="subtitle1" color="white">
@@ -490,32 +495,33 @@ function HeroSection() {
       <Container
         maxWidth="lg"
         sx={{
-          mt: -3,
+          mt: { xs: 2, sm: -3 },
           position: "relative",
           zIndex: 5,
+          px: { xs: 2, sm: 3 },
         }}
       >
         <Paper
           elevation={5}
           sx={{
-            borderRadius: 5,
+            borderRadius: { xs: 3, sm: 5 },
             overflow: "hidden",
           }}
         >
           <Grid container>
-            <Grid item size={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <StatCard value={8} label="Carreras" />
             </Grid>
 
-            <Grid item size={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <StatCard value={10} suffix="K" label="Estudiantes" />
             </Grid>
 
-            <Grid item size={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <StatCard value={150} prefix="+" label="Convenios" />
             </Grid>
 
-            <Grid item size={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <StatCard value={50} prefix="+" label="Años" />
             </Grid>
           </Grid>
@@ -528,6 +534,10 @@ function HeroSection() {
 function DegreesCarrousel() {
   const dragRef = useRef(false);
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width:932px)");
+  const isTablet = useMediaQuery("(max-width:1199px)");
+  const slidesToShow = isMobile ? 1 : isTablet ? 2 : 3;
+
   return (
     <section
       key={"carreras"}
@@ -536,9 +546,9 @@ function DegreesCarrousel() {
     >
       <Box
         sx={{
-          mt: 10,
+          mt: { xs: 7, md: 10 },
           textAlign: "center",
-          mb: 6,
+          mb: { xs: 3, md: 6 },
         }}
       >
         <Typography variant="h2" fontWeight={900}>
@@ -551,7 +561,8 @@ function DegreesCarrousel() {
       </Box>
       <Box
         sx={{
-          width: "100%",
+          width: { xs: "calc(100vw - 12px)", sm: "100%" },
+          ml: { xs: "calc(50% - 50vw + 6px)", sm: 0 },
           boxSizing: "border-box",
           overflow: "hidden",
           "& .slick-slider": {
@@ -559,21 +570,23 @@ function DegreesCarrousel() {
             touchAction: "pan-y",
           },
           "& .slick-list": {
-            margin: "0 -10px",
+            margin: { xs: 0, sm: "0 -10px" },
           },
           "& .slick-slide": {
-            padding: "0 10px",
+            padding: { xs: "0 4px", sm: "0 10px" },
             boxSizing: "border-box",
             height: "auto",
             "& > div": {
               width: "100%",
-              margin: "0 -10px",
+              margin: 0,
             },
           },
         }}
       >
         <Slider
           {...settings}
+          responsive={[]}
+          slidesToShow={slidesToShow}
           swipe
           draggable
           beforeChange={() => {
@@ -590,17 +603,17 @@ function DegreesCarrousel() {
               <Card
                 //onClick={() => navigate(carrera.route)}
                 sx={{
-                  width: "100%",
+                  width: "200px",
                   objectFit: "cover",
                   display: "block",
-                  height: 400,
-                  borderRadius: 5,
+                  height: { xs: 440, sm: 400 },
+                  borderRadius: { xs: 3, sm: 5 },
                   overflow: "hidden",
                   cursor: "pointer",
                   position: "relative",
                   transition: "all .35s ease",
                   my: 2,
-                  mx: 1,
+                  mx: 0,
                   "&:hover": {
                     transform: "scale(1.01)",
                     boxShadow: "0 15px 25px rgba(0,0,0,.15)",
@@ -707,12 +720,7 @@ function DegreesCarrousel() {
   );
 }
 
-function AnimatedNumber({
-  value,
-  prefix = "",
-  suffix = "",
-  duration = 1400,
-}) {
+function AnimatedNumber({ value, prefix = "", suffix = "", duration = 1400 }) {
   const elementRef = useRef(null);
   const [displayValue, setDisplayValue] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
@@ -774,11 +782,22 @@ function StatCard({ value, label, prefix, suffix }) {
     <Box
       sx={{
         textAlign: "center",
-        py: 4,
+        py: { xs: 2.25, sm: 4 },
         bgcolor: "white",
+        height: "100%",
+        borderRight: "1px solid rgba(18, 54, 102, 0.08)",
+        borderBottom: {
+          xs: "1px solid rgba(18, 54, 102, 0.08)",
+          sm: "none",
+        },
       }}
     >
-      <Typography variant="h4" color="#123666" fontWeight={800}>
+      <Typography
+        variant="h4"
+        color="#123666"
+        fontWeight={800}
+        fontSize={{ xs: "1.65rem", sm: "2.125rem" }}
+      >
         <AnimatedNumber value={value} prefix={prefix} suffix={suffix} />
       </Typography>
 
@@ -848,50 +867,173 @@ function EventSection() {
 }
 function JourneySection() {
   const [selectedStep, setSelectedStep] = useState(0);
+  const isMobile = useMediaQuery("(max-width:899px)");
+  const stepRefs = useRef([]);
+  const avatarRefs = useRef([]);
+
+  useEffect(() => {
+    if (!isMobile) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleStep = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (visibleStep) {
+          setSelectedStep(Number(visibleStep.target.dataset.journeyIndex));
+        }
+      },
+      {
+        rootMargin: "-20% 0px -55% 0px",
+        threshold: [0.05, 0.25, 0.5],
+      },
+    );
+
+    stepRefs.current.forEach((step) => {
+      if (step) observer.observe(step);
+    });
+
+    return () => observer.disconnect();
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    avatarRefs.current[selectedStep]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [isMobile, selectedStep]);
+
+  const goToMobileStep = (index) => {
+    setSelectedStep(index);
+    stepRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   return (
     <Box
       textAlign="center"
-      mb={8}
+      mb={{ xs: 5, md: 8 }}
       sx={{
         position: "relative",
         zIndex: 1,
         mt: { xs: 4, md: 12 },
-        p: { xs: 2, md: 4 },
+        px: { xs: 0, md: 4 },
+        py: { xs: 2, md: 4 },
       }}
     >
-      <Typography variant="h2">Tu camino en la UTN</Typography>
+      <Typography variant="h2" fontSize={{ xs: "2rem", md: "3.75rem" }}>
+        Tu camino en la UTN
+      </Typography>
 
-      <Typography variant="h6" color="text.secondary">
+      <Typography
+        variant="h6"
+        color="text.secondary"
+        fontSize={{ xs: "1rem", md: "1.25rem" }}
+        px={{ xs: 1, md: 0 }}
+      >
         Descubrí todo lo que podés vivir durante tu formación.
       </Typography>
+      {/* Mobile: navegación fija y pasos que avanzan con el scroll */}
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "relative",
-          mb: 8,
+          display: { xs: "block", md: "none" },
+          position: "sticky",
+          top: 70,
+          zIndex: 10,
+          mt: 2,
+          width: "100vw",
+          ml: "calc(50% - 50vw)",
+          px: 1.5,
+          pt: 2,
+          pb: 1.5,
+          minHeight: 104,
+          bgcolor: "rgba(248, 250, 253, 0.94)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid rgba(18, 54, 102, 0.1)",
+          boxShadow: "0 8px 18px rgba(18, 54, 102, 0.08)",
         }}
       >
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            overflowX: "auto",
+            px: 1,
+            py: 0.75,
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          {studentJourney.map((step, index) => (
+            <Box
+              key={index}
+              ref={(element) => {
+                avatarRefs.current[index] = element;
+              }}
+              onClick={() => goToMobileStep(index)}
+              sx={{
+                flex: "0 0 76px",
+                cursor: "pointer",
+              }}
+            >
+              <Avatar
+                sx={{
+                  mx: "auto",
+                  width: 46,
+                  height: 46,
+                  bgcolor: selectedStep === index ? "#123666" : "#E8EEF5",
+                  color: selectedStep === index ? "white" : "#123666",
+                  transition: ".3s",
+                  transform:
+                    selectedStep === index ? "scale(1.08)" : "scale(1)",
+                }}
+              >
+                {step.icon}
+              </Avatar>
+              <Typography
+                mt={0.5}
+                fontSize="0.72rem"
+                fontWeight={selectedStep === index ? 700 : 500}
+                noWrap
+              >
+                {step.title}
+              </Typography>
+            </Box>
+          ))}
+        </Stack>
         <Box
           sx={{
-            position: "absolute",
-            top: "35px",
-            left: 0,
-            right: 0,
-            height: 4,
-            bgcolor: "#DCE3EC",
-            zIndex: 0,
+            height: 3,
+            mt: 0.5,
+            width: `${((selectedStep + 1) / studentJourney.length) * 100}%`,
+            bgcolor: "#123666",
+            transition: ".4s",
           }}
         />
       </Box>
 
-      <Box
-        sx={{
-          display: "block",
-          mb: 8,
-        }}
-      >
+      <Stack spacing={3} sx={{ display: { xs: "flex", md: "none" }, mt: 3 }}>
+        {studentJourney.map((step, index) => (
+          <Box
+            key={step.title}
+            ref={(element) => {
+              stepRefs.current[index] = element;
+            }}
+            data-journey-index={index}
+            sx={{ scrollMarginTop: "175px" }}
+          >
+            <JourneyDetailCard step={step} mobile />
+          </Box>
+        ))}
+      </Stack>
+
+      {/* Desktop: selector por clic y una única tarjeta activa */}
+      <Box sx={{ display: { xs: "none", md: "block" }, mt: 8, mb: 8 }}>
         <Grid container direction="row" spacing={4}>
           {studentJourney.map((step, index) => (
             <Box
@@ -913,7 +1055,6 @@ function JourneySection() {
                   height: 70,
                   bgcolor: selectedStep === index ? "#123666" : "#E8EEF5",
                   color: selectedStep === index ? "white" : "#123666",
-
                   transition: ".3s",
                   transform:
                     selectedStep === index ? "scale(1.15)" : "scale(1)",
@@ -922,11 +1063,7 @@ function JourneySection() {
                 {step.icon}
               </Avatar>
               <Typography mt={2}>{step.title}</Typography>
-              <Typography
-                display={{ xs: "none", md: "block" }}
-                variant="caption"
-                color="text.secondary"
-              >
+              <Typography variant="caption" color="text.secondary">
                 {step.subtitle}
               </Typography>
             </Box>
@@ -941,48 +1078,103 @@ function JourneySection() {
           }}
         />
       </Box>
-      <Card
-        sx={{
-          borderRadius: 5,
-          overflow: "hidden",
-          mt: 2,
-        }}
-      >
-        <Grid container spacing={1}>
-          <Grid size={{ xs: 12, md: 5 }} m={0}>
+
+      <Box sx={{ display: { xs: "none", md: "block" } }}>
+        <JourneyDetailCard step={studentJourney[selectedStep]} />
+      </Box>
+    </Box>
+  );
+}
+
+function JourneyDetailCard({ step, mobile = false }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <Card
+      sx={{
+        borderRadius: mobile ? 3 : 5,
+        overflow: "hidden",
+        boxShadow: mobile ? "0 10px 30px rgba(18, 54, 102, 0.12)" : undefined,
+      }}
+    >
+      <Grid container spacing={1}>
+        <Grid size={{ xs: 12, md: 5 }} m={0}>
+          <Box
+            component="img"
+            src={step.image}
+            alt=""
+            sx={{
+              width: "100%",
+              height: mobile ? 210 : "100%",
+              objectFit: "cover",
+              transition: ".4s",
+            }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 7 }} m={0}>
+          <Box p={mobile ? 2.5 : 5}>
+            <Typography
+              variant="h4"
+              fontSize={mobile ? "1.65rem" : "2.125rem"}
+              textAlign={mobile ? "left" : "center"}
+            >
+              {step.title}
+            </Typography>
             <Box
-              component="img"
-              src={studentJourney[selectedStep].image}
               sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                transition: ".4s",
+                position: "relative",
+                mt: 2,
+                maxHeight: mobile && !expanded ? 185 : "none",
+                overflow: "hidden",
+                transition: "max-height .35s ease",
+                "&::after":
+                  mobile && !expanded
+                    ? {
+                        content: '""',
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: 55,
+                        pointerEvents: "none",
+                        background:
+                          "linear-gradient(to bottom, transparent, white)",
+                      }
+                    : undefined,
               }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 7 }} m={0}>
-            <Box p={5}>
-              <Typography variant="h4">
-                {studentJourney[selectedStep].title}
-              </Typography>
+            >
               <Typography
                 variant="body1"
                 sx={{
                   whiteSpace: "pre-line",
                   color: "black",
-                  mt: 2,
-                  fontSize: "1.25rem",
+                  fontSize: mobile ? "1rem" : "1.25rem",
+                  lineHeight: mobile ? 1.65 : 1.5,
                   textAlign: "left",
                 }}
                 dangerouslySetInnerHTML={{
-                  __html: studentJourney[selectedStep].text,
+                  __html: step.text,
                 }}
-              ></Typography>
+              />
             </Box>
-          </Grid>
+            {mobile && (
+              <Button
+                onClick={() => setExpanded((current) => !current)}
+                sx={{
+                  mt: 1,
+                  px: 0,
+                  minWidth: 0,
+                  fontWeight: 800,
+                  textTransform: "none",
+                  color: "#123666",
+                }}
+              >
+                {expanded ? "Ver menos" : "Ver más"}
+              </Button>
+            )}
+          </Box>
         </Grid>
-      </Card>
-    </Box>
+      </Grid>
+    </Card>
   );
 }

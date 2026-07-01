@@ -1,21 +1,4 @@
-import ListEngineer from "../../../components/lists/listEngineer";
-import MateriasXAnoList from "../../../components/lists/listMaterias";
-import CircleIcon from "@mui/icons-material/Circle";
-import {
-  Container,
-  Typography,
-  List,
-  ListItem,
-  Paper,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-
-import "./degrees.css";
+import DegreePageTemplate from "../../../components/degrees/DegreePageTemplate";
 
 export default function SharedJPAMetalurgic() {
   const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngMetalurgicaBanner.png`;
@@ -99,173 +82,24 @@ export default function SharedJPAMetalurgic() {
     "Es importante destacar que el avance de la informática y las técnicas computacionales relativizan cada vez más el papel del ingeniero como mero calculista, volcándose en consecuencia su formación hacia tareas más creativas e ingeniosas en el campo del proyecto metalúrgico.",
     "En este plano, el conocimiento estadístico de fallas de los elementos mecánicos y sus soluciones le permite dirigir más eficazmente el diseño a sistemas, no solo funcionales sino también durables.",
   ];
-  return (
-    <Container style={{ padding: "3%" }}>
-      <Paper className="paper-container">
-        <Box
-          sx={{
-            backgroundImage: `url(${imageDirBanner})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: "black",
-            height: 400,
-          }}
-          className="banner-image"
-        ></Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Card>
-          <CardContent>
-            <div style={{ alignContent: "center", padding: "10px" }}>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Descripción
-              </Typography>
-
-              <Typography
-                variant="body1"
-                className="typography-text"
-                gutterBottom
-              >
-                Capacita en el estudio, selección, procesamiento, investigación
-                y asesoramiento en general de metales y aleaciones, aceros
-                comunes y especiales, aleaciones de aluminio, magnesio, cobre,
-                como también en los no metales como cerámicos, plásticos
-                reforzados, fibras de carbono, etc.
-              </Typography>
-              <ListEngineer
-                degree={"Título - Ingeniero Metalúrgico"}
-                duration={"Duración - 5 Años "}
-                link={"https://www.institucional.frc.utn.edu.ar/metalurgica/"}
-                intermedio={
-                  "Título intermedio - Técnico Universitario Metalúrgico (3er año)"
-                }
-              ></ListEngineer>
-            </div>
-          </CardContent>
-        </Card>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Materias de la Carrera
-              </Typography>
-              <List>
-                <MateriasXAnoList
-                  listaMaterias={materias1Año}
-                  ano="Primer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias2Año}
-                  ano="Segundo Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias3Año}
-                  ano="Tercer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias4Año}
-                  ano="Cuarto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias5Año}
-                  ano="Quinto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materiasElectivas}
-                  ano="Electivas"
-                />
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Incumbencias/ Alcance
-              </Typography>
-
-              <List component="div" disablePadding>
-                {alcances.map((row) => {
-                  return (
-                    <ListItem disablePadding alignItems="flex-start">
-                      <ListItemIcon sx={{ ml: 2 }}>
-                        <CircleIcon sx={{ width: 18, height: 18 }} />
-                      </ListItemIcon>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Perfil del Egresado
-              </Typography>
-
-              <List component="div" disablePadding>
-                {perfil.map((row) => {
-                  return (
-                    <ListItem>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Charla Departamental 2021
-              </Typography>
-            </CardContent>
-            <CardMedia
-              component="iframe"
-              width="560"
-              height="610"
-              title="YouTube video player"
-              src="https://www.youtube.com/embed/3hYEvUbSnkk?si=5S3ZqeXJPBBR3RgY"
-            ></CardMedia>
-          </Card>
-        </Box>
-      </Paper>
-    </Container>
+  const curriculum = [
+    { year: "Primer Año", subjects: materias1Año },
+    { year: "Segundo Año", subjects: materias2Año },
+    { year: "Tercer Año", subjects: materias3Año },
+    { year: "Cuarto Año", subjects: materias4Año },
+    { year: "Quinto Año", subjects: materias5Año },
+    { year: "Electivas", subjects: materiasElectivas },
+  ];
+return (
+    <DegreePageTemplate
+      title="Ingeniería Metalúrgica"
+      image={imageDirBanner}
+      description="Capacita en el estudio, selección, procesamiento, investigación y asesoramiento de metales y aleaciones, así como de materiales no metálicos, entre ellos cerámicos, plásticos reforzados y fibras de carbono."
+      degreeInfo={{ degree: "Título — Ingeniero Metalúrgico", duration: "Duración — 5 años", link: "https://www.institucional.frc.utn.edu.ar/metalurgica/", intermedio: "Título intermedio — Técnico Universitario Metalúrgico (3.er año)" }}
+      curriculum={curriculum}
+      scopes={alcances}
+      profile={perfil}
+      video={{ title: "Charla del Departamento de Ingeniería Metalúrgica", src: "https://www.youtube.com/embed/3hYEvUbSnkk?si=5S3ZqeXJPBBR3RgY" }}
+    />
   );
 }

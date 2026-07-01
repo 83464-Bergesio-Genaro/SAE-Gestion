@@ -1,20 +1,27 @@
-import {useState, useEffect,useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { appConfig } from "../../../config/appConfig";
 import ObtenerTokenJWT from "../../../api/AuthService";
-import { AuthContext } from "../sharedContext"; 
+import { SESSION_EXPIRED_EVENT } from "../../../api/apiClient";
+import { AuthContext } from "../sharedContext";
+
+const SESSION_EXPIRATION_WARNING_MS = 300_000; //5  Minutos
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem("session");
 
     if (!stored) return null;
-    const parsed = JSON.parse(stored);
-
-    if (Date.now() > parsed.expiration) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (!parsed.token || Date.now() > parsed.expiration) {
+        localStorage.removeItem("session");
+        return null;
+      }
+      return parsed;
+    } catch {
       localStorage.removeItem("session");
       return null;
     }
-    return parsed;
   });
 
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -42,18 +49,42 @@ export function AuthProvider({ children }) {
   }, [clearSession]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const stored = localStorage.getItem("session");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Date.now() > parsed.expiration) {
-          clearSession();
-        }
-      }
-    }, 300000);
+    const handleExpiredSession = () => clearSession();
+    const handleStorageChange = (event) => {
+      if (event.key === "session" && !event.newValue) clearSession();
+    };
 
-    return () => clearInterval(interval);
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleExpiredSession);
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpiredSession);
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, [clearSession]);
+
+  useEffect(() => {
+    if (!user?.expiration) return undefined;
+
+    const remainingTime = user.expiration - Date.now();
+    const warningTime = Math.min(
+      SESSION_EXPIRATION_WARNING_MS,
+      Math.max(Number(appConfig.sessionTimeout) / 2, 10_000),
+    );
+    const warningTimeout = window.setTimeout(
+      () => setSessionExpired(true),
+      Math.max(remainingTime - warningTime, 0),
+    );
+    const expirationTimeout = window.setTimeout(
+      clearSession,
+      Math.max(remainingTime, 0),
+    );
+
+    return () => {
+      window.clearTimeout(warningTimeout);
+      window.clearTimeout(expirationTimeout);
+    };
+  }, [user?.expiration, clearSession]);
 
   const login = async (legajo, dominio, password) => {
     const result = await ObtenerTokenJWT(legajo, dominio, password);
@@ -61,7 +92,7 @@ export function AuthProvider({ children }) {
       const session = {
         token: result.data.token ?? "",
         id: result.data.id ?? 0,
-        legajo: (result.data.legajo_armado ?? ""),
+        legajo: result.data.legajo_armado ?? "",
         email: result.data.legajo_armado ?? "",
         nombre: result.data.nombre_usuario ?? "",
         id_perfil: result.data.id_perfil ?? 0,
@@ -78,7 +109,9 @@ export function AuthProvider({ children }) {
 
   const extendSession = () => {
     const stored = localStorage.getItem("session");
-    if (stored) {
+    if (!stored) return;
+
+    try {
       const parsed = JSON.parse(stored);
       const extended = {
         ...parsed,
@@ -87,6 +120,8 @@ export function AuthProvider({ children }) {
       localStorage.setItem("session", JSON.stringify(extended));
       setUser(extended);
       setSessionExpired(false);
+    } catch {
+      clearSession();
     }
   };
 
@@ -101,9 +136,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    setUser(null);
-    setSessionExpired(false);
-    localStorage.removeItem("session");
+    clearSession();
   };
 
   return (
@@ -115,7 +148,6 @@ export function AuthProvider({ children }) {
         extendSession,
         updateUser,
         sessionExpired,
-        setSessionExpired,
         isSessionValid,
         expireSession,
       }}

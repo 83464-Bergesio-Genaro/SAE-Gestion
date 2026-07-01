@@ -45,6 +45,7 @@ import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 import { SportsProvider } from "../../context/providers/sportsProvider";
 import { useSports } from "../../context/employedContext";
+import SAEPage from "../../../shared/components/page/SAEPage";
 
 const EMPTY_DOCENTE = {
   cuil: "",
@@ -147,7 +148,7 @@ function EmployedSportsContent() {
     crearTorneo,
   } = useSports();
 
-   const sectionConfig = useMemo(
+  const sectionConfig = useMemo(
     () => ({
       profesores: {
         title: "Gestión Profesores",
@@ -230,310 +231,142 @@ function EmployedSportsContent() {
     );
   }, [torneosRows, busquedaDeportes]);
 
- return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "90px", md: "100px" },
-        pb: 4,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
-        {/* Welcome card */}
+  return (
+    <SAEPage>
+      {/* Welcome card */}
 
-        <HeaderPageEmployed
-          header="Módulo de Deportes"
-          title="Gestión de Deportes"
-          description="Administrá torneos, profesores, espacios y deportistas desde un solo lugar."
-        />
-        <Card
+      <HeaderPageEmployed
+        header="Módulo de Deportes"
+        title="Gestión de Deportes"
+        description="Administrá torneos, profesores, espacios y deportistas desde un solo lugar."
+      />
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          mb: 3,
+          overflow: "hidden",
+        }}
+      >
+        {/* Gradient header */}
+        <Box
           sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            mb: 3,
-            overflow: "hidden",
+            background: "var(--gradient)",
+            color: "white",
+            px: 3,
+            pt: 0,
+            pb: 0,
           }}
         >
-          {/* Gradient header */}
-          <Box
-            sx={{
-              background: "var(--gradient)",
-              color: "white",
-              px: 3,
-              pt: 0,
-              pb: 0,
-            }}
-          >
-            {/* Tab row */}
-            <Stack direction="row" spacing={0}>
-              {[
-                { key: "profesores", label: "Profesores" },
-                { key: "espacios", label: "Espacios Deportivos" },
-                { key: "deportistas", label: "Deportistas" },
-                { key: "deportes", label: "Deportes" },
-              ].map(({ key, label }) => (
-                <Box
-                  key={key}
-                  onClick={() => handleSectionChange(key)}
+          {/* Tab row */}
+          <Stack direction="row" spacing={0}>
+            {[
+              { key: "profesores", label: "Profesores" },
+              { key: "espacios", label: "Espacios Deportivos" },
+              { key: "deportistas", label: "Deportistas" },
+              { key: "deportes", label: "Deportes" },
+            ].map(({ key, label }) => (
+              <Box
+                key={key}
+                onClick={() => handleSectionChange(key)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  px: 2.5,
+                  py: 1.5,
+                  cursor: "pointer",
+                  fontWeight: activeSection === key ? 700 : 500,
+                  fontSize: "0.85rem",
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                  color:
+                    activeSection === key ? "white" : "rgba(255,255,255,0.6)",
+                  borderBottom:
+                    activeSection === key
+                      ? "3px solid white"
+                      : "3px solid transparent",
+                  transition: "all 0.15s",
+                  "&:hover": {
+                    color: "white",
+                    borderBottomColor: "rgba(255,255,255,0.4)",
+                  },
+                }}
+              >
+                <Typography
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    px: 2.5,
-                    py: 1.5,
-                    cursor: "pointer",
-                    fontWeight: activeSection === key ? 700 : 500,
-                    fontSize: "0.85rem",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                    color:
-                      activeSection === key ? "white" : "rgba(255,255,255,0.6)",
-                    borderBottom:
-                      activeSection === key
-                        ? "3px solid white"
-                        : "3px solid transparent",
-                    transition: "all 0.15s",
-                    "&:hover": {
-                      color: "white",
-                      borderBottomColor: "rgba(255,255,255,0.4)",
-                    },
+                    fontWeight: "inherit",
+                    fontSize: "inherit",
+                    letterSpacing: "inherit",
+                    textTransform: "inherit",
+                    color: "inherit",
+                    lineHeight: 1,
                   }}
                 >
-                  <Typography
-                    sx={{
-                      fontWeight: "inherit",
-                      fontSize: "inherit",
-                      letterSpacing: "inherit",
-                      textTransform: "inherit",
-                      color: "inherit",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {label}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-
-            {/* Title + search + add button */}
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
-              sx={{ py: 2 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <currentSection.icon sx={{ fontSize: 30 }} />
-                <Typography variant="h6" fontWeight={700}>
-                  {currentSection.title}
+                  {label}
                 </Typography>
-              </Stack>
+              </Box>
+            ))}
+          </Stack>
 
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                alignItems={{ sm: "center" }}
-              >
-                <SAETextField
-                  placeholder="Buscar en esta gestión..."
-                  size="small"
-                  value={busquedaGestion}
-                  onChange={(e) => setBusquedaGestion(e.target.value)}
-                  sx={{
-                    width: { xs: "100%", sm: 240, md: 220 },
-                    "& .MuiOutlinedInput-root": {
-                      bgcolor: "rgba(255,255,255,0.12)",
-                      color: "white",
-                      "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                      "&:hover fieldset": {
-                        borderColor: "rgba(255,255,255,0.6)",
-                      },
-                      "&.Mui-focused fieldset": { borderColor: "white" },
-                    },
-                    "& input::placeholder": {
-                      color: "rgba(255,255,255,0.7)",
-                      opacity: 1,
-                    },
-                    "& .MuiInputAdornment-root svg": {
-                      color: "rgba(255,255,255,0.7)",
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-                {activeSection === "profesores" && (
-                  <SAEButton
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={openCreateDocente}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      bgcolor: "rgba(255,255,255,0.18)",
-                      color: "white",
-                      border: "1px solid rgba(255,255,255,0.4)",
-                      "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                    }}
-                  >
-                    Nuevo docente
-                  </SAEButton>
-                )}
-                {activeSection === "espacios" && (
-                  <SAEButton
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={openCreateEspacio}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      bgcolor: "rgba(255,255,255,0.18)",
-                      color: "white",
-                      border: "1px solid rgba(255,255,255,0.4)",
-                      "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                    }}
-                  >
-                    Nuevo espacio
-                  </SAEButton>
-                )}
-                {activeSection === "deportistas" && (
-                  <SAEButton
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={openCreateDeportista}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      bgcolor: "rgba(255,255,255,0.18)",
-                      color: "white",
-                      border: "1px solid rgba(255,255,255,0.4)",
-                      "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                    }}
-                  >
-                    Nuevo deportista
-                  </SAEButton>
-                )}
-                {activeSection === "deportes" && (
-                  <SAEButton
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={openCreateDeporte}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      bgcolor: "rgba(255,255,255,0.18)",
-                      color: "white",
-                      border: "1px solid rgba(255,255,255,0.4)",
-                      "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                    }}
-                  >
-                    Nuevo deporte
-                  </SAEButton>
-                )}
-              </Stack>
-            </Stack>
-          </Box>
-
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ width: "100%" }}>
-              <DataGrid
-                rows={rowsGestionFiltradas}
-                columns={currentSection.columns}
-                loading={currentSection.loading}
-                autoHeight
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25]}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 5 } },
-                }}
-                sx={{ borderRadius: 0, border: "none" }}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-
-        <Card
-          sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Card header */}
-          <Box
-            sx={{
-              background: "var(--gradient)",
-              color: "white",
-              px: 3,
-              py: 2.5,
-            }}
+          {/* Title + search + add button */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ sm: "center" }}
+            justifyContent="space-between"
+            spacing={2}
+            sx={{ py: 2 }}
           >
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <currentSection.icon sx={{ fontSize: 30 }} />
+              <Typography variant="h6" fontWeight={700}>
+                {currentSection.title}
+              </Typography>
+            </Stack>
+
             <Stack
               direction={{ xs: "column", sm: "row" }}
+              spacing={1}
               alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
             >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <EmojiEventsIcon sx={{ fontSize: 32 }} />
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    Gestión de Torneos
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.85 }}>
-                    Administrá los torneos deportivos, inscribí alumnos y
-                    consultá la información.
-                  </Typography>
-                </Box>
-              </Stack>
-
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                alignItems={{ sm: "center" }}
-              >
-                <SAETextField
-                  placeholder="Buscar torneo, deporte o responsable..."
-                  size="small"
-                  value={busquedaDeportes}
-                  onChange={(e) => setBusquedaDeportes(e.target.value)}
-                  sx={{
-                    width: { xs: "100%", sm: 260, md: 240 },
-                    "& .MuiOutlinedInput-root": {
-                      bgcolor: "rgba(255,255,255,0.12)",
-                      color: "white",
-                      "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                      "&:hover fieldset": {
-                        borderColor: "rgba(255,255,255,0.6)",
-                      },
-                      "&.Mui-focused fieldset": { borderColor: "white" },
+              <SAETextField
+                placeholder="Buscar en esta gestión..."
+                size="small"
+                value={busquedaGestion}
+                onChange={(e) => setBusquedaGestion(e.target.value)}
+                sx={{
+                  width: { xs: "100%", sm: 240, md: 220 },
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "rgba(255,255,255,0.12)",
+                    color: "white",
+                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255,255,255,0.6)",
                     },
-                    "& input::placeholder": {
-                      color: "rgba(255,255,255,0.7)",
-                      opacity: 1,
-                    },
-                    "& .MuiInputAdornment-root svg": {
-                      color: "rgba(255,255,255,0.7)",
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
+                    "&.Mui-focused fieldset": { borderColor: "white" },
+                  },
+                  "& input::placeholder": {
+                    color: "rgba(255,255,255,0.7)",
+                    opacity: 1,
+                  },
+                  "& .MuiInputAdornment-root svg": {
+                    color: "rgba(255,255,255,0.7)",
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              {activeSection === "profesores" && (
                 <SAEButton
                   variant="contained"
                   startIcon={<AddIcon />}
-                  onClick={() => setTorneoFormOpen(true)}
+                  onClick={openCreateDocente}
                   sx={{
                     whiteSpace: "nowrap",
                     bgcolor: "rgba(255,255,255,0.18)",
@@ -542,68 +375,157 @@ function EmployedSportsContent() {
                     "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
                   }}
                 >
-                  Nuevo Torneo
+                  Nuevo docente
                 </SAEButton>
-              </Stack>
+              )}
+              {activeSection === "espacios" && (
+                <SAEButton
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={openCreateEspacio}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    bgcolor: "rgba(255,255,255,0.18)",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+                  }}
+                >
+                  Nuevo espacio
+                </SAEButton>
+              )}
+              {activeSection === "deportistas" && (
+                <SAEButton
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={openCreateDeportista}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    bgcolor: "rgba(255,255,255,0.18)",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+                  }}
+                >
+                  Nuevo deportista
+                </SAEButton>
+              )}
+              {activeSection === "deportes" && (
+                <SAEButton
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={openCreateDeporte}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    bgcolor: "rgba(255,255,255,0.18)",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+                  }}
+                >
+                  Nuevo deporte
+                </SAEButton>
+              )}
             </Stack>
+          </Stack>
+        </Box>
+
+        <CardContent sx={{ p: 0 }}>
+          <Box sx={{ width: "100%" }}>
+            <DataGrid
+              rows={rowsGestionFiltradas}
+              columns={currentSection.columns}
+              loading={currentSection.loading}
+              autoHeight
+              disableRowSelectionOnClick
+              pageSizeOptions={[5, 10, 25]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 5 } },
+              }}
+              sx={{ borderRadius: 0, border: "none" }}
+            />
           </Box>
+        </CardContent>
+      </Card>
 
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ width: "100%" }}>
-              <DataGrid
-                rows={rowsTorneosFiltradas}
-                columns={torneosColumns}
-                loading={loadingTorneos}
-                autoHeight
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25]}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 5 } },
-                }}
-                localeText={{ noRowsLabel: "No hay torneos activos" }}
-                sx={{ borderRadius: 0, border: "none" }}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-
-        <Card
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Card header */}
+        <Box
           sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            overflow: "hidden",
-            mt: 3,
+            background: "var(--gradient)",
+            color: "white",
+            px: 3,
+            py: 2.5,
           }}
         >
-          <Box
-            sx={{
-              background: "var(--gradient)",
-              color: "white",
-              px: 3,
-              py: 2.5,
-            }}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ sm: "center" }}
+            justifyContent="space-between"
+            spacing={2}
           >
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <EmojiEventsIcon sx={{ fontSize: 32 }} />
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  Gestión de Torneos
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.85 }}>
+                  Administrá los torneos deportivos, inscribí alumnos y consultá
+                  la información.
+                </Typography>
+              </Box>
+            </Stack>
+
             <Stack
               direction={{ xs: "column", sm: "row" }}
+              spacing={1}
               alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
             >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <ScheduleIcon sx={{ fontSize: 32 }} />
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    Horarios deportivos
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.85 }}>
-                    Calendario de actividades y horarios de cada deporte.
-                  </Typography>
-                </Box>
-              </Stack>
+              <SAETextField
+                placeholder="Buscar torneo, deporte o responsable..."
+                size="small"
+                value={busquedaDeportes}
+                onChange={(e) => setBusquedaDeportes(e.target.value)}
+                sx={{
+                  width: { xs: "100%", sm: 260, md: 240 },
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "rgba(255,255,255,0.12)",
+                    color: "white",
+                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255,255,255,0.6)",
+                    },
+                    "&.Mui-focused fieldset": { borderColor: "white" },
+                  },
+                  "& input::placeholder": {
+                    color: "rgba(255,255,255,0.7)",
+                    opacity: 1,
+                  },
+                  "& .MuiInputAdornment-root svg": {
+                    color: "rgba(255,255,255,0.7)",
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
               <SAEButton
                 variant="contained"
-                startIcon={<ScheduleIcon />}
-                onClick={() => setHorariosDialogOpen(true)}
+                startIcon={<AddIcon />}
+                onClick={() => setTorneoFormOpen(true)}
                 sx={{
                   whiteSpace: "nowrap",
                   bgcolor: "rgba(255,255,255,0.18)",
@@ -612,16 +534,85 @@ function EmployedSportsContent() {
                   "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
                 }}
               >
-                Gestionar Horarios
+                Nuevo Torneo
               </SAEButton>
             </Stack>
-          </Box>
-        </Card>
-
-        <Box sx={{ mt: 3 }}>
-          <SportsCalendar />
+          </Stack>
         </Box>
-      </Container>
+
+        <CardContent sx={{ p: 0 }}>
+          <Box sx={{ width: "100%" }}>
+            <DataGrid
+              rows={rowsTorneosFiltradas}
+              columns={torneosColumns}
+              loading={loadingTorneos}
+              autoHeight
+              disableRowSelectionOnClick
+              pageSizeOptions={[5, 10, 25]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 5 } },
+              }}
+              localeText={{ noRowsLabel: "No hay torneos activos" }}
+              sx={{ borderRadius: 0, border: "none" }}
+            />
+          </Box>
+        </CardContent>
+      </Card>
+
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          overflow: "hidden",
+          mt: 3,
+        }}
+      >
+        <Box
+          sx={{
+            background: "var(--gradient)",
+            color: "white",
+            px: 3,
+            py: 2.5,
+          }}
+        >
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ sm: "center" }}
+            justifyContent="space-between"
+            spacing={2}
+          >
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <ScheduleIcon sx={{ fontSize: 32 }} />
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  Horarios deportivos
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.85 }}>
+                  Calendario de actividades y horarios de cada deporte.
+                </Typography>
+              </Box>
+            </Stack>
+            <SAEButton
+              variant="contained"
+              startIcon={<ScheduleIcon />}
+              onClick={() => setHorariosDialogOpen(true)}
+              sx={{
+                whiteSpace: "nowrap",
+                bgcolor: "rgba(255,255,255,0.18)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.4)",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+              }}
+            >
+              Gestionar Horarios
+            </SAEButton>
+          </Stack>
+        </Box>
+      </Card>
+
+      <Box sx={{ mt: 3 }}>
+        <SportsCalendar />
+      </Box>
 
       <Dialog
         open={dialogOpen}
@@ -1017,6 +1008,6 @@ function EmployedSportsContent() {
         }}
         mode="create"
       />
-    </Box>
+    </SAEPage>
   );
 }

@@ -1,8 +1,8 @@
-import emailjs from "@emailjs/browser";
+import emailjs from '@emailjs/browser';
 
-const EMAILJS_SERVICE_ID = "service_3pfadf8";
-const EMAILJS_PUBLIC_KEY = "HPmcidnqVsJvSzXbn";
-const EMAILJS_TEMPLATES = ["template_generico", "template_q5q7k6a"];
+const EMAILJS_SERVICE_ID = 'service_3pfadf8';
+const EMAILJS_PUBLIC_KEY = 'HPmcidnqVsJvSzXbn';
+const EMAILJS_TEMPLATES = ['template_generico', 'template_q5q7k6a'];
 
 const sendToConfiguredTemplates = (send) =>
   Promise.all(
@@ -31,17 +31,17 @@ export function sendConsultationEmail({
       EMAILJS_SERVICE_ID,
       templateId,
       {
-        form_type: "Consulta SAE",
+        form_type: 'Consulta SAE',
         user_name: user_name,
         user_email: user_email,
         subject: subject,
         message: message,
-        desc: "-",
-        legajo: legajo || "-",
-        phone: "-",
-        amount: "-",
-        date: new Date().toLocaleDateString("es-AR"),
-        carrera: "-",
+        desc: '-',
+        legajo: legajo || '-',
+        phone: '-',
+        amount: '-',
+        date: new Date().toLocaleDateString('es-AR'),
+        carrera: '-',
       },
       options,
     ),

@@ -42,6 +42,7 @@ import SAETimeField from "../../../shared/components/inputs/SAETimeField";
 import { DataGrid } from "@mui/x-data-grid";
 import { JPAProvider } from "../../context/providers/jpaProvider";
 import { useJPA } from "../../context/employedContext";
+import SAEPage from "../../../shared/components/page/SAEPage";
 function CopyURLButton() {
   const ubicacionesComunes = [
     {
@@ -225,16 +226,7 @@ function EmployedJPAContent() {
     setDialogData((prev) => ({ ...prev, [field]: value }));
   };
   return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "90px", md: "100px" },
-        pb: 4,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
+    <SAEPage>
         <HeaderPageEmployed
           header=" Módulo de JPA"
           title="Gestión de la Jornada de Puertas Abiertas"
@@ -395,8 +387,7 @@ function EmployedJPAContent() {
             </Box>
           </CardContent>
         </Card>
-      </Container>
-      {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
+              {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
       {dialogOpen && dialogType === "eventoPublico" && (
         <Dialog
           open={dialogOpen}
@@ -1008,7 +999,7 @@ function EmployedJPAContent() {
           {snackbarMsg}
         </Alert>
       </Snackbar>
-    </Box>
+     </SAEPage>
   );
 }
 

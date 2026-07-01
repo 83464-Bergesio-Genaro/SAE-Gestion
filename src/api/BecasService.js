@@ -1,254 +1,157 @@
-import { appConfig } from "../config/appConfig";
+import {
+  apiDeleteFile,
+  apiDownloadDocument,
+  apiUploadFile,
+  RequestAPI,
+} from './apiClient';
 
-export const URLApiCotroller = `${appConfig.apiUrl}/api/Becas`;
+export { RequestAPI };
 
-function getToken() {
-  const stored = localStorage.getItem("session");
-  if (!stored) return null;
-  const parsed = JSON.parse(stored);
-  if (Date.now() > parsed.expiration) {
-    localStorage.removeItem("session");
-    return null;
-  }
-  return parsed.token;
-}
+export const ObtenerProyectosInvestigacion = () =>
+  RequestAPI('/api/Beca/ObtenerProyectosInvestigacion', 'GET');
 
-function getHeaders(method, body) {
-  const token = getToken();
-  const headers = {
-    "ngrok-skip-browser-warning": "true",
-  };
-  if (!(body instanceof FormData)) headers["Content-Type"] = "application/json";
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const options = { method, headers };
-  if (body)
-    options.body = body instanceof FormData ? body : JSON.stringify(body);
-  return options;
-}
+export const ObtenerServiciosInternos = () =>
+  RequestAPI('/api/Beca/ObtenerServiciosInternos', 'GET');
 
-export async function RequestAPI(endpoint, action, body = null) {
-  const res = await fetch(
-    appConfig.apiUrl + endpoint,
-    getHeaders(action, body),
-  );
-  if (res.ok && action === "DELETE") return res; // Para DELETE no esperamos un body, por lo que no intentamos parsear la respuesta
-  if (res.status === 204 && action === "GET") return []; // Para GET, si el status es 204 (No Content) devolvemos un array vacío para evitar errores al mapear la respuesta
-  if (!res.ok) {
-    let detail = `Error ${res.status}`;
-    try {
-      const json = await res.json();
-      console.error("Error API completo:", json);
-      if (json.errors) {
-        detail = Object.entries(json.errors)
-          .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
-          .join(" | ");
-      } else if (json.title) {
-        detail = `${json.title} (${res.status})`;
-      } else if (json.message) {
-        detail = json.message;
-      }
-    } catch {
-      /* ignore */
-    }
-    throw new Error(detail);
-  }
-  return res.json();
-}
+export const ObtenerBecariosCompleto = () =>
+  RequestAPI('/api/Beca/ObtenerBecariosCompleto', 'GET');
 
-export async function ObtenerProyectosInvestigacion() {
-  return RequestAPI("/api/Beca/ObtenerProyectosInvestigacion", "GET");
-}
+export const CrearServicioInterno = (body) =>
+  RequestAPI('/api/Beca/CrearServicioInterno', 'POST', body);
 
-export async function ObtenerServiciosInternos() {
-  return RequestAPI("/api/Beca/ObtenerServiciosInternos", "GET");
-}
+export const CrearProyectoInvestigacion = (body) =>
+  RequestAPI('/api/Beca/CrearProyectoInvestigacion', 'POST', body);
 
-export async function ObtenerBecariosCompleto() {
-  return RequestAPI("/api/Beca/ObtenerBecariosCompleto", "GET");
-}
-
-export async function CrearServicioInterno(body) {
-  return RequestAPI("/api/Beca/CrearServicioInterno", "POST", body);
-}
-export async function CrearProyectoInvestigacion(body) {
-  return RequestAPI("/api/Beca/CrearProyectoInvestigacion", "POST", body);
-}
-
-export async function EditarProyectoInvestigacion(id, body) {
+export function EditarProyectoInvestigacion(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarProyecto/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
 
-export async function EditarServicioInterno(id, body) {
+export function EditarServicioInterno(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarServicio/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
 
-export async function ObtenerBecariosEconomicaXLegajo(legajo) {
+export function ObtenerBecariosEconomicaXLegajo(legajo) {
   return RequestAPI(
     `/api/Beca/ObtenerBecariosEconomicaXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
-export async function ObtenerBecariosServiciosXLegajo(legajo) {
+export function ObtenerBecariosServiciosXLegajo(legajo) {
   return RequestAPI(
     `/api/Beca/ObtenerBecariosServiciosXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
-export async function ObtenerBecariosInvestigacionXLegajo(legajo) {
+export function ObtenerBecariosInvestigacionXLegajo(legajo) {
   return RequestAPI(
     `/api/Beca/ObtenerBecariosInvestigacionXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
-export async function ObtenerBecariosXLegajo(legajo) {
+
+export function ObtenerBecariosXLegajo(legajo) {
   return RequestAPI(
     `/api/Beca/ObtenerBecariosXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
-export async function ObtenerUsuariosXLegajo(legajo) {
+export function ObtenerUsuariosXLegajo(legajo) {
   return RequestAPI(
-    "/api/Usuarios/ObtenerUsuarioXlegajo/" + encodeURIComponent(legajo),
-    "GET",
+    `/api/Usuarios/ObtenerUsuarioXlegajo/${encodeURIComponent(legajo)}`,
+    'GET',
   );
 }
-export async function CrearBecarioSAE(body) {
-  return RequestAPI(`/api/Beca/CrearBecarioSAE`, "POST", body);
-}
 
-export async function EditarBecarioSAE(id, body) {
-  console.log("Editando becario SAE con ID:", id, "y body:", body);
+export const CrearBecarioSAE = (body) =>
+  RequestAPI('/api/Beca/CrearBecarioSAE', 'POST', body);
+
+export function EditarBecarioSAE(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarBecarioSAE/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
 
-export async function CrearBecarioEconomica(id_becario) {
+export function CrearBecarioEconomica(idBecario) {
   return RequestAPI(
-    `/api/Beca/CrearBecarioEconomica/${encodeURIComponent(id_becario)}`,
-    "POST",
+    `/api/Beca/CrearBecarioEconomica/${encodeURIComponent(idBecario)}`,
+    'POST',
   );
 }
 
-export async function EditarBecarioEconomica(id, body) {
+export function EditarBecarioEconomica(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarBecarioEconomica/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
 
-export async function CrearBecarioInvestigacion(id_becario, id_proyecto) {
+export function CrearBecarioInvestigacion(idBecario, idProyecto) {
   return RequestAPI(
-    `/api/Beca/CrearBecarioInvestigacion/${encodeURIComponent(id_becario)}/${encodeURIComponent(id_proyecto)}`,
-    "POST",
+    `/api/Beca/CrearBecarioInvestigacion/${encodeURIComponent(idBecario)}/${encodeURIComponent(idProyecto)}`,
+    'POST',
   );
 }
 
-export async function EditarBecarioInvestigacion(id, body) {
+export function EditarBecarioInvestigacion(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarBecarioInvestigacion/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
 
-export async function CrearBecarioServicio(id_becario, id_servicio) {
+export function CrearBecarioServicio(idBecario, idServicio) {
   return RequestAPI(
-    `/api/Beca/CrearBecarioServicio/${encodeURIComponent(id_becario)}/${encodeURIComponent(id_servicio)}`,
-    "POST",
+    `/api/Beca/CrearBecarioServicio/${encodeURIComponent(idBecario)}/${encodeURIComponent(idServicio)}`,
+    'POST',
   );
 }
 
-export async function EditarBecarioServicio(id, body) {
+export function EditarBecarioServicio(id, body) {
   return RequestAPI(
     `/api/Beca/ModificarBecarioServicio/${encodeURIComponent(id)}`,
-    "PUT",
+    'PUT',
     body,
   );
 }
 
-export async function listarDocumentacionXLegajo(legajo) {
+export function listarDocumentacionXLegajo(legajo) {
   return RequestAPI(
     `/api/Estudiante/ListarDocumentacionXLegajo/${encodeURIComponent(legajo)}`,
-    "GET",
+    'GET',
   );
 }
 
-export async function descargarDocumentacionXId(id) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Estudiante/DescargarDocumentacionXId/${encodeURIComponent(id)}`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-
-  const contentType = (res.headers.get("Content-Type") || "").toLowerCase();
-
-  if (contentType.includes("application/json")) {
-    return res.json();
-  }
-
-  if (
-    contentType.startsWith("image/") ||
-    contentType.includes("application/pdf")
-  ) {
-    const blob = await res.blob();
-    const dataUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-
-    const disposition = res.headers.get("Content-Disposition") || "";
-    const fileNameMatch = disposition.match(
-      /filename\*?=(?:UTF-8''|"?)([^";]+)/i,
-    );
-    const fileName = fileNameMatch?.[1]
-      ? decodeURIComponent(fileNameMatch[1].replace(/"/g, ""))
-      : "documento";
-    const extension = contentType.includes("application/pdf")
-      ? "pdf"
-      : contentType.split("/")[1] || "jpg";
-
-    return {
-      id,
-      nombre_documento: fileName,
-      datos_documento: dataUrl,
-      extension,
-    };
-  }
-
-  throw new Error("Formato de respuesta no soportado");
-}
-
-export async function crearDocumentoEstudiante(id_tipo_documento, archivo) {
-  const body = new FormData();
-  body.append("archivo", archivo);
-
-  return RequestAPI(
-    `/api/Estudiante/CrearDocumentoEstudiante/${encodeURIComponent(id_tipo_documento)}`,
-    "POST",
-    body,
+export function descargarDocumentacionXId(id) {
+  return apiDownloadDocument(
+    `/api/Estudiante/DescargarDocumentacionXId/${encodeURIComponent(id)}`,
+    { id },
   );
 }
 
-export async function eliminarDocumentoEstudiante(id_documento) {
-  return RequestAPI(
-    `/api/Estudiante/EliminarDocumentoEstudiante/${encodeURIComponent(id_documento)}`,
-    "DELETE",
+export function crearDocumentoEstudiante(idTipoDocumento, archivo) {
+  return apiUploadFile(
+    `/api/Estudiante/CrearDocumentoEstudiante/${encodeURIComponent(idTipoDocumento)}`,
+    archivo,
+  );
+}
+
+export function eliminarDocumentoEstudiante(idDocumento) {
+  return apiDeleteFile(
+    `/api/Estudiante/EliminarDocumentoEstudiante/${encodeURIComponent(idDocumento)}`,
   );
 }

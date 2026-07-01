@@ -13,7 +13,6 @@ import {
   CardContent,
   Chip,
   TextField,
-  InputAdornment,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,24 +25,12 @@ import {
   Snackbar,
 } from "@mui/material";
 import ScheduleIcon from "@mui/icons-material/Schedule";
-import PersonIcon from "@mui/icons-material/Person";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import PeopleIcon from "@mui/icons-material/People";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
-import AddIcon from "@mui/icons-material/Add";
-import CastleIcon from "@mui/icons-material/Castle";
-import EditIcon from "@mui/icons-material/Edit";
+
 import CloseIcon from "@mui/icons-material/Close";
-import SchoolIcon from "@mui/icons-material/School";
-import GroupsIcon from "@mui/icons-material/Groups";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import SearchIcon from "@mui/icons-material/Search";
-import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
+import SAEPage from "../../../shared/components/page/SAEPage";
 
 import GestionarHorariosDialog from "./HorariosDialog";
 
@@ -53,6 +40,7 @@ import { EmployedCalendar } from "./EmployedCalendar";
 import { useEmploy } from "../../context/employedContext";
 import { AdminUsersProvider } from "../../context/providers/employProvider";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
+import DataGridPanel from "../../../shared/components/dataGrid/DataGridPanel";
 const secciones = [
   { key: "empleados", label: "Empleados" },
   { key: "usuarios", label: "Estudiantes Registrados" },
@@ -148,228 +136,91 @@ function EmployedAdminContent() {
     setDialogData((prev) => ({ ...prev, [field]: value }));
   };
   return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "90px", md: "100px" },
-        pb: 4,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
-        <HeaderPageEmployed
-          header="Módulo de Empleados"
-          title="Gestión de Empleados y sus Horarios"
-          description="Permite cargar empleados, modificar sus permisos y sus horarios"
+    <SAEPage>
+      <HeaderPageEmployed
+        header="Módulo de Empleados"
+        title="Gestión de Empleados y sus Horarios"
+        description="Permite cargar empleados, modificar sus permisos y sus horarios"
+      />
+
+      <DataGridPanel
+        tabs={secciones}
+        activeTab={activeSection}
+        onTabChange={handleSectionChange}
+        title={currentSection.title}
+        icon={currentSection.icon}
+        searchValue={busquedaGestion}
+        onSearchChange={setBusquedaGestion}
+        searchPlaceholder="Búsqueda..."
+        actionLabel={currentSection.addButton}
+        onAction={currentSection.dialog}
+        sx={{ mb: 3 }}
+      >
+        <DataGrid
+          rows={rowsGestionFiltradas}
+          columns={currentSection.columns}
+          loading={currentSection.loading}
+          autoHeight
+          disableRowSelectionOnClick
+          pageSizeOptions={[5, 10, 25]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 5 } },
+          }}
+          localeText={{ noRowsLabel: "Sin Registros" }}
+          sx={{ borderRadius: 0, border: "none" }}
         />
-
-        <Card
+      </DataGridPanel>
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          overflow: "hidden",
+          mt: 3,
+        }}
+      >
+        <Box
           sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            mb: 3,
-            overflow: "hidden",
+            background: "var(--gradient)",
+            color: "white",
+            px: 3,
+            py: 2.5,
           }}
         >
-          <Box
-            sx={{
-              background: "var(--gradient)",
-              color: "white",
-              px: 3,
-              pt: 0,
-              pb: 0,
-            }}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ sm: "center" }}
+            justifyContent="space-between"
+            spacing={2}
           >
-            <Stack
-              direction="row"
-              overflow={{ xs: "scroll", md: "hidden" }}
-              spacing={0}
-            >
-              {secciones.map((item) => (
-                <Box
-                  key={item.key}
-                  onClick={() => handleSectionChange(item.key)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    px: 2.5,
-                    py: 1.5,
-                    cursor: "pointer",
-                    fontWeight: activeSection === item.key ? 700 : 500,
-                    fontSize: "0.85rem",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                    color:
-                      activeSection === item.key
-                        ? "white"
-                        : "rgba(255,255,255,0.6)",
-                    borderBottom:
-                      activeSection === item.key
-                        ? "3px solid white"
-                        : "3px solid transparent",
-                    transition: "all 0.15s",
-                    "&:hover": {
-                      color: "white",
-                      borderBottomColor: "rgba(255,255,255,0.4)",
-                    },
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontWeight: "inherit",
-                      fontSize: "inherit",
-                      letterSpacing: "inherit",
-                      textTransform: "inherit",
-                      color: "inherit",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {item.label}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
-              sx={{ py: 2 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <currentSection.icon sx={{ fontSize: 30 }} />
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <ScheduleIcon sx={{ fontSize: 32 }} />
+              <Box>
                 <Typography variant="h6" fontWeight={700}>
-                  {currentSection.title}
+                  Horarios Empleados
                 </Typography>
-              </Stack>
-
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                alignItems={{ sm: "center" }}
-              >
-                <SAETextField
-                  placeholder="Busqueda..."
-                  size="small"
-                  value={busquedaGestion}
-                  onChange={(e) => setBusquedaGestion(e.target.value)}
-                  sx={{
-                    width: { xs: "100%", sm: 240, md: 220 },
-                    "& .MuiOutlinedInput-root": {
-                      bgcolor: "rgba(255,255,255,0.12)",
-                      color: "white",
-                      "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                      "&:hover fieldset": {
-                        borderColor: "rgba(255,255,255,0.6)",
-                      },
-                      "&.Mui-focused fieldset": { borderColor: "white" },
-                    },
-                    "& input::placeholder": {
-                      color: "rgba(255,255,255,0.7)",
-                      opacity: 1,
-                    },
-                    "& .MuiInputAdornment-root svg": {
-                      color: "rgba(255,255,255,0.7)",
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-                <SAEButton
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={currentSection.dialog}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    bgcolor: "rgba(255,255,255,0.18)",
-                    color: "white",
-                    border: "1px solid rgba(255,255,255,0.4)",
-                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                  }}
-                >
-                  {currentSection.addButton}
-                </SAEButton>
-              </Stack>
+                <Typography variant="body2" sx={{ opacity: 0.85 }}>
+                  Nuestros Horarios
+                </Typography>
+              </Box>
             </Stack>
-          </Box>
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ width: "100%" }}>
-              <DataGrid
-                rows={rowsGestionFiltradas}
-                columns={currentSection.columns}
-                loading={currentSection.loading}
-                autoHeight
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25]}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 5 } },
-                }}
-                localeText={{ noRowsLabel: "Sin Registros" }}
-                sx={{ borderRadius: 0, border: "none" }}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-        <Card
-          sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            overflow: "hidden",
-            mt: 3,
-          }}
-        >
-          <Box
-            sx={{
-              background: "var(--gradient)",
-              color: "white",
-              px: 3,
-              py: 2.5,
-            }}
-          >
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
+            <SAEButton
+              variant="contained"
+              startIcon={<ScheduleIcon />}
+              onClick={() => setHorariosDialogOpen(true)}
+              sx={{
+                whiteSpace: "nowrap",
+                bgcolor: "rgba(255,255,255,0.18)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.4)",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+              }}
             >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <ScheduleIcon sx={{ fontSize: 32 }} />
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    Horarios Empleados
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.85 }}>
-                    Nuestros Horarios
-                  </Typography>
-                </Box>
-              </Stack>
-              <SAEButton
-                variant="contained"
-                startIcon={<ScheduleIcon />}
-                onClick={() => setHorariosDialogOpen(true)}
-                sx={{
-                  whiteSpace: "nowrap",
-                  bgcolor: "rgba(255,255,255,0.18)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.4)",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                }}
-              >
-                Gestionar Horarios
-              </SAEButton>
-            </Stack>
-          </Box>
-        </Card>
-        <EmployedCalendar />
-      </Container>
+              Gestionar Horarios
+            </SAEButton>
+          </Stack>
+        </Box>
+      </Card>
+      <EmployedCalendar />
 
       {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
       {dialogOpen && dialogType === "empleados" && (
@@ -793,7 +644,7 @@ function EmployedAdminContent() {
           {snackbarMsg}
         </Alert>
       </Snackbar>
-    </Box>
+    </SAEPage>
   );
 }
 

@@ -1,5 +1,3 @@
-const baseUrl = import.meta.env.BASE_URL;
-
 import Diversity3Icon from "@mui/icons-material/Diversity3";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
@@ -52,7 +50,7 @@ export const studentMenu = [
     path: "/Mis-Becas",
     color: "#184B97",
     icon: Diversity3Icon,
-    descripcion: "Gestiona tus inscripciones a las becas, consulta requisitos.",    
+    descripcion: "Gestiona tus inscripciones a las becas, consulta requisitos.",
   },
   {
     label: "Salud",
@@ -74,7 +72,7 @@ export const studentMenu = [
     color: "#6B76A8",
     icon: HelpIcon,
     descripcion: "Encontrá respuestas frecuentes o comunicate con la SAE.",
-  }
+  },
 ];
 
 export const employedMenu = [
@@ -88,59 +86,60 @@ export const employedMenu = [
   {
     label: "Deportes",
     path: "/Gestion-Deportes",
-    color:"#56719a",
+    color: "#56719a",
     icon: SportsHandballIcon,
-    descripcion: "Gestiona los deportes, los docentes, horarios y torneos."
+    descripcion: "Gestiona los deportes, los docentes, horarios y torneos.",
   },
   {
     label: "Becas",
     path: "/Gestion-Becas",
-    color:"#3F76C8",
+    color: "#3F76C8",
     icon: Diversity3Icon,
     descripcion: "Permite administrar todas las becas de las secretaría.",       
   },
   {
     label: "Prensa",
     path: "/Gestion-Prensa",
-    color:"#5E8ACC",
+    color: "#5E8ACC",
     icon: NewspaperIcon,
     descripcion: "Gestiona las noticias y documentación que se mostraran a los alumnos.",   
   },
-    {
+  {
     label: "Compras",
     path: "/Gestion-Compras",
-    color:"#5E8ACC",
+    color: "#5E8ACC",
     icon: ShoppingCartIcon,
     descripcion: "Registra las compras que va realizando el área.",   
   },
-    {
+  {
     label: "Viajes",
     path: "/Gestion-Viajes",
-    color:"#5E8ACC",
+    color: "#5E8ACC",
     icon: LocalAirportIcon,
-    descripcion: "Administra los viajes organizados por la institución.",   
+    descripcion: "Administra los viajes organizados por la institución.",
   },
   {
     label: "JPA",
     path: "/Gestion-JPA",
-    color:"#e4f7d8",
+    color: "#e4f7d8",
     icon: HubIcon,
-    descripcion: "Gestiona las oportunidades a los nuevos ingresantes!",        
+    descripcion: "Gestiona las oportunidades a los nuevos ingresantes!",
   },
   {
     label: "Salud",
     path: "/Gestion-Salud",
-    color:"#E4F7D8",
+    color: "#E4F7D8",
     icon: HealthAndSafetyIcon,
     descripcion: "Consulta servicios de salud y gestiona tus turnos médicos.",
   },
-    {
+  {
     label: "Consultas",
     path: "/Gestion-Consultas",
     color: "#6B76A8",
     icon: HelpIcon,
-    descripcion: "Revisá el contenido visible para estudiantes y planificá su administración.",
-  }
+    descripcion:
+      "Revisá el contenido visible para estudiantes y planificá su administración.",
+  },
 ];
 
 export const adminMenu = [
@@ -154,49 +153,49 @@ export const adminMenu = [
   {
     label: "Deportes",
     path: "/Gestion-Deportes",
-    color:"#56719a",
+    color: "#56719a",
     icon: SportsHandballIcon,
-    descripcion: "Gestiona los deportes, los docentes, horarios y torneos."
+    descripcion: "Gestiona los deportes, los docentes, horarios y torneos.",
   },
   {
     label: "Becas",
     path: "/Gestion-Becas",
-    color:"#3F76C8",
+    color: "#3F76C8",
     icon: Diversity3Icon,
     descripcion: "Permite administrar todas las becas de las secretaría.",       
   },
   {
     label: "Prensa",
     path: "/Gestion-Prensa",
-    color:"#5E8ACC",
+    color: "#5E8ACC",
     icon: NewspaperIcon,
     descripcion: "Gestiona las noticias y documentación que se mostraran a los alumnos.",   
   },
-      {
+  {
     label: "Compras",
     path: "/Gestion-Compras",
-    color:"#5E8ACC",
+    color: "#5E8ACC",
     icon: ShoppingCartIcon,
     descripcion: "Registra las compras que va realizando el área.",   
   },
-    {
+  {
     label: "Viajes",
     path: "/Gestion-Viajes",
-    color:"#5E8ACC",
+    color: "#5E8ACC",
     icon: LocalAirportIcon,
-    descripcion: "Administra los viajes organizados por la institución.",   
+    descripcion: "Administra los viajes organizados por la institución.",
   },
   {
     label: "JPA",
     path: "/Gestion-JPA",
-    color:"#e4f7d8",
+    color: "#e4f7d8",
     icon: HubIcon,
-    descripcion: "Gestiona las oportunidades a los nuevos ingresantes!",       
+    descripcion: "Gestiona las oportunidades a los nuevos ingresantes!",
   },
   {
     label: "Salud",
     path: "/Gestion-Salud",
-    color:"#E4F7D8",
+    color: "#E4F7D8",
     icon: HealthAndSafetyIcon,
     descripcion: "Consulta servicios de salud y gestiona tus turnos médicos.",
   },
@@ -205,19 +204,20 @@ export const adminMenu = [
     path: "/Gestion-Consultas",
     color: "#6B76A8",
     icon: HelpIcon,
-    descripcion: "Revisá el contenido visible para estudiantes y planificá su administración.",
+    descripcion:
+      "Revisá el contenido visible para estudiantes y planificá su administración.",
   },
   {
     label: "Empleados",
     path: "/Gestion-Usuarios",
-    color:"#e4f7d8",
+    color: "#e4f7d8",
     icon: BadgeIcon,
     descripcion: "Gestiona los empleados y usuarios que pueden acceder a la aplicación.",    
   },
   {
     label: "Reportes",
     path: "/Reportes-Estadisticas",
-    color:"#e4f7d8",
+    color: "#e4f7d8",
     icon: QueryStatsIcon,
     descripcion: "Analiza el funcionamiento de cada área.",    
   }

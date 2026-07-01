@@ -1,4 +1,5 @@
 import {SAETypography} from "../shared/components/typography/SAETypography";
+import { Chip } from "@mui/material";
 export const mostrarHorasMinutos = (horario) => {
   const [h1, m1] = horario.split(":").map(Number);
   if (m1 === 0) return `${h1}:00hs`;

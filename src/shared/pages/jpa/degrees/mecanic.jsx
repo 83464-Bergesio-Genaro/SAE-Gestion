@@ -1,21 +1,4 @@
-import ListEngineer from "../../../components/lists/listEngineer";
-import MateriasXAnoList from "../../../components/lists/listMaterias";
-import CircleIcon from "@mui/icons-material/Circle";
-import {
-  Container,
-  Typography,
-  List,
-  ListItem,
-  Paper,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-
-import "./degrees.css";
+import DegreePageTemplate from "../../../components/degrees/DegreePageTemplate";
 
 export default function SharedJPAMecanic() {
   const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngMecanicaBanner.png`;
@@ -102,173 +85,24 @@ export default function SharedJPAMecanic() {
     "El egresado de nuestra carrera demuestra gran interés y capacidad para la interpretación de las matemáticas aplicadas a fenómenos físicos y razonamiento analítico para la comprensión de estos fenómenos.",
     "Su formación académica le permite diseñar, planificar y administrar los procesos industriales en los diferentes campos ocupacionales a los que tenga acceso. También, le permite planear los impactos económicos, sociales y ambientales en el desarrollo de proyectos, comunicarse y concertar con profesionales de otras disciplinas, formas de integración y dirección de equipos interdisciplinarios de trabajo; adoptando una actitud emprendedora y de liderazgo.",
   ];
-  return (
-    <Container style={{ padding: "3%" }}>
-      <Paper className="paper-container">
-        <Box
-          sx={{
-            backgroundImage: `url(${imageDirBanner})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: "black",
-            height: 400,
-          }}
-          className="banner-image"
-        ></Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Card>
-          <CardContent>
-            <div style={{ alignContent: "center", padding: "10px" }}>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Descripción
-              </Typography>
-
-              <Typography
-                variant="body1"
-                className="typography-text"
-                gutterBottom
-              >
-                Esta formación académica permite diseñar, planificar y
-                administrar procesos industriales en un extenso campo
-                ocupacional. Planear impactos económicos, sociales y ambientales
-                en el desarrollo de proyectos, integrar y dirigir equipos con
-                actitud emprendedora y de liderazgo.
-              </Typography>
-              <ListEngineer
-                degree={"Título - Ingeniero Mecánico"}
-                duration={"Duración - 5 Años "}
-                link={"https://www.institucional.frc.utn.edu.ar/mecanica/"}
-                world={
-                  "Programa de doble titulación con el Instituto Politécnico de Bragança (Portugal - Unión Europea) y con la Universidade Tecnológica Federal do Paraná - UTFPR (Brasil)"
-                }
-              ></ListEngineer>
-            </div>
-          </CardContent>
-        </Card>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Materias de la Carrera
-              </Typography>
-              <List>
-                <MateriasXAnoList
-                  listaMaterias={materias1Año}
-                  ano="Primer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias2Año}
-                  ano="Segundo Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias3Año}
-                  ano="Tercer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias4Año}
-                  ano="Cuarto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias5Año}
-                  ano="Quinto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materiasElectivas}
-                  ano="Electivas"
-                />
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Incumbencias/ Alcance
-              </Typography>
-
-              <List component="div" disablePadding>
-                {alcances.map((row) => {
-                  return (
-                    <ListItem disablePadding alignItems="flex-start">
-                      <ListItemIcon sx={{ ml: 2 }}>
-                        <CircleIcon sx={{ width: 18, height: 18 }} />
-                      </ListItemIcon>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Perfil del Egresado
-              </Typography>
-
-              <List component="div" disablePadding>
-                {perfil.map((row) => {
-                  return (
-                    <ListItem>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Charla Departamental 2021
-              </Typography>
-            </CardContent>
-            <CardMedia
-              component="iframe"
-              width="560"
-              height="610"
-              title="YouTube video player"
-              src="https://www.youtube.com/embed/jmwD1Zl-KwA?si=KAOqCzfpp088Ty-K"
-            ></CardMedia>
-          </Card>
-        </Box>
-      </Paper>
-    </Container>
+  const curriculum = [
+    { year: "Primer Año", subjects: materias1Año },
+    { year: "Segundo Año", subjects: materias2Año },
+    { year: "Tercer Año", subjects: materias3Año },
+    { year: "Cuarto Año", subjects: materias4Año },
+    { year: "Quinto Año", subjects: materias5Año },
+    { year: "Electivas", subjects: materiasElectivas },
+  ];
+return (
+    <DegreePageTemplate
+      title="Ingeniería Mecánica"
+      image={imageDirBanner}
+      description="Esta formación académica permite diseñar, planificar y administrar procesos industriales en un extenso campo ocupacional; planear impactos económicos, sociales y ambientales, y dirigir equipos con actitud emprendedora y de liderazgo."
+      degreeInfo={{ degree: "Título — Ingeniero Mecánico", duration: "Duración — 5 años", link: "https://www.institucional.frc.utn.edu.ar/mecanica/", world: "Programa de doble titulación con el Instituto Politécnico de Bragança (Portugal — Unión Europea) y con la Universidade Tecnológica Federal do Paraná — UTFPR (Brasil)" }}
+      curriculum={curriculum}
+      scopes={alcances}
+      profile={perfil}
+      video={{ title: "Charla del Departamento de Ingeniería Mecánica", src: "https://www.youtube.com/embed/jmwD1Zl-KwA?si=KAOqCzfpp088Ty-K" }}
+    />
   );
 }

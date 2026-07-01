@@ -40,7 +40,7 @@ import { SportsProvider } from "../../context/providers/sportsProvider";
 import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
 import TitleBox from "../../../shared/components/titleBox";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
-
+import SAEPage from "../../../shared/components/page/SAEPage";
 const C = SPORTS_STRINGS;
 
 function StudentSportsContent() {
@@ -71,230 +71,214 @@ function StudentSportsContent() {
   } = useSportsContext();
 
   return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "114px", md: "100px" },
-        pb: 8,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
-        <StudentHeaderPage
-          title={C.bigTitle}
-          description={C.bigSubtitle}
-          backgroundImage="images/carrousel/EntradaUTN.jpg"
-          icon={SportsHandballIcon}
-        />
+    <SAEPage>
+      <StudentHeaderPage
+        title={C.bigTitle}
+        description={C.bigSubtitle}
+        backgroundImage="images/carrousel/EntradaUTN.jpg"
+        icon={SportsHandballIcon}
+      />
 
-        <TitleBox
-          title={C.documentationTitle}
-          description={C.documentationSubtitle}
-        />
+      <TitleBox
+        title={C.documentationTitle}
+        description={C.documentationSubtitle}
+      />
 
-        {loadingDocuments ? (
-          <Stack alignItems="center" sx={{ py: 5 }}>
-            <SAESpinner size="S" />
-          </Stack>
-        ) : (
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            {documentos.map((item) => (
-              <Grid
-                key={item.id_tipo_documento ?? item.nombre}
-                size={{ xs: 12, sm: 6, md: 4 }}
-                item
-                sx={{ justifyContent: "center", alignItems: "center" }}
-              >
-                <DocumentCard
-                  documento={item}
-                  onPreview={handlePreview}
-                  onFileChange={handleArchivoChange}
-                  onDelete={requestDeleteDocument}
-                  uploadDisabled={item.subido}
-                  deleteDisabled={!item.subido}
-                  notUploadedLabel={C.docStateNotUploaded}
-                  uploadedLabel={C.docStataUplodaded}
-                  showRequirement
-                />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-
-        <TitleBox title={C.sportsTitle} description={C.sportsSubTitle} />
-        {loadingSports ? (
-          <Stack alignItems="center" sx={{ py: 5 }}>
-            <SAESpinner size="S" />
-          </Stack>
-        ) : horariosDeportista.length > 0 ? (
-          <Card
-            sx={{
-              overflow: "hidden",
-              borderRadius: 6,
-              boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            }}
-          >
-            <DeportesMasonry
-              deportes={horariosDeportista}
-              onInscribirClick={handleInscribirClick}
-            />
-          </Card>
-        ) : null}
-
-        <TitleBox
-          title={C.tournamnetsTitle}
-          description={C.tournamnetsSubTitle}
-        />
-
-        {loadingTournaments ? (
-          <Stack alignItems="center" sx={{ py: 5 }}>
-            <SAESpinner size="S" />
-          </Stack>
-        ) : torneoDeportista.length > 0 ? (
-          <Card
-            sx={{
-              borderRadius: 6,
-              boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-              overflow: "hidden",
-            }}
-          >
-            <Box
-              sx={{
-                px: 3,
-                py: 2.5,
-                background: "var(--gradient)",
-              }}
+      {loadingDocuments ? (
+        <Stack alignItems="center" sx={{ py: 5 }}>
+          <SAESpinner size="S" />
+        </Stack>
+      ) : (
+        <Grid container spacing={3} sx={{ mt: 1 }}>
+          {documentos.map((item) => (
+            <Grid
+              key={item.id_tipo_documento ?? item.nombre}
+              size={{ xs: 12, sm: 6, md: 4 }}
+              item
+              sx={{ justifyContent: "center", alignItems: "center" }}
             >
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                justifyContent="flex-end"
-                alignItems={{ sm: "center" }}
-              >
-                <SAETextField
-                  placeholder="Buscar torneo..."
-                  size="small"
-                  value={busquedaTorneos}
-                  onChange={(e) => setBusquedaTorneos(e.target.value)}
-                  sx={{
-                    width: { xs: "100%", sm: 260, md: 340 },
-                    "& .MuiOutlinedInput-root": {
-                      bgcolor: "white",
-                      color: "black",
-                      "& fieldset": { borderColor: "rgba(255, 255, 255, 0.6)" },
-                      "&:hover fieldset": {
-                        borderColor: "white",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "rgb(59, 101, 218)",
-                      },
-                    },
-                    "& input::placeholder": {
-                      color: "rgba(54, 54, 54, 0.7)",
-                      opacity: 1,
-                    },
-                    "& .MuiInputAdornment-root svg": {
-                      color: "rgba(0, 0, 0, 0.7)",
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-              </Stack>
-            </Box>
-            <CardContent sx={{ p: 2 }}>
-              <Box sx={{ width: "100%" }}>
-                <DataGrid
-                  rows={rowsTorneosFiltradas}
-                  columns={torneosColumns}
-                  autoHeight
-                  disableRowSelectionOnClick
-                  pageSizeOptions={[5, 10, 25]}
-                  initialState={{
-                    pagination: { paginationModel: { pageSize: 5 } },
-                  }}
-                  localeText={{ noRowsLabel: "No hay torneos activos" }}
-                  sx={{
-                    minWidth: 850,
-                    "& .MuiDataGrid-columnHeaderTitle": {
-                      whiteSpace: "normal",
-                      lineHeight: "1.2",
-                      fontWeight: "bold",
-                    },
-                    borderRadius: 4,
-                  }}
-                />
-              </Box>
-            </CardContent>
-          </Card>
-        ) : null}
-        {!loadingSports && horariosDeportista.length > 0 && (
-          <>
-            <TitleBox
-              title={C.horariosTitle}
-              description={C.horariosSubTitle}
-            />
-            <EmployedSportsProvider>
-              <SportsCalendar subscribedSportIds={subscribedSportIds} />
-            </EmployedSportsProvider>
-          </>
-        )}
+              <DocumentCard
+                documento={item}
+                onPreview={handlePreview}
+                onFileChange={handleArchivoChange}
+                onDelete={requestDeleteDocument}
+                uploadDisabled={item.subido}
+                deleteDisabled={!item.subido}
+                notUploadedLabel={C.docStateNotUploaded}
+                uploadedLabel={C.docStataUplodaded}
+                showRequirement
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
-        {/*Dialog para Borrar Documento*/}
-        <Dialog open={openPopup} onClose={closeDeleteDialog}>
-          <DialogTitle>{C.deleteDocTitle}</DialogTitle>
-
-          <DialogContent>
-            <DialogContentText>
-              {C.deleteDocMessage(documentoAEliminar?.archivoNombre)}
-            </DialogContentText>
-          </DialogContent>
-
-          <DialogActions>
-            <SAEButton
-              onClick={() => handleDelete(documentoAEliminar)}
-              autoFocus
-            >
-              {C.deleteDocButton}
-            </SAEButton>
-          </DialogActions>
-        </Dialog>
-
-        <DocumentPreviewDialog
-          open={preview.open}
-          onClose={closePreview}
-          title={preview.title}
-          imageSrc={preview.imageSrc}
-          isPdf={preview.isPdf}
-          loading={preview.loading}
-          error={preview.error}
-        />
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          onClose={closeSnackbar}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      <TitleBox title={C.sportsTitle} description={C.sportsSubTitle} />
+      {loadingSports ? (
+        <Stack alignItems="center" sx={{ py: 5 }}>
+          <SAESpinner size="S" />
+        </Stack>
+      ) : horariosDeportista.length > 0 ? (
+        <Card
+          sx={{
+            overflow: "hidden",
+            borderRadius: 6,
+            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          }}
         >
-          <Alert
-            onClose={closeSnackbar}
-            severity={snackbar.severity}
-            variant="filled"
-            sx={{ width: "100%" }}
+          <DeportesMasonry
+            deportes={horariosDeportista}
+            onInscribirClick={handleInscribirClick}
+          />
+        </Card>
+      ) : null}
+
+      <TitleBox
+        title={C.tournamnetsTitle}
+        description={C.tournamnetsSubTitle}
+      />
+
+      {loadingTournaments ? (
+        <Stack alignItems="center" sx={{ py: 5 }}>
+          <SAESpinner size="S" />
+        </Stack>
+      ) : torneoDeportista.length > 0 ? (
+        <Card
+          sx={{
+            borderRadius: 6,
+            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              px: 3,
+              py: 2.5,
+              background: "var(--gradient)",
+            }}
           >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </Container>
-    </Box>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              justifyContent="flex-end"
+              alignItems={{ sm: "center" }}
+            >
+              <SAETextField
+                placeholder="Buscar torneo..."
+                size="small"
+                value={busquedaTorneos}
+                onChange={(e) => setBusquedaTorneos(e.target.value)}
+                sx={{
+                  width: { xs: "100%", sm: 260, md: 340 },
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "white",
+                    color: "black",
+                    "& fieldset": { borderColor: "rgba(255, 255, 255, 0.6)" },
+                    "&:hover fieldset": {
+                      borderColor: "white",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "rgb(59, 101, 218)",
+                    },
+                  },
+                  "& input::placeholder": {
+                    color: "rgba(54, 54, 54, 0.7)",
+                    opacity: 1,
+                  },
+                  "& .MuiInputAdornment-root svg": {
+                    color: "rgba(0, 0, 0, 0.7)",
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            </Stack>
+          </Box>
+          <CardContent sx={{ p: 2 }}>
+            <Box sx={{ width: "100%" }}>
+              <DataGrid
+                rows={rowsTorneosFiltradas}
+                columns={torneosColumns}
+                autoHeight
+                disableRowSelectionOnClick
+                pageSizeOptions={[5, 10, 25]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 5 } },
+                }}
+                localeText={{ noRowsLabel: "No hay torneos activos" }}
+                sx={{
+                  minWidth: 850,
+                  "& .MuiDataGrid-columnHeaderTitle": {
+                    whiteSpace: "normal",
+                    lineHeight: "1.2",
+                    fontWeight: "bold",
+                  },
+                  borderRadius: 4,
+                }}
+              />
+            </Box>
+          </CardContent>
+        </Card>
+      ) : null}
+      {!loadingSports && horariosDeportista.length > 0 && (
+        <>
+          <TitleBox title={C.horariosTitle} description={C.horariosSubTitle} />
+          <EmployedSportsProvider>
+            <SportsCalendar subscribedSportIds={subscribedSportIds} />
+          </EmployedSportsProvider>
+        </>
+      )}
+
+      {/*Dialog para Borrar Documento*/}
+      <Dialog open={openPopup} onClose={closeDeleteDialog}>
+        <DialogTitle>{C.deleteDocTitle}</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            {C.deleteDocMessage(documentoAEliminar?.archivoNombre)}
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <SAEButton onClick={() => handleDelete(documentoAEliminar)} autoFocus>
+            {C.deleteDocButton}
+          </SAEButton>
+        </DialogActions>
+      </Dialog>
+
+      <DocumentPreviewDialog
+        open={preview.open}
+        onClose={closePreview}
+        title={preview.title}
+        imageSrc={preview.imageSrc}
+        isPdf={preview.isPdf}
+        loading={preview.loading}
+        error={preview.error}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </SAEPage>
   );
 }
 

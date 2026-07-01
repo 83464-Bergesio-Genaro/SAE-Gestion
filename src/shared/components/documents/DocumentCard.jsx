@@ -59,9 +59,10 @@ export default function DocumentCard({
     <Card
       sx={{
         height: "100%",
-        borderRadius: 4,
+        borderRadius: 6,
         width: "100%",
         maxWidth: 357,
+        mx: { xs: "auto", sm: 0 },
         minWidth: 0,
         flexDirection: "column",
         boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
@@ -103,10 +104,10 @@ export default function DocumentCard({
               />
             )}
           </Stack>
-          <Typography variant="h6">
+          <Typography variant="subtitle1">
             <strong>{documento.nombre}</strong>
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             {description}
           </Typography>
 

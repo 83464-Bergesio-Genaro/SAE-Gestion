@@ -1,21 +1,4 @@
-import ListEngineer from "../../../components/lists/listEngineer";
-import MateriasXAnoList from "../../../components/lists/listMaterias";
-import CircleIcon from "@mui/icons-material/Circle";
-import {
-  Container,
-  Typography,
-  List,
-  ListItem,
-  Paper,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-
-import "./degrees.css";
+import DegreePageTemplate from "../../../components/degrees/DegreePageTemplate";
 
 export default function SharedJPASistemas() {
   const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngSistemasBanner.png`;
@@ -104,171 +87,24 @@ export default function SharedJPASistemas() {
     "Está capacitado para abordar proyectos de investigación y desarrollo, integrando a tal efecto equipos interdisciplinarios en cooperación, o asumiendo el liderazgo efectivo en la coordinación técnica y metodológica de los mismos.",
   ];
 
-  return (
-    <Container style={{ padding: "3%" }}>
-      <Paper className="paper-container">
-        <Box
-          sx={{
-            backgroundImage: `url(${imageDirBanner})`,   
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: "black",
-            height: 400,
-          }}
-          className="banner-image"
-        ></Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Card>
-          <CardContent>
-            <div style={{ alignContent: "center", padding: "10px" }}>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Descripción
-              </Typography>
-
-              <Typography
-                variant="body1"
-                className="typography-text"
-                gutterBottom
-              >
-                Formación analítica que permite al profesional interpretar y
-                resolver problemas mediante el empleo de metodologías de sistema
-                y tecnologías de procesamientos de información.
-              </Typography>
-              <ListEngineer
-                degree={"Título - Ingeniero en Sistemas de la Informacion"}
-                duration={"Duración - 5 Años"}
-                link={"https://www.institucional.frc.utn.edu.ar/sistemas/"}
-                intermedio={
-                  "Título intermedio - Analista Universitario de sistemas (3er año)"
-                }
-              ></ListEngineer>
-            </div>
-          </CardContent>
-        </Card>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Materias de la Carrera
-              </Typography>
-              <List>
-                <MateriasXAnoList
-                  listaMaterias={materias1Año}
-                  ano="Primer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias2Año}
-                  ano="Segundo Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias3Año}
-                  ano="Tercer Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias4Año}
-                  ano="Cuarto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materias5Año}
-                  ano="Quinto Año"
-                />
-                <MateriasXAnoList
-                  listaMaterias={materiasElectivas}
-                  ano="Electivas"
-                />
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Incumbencias/ Alcance
-              </Typography>
-
-              <List component="div" disablePadding>
-                {alcances.map((row) => {
-                  return (
-                    <ListItem disablePadding alignItems="flex-start">
-                      <ListItemIcon sx={{ ml: 2 }}>
-                        <CircleIcon sx={{ width: 18, height: 18 }} />
-                      </ListItemIcon>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Perfil del Egresado
-              </Typography>
-
-              <List component="div" disablePadding>
-                {perfil.map((row) => {
-                  return (
-                    <ListItem>
-                      <ListItemText primary={row} />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </CardContent>
-          </Card>
-        </Box>
-      </Paper>
-      <Paper className="paper-container">
-        <Box pt={2} pb={2}>
-          <Card>
-            <CardContent>
-              <Typography
-                variant="h4"
-                className="typography-title"
-                gutterBottom
-              >
-                Charla Departamental 2021
-              </Typography>
-            </CardContent>
-            <CardMedia
-              component="iframe"
-              width="560"
-              height="610"
-              title="YouTube video player"
-              src="https://www.youtube.com/embed/_P-PybOgYys?si=wj81Dd-sUG9mbpMd"
-            ></CardMedia>
-          </Card>
-        </Box>
-      </Paper>
-    </Container>
+  const curriculum = [
+    { year: "Primer Año", subjects: materias1Año },
+    { year: "Segundo Año", subjects: materias2Año },
+    { year: "Tercer Año", subjects: materias3Año },
+    { year: "Cuarto Año", subjects: materias4Año },
+    { year: "Quinto Año", subjects: materias5Año },
+    { year: "Electivas", subjects: materiasElectivas },
+  ];
+return (
+    <DegreePageTemplate
+      title="Ingeniería en Sistemas de Información"
+      image={imageDirBanner}
+      description="Ofrece una formación analítica que permite interpretar y resolver problemas mediante el empleo de metodologías de sistemas y tecnologías de procesamiento de información."
+      degreeInfo={{ degree: "Título — Ingeniero en Sistemas de Información", duration: "Duración — 5 años", link: "https://www.institucional.frc.utn.edu.ar/sistemas/", intermedio: "Título intermedio — Analista Universitario de Sistemas (3.er año)" }}
+      curriculum={curriculum}
+      scopes={alcances}
+      profile={perfil}
+      video={{ title: "Charla del Departamento de Ingeniería en Sistemas", src: "https://www.youtube.com/embed/_P-PybOgYys?si=wj81Dd-sUG9mbpMd" }}
+    />
   );
 }

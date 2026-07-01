@@ -1,9 +1,7 @@
-import { Box, IconButton, useTheme,Stack, useMediaQuery ,Card, CardContent, Divider,Link, Typography} from "@mui/material";
+import { Box, IconButton, Stack, useMediaQuery, Card, CardContent, Divider, Link, Typography } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { useMemo, useState } from "react";
-
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
@@ -51,12 +49,15 @@ const formatearFecha = (fechaString) => {
 };
 
 export function CalendarEvent({eventos}){
+  const isMobile = useMediaQuery("(max-width:932px)");
+  const isTablet = useMediaQuery("(max-width:1199px)");
+  const slidesToShow = isMobile ? 1 : isTablet ? 2 : 3;
 
   return(
     <Box
       sx={{
         py:{ xs: 2, sm: 8 },
-        px: { xs: 2, sm: 4 },
+        px: { xs: 0, sm: 4 },
         width: "100%",
         boxSizing: "border-box",
         overflow: "hidden",
@@ -65,10 +66,10 @@ export function CalendarEvent({eventos}){
           touchAction: "pan-y",
         },
         "& .slick-list": {
-          margin: "0 -10px",
+          margin: { xs: "0 -6px", sm: "0 -10px" },
         },
         "& .slick-slide": {
-          padding: "0 10px",
+          padding: { xs: "0 6px", sm: "0 10px" },
           boxSizing: "border-box",
           height: "auto", 
           "& > div": {
@@ -76,7 +77,7 @@ export function CalendarEvent({eventos}){
           }
         },
         "& .slick-slide > div": {
-          padding: "0 10px",
+          padding: { xs: "0 4px", sm: "0 10px" },
           boxSizing: "border-box",
           height: "auto", 
           "& > div": {
@@ -89,11 +90,15 @@ export function CalendarEvent({eventos}){
 
       }}
     >
-      <Slider {...settingsSchedule}>
+      <Slider
+        {...settingsSchedule}
+        responsive={[]}
+        slidesToShow={slidesToShow}
+      >
       { eventos.map((evento) => {
 
           return(
-          <EventoCard evento={evento}>
+          <EventoCard key={evento.id ?? `${evento.nombre_evento}-${evento.fecha_evento}`} evento={evento}>
           </EventoCard>)
         })}
       </Slider> 
@@ -104,11 +109,13 @@ export function CalendarEvent({eventos}){
 function EventoCard({ evento }) {
   return (
     <Card sx={{
-      my:2,
+      my: 2,
+      minHeight: { xs: 330, sm: 390 },
       position: "relative",
       borderRadius: 5,
       overflow: "hidden",
-      border: '2px solid transparent',
+      border: { xs: "1px solid rgba(18, 54, 102, 0.12)", sm: '2px solid transparent' },
+      bgcolor: "white",
       backgroundClip: 'padding-box',
       '&::before': {
         content: '""',
@@ -119,7 +126,7 @@ function EventoCard({ evento }) {
         borderRadius: 'inherit',
         background: 'linear-gradient(45deg, #6a11cb 0%, #2575fc 100%)', // Borde colorido
       },
-      boxShadow: 4,
+      boxShadow: { xs: "0 8px 24px rgba(18, 54, 102, 0.12)", sm: 4 },
       color: '#000000',
       }}>
       <CardContent
@@ -130,17 +137,18 @@ function EventoCard({ evento }) {
           border: '1px solid rgba(255, 255, 255, 0.18)', // Borde sutil
           borderRadius: 2,
           color: '#000000',
-          p: 3,
+          p: { xs: 2.25, sm: 3 },
           display: "flex",
           flexDirection: "column",
           height: "100%",
         }}
       >
-      <Stack direction="row" justifyContent="flex-start" alignItems="center" pb={1} spacing={2}>
+      <Stack direction="row" justifyContent="flex-start" alignItems="center" pb={1} spacing={{ xs: 1, sm: 2 }}>
         <Box
           sx={{
-            maxWidth: 40,
-            minheight:40,
+            width: 40,
+            height: 40,
+            flexShrink: 0,
             borderRadius: "50%",
             bgcolor: "#E7F1FF",
             display: "flex",
@@ -150,30 +158,30 @@ function EventoCard({ evento }) {
         >
           <CalendarIcon sx={{ fontSize: 20, color: "#2A548B" }} />
         </Box>
-          <Typography sx={{ fontSize:18, fontWeight: 700,width:"100%" }}>
+          <Typography sx={{ fontSize: { xs: 16, sm: 18 }, fontWeight: 700, flexGrow: 1 }}>
             {formatearFecha(evento.fecha_evento)}
           </Typography>
-          <Typography sx={{ fontSize: 24, fontWeight: 700 }}>
+          <Typography sx={{ fontSize: { xs: 18, sm: 24 }, fontWeight: 800, color: "#123666" }}>
             {evento.horario_inicio}
           </Typography>          
       </Stack>        
       <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.5)", mb: 2 }} />
       <Stack sx={{ flexGrow: 1, justifyContent: "space-between" }}>
-        <Box sx={{ maxHeight: "75px", overflow: "hidden"}}> 
-          <Typography sx={{mt:0.5, fontSize: 26, fontWeight: 700,textAlign:"center" }}>
+        <Box sx={{ minHeight: { xs: "auto", sm: "75px" }, overflow: "hidden"}}> 
+          <Typography sx={{ mt: 0.5, fontSize: { xs: 22, sm: 26 }, lineHeight: 1.2, fontWeight: 700, textAlign: "left" }}>
             {evento.nombre_evento}
           </Typography>
 
       
         </Box>
-        <Box sx={{ height: "45px", overflow: "hidden", pt:2 }}> 
+        <Box sx={{ minHeight: "45px", overflow: "hidden", pt: 2 }}> 
           <Typography sx={{textAlign:"left" }}>
             <strong>Expositor: </strong>{evento.encargado}
           </Typography>  
         </Box>
       </Stack>
 
-      <Box sx={{ height: "40px", pr: 0.5 }} my={2}>
+      <Box sx={{ minHeight: "40px", pr: 0.5 }} my={{ xs: 1.5, sm: 2 }}>
         <Typography sx={{ mb: 2 }}>
           <Box component="span" sx={{ fontWeight: 700 }}>
             Duración:
@@ -184,7 +192,7 @@ function EventoCard({ evento }) {
         <Divider
           sx={{ borderColor: "rgba(0, 0, 0, 0.6)", mt: "auto", mb: 2 }}
         />
-        <Box sx={{ height: "20px"}} my={1}>
+        <Box sx={{ minHeight: "24px"}} my={1}>
           <Link 
             target="_blank" 
             href={evento.lugar} 

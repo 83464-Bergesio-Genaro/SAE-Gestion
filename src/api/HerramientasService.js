@@ -1,51 +1,13 @@
-import { appConfig } from "../config/appConfig";
+import { RequestAPI } from './apiClient';
 
-function getToken() {
-  const stored = localStorage.getItem("session");
-  if (!stored) return null;
-  const parsed = JSON.parse(stored);
-  if (Date.now() > parsed.expiration) {
-    localStorage.removeItem("session");
-    return null;
-  }
-  return parsed.token;
+export function obtenerTiposDocumento() {
+  return RequestAPI('/api/Herramientas/ObtenerTiposDocumento', 'GET');
 }
 
-function getHeaders(method, body) {
-  const token = getToken();
-  const headers = {
-    "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true",
-  };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const options = { method, headers };
-  if (body) options.body = JSON.stringify(body);
-  return options;
+export function obtenerPerfiles() {
+  return RequestAPI('/api/Herramientas/ObtenerPerfiles', 'GET');
 }
 
-export async function obtenerTiposDocumento() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Herramientas/ObtenerTiposDocumento`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-
-export async function obtenerPerfiles() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Herramientas/ObtenerPerfiles`,
-    getHeaders("GET"),
-  );
-  
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
-}
-export async function obtenerCarreras() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Herramientas/ObtenerCarreras`,
-    getHeaders("GET"),
-  );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
+export function obtenerCarreras() {
+  return RequestAPI('/api/Herramientas/ObtenerCarreras', 'GET');
 }

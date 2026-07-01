@@ -1,9 +1,15 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import {ContarVisualizacionLinkFrecuente,BuscarLinkFrecuentes} from "../../../api/EmpleadoService";
-import { isValidEmail } from "../../../utils/util.jsx";;
+import {
+  ContarVisualizacionLinkFrecuente,
+  BuscarLinkFrecuentes,
+} from "../../../api/EmpleadoService";
+import { isValidEmail } from "../../../utils/util.jsx";
 import { sendConsultationEmail } from "../../../api/EmailService";
 import { ConsultationContext } from "../studentContext";
-import { useAuth, useNotification } from "../../../shared/context/sharedContext";
+import {
+  useAuth,
+  useNotification,
+} from "../../../shared/context/sharedContext";
 
 export const ConsultationAlumnoProvider = ({ children }) => {
   const { user } = useAuth();
@@ -52,14 +58,22 @@ export const ConsultationAlumnoProvider = ({ children }) => {
   const handleLinkFrecuenteClick = async (event, link) => {
     if (!link.hipervinculo) {
       event.preventDefault();
-      useNotification("Este link no tiene hipervínculo configurado","error",6000);
+      useNotification(
+        "Este link no tiene hipervínculo configurado",
+        "error",
+        6000,
+      );
       return;
     }
 
     try {
       await ContarVisualizacionLinkFrecuente(link.id);
     } catch (error) {
-      useNotification(("Error al contar visualización del link:"+ error),"error",6000);
+      useNotification(
+        "Error al contar visualización del link:" + error,
+        "error",
+        6000,
+      );
     }
   };
 
@@ -67,7 +81,10 @@ export const ConsultationAlumnoProvider = ({ children }) => {
     async (event) => {
       event.preventDefault();
       if (invalidFields.length > 0) {
-        useNotification("Es necesario que todos los campos sean válidos","warning");
+        useNotification(
+          "Es necesario que todos los campos sean válidos",
+          "warning",
+        );
         return;
       }
 
@@ -109,7 +126,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
         sending,
         handleChange,
         handleSubmit,
-        handleLinkFrecuenteClick
+        handleLinkFrecuenteClick,
       }}
     >
       {children}

@@ -1,233 +1,116 @@
-import { appConfig } from "../config/appConfig";
-import {mapPublicacionPublica} from "./formatters/PrensaFormatter.js";
+import { mapPublicacionPublica } from './formatters/PrensaFormatter.js';
+import {
+  ApiError,
+  apiDownloadDocument,
+  apiRequest,
+  apiUploadFile,
+  RequestAPI,
+  resolveApiUrl,
+} from './apiClient';
 
-function getToken() {
-  const stored = localStorage.getItem("session");
-  if (!stored) return null;
-  const parsed = JSON.parse(stored);
-  if (Date.now() > parsed.expiration) {
-    localStorage.removeItem("session");
-    return null;
-  }
-  return parsed.token;
-}
+export const listarPublicacionesCompleto = () =>
+  RequestAPI('/api/Prensa/ListarPublicacionesCompleto', 'GET');
 
-function getHeaders(method, body) {
-  const token = getToken();
-  const headers = { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const options = { method, headers };
-  if (body) options.body = JSON.stringify(body);
-  return options;
-}
+export const listarPublicacionesActivas = () =>
+  RequestAPI('/api/Prensa/ListarPublicacionesActivas', 'GET');
 
-export async function listarPublicacionesCompleto() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/ListarPublicacionesCompleto`,
-    getHeaders("GET")
+export function obtenerPublicacionPorId(id) {
+  return RequestAPI(
+    `/api/Prensa/ObtenerPublicacionXId/${encodeURIComponent(id)}`,
+    'GET',
   );
-  return res.json();
 }
 
-export async function listarPublicacionesActivas() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/ListarPublicacionesActivas`,
-    getHeaders("GET")
+export const crearPublicacion = (body) =>
+  RequestAPI('/api/Prensa/CrearPublicacion', 'POST', body);
+
+export function modificarPublicacion(id, body) {
+  return RequestAPI(
+    `/api/Prensa/ModificarPublicacion/${encodeURIComponent(id)}`,
+    'PUT',
+    body,
   );
-  return res.json();
 }
 
-export async function obtenerPublicacionPorId(id) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/ObtenerPublicacionXId/${id}`,
-    getHeaders("GET")
+export function eliminarPublicacion(id) {
+  return RequestAPI(
+    `/api/Prensa/EliminarPublicacion/${encodeURIComponent(id)}`,
+    'DELETE',
   );
-  return res.json();
 }
 
-export async function crearPublicacion(body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/CrearPublicacion`,
-    getHeaders("POST", body)
+export function listarDocumentosPorPublicacion(idPublicacion) {
+  return RequestAPI(
+    `/api/Prensa/ListarDocumentoXPublicacion/${encodeURIComponent(idPublicacion)}`,
+    'GET',
   );
-  return res.json();
 }
 
-export async function modificarPublicacion(id, body) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/ModificarPublicacion/${id}`,
-    getHeaders("PUT", body)
+export const listarDocumentosSinData = () =>
+  RequestAPI('/api/Prensa/ListarDocumentosSinData', 'GET');
+
+export function crearDocumentoPrensa(formData) {
+  return apiUploadFile(
+    '/api/Prensa/CrearDocumentoPrensaLibre',
+    formData,
   );
-  return res.json();
 }
 
-export async function eliminarPublicacion(id) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/EliminarPublicacion/${id}`,
-    getHeaders("DELETE")
+export function crearVinculoDocPubli(idPublicacion, idDocumento) {
+  return RequestAPI(
+    `/api/Prensa/CrearVinculoDocPubli/${encodeURIComponent(idPublicacion)}/${encodeURIComponent(idDocumento)}`,
+    'POST',
   );
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
 }
 
-export async function listarDocumentosPorPublicacion(idPublicacion) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/ListarDocumentoXPublicacion/${idPublicacion}`,
-    getHeaders("GET")
+export function descargarDocumentoPorId(idDocumento) {
+  return apiDownloadDocument(
+    `/api/Prensa/DescargarDocumentoXId/${encodeURIComponent(idDocumento)}`,
+    { id: idDocumento },
   );
-  return res.json();
 }
 
-export async function listarDocumentosSinData() {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/ListarDocumentosSinData`,
-    getHeaders("GET")
-  );
-  return res.json();
-}
+const PUBLIC_NEWS_ERRORS = {
+  400: 'Se enviaron parámetros a una vista',
+  401: 'El endpoint requiere autenticación',
+  409: 'Conflicto en la base de datos',
+  500: 'Error interno del servidor',
+};
 
-export async function crearDocumentoPrensa(formData) {
-  const token = getToken();
-  const headers = { "ngrok-skip-browser-warning": "true" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/CrearDocumentoPrensaLibre`,
-    { method: "POST", headers, body: formData }
-  );
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`CrearDocumentoPrensa ${res.status}: ${err}`);
-  }
-  return res.json();
-}
-
-export async function crearVinculoDocPubli(idPublicacion, idDocumento) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/CrearVinculoDocPubli/${idPublicacion}/${idDocumento}`,
-    getHeaders("POST")
-  );
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`CrearVinculoDocPubli ${res.status}: ${err}`);
-  }
-  return res.json();
-}
-
-export async function descargarDocumentoPorId(idDocumento) {
-  const res = await fetch(
-    `${appConfig.apiUrl}/api/Prensa/DescargarDocumentoXId/${idDocumento}`,
-    getHeaders("GET")
-  );
-
-  if (!res.ok) {
-    throw new Error(`Error ${res.status}`);
-  }
-
-  const contentType = (res.headers.get("Content-Type") || "").toLowerCase();
-
-  if (contentType.includes("application/json")) {
-    return res.json();
-  }
-
-  if (contentType.startsWith("image/") || contentType.includes("application/pdf")) {
-    const blob = await res.blob();
-    const dataUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-
-    const disposition = res.headers.get("Content-Disposition") || "";
-    const fileNameMatch = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
-    const fileName = fileNameMatch?.[1] ? decodeURIComponent(fileNameMatch[1].replace(/"/g, "")) : "documento";
-    
-    const extension = contentType?.includes("application/pdf")
-      ? "pdf"
-      : contentType?.split("/")[1] || "jpg";
-
-    return {
-      id: idDocumento,
-      nombre_documento: fileName,
-      datos_documento: dataUrl,
-      extension,
-    };
-  }
-
-  throw new Error("Formato de respuesta no soportado");
-}
-
-export async function ObtenerNoticiasPublicas(){
+export async function ObtenerNoticiasPublicas() {
   try {
-    const response = await fetch(`${appConfig.apiUrl}/api/Prensa/ListarPublicacionesActivas`, { headers: { "ngrok-skip-browser-warning": "true" } });
+    const response = await apiRequest(
+      '/api/Prensa/ListarPublicacionesActivas',
+      { auth: false, includeHeaders: true },
+    );
 
-    switch (response.status) {
-
-      case 200:
-      {
-        const data = await response.json();
-
-        let  listaPublicaciones =data.map(mapPublicacionPublica);
-        //console.log(listaPublicaciones);
-        //Se ordena el listado obtenido de acuerdo a su prioridad
-        listaPublicaciones=[...listaPublicaciones].sort((a, b) => b.prioridad - a.prioridad);
-        //console.log("Lista de publicaciones obtenida: ", listaPublicaciones);
-        return {success:true,data:listaPublicaciones,message:""};
-      }
-      case 204:
-        return {
-          success: false,
-          data:[],
-          message: "No hay publicaciones a listar"
-        };
-      case 400:
-        return {
-          success: false,
-          data:null,
-          message: "Se envio parametros a una vista"
-        };
-      case 401:
-
-        return {
-          success: false,
-          data:null,
-          message: "Paso a usar JWT el endpoint"
-        };
-
-      case 409:
-        return {
-          success: false,
-          data:null,
-          message: "Conflicto en la base de datos"
-        };
-
-      case 500:
-        return {
-          success: false,
-          data:null,
-          message: "Error interno del servidor"
-        };
-
-      default:
-
-        return {
-          success: false,
-          data:null,
-          message: "Respuesta desconocida"
-        };
+    if (response.status === 204 || !response.data?.length) {
+      return {
+        success: false,
+        data: [],
+        message: 'No hay publicaciones a listar',
+      };
     }
+
+    const publications = response.data
+      .map(mapPublicacionPublica)
+      .sort((a, b) => b.prioridad - a.prioridad);
+
+    return { success: true, data: publications, message: '' };
   } catch (error) {
-    console.log("Error: "+error)
     return {
       success: false,
-      data:null,
-      message: "Error no contemplado"
+      data: null,
+      message:
+        error instanceof ApiError
+          ? PUBLIC_NEWS_ERRORS[error.status] ?? error.message
+          : 'Error no contemplado',
     };
   }
 }
 
-export function getDownloadUrl(id){
-  return `${appConfig.apiUrl}/api/Prensa/DescargarDocumentoXId/${id}`;
+export function getDownloadUrl(id) {
+  return resolveApiUrl(
+    `/api/Prensa/DescargarDocumentoXId/${encodeURIComponent(id)}`,
+  );
 }
-

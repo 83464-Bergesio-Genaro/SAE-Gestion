@@ -985,9 +985,7 @@ export function SectionGridCard({
                   letterSpacing: "0.05em",
                   textTransform: "uppercase",
                   color:
-                    activeSection === key
-                      ? "white"
-                      : "rgba(255,255,255,0.6)",
+                    activeSection === key ? "white" : "rgba(255,255,255,0.6)",
                   borderBottom:
                     activeSection === key
                       ? "3px solid white"
@@ -1031,7 +1029,7 @@ export function SectionGridCard({
 
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
               <SAETextField
-                placeholder="Buscar en esta gestión..."
+                placeholder="Buscar..."
                 size="small"
                 value={busquedaGestion}
                 onChange={(e) => setBusquedaGestion(e.target.value)}
@@ -1042,6 +1040,25 @@ export function SectionGridCard({
                         <SearchIcon />
                       </InputAdornment>
                     ),
+                  },
+                }}
+                sx={{
+                  width: { xs: "100%", sm: 240, md: 220 },
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "rgba(255,255,255,0.12)",
+                    color: "white",
+                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255,255,255,0.6)",
+                    },
+                    "&.Mui-focused fieldset": { borderColor: "white" },
+                  },
+                  "& input::placeholder": {
+                    color: "rgba(255,255,255,0.7)",
+                    opacity: 1,
+                  },
+                  "& .MuiInputAdornment-root svg": {
+                    color: "rgba(255,255,255,0.7)",
                   },
                 }}
               />

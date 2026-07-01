@@ -1,89 +1,81 @@
-import { appConfig } from "../config/appConfig";
+import { ApiError, apiRequest } from './apiClient';
+
+const LOGIN_ERROR_MESSAGES = {
+  204: 'Usuario no encontrado',
+  401: 'Credenciales incorrectas',
+  409: 'Conflicto en la sesión',
+  500: 'Error interno del servidor',
+};
+
+const UPDATE_USER_ERROR_MESSAGES = {
+  400: 'Datos inválidos',
+  401: 'No autorizado',
+  404: 'Usuario no encontrado',
+  500: 'Error interno del servidor',
+};
+
+function errorResult(error, messages) {
+  if (error instanceof ApiError) {
+    return {
+      success: false,
+      message: messages[error.status] ?? error.message ?? 'Respuesta desconocida',
+    };
+  }
+
+  return {
+    success: false,
+    message: 'Error de conexión',
+    error,
+  };
+}
 
 export default async function ObtenerTokenJWT(legajo, dominio, password) {
   try {
-
-    const response = await fetch(
-      `${appConfig.apiUrl}/api/Usuarios/ObtenerTokenJWT/${legajo}/${dominio}/${password}`,
-      { headers: { "ngrok-skip-browser-warning": "true" } },
+    const response = await apiRequest(
+      `/api/Usuarios/ObtenerTokenJWT/${encodeURIComponent(legajo)}/${encodeURIComponent(dominio)}/${encodeURIComponent(password)}`,
+      {
+        auth: false,
+        includeHeaders: true,
+      },
     );
 
-    switch (response.status) {
-      case 201: {
-        const data = await response.json();
-        return { success: true, data };
-      }
-      case 204:
-        return {
-          success: false,
-          message: "Usuario no encontrado",
-        };
-
-      case 401:
-        return {
-          success: false,
-          message: "Credenciales incorrectas",
-        };
-
-      case 409:
-        return {
-          success: false,
-          message: "Conflicto en la sesión",
-        };
-
-      case 500:
-        return {
-          success: false,
-          message: "Error interno del servidor",
-        };
-
-      default:
-        return {
-          success: false,
-          message: "Respuesta desconocida",
-        };
+    if (response.status === 201) {
+      return { success: true, data: response.data };
     }
-  } catch (error) {
-    console.log("Error: " + error);
+
     return {
       success: false,
-      message: "Error no contemplado",
+      message:
+        LOGIN_ERROR_MESSAGES[response.status] ?? 'Respuesta desconocida',
     };
+  } catch (error) {
+    return errorResult(error, LOGIN_ERROR_MESSAGES);
   }
 }
 
 export async function ModificarUsuario(id, payload, token) {
   try {
-    const response = await fetch(
-      `${appConfig.apiUrl}/api/Usuarios/ModificarUsuario/${id}`,
+    const response = await apiRequest(
+      `/api/Usuarios/ModificarUsuario/${encodeURIComponent(id)}`,
       {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify(payload),
-      }
+        method: 'PUT',
+        body: payload,
+        token,
+        includeHeaders: true,
+      },
     );
-    switch (response.status) {
-      case 200:
-      case 201: {
-        const data = await response.json();
-        return { success: true, data };
-      }
-      case 400:
-        return { success: false, message: "Datos inválidos" };
-      case 401:
-        return { success: false, message: "No autorizado" };
-      case 404:
-        return { success: false, message: "Usuario no encontrado" };
-      case 500:
-        return { success: false, message: "Error interno del servidor" };
-      default:
-        return { success: false, message: "Respuesta desconocida" };
+
+    if (response.status === 200 || response.status === 201) {
+      return { success: true, data: response.data };
     }
+
+    return {
+      success: false,
+      message:
+        UPDATE_USER_ERROR_MESSAGES[response.status] ??
+        'Respuesta desconocida',
+    };
   } catch (error) {
-    return { success: false, message: "Error de conexión ",error };
+    return errorResult(error, UPDATE_USER_ERROR_MESSAGES);
   }
 }

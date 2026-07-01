@@ -28,7 +28,16 @@ function DashboardCard({ item, onClick }) {
             }
       }}
     >
-      <CardActionArea onClick={onClick} sx={{ height: "100%" }}>
+      <CardActionArea
+        onClick={onClick}
+        disableRipple
+        sx={{
+          height: "100%",
+          bgcolor: "transparent",
+          "&:hover": { bgcolor: "transparent" },
+          "& .MuiCardActionArea-focusHighlight": { opacity: 0 },
+        }}
+      >
         <CardContent sx={{ p: 3, minHeight: 170 }}>
           <Stack spacing={2} sx={{ height: "100%" }}>
             <Box

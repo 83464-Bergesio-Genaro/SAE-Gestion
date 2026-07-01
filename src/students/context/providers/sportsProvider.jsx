@@ -57,11 +57,9 @@ export function SportsProvider({ children }) {
   const showSnackbar = useCallback((message, severity = "success") => {
     showSnackbarState(setSnackbar, message, severity);
   }, []);
-  const closeSnackbar = () =>
-    closeSnackbarState(setSnackbar);
+  const closeSnackbar = () => closeSnackbarState(setSnackbar);
 
-  const closePreview = () =>
-    closePreviewState(setPreview);
+  const closePreview = () => closePreviewState(setPreview);
 
   const closeDeleteDialog = () => setOpenPopup(false);
 
@@ -191,7 +189,6 @@ export function SportsProvider({ children }) {
 
   const loadSportsmanSchedules = async (sportsman) => {
     const data = await obtenerHorariosDeportista(sportsman.id);
-    console.log(data);
     setHorariosDeportista(data);
     return data;
   };

@@ -8,6 +8,7 @@ import {
   ObtenerPerfilXLegajo,
   ModificarPerfilEstudiante,
 } from "../../../api/EstudianteService";
+import { listarDocumentacionXLegajo } from "../../../api/BecasService";
 import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
 import { ProfileContext } from "../../../students/context/studentContext";
 import { useAuth } from "../sharedContext";
@@ -39,7 +40,7 @@ const REQUIRED_FIELDS = [
   ["direccion", "Dirección"],
 ];
 
-export const ProfileContextProvider = ({ children }) => {
+export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
   const { user } = useAuth();
   const [formError, setFormError] = useState(null);
   // Estados de Notificación
@@ -49,6 +50,8 @@ export const ProfileContextProvider = ({ children }) => {
   //ESTADOS
   const [datosPerfil, setDatosPerfil] = useState({});
   const [loadingPerfil, setLoadingPerfil] = useState(false);
+  const [documentosPerfil, setDocumentosPerfil] = useState([]);
+  const [loadingDocumentos, setLoadingDocumentos] = useState(false);
   const [saveAttempted, setSaveAttempted] = useState(false);
 
   const fetchDatosPerfil = useCallback(async (legajo) => {
@@ -69,6 +72,24 @@ export const ProfileContextProvider = ({ children }) => {
   useEffect(() => {
     fetchDatosPerfil(user?.legajo);
   }, [fetchDatosPerfil, user?.legajo]);
+
+  useEffect(() => {
+    const fetchDocumentos = async () => {
+      if (!loadDocuments || !user?.email) return;
+      setLoadingDocumentos(true);
+
+      try {
+        const data = await listarDocumentacionXLegajo(user.email);
+        setDocumentosPerfil(Array.isArray(data) ? data : []);
+      } catch {
+        setDocumentosPerfil([]);
+      } finally {
+        setLoadingDocumentos(false);
+      }
+    };
+
+    fetchDocumentos();
+  }, [loadDocuments, user?.email]);
 
   const handleChange = useCallback((field, value) => {
     setDatosPerfil((prev) => ({ ...prev, [field]: value }));
@@ -203,6 +224,8 @@ export const ProfileContextProvider = ({ children }) => {
         profileInitials: getInitials(user?.nombre),
         datosPerfil,
         loadingPerfil,
+        documentosPerfil,
+        loadingDocumentos,
         setDatosPerfil,
         handleChange,
         handleMaskedChange,

@@ -23,7 +23,10 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-import { useAuth, useNotification } from "../../../shared/context/sharedContext";
+import {
+  useAuth,
+  useNotification,
+} from "../../../shared/context/sharedContext";
 import { useHealth } from "../../context/studentContext";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useEffect } from "react";
@@ -54,7 +57,11 @@ import BloodtypeIcon from "@mui/icons-material/Bloodtype";
 
 import { calendarDays } from "../../../utils/constants";
 import { SAETypography } from "../../../shared/components/typography/SAETypography";
-import { formatearFecha, mostrarHorasMinutos, ScaleText } from "../../../utils/util";
+import {
+  formatearFecha,
+  mostrarHorasMinutos,
+  ScaleText,
+} from "../../../utils/util";
 import { DataGrid } from "@mui/x-data-grid";
 
 const PALETTE = [
@@ -66,13 +73,12 @@ const PALETTE = [
   "#F1C6A3", //Reprogramado
 ];
 
-const COURSE_PALLETE = [
-  "#C8C1DF", //Pendiente
-  "#BFEBA2", //Asignado
-  "#AB95EE", //Cancelado
-  "#AC829F", //En curso
-  "#F6F399", //Finalizado
-  "#B3A4A4", //Reprogramado
+const COURSE_PALETTE = [
+  "#C8C1DF",
+  "#BFEBA2",
+  "#AB95EE",
+  "#F6F399",
+  "#F1C6A3",
 ];
 
 const settings = {
@@ -174,7 +180,6 @@ const agruparPorEspecialidad = (horariosMapeados) => {
 };
 
 export function EmployedStudentContent() {
-  
   const { user } = useAuth();
 
   const {
@@ -191,7 +196,7 @@ export function EmployedStudentContent() {
     turnsColumns,
     openCreateTurnos,
     openShowTurnos,
-    openDeleteTurnos
+    openDeleteTurnos,
   } = useHealth();
 
   useEffect(() => {
@@ -202,450 +207,53 @@ export function EmployedStudentContent() {
 
   return (
     <SAEPage>
-        <StudentHeaderPage
-          title={"Salud"}
-          description={
-            "Permite sacar turnos médicos y ver los cursos disponibles"
-          }
-          backgroundImage="images/varias/campus.jpg"
-          icon={HealingIcon}
-        />
+      <StudentHeaderPage
+        title={"Salud"}
+        description={
+          "Permite sacar turnos médicos y ver los cursos disponibles"
+        }
+        backgroundImage="images/varias/campus.jpg"
+        icon={HealingIcon}
+      />
 
-        <TitleBox
-          title="Servicios para Alumnos"
-          description="Especialidades médicas disponibles para solicitar turnos"
-        />
-      
-        <Card
-          sx={{
-            position: "relative",
-            background: "var(--gradient)",
-            borderRadius: 6,
-            overflow: "hidden",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              width: 400,
-              height: 400,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.08)",
-              top: -150,
-              right: -150,
-            },
-          }}
+      <TitleBox
+        title="Servicios para Alumnos"
+        description="Especialidades médicas disponibles para solicitar turnos"
+      />
+
+      <Card
+        sx={{
+          position: "relative",
+          background: "var(--gradient)",
+          borderRadius: 6,
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            width: 400,
+            height: 400,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            top: -150,
+            right: -150,
+          },
+        }}
+      >
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          alignItems="center"
+          spacing={1.5}
+          p={5}
         >
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            alignItems="center"
-            spacing={1.5}
-            p={5}
-          >
-            {loadingHorarios && (
-              <Stack alignItems="center" width={"100%"} gap={1}>
-                <SAESpinner size="S" />
-              </Stack>
-            )}
-            {!loadingHorarios && (
-              <Box
-                sx={{
-                  px: { xs: 2, sm: 4 },
-                  width: "100%",
-                  boxSizing: "border-box",
-                  overflow: "hidden",
-                  "& .slick-slider": {
-                    width: "100%",
-                    touchAction: "pan-y",
-                  },
-                  "& .slick-list": {
-                    margin: "0 -10px",
-                  },
-                  "& .slick-slide": {
-                    padding: "0 10px",
-                    boxSizing: "border-box",
-                    height: "auto",
-                    "& > div": {
-                      width: "100%",
-                    },
-                  },
-                }}
-              >
-                <Slider {...settingsSchedule}>
-                  {horariosAgrupados.map((especialidad, index) => {
-                    const IconoDinamico =
-                      MEDICINE_ICONS[index % MEDICINE_ICONS.length];
-                    return (
-                      <Card
-                        key={especialidad.id_especialidad}
-                        variant="outlined"
-                        sx={{
-                          minWidth: 300,
-                          maxWidth: 300,
-                          minHeight: 400,
-                          maxHeight: 400,
-                          borderRadius: 4,
-                          my: 3,
-                          background:
-                            "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)", //GRADIENTE??
-                          border: "1px solid #DCE7F5",
-                          boxShadow: "0 10px 25px rgba(18,54,102,0.12)",
-                          transition: "all .3s ease",
-                          "&:hover": {
-                            transform: "translateY(-6px)",
-                            boxShadow: "0 18px 40px rgba(18,54,102,0.20)",
-                          },
-                          // NUEVO: Hacemos que la tarjeta sea un contenedor Flex vertical
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
-                        {/* NUEVO: Forzamos a CardContent a ocupar el 100% del alto y usar Flexbox */}
-                        <CardContent
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            height: "100%",
-                            p: 2,
-                            "&:last-child": { pb: 2 },
-                          }}
-                        >
-                          {/* SECCIÓN 1: CABECERA (Alto fijo implícito por el icono de 55px) */}
-                          <Stack
-                            direction="row"
-                            justifyContent="flex-start"
-                            alignItems="center"
-                            spacing={2}
-                          >
-                            <Box
-                              sx={{
-                                width: 55,
-                                height: 60,
-                                borderRadius: "50%",
-                                bgcolor: "#E7F1FF",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <IconoDinamico
-                                sx={{ fontSize: 30, color: "#2A548B" }}
-                              />
-                            </Box>
-                            <SAETypography variant="h6" fontWeight="bold" noWrap>
-                              {especialidad.nombre_especialidad}
-                            </SAETypography>
-                          </Stack>
-
-                          <Divider sx={{ my: 1 }} />
-
-                          {/* NUEVO: Stack intermedio que se estira para ocupar el espacio y empujar el botón */}
-                          <Stack
-                            sx={{
-                              flexGrow: 1,
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            {/* SECCIÓN 2: DESCRIPCIÓN (Le damos un alto fijo para que no mueva lo demás) */}
-                            <Box sx={{ height: "80px", overflow: "hidden" }}>                       
-                              <ScaleText
-                                text={ especialidad?.descripcion_especialidad ?? ""}
-                                maxWidth={"300px"}
-                                maxHeight={"80px"}
-                              />
-                            </Box>
-
-                            <Divider sx={{ my: 0.5, borderStyle: "dashed" }} />
-
-                            {/* SECCIÓN 3: HORARIOS Y PROFESIONAL (Alto fijo y control de scroll por si hay muchos días) */}
-                            <Box
-                              sx={{
-                                height: "90px",
-                                overflowY: "auto",
-                                pr: 0.5,
-                              }}
-                              my={2}
-                            >
-                              <SAETypography
-                                variant="body2"
-                                fontWeight="bold"
-                                color="var(--secondary)"
-                              >
-                                Horarios de Atención:
-                              </SAETypography>
-
-                              {especialidad.diasYHorarios.map((item, index) => {
-                                const diaEncontrado = calendarDays.find(
-                                  (d) => d.value === item.dia,
-                                );
-                                const nombreDia = diaEncontrado
-                                  ? diaEncontrado.label
-                                  : "Día no asignado";
-
-                                return (
-                                  <Stack
-                                    key={index}
-                                    direction="row"
-                                    alignItems="center"
-                                    gap={1}
-                                    sx={{ mt: 0.5 }}
-                                  >
-                                    <AccessTimeIcon
-                                      fontSize="small"
-                                      color="action"
-                                    />
-                                    <SAETypography variant="body2">
-                                      <strong>{nombreDia}:</strong>{" "}
-                                      {mostrarHorasMinutos(item.hora_inicio)} a{" "}
-                                      {mostrarHorasMinutos(item.hora_fin)}
-                                    </SAETypography>
-                                  </Stack>
-                                );
-                              })}
-                            </Box>
-                            <SAETypography variant="body2" sx={{ pt: 1.5 }}>
-                              <strong>{"Profesional: "}</strong>
-                              {especialidad.especialista}
-                            </SAETypography>
-                            {/* SECCIÓN EN EL FONDO: EL BOTÓN (Queda alineado abajo siempre igual) */}
-                            <SAEButton
-                              variant="contained"
-                              onClick={() =>
-                                openCreateTurnos(
-                                  user.email,
-                                  especialidad.id_especialidad,
-                                  especialidad.diasYHorarios,
-                                )
-                              }
-                              sx={{
-                                whiteSpace: "nowrap",
-                                color: "white",
-                                border: "1px solid rgba(255,255,255,0.4)",
-                                mt: 1, // Pequeño margen superior de seguridad
-                              }}
-                            >
-                              Pedir Turno
-                            </SAEButton>
-                          </Stack>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </Slider>
-              </Box>
-            )}
-          </Stack>
-        </Card>
-
-        <TitleBox
-          title="Turnos Activos"
-          description="Podrás ver aquellos turnos que tengas activos en estos días."
-        />
-
-        <Card
-          sx={{
-            position: "relative",
-            p: 2,
-            background: "var(--gradient)",
-            borderRadius: 6,
-            overflow: "hidden",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              width: 400,
-              height: 400,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.08)",
-              top: -150,
-              right: -150,
-            },
-          }}
-        >
-          {loadingTurnos && (
-            <Grid
-              width={"100%"}
-              container
-              alignItems="center"
-              justifyContent="center"
-            >
-              <SAESpinner></SAESpinner>
-            </Grid>
-          )}
-          {!loadingTurnos && estudianteTurnos.length === 0 && (
-            <SAETypography
-              variant="h3"
-              fontWeight="bold"
-              sx={{
-                color: "white",
-                pt: { xs: 2, md: 4 },
-                fontSize: { xs: "1.5em", md: "2.5em" },
-                textAlign: { xs: "center" },
-              }}
-            >
-              No hay turnos activos
-            </SAETypography>
-          )}
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            alignItems="center"
-            width={"100%"}
-            spacing={1.5}
-            p={2}
-          >
-            {!loadingTurnos &&
-              estudianteTurnos.length > 0 &&
-              //ESTAS SON LAS TARJETAS QUE VES ADENTRO DEL COMPONENTE
-              estudianteTurnos.map((turno) => (
-                <Card
-                  key={turno.id}
-                  variant="outlined"
-                  sx={{
-                    minWidth: 350,
-                    maxWidth: 350,
-                    color: "var(--textBlack)",
-                    my: 2,
-                    borderRadius: 2,
-                    p: 1.1,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                    transition: "background-color 0.3s ease, width 0.3s ease",
-                  }}
-                >
-                  <CardContent sx={{ "&:last-child": { paddingBottom: 2 } }}>
-                    {/* Cabecera: Nombre y Estado */}
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      mb={1.5}
-                    >
-                      <SAETypography
-                        variant="subtitle1"
-                        fontWeight="bold"
-                        noWrap
-                        sx={{ maxWidth: "140px" }}
-                      >
-                        {turno.fecha_solicitud || "Fecha Solicitud"}
-                      </SAETypography>
-                      <Chip
-                        label={turno.estado || "Sin Definir"}
-                        size="small"
-                        sx={{
-                          bgcolor: PALETTE[turno.id_estado_turno],
-                          color: "var(--textBlack)",
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                        }}
-                      />
-                    </Stack>
-
-                    <Divider sx={{ my: 1 }} />
-
-                    {/* Datos Mínimos: Fecha y Hora */}
-                    <Stack spacing={1} mt={1.5}>
-                      <SAETypography variant="body2">
-                        <strong>{"Solicitante: "}</strong>
-                        <br />
-                        {turno.paciente || "Error recuperando el nombre"}
-                      </SAETypography>
-                      <SAETypography variant="body2">
-                        <strong>{"Asunto: "}</strong>
-                        <br />
-                        {turno.asunto || "Turno sin Asunto"}
-                      </SAETypography>
-                      <SAETypography variant="body2">
-                        <strong>{"Atiende: "}</strong>
-                        <br />
-                        {turno.especialista || "Sin médico asignado"}
-                      </SAETypography>
-                      <Stack direction="row" alignItems="center" gap={1}>
-                        <CalendarMonthIcon fontSize="medium" />
-                        <SAETypography variant="body2">
-                          {turno.fecha_atencion || "Sin Fecha Asignada"}
-                        </SAETypography>
-                      </Stack>
-
-                      <Stack direction="row" alignItems="center" gap={1}>
-                        <AccessTimeIcon fontSize="medium" />
-                        <SAETypography variant="body2">
-                          {turno.hora_atencion || "Sin Horario Asignado"}
-                        </SAETypography>
-                      </Stack>
-                    </Stack>
-                    <Stack spacing={2} mt={1.5} p={2}>
-                      <SAEButton
-                        variant="contained"
-                        onClick={() => openShowTurnos(turno)}
-                        sx={{
-                          whiteSpace: "nowrap",
-                          color: "var(--textWhite)",
-                          border: "1px solid rgba(255,255,255,0.4)",
-                        }}
-                      >
-                        Ver datos turno
-                      </SAEButton>
-                      <SAEButton
-                        variant="contained"
-                        color="error"
-                        onClick={() => openDeleteTurnos(turno)}
-                        sx={{
-                          whiteSpace: "nowrap",
-                          color: "white",
-                          border: "1px solid rgba(255,255,255,0.4)",
-                        }}
-                      >
-                        Eliminar Turno
-                      </SAEButton>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              ))}
-          </Stack>
-        </Card>
-
-        <TitleBox
-          title="Cursos y Capacitaciones"
-          description=" Descubrí que lo primero es la salud"
-        />
-
-        <Card
-          sx={{
-            position: "relative",
-            background: "var(--gradient)",
-            borderRadius: 6,
-            overflow: "hidden",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              width: 400,
-              height: 400,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.08)",
-              top: -150,
-              right: -150,
-            },
-          }}
-        >
-          {loadingCursos && (
+          {loadingHorarios && (
             <Stack alignItems="center" width={"100%"} gap={1}>
               <SAESpinner size="S" />
             </Stack>
           )}
-          {!loadingCursos && cursos.length === 0 && (
-            <SAETypography
-              variant="h3"
-              fontWeight="bold"
-              sx={{
-                pt: { xs: 2, md: 4 },
-                fontSize: { xs: "0.5em", md: "1.5em" },
-                textAlign: { xs: "center" },
-              }}
-            >
-              No hay cursos actualmente activos
-            </SAETypography>
-          )}
-          {!loadingTurnos && cursos.length > 0 && (
+          {!loadingHorarios && (
             <Box
               sx={{
                 px: { xs: 2, sm: 4 },
-                py: 3,
                 width: "100%",
                 boxSizing: "border-box",
                 overflow: "hidden",
@@ -666,60 +274,500 @@ export function EmployedStudentContent() {
                 },
               }}
             >
-              <Slider {...settings}>
-                {cursos.map((curso, index) => (
-                  <div key={curso.id || index} style={{ width: "100%" }}>
+              <Slider {...settingsSchedule}>
+                {horariosAgrupados.map((especialidad, index) => {
+                  const IconoDinamico =
+                    MEDICINE_ICONS[index % MEDICINE_ICONS.length];
+                  return (
                     <Card
+                      key={especialidad.id_especialidad}
+                      variant="outlined"
                       sx={{
-                        minWidth: "300px",
-                        height: 220,
+                        minWidth: 300,
+                        maxWidth: 300,
+                        minHeight: 400,
+                        maxHeight: 400,
                         borderRadius: 4,
+                        my: 3,
+                        background:
+                          "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)", //GRADIENTE??
+                        border: "1px solid #DCE7F5",
+                        boxShadow: "0 10px 25px rgba(18,54,102,0.12)",
+                        transition: "all .3s ease",
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: "0 18px 40px rgba(18,54,102,0.20)",
+                        },
+                        // NUEVO: Hacemos que la tarjeta sea un contenedor Flex vertical
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      {/* NUEVO: Forzamos a CardContent a ocupar el 100% del alto y usar Flexbox */}
+                      <CardContent
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          height: "100%",
+                          p: 2,
+                          "&:last-child": { pb: 2 },
+                        }}
+                      >
+                        {/* SECCIÓN 1: CABECERA (Alto fijo implícito por el icono de 55px) */}
+                        <Stack
+                          direction="row"
+                          justifyContent="flex-start"
+                          alignItems="center"
+                          spacing={2}
+                        >
+                          <Box
+                            sx={{
+                              width: 55,
+                              height: 60,
+                              borderRadius: "50%",
+                              bgcolor: "#E7F1FF",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <IconoDinamico
+                              sx={{ fontSize: 30, color: "#2A548B" }}
+                            />
+                          </Box>
+                          <SAETypography variant="h6" fontWeight="bold" noWrap>
+                            {especialidad.nombre_especialidad}
+                          </SAETypography>
+                        </Stack>
+
+                        <Divider sx={{ my: 1 }} />
+
+                        {/* NUEVO: Stack intermedio que se estira para ocupar el espacio y empujar el botón */}
+                        <Stack
+                          sx={{
+                            flexGrow: 1,
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          {/* SECCIÓN 2: DESCRIPCIÓN (Le damos un alto fijo para que no mueva lo demás) */}
+                          <Box sx={{ height: "80px", overflow: "hidden" }}>
+                            <ScaleText
+                              text={
+                                especialidad?.descripcion_especialidad ?? ""
+                              }
+                              maxWidth={"300px"}
+                              maxHeight={"80px"}
+                            />
+                          </Box>
+
+                          <Divider sx={{ my: 0.5, borderStyle: "dashed" }} />
+
+                          {/* SECCIÓN 3: HORARIOS Y PROFESIONAL (Alto fijo y control de scroll por si hay muchos días) */}
+                          <Box
+                            sx={{
+                              height: "90px",
+                              overflowY: "auto",
+                              pr: 0.5,
+                            }}
+                            my={2}
+                          >
+                            <SAETypography
+                              variant="body2"
+                              fontWeight="bold"
+                              color="var(--secondary)"
+                            >
+                              Horarios de Atención:
+                            </SAETypography>
+
+                            {especialidad.diasYHorarios.map((item, index) => {
+                              const diaEncontrado = calendarDays.find(
+                                (d) => d.value === item.dia,
+                              );
+                              const nombreDia = diaEncontrado
+                                ? diaEncontrado.label
+                                : "Día no asignado";
+
+                              return (
+                                <Stack
+                                  key={index}
+                                  direction="row"
+                                  alignItems="center"
+                                  gap={1}
+                                  sx={{ mt: 0.5 }}
+                                >
+                                  <AccessTimeIcon
+                                    fontSize="small"
+                                    color="action"
+                                  />
+                                  <SAETypography variant="body2">
+                                    <strong>{nombreDia}:</strong>{" "}
+                                    {mostrarHorasMinutos(item.hora_inicio)} a{" "}
+                                    {mostrarHorasMinutos(item.hora_fin)}
+                                  </SAETypography>
+                                </Stack>
+                              );
+                            })}
+                          </Box>
+                          <SAETypography variant="body2" sx={{ pt: 1.5 }}>
+                            <strong>{"Profesional: "}</strong>
+                            {especialidad.especialista}
+                          </SAETypography>
+                          {/* SECCIÓN EN EL FONDO: EL BOTÓN (Queda alineado abajo siempre igual) */}
+                          <SAEButton
+                            variant="contained"
+                            onClick={() =>
+                              openCreateTurnos(
+                                user.legajo,
+                                especialidad.id_especialidad,
+                                especialidad.diasYHorarios,
+                              )
+                            }
+                            sx={{
+                              whiteSpace: "nowrap",
+                              color: "white",
+                              border: "1px solid rgba(255,255,255,0.4)",
+                              mt: 1, // Pequeño margen superior de seguridad
+                            }}
+                          >
+                            Pedir Turno
+                          </SAEButton>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </Slider>
+            </Box>
+          )}
+        </Stack>
+      </Card>
+
+      <TitleBox
+        title="Turnos Activos"
+        description="Podrás ver aquellos turnos que tengas activos en estos días."
+      />
+
+      <Card
+        sx={{
+          position: "relative",
+          p: 2,
+          background: "var(--gradient)",
+          borderRadius: 6,
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            width: 400,
+            height: 400,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            top: -150,
+            right: -150,
+          },
+        }}
+      >
+        {loadingTurnos && (
+          <Grid
+            width={"100%"}
+            container
+            alignItems="center"
+            justifyContent="center"
+          >
+            <SAESpinner></SAESpinner>
+          </Grid>
+        )}
+        {!loadingTurnos && estudianteTurnos.length === 0 && (
+          <SAETypography
+            variant="h3"
+            fontWeight="bold"
+            sx={{
+              color: "white",
+              pt: { xs: 2, md: 4 },
+              fontSize: { xs: "1.5em", md: "2.5em" },
+              textAlign: { xs: "center" },
+            }}
+          >
+            No hay turnos activos
+          </SAETypography>
+        )}
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          alignItems="center"
+          width={"100%"}
+          spacing={1.5}
+          p={2}
+        >
+          {!loadingTurnos &&
+            estudianteTurnos.length > 0 &&
+            //ESTAS SON LAS TARJETAS QUE VES ADENTRO DEL COMPONENTE
+            estudianteTurnos.map((turno) => (
+              <Card
+                key={turno.id}
+                variant="outlined"
+                sx={{
+                  minWidth: 350,
+                  maxWidth: 350,
+                  color: "var(--textBlack)",
+                  my: 2,
+                  borderRadius: 2,
+                  p: 1.1,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  transition: "background-color 0.3s ease, width 0.3s ease",
+                }}
+              >
+                <CardContent sx={{ "&:last-child": { paddingBottom: 2 } }}>
+                  {/* Cabecera: Nombre y Estado */}
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={1.5}
+                  >
+                    <SAETypography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      noWrap
+                      sx={{ maxWidth: "140px" }}
+                    >
+                      {turno.fecha_solicitud || "Fecha Solicitud"}
+                    </SAETypography>
+                    <Chip
+                      label={turno.estado || "Sin Definir"}
+                      size="small"
+                      sx={{
+                        bgcolor: PALETTE[turno.id_estado_turno],
+                        color: "var(--textBlack)",
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                      }}
+                    />
+                  </Stack>
+
+                  <Divider sx={{ my: 1 }} />
+
+                  {/* Datos Mínimos: Fecha y Hora */}
+                  <Stack spacing={1} mt={1.5}>
+                    <SAETypography variant="body2">
+                      <strong>{"Solicitante: "}</strong>
+                      <br />
+                      {turno.paciente || "Error recuperando el nombre"}
+                    </SAETypography>
+                    <SAETypography variant="body2">
+                      <strong>{"Asunto: "}</strong>
+                      <br />
+                      {turno.asunto || "Turno sin Asunto"}
+                    </SAETypography>
+                    <SAETypography variant="body2">
+                      <strong>{"Atiende: "}</strong>
+                      <br />
+                      {turno.especialista || "Sin médico asignado"}
+                    </SAETypography>
+                    <Stack direction="row" alignItems="center" gap={1}>
+                      <CalendarMonthIcon fontSize="medium" />
+                      <SAETypography variant="body2">
+                        {turno.fecha_atencion || "Sin Fecha Asignada"}
+                      </SAETypography>
+                    </Stack>
+
+                    <Stack direction="row" alignItems="center" gap={1}>
+                      <AccessTimeIcon fontSize="medium" />
+                      <SAETypography variant="body2">
+                        {turno.hora_atencion || "Sin Horario Asignado"}
+                      </SAETypography>
+                    </Stack>
+                  </Stack>
+                  <Stack spacing={2} mt={1.5} p={2}>
+                    <SAEButton
+                      variant="contained"
+                      onClick={() => openShowTurnos(turno)}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "var(--textWhite)",
+                        border: "1px solid rgba(255,255,255,0.4)",
+                      }}
+                    >
+                      Ver datos turno
+                    </SAEButton>
+                    <SAEButton
+                      variant="contained"
+                      color="error"
+                      onClick={() => openDeleteTurnos(turno)}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: "white",
+                        border: "1px solid rgba(255,255,255,0.4)",
+                      }}
+                    >
+                      Eliminar Turno
+                    </SAEButton>
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+        </Stack>
+      </Card>
+
+      <TitleBox
+        title="Cursos y Capacitaciones"
+        description=" Descubrí que lo primero es la salud"
+      />
+
+      <Card
+        sx={{
+          position: "relative",
+          background: "var(--gradient)",
+          borderRadius: 6,
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            width: 400,
+            height: 400,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            top: -150,
+            right: -150,
+          },
+        }}
+      >
+        <Stack>
+          {loadingCursos && (
+            <Stack alignItems="center" width={"100%"} gap={1}>
+              <SAESpinner size="S" />
+            </Stack>
+          )}
+          {!loadingCursos && cursos.length === 0 && (
+            <SAETypography
+              variant="h3"
+              fontWeight="bold"
+              sx={{
+                pt: { xs: 2, md: 4 },
+                fontSize: { xs: "0.5em", md: "1.5em" },
+                textAlign: { xs: "center" },
+              }}
+            >
+              No hay cursos actualmente activos
+            </SAETypography>
+          )}
+          {!loadingCursos && cursos.length > 0 && (
+            <Box
+              sx={{
+                px: { xs: 0, sm: 4 },
+                width: "100%",
+                boxSizing: "border-box",
+                overflow: "hidden",
+                "& .slick-slider": {
+                  width: "100%",
+                  touchAction: "pan-y",
+                },
+                "& .slick-list": {
+                  margin: { xs: 0, sm: "0 -10px" },
+                },
+                "& .slick-slide": {
+                  padding: { xs: "0 5px", sm: "0 10px" },
+                  boxSizing: "border-box",
+                  height: "auto",
+                  "& > div": {
+                    width: "100%",
+                  },
+                },
+              }}
+            >
+              <Slider {...settings}>
+                {cursos.map((curso, index) => {
+                  return (
+                    <Card
+                      key={curso.id || index}
+                      variant="outlined"
+                      sx={{
+                        width: { xs: "calc(100% - 10px)", sm: 300 },
+                        minWidth: { xs: 0, sm: 300 },
+                        maxWidth: { xs: "none", sm: 300 },
+                        height: 210,
+                        borderRadius: { xs: 3, sm: 4 },
+                        my: { xs: 2, sm: 3, md: 1.5 },
+                        mx: "auto",
                         background:
                           "linear-gradient(180deg,#1D3557 0%,#2A548B 100%)", // GRADIENT
                         color: "white",
                         cursor: "pointer",
                         transition: "all .3s ease",
-                        overflow: "hidden",
-                        display: "flex", // Añadido para asegurar consistencia interna
-                        flexDirection: "column",
                         "&:hover": {
-                          transform: "scale(1.01)",
-                          boxShadow: "0 15px 35px rgba(0,0,0,.05)",
+                          transform: "translateY(-6px)",
+                          boxShadow: "0 18px 40px rgba(18,54,102,0.20)",
                         },
+                        // NUEVO: Hacemos que la tarjeta sea un contenedor Flex vertical
+                        display: "flex",
+                        flexDirection: "column",
                       }}
                     >
-                      <Box
-                        sx={{
-                          p: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 2,
-                        }}
-                      >
-                        <SchoolIcon
-                          sx={{
-                            fontSize: 40,
-                            color: COURSE_PALLETE[index],
-                          }}
-                        />
-                        <SAETypography
-                          variant="body1"
-                        >
-                            {curso.nombre_curso}
-                        </SAETypography>
+                      {/* NUEVO: Forzamos a CardContent a ocupar el 100% del alto y usar Flexbox */}
 
-                      </Box>
+                      {/* SECCIÓN 1: CABECERA (Alto fijo implícito por el icono de 55px) */}
+                      <Stack
+                        direction="row"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                        spacing={1.5}
+                        sx={{ px: 1.5, pt: 1.5, pb: 1 }}
+                      >
+                        <Box
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            flexShrink: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <SchoolIcon
+                            sx={{
+                              fontSize: 28,
+                              color:
+                                COURSE_PALETTE[index % COURSE_PALETTE.length],
+                            }}
+                          />
+                        </Box>
+                        <SAETypography
+                          variant="h6"
+                          fontWeight="bold"
+                          sx={{
+                            fontSize: { xs: "1rem", sm: "1.1rem" },
+                            lineHeight: 1.2,
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {curso.nombre_curso}
+                        </SAETypography>
+                      </Stack>
+
                       <Divider
                         sx={{
-                          borderColor: COURSE_PALLETE[index],
+                          borderColor:
+                            COURSE_PALETTE[index % COURSE_PALETTE.length],
                         }}
                       />
-                      <CardContent>
-                        <Stack spacing={2}>
+
+                      {/* NUEVO: Stack intermedio que se estira para ocupar el espacio y empujar el botón */}
+                      <CardContent
+                        sx={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                          px: 1.5,
+                          pt: 1,
+                          pb: 1.5,
+                          "&:last-child": { pb: 1.5 },
+                        }}
+                      >
+                        <Stack spacing={1}>
                           <Chip
                             label={`${curso.cupo_maximo} Vacantes`}
                             sx={{
                               width: "fit-content",
+                              height: 28,
                               bgcolor: "#FFD54F",
                               color: "#1D3557",
                               fontWeight: 700,
@@ -740,380 +788,366 @@ export function EmployedStudentContent() {
                         </Stack>
                       </CardContent>
                     </Card>
-                  </div>
-                ))}
+                  );
+                })}
               </Slider>
             </Box>
           )}
-        </Card>
+        </Stack>
+      </Card>
 
-        <TitleBox
-          title="Histórico de Turnos"
-          description="Turnos cancelados o finalizados"
-        />
-        <Card
-          sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            my: 3,
-            overflow: "hidden",
-          }}
-        >
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ width: "100%" }}>
-              <DataGrid //Este data grid no lo uso con el componente porque es para tener varias secciones
-                rows={turnsRows}
-                columns={turnsColumns}
-                loading={loadingTurnos}
-                autoHeight
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25]}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 5 } },
-                }}
-                localeText={{ noRowsLabel: "Sin Registros" }}
-                sx={{ borderRadius: 0, border: "none" }}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-      <DialogHealth/>
+      <TitleBox
+        title="Histórico de Turnos"
+        description="Turnos cancelados o finalizados"
+      />
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          my: 3,
+          overflow: "hidden",
+        }}
+      >
+        <CardContent sx={{ p: 0 }}>
+          <Box sx={{ width: "100%" }}>
+            <DataGrid //Este data grid no lo uso con el componente porque es para tener varias secciones
+              rows={turnsRows}
+              columns={turnsColumns}
+              loading={loadingTurnos}
+              autoHeight
+              disableRowSelectionOnClick
+              pageSizeOptions={[5, 10, 25]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 5 } },
+              }}
+              localeText={{ noRowsLabel: "Sin Registros" }}
+              sx={{ borderRadius: 0, border: "none" }}
+            />
+          </Box>
+        </CardContent>
+      </Card>
+      <DialogHealth />
     </SAEPage>
   );
 }
 
-function DialogHealth(){
-const { 
-      dialogOpen, 
-      dialogData, 
-      dialogType, 
-      dialogMode, 
-      dialogError, 
-      dialogSaving,
-      setDialogData, 
-      setDialogError, 
-      handleDataChange,
-      closeDialog } = useNotification();
-  const { handleTurnosSave} = useHealth();
-  //Esta funcion no se puede generalizar al parecer
-  const handleDialogChange = (field, value) => {
-    setDialogData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  return(
+function DialogHealth() {
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setDialogError,
+    handleDataChange,
+    closeDialog,
+  } = useNotification();
+  const { handleTurnosSave } = useHealth();
+  return (
     <>
-    {dialogOpen && dialogType === "turnos" && (
-          <Dialog
-            open={dialogOpen}
-            onClose={closeDialog}
-            maxWidth="md"
-            fullWidth
-            autoFocus={true}  
+      {dialogOpen && dialogType === "turnos" && (
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="md" fullWidth>
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
           >
-            <DialogTitle
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
+            <SAETypography
+              variant="h6"
+              component="span"
+              sx={{ fontWeight: "bold" }}
             >
-              <SAETypography
-                variant="h6"
-                component="span"
-                sx={{ fontWeight: "bold" }}
-              >
-                {dialogMode === "cancelados"
-                  ? "Turnos Cancelados"
-                  : "Turnos Finalizados"}
-              </SAETypography>
-              <IconButton onClick={closeDialog} size="small">
-                <CloseIcon />
-              </IconButton>
-            </DialogTitle>
-            <DialogContent dividers>
-              <Stack spacing={2} sx={{ pt: 1 }}>
-                {dialogError && (
-                  <Alert severity="error" onClose={() => setDialogError("")}>
-                    {dialogError}
-                  </Alert>
-                )}
-                <>
-                  <Grid container spacing={1}>
-                    {dialogMode === "create" && (
-                      <Grid container size={{ xs: 12 }} m={0} spacing={2}>
-                        <Grid size={{ xs: 12 }} m={0}>
-                          <Card
-                            sx={{
-                              bgcolor: "rgba(235, 235, 41, 0.7)",
-                              border: "1px solid rgba(235, 41, 41, 0.1)",
-                            }}
-                          >
-                            <CardContent sx={{ p: 2 }}>
-                              <SAETypography
-                                variant="subtitle1"
-                                color="var(--textBlack)"
-                                gutterBottom
-                                fontWeight={600}
-                              >
-                                ¡ATENCIÓN!
-                              </SAETypography>
-                              <SAETypography variant="body2" color="var(--textBlack)">
-                                Una vez generado el turno no podrá ser
-                                modificado. En caso de equivocación debera
-                                eliminarlo y despues volverlo a crear
-                              </SAETypography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                        <Grid size={{ xs: 12 }} m={0}>
-                          <InputLabel>Sus datos</InputLabel>
-                        </Grid>
-
-                        <Grid size={{ xs: 12 }} m={0}>
-                          <SAETextField
-                            label="Tu legajo:"
-                            fullWidth
-                            value={dialogData.legajo}
-                            onChange={(e) =>
-                              handleDataChange("legajo", e.target.value)
-                            }
-                            disabled={true}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }} m={0}>
-                          <SAETextField
-                            label="Fecha de Solicitud"
-                            type="date"
-                            value={dialogData.fecha_solicitud}
-                            onChange={(e) =>
-                              handleDataChange(
-                                "fecha_solicitud",
-                                e.target.value
-                              )
-                            }
-                            fullWidth
-                            disabled={true}
-                            slotProps={{ inputLabel: { shrink: true } }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }} m={0}>
-                          <InputLabel>Disponibilidad</InputLabel>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }} m={0}>
-                          <Select
-                            value={dialogData.dia_selecionado}
-                            label="Dia"
-                            fullWidth
-                            onChange={(e) =>
-                              handleDataChange(
-                                "dia_selecionado",
-                                e.target.value
-                              )
-                            }
-                          >
-                            {calendarDays.map((d) => (
-                              <MenuItem key={d.value} value={d.value}>
-                                {d.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }} m={0}>
-                          <SAETextField
-                            label="Hora Aproximada"
-                            type="time"
-                            fullWidth
-                            value={dialogData.horario_disponible}
-                            onChange={(e) =>
-                              handleDataChange(
-                                "horario_disponible",
-                                e.target.value
-                              )
-                            }
-                            slotProps={{ inputLabel: { shrink: true } }}
-                          />
-                          <Chip
-                            label={
-                              "Revisar los horarios de inicio y fin del especialista"
-                            }
-                            sx={{
-                              bgcolor: "var(--chipBackground)",
-                              color: "white",
-                              fontWeight: 700,
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }} m={0}>
-                          <InputLabel>Asunto</InputLabel>
-                        </Grid>
-
-                        <Grid size={{ xs: 12 }} mt={-1}>
-                          <SAETextField
-                            label="Explique su dolencia"
-                            value={dialogData.asunto}
-                            onChange={(e) =>
-                              handleDataChange("asunto", e.target.value)
-                            }
-                            multiline
-                            fullWidth
-                            rows={4} // Número inicial de filas
-                          />
-                        </Grid>
-                      </Grid>
-                    )}
-                    {dialogMode === "delete" && (
-                      <>
-                        <Grid size={{ xs: 12 }} m={0}>
-                          <Card
-                            sx={{
-                              bgcolor: "rgba(193, 73, 55, 0.7)",
-                              border: "1px solid rgba(235, 41, 41, 0.1)",
-                            }}
-                          >
-                            <CardContent sx={{ p: 2 }}>
-                              <SAETypography
-                                variant="subtitle2"
-                                color="textPrimary"
-                                fontWeight={600}
-                                gutterBottom
-                                fontSize={"22px"}
-                              >
-                                ¡ATENCIÓN!
-                              </SAETypography>
-                              <SAETypography
-                                variant="body2"
-                              >
-                                Esta por cancelar el turno, toda la informacion
-                                que se haya utilizado en este turno se perdera
-                                como tambien la disponibilidad.
-                              </SAETypography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      </>
-                    )}
-                    {dialogMode === "show" && (
-                      <>
-                        <Grid size={{ xs: 12, md: 3 }} m={0}>
-                          <SAETextField
-                            label="ID Turno"
-                            type="number"
-                            fullWidth
-                            value={dialogData.id}
-                            onChange={(e) =>
-                              handleDataChange("id", e.target.value)
-                            }
-                            disabled={true}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 9 }} m={0}>
-                          <SAETextField
-                            label="Legajo Estudiante"
-                            value={dialogData.legajo}
-                            onChange={(e) =>
-                              handleDataChange("legajo", e.target.value)
-                            }
-                            fullWidth
-                            disabled={true}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }} m={0}>
-                          <SAETextField
-                            label="Paciente"
-                            value={dialogData.paciente}
-                            onChange={(e) =>
-                              handleDataChange("paciente", e.target.value)
-                            }
-                            fullWidth
-                            disabled={true}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <SAETextField
-                            label="Fecha de Atención"
-                            type="date"
-                            value={dialogData.fecha_atencion}
-                            onChange={(e) =>
-                              handleDataChange(
-                                "fecha_atencion",
-                                e.target.value
-                              )
-                            }
-                            fullWidth
-                            disabled={true}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <SAETextField
-                            label="Horario de Atención"
-                            type="time"
-                            value={
-                              dialogData?.hora_atencion?.split?.("hs")?.[0] ||
-                              ""
-                            }
-                            onChange={(e) =>
-                              handleDataChange(
-                                "hora_atencion",
-                                e.target.value
-                              )
-                            }
-                            slotProps={{ inputLabel: { shrink: true } }}
-                            fullWidth
-                            disabled={true}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                          <SAETextField
-                            label="Asunto"
-                            value={dialogData.asunto}
-                            onChange={(e) =>
-                              handleDataChange("asunto", e.target.value)
-                            }
-                            multiline
-                            fullWidth
-                            rows={4} // Número inicial de filas
-                            disabled={true}
-                          />
-                        </Grid>
-                      </>
-                    )}
-                  </Grid>
-                </>
-              </Stack>
-            </DialogContent>
-            <DialogActions sx={{ px: 3, pb: 2 }}>
-              <SAEButton
-                variant="outlined"
-                onClick={closeDialog}
-                disabled={dialogSaving}
-              >
-                {dialogMode === "show" ? "Cerrar" : "Cancelar"}
-              </SAEButton>
-              {dialogMode !== "show" && (
-                <SAEButton
-                  variant="contained"
-                  onClick={handleTurnosSave}
-                  disabled={dialogSaving}
-                  startIcon={
-                    dialogSaving ? (
-                      <CircularProgress size={16} color="inherit" />
-                    ) : null
-                  }
-                >
-                  {dialogMode === "create"
-                    ? "Crear"
-                    : dialogMode === "delete"
-                      ? "Eliminar"
-                      : "Cerrar"}
-                </SAEButton>
+              {dialogMode === "cancelados"
+                ? "Turnos Cancelados"
+                : "Turnos Finalizados"}
+            </SAETypography>
+            <IconButton onClick={closeDialog} size="small">
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={2} sx={{ pt: 1 }}>
+              {dialogError && (
+                <Alert severity="error" onClose={() => setDialogError("")}>
+                  {dialogError}
+                </Alert>
               )}
-            </DialogActions>
-          </Dialog>
-        )}
-    </>
-  )
-}
+              <>
+                <Grid container spacing={1}>
+                  {dialogMode === "create" && (
+                    <Grid container size={{ xs: 12 }} m={0} spacing={2}>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <Card
+                          sx={{
+                            bgcolor: "rgba(235, 235, 41, 0.7)",
+                            border: "1px solid rgba(235, 41, 41, 0.1)",
+                          }}
+                        >
+                          <CardContent sx={{ p: 2 }}>
+                            <SAETypography
+                              variant="subtitle1"
+                              color="var(--textBlack)"
+                              gutterBottom
+                              fontWeight={600}
+                            >
+                              ¡ATENCIÓN!
+                            </SAETypography>
+                            <SAETypography
+                              variant="body2"
+                              color="var(--textBlack)"
+                            >
+                              Una vez generado el turno no podrá ser modificado.
+                              En caso de equivocación debera eliminarlo y
+                              despues volverlo a crear
+                            </SAETypography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <InputLabel>Sus datos</InputLabel>
+                      </Grid>
 
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <SAETextField
+                          label="Tu legajo:"
+                          fullWidth
+                          value={dialogData.legajo}
+                          onChange={(e) =>
+                            handleDataChange("legajo", e.target.value)
+                          }
+                          disabled={true}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <SAETextField
+                          label="Fecha de Solicitud"
+                          type="date"
+                          value={dialogData.fecha_solicitud}
+                          onChange={(e) =>
+                            handleDataChange("fecha_solicitud", e.target.value)
+                          }
+                          fullWidth
+                          disabled={true}
+                          slotProps={{ inputLabel: { shrink: true } }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <InputLabel>Disponibilidad</InputLabel>
+                      </Grid>
+                      <Grid size={{ xs: 12, md: 6 }} m={0}>
+                        <Select
+                          value={dialogData.dia_selecionado}
+                          label="Dia"
+                          fullWidth
+                          onChange={(e) =>
+                            handleDataChange("dia_selecionado", e.target.value)
+                          }
+                        >
+                          {calendarDays.map((d) => (
+                            <MenuItem key={d.value} value={d.value}>
+                              {d.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Grid>
+                      <Grid size={{ xs: 12, md: 6 }} m={0}>
+                        <SAETextField
+                          label="Hora Aproximada"
+                          type="time"
+                          fullWidth
+                          value={dialogData.horario_disponible}
+                          onChange={(e) =>
+                            handleDataChange(
+                              "horario_disponible",
+                              e.target.value,
+                            )
+                          }
+                          slotProps={{ inputLabel: { shrink: true } }}
+                        />
+                        <Chip
+                          label={
+                            "Revisar los horarios de inicio y fin del especialista"
+                          }
+                          sx={{
+                            bgcolor: "var(--chipBackground)",
+                            color: "white",
+                            fontWeight: 700,
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <InputLabel>Asunto</InputLabel>
+                      </Grid>
+
+                      <Grid size={{ xs: 12 }} mt={-1}>
+                        <SAETextField
+                          label="Explique su dolencia"
+                          value={dialogData.asunto}
+                          onChange={(e) =>
+                            handleDataChange("asunto", e.target.value)
+                          }
+                          multiline
+                          fullWidth
+                          rows={4} // Número inicial de filas
+                        />
+                      </Grid>
+                    </Grid>
+                  )}
+                  {dialogMode === "delete" && (
+                    <>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <Card
+                          sx={{
+                            bgcolor: "rgba(193, 73, 55, 0.7)",
+                            border: "1px solid rgba(235, 41, 41, 0.1)",
+                          }}
+                        >
+                          <CardContent sx={{ p: 2 }}>
+                            <SAETypography
+                              variant="subtitle2"
+                              color="textPrimary"
+                              fontWeight={600}
+                              gutterBottom
+                              fontSize={"22px"}
+                            >
+                              ¡ATENCIÓN!
+                            </SAETypography>
+                            <SAETypography variant="body2">
+                              Esta por cancelar el turno, toda la informacion
+                              que se haya utilizado en este turno se perdera
+                              como tambien la disponibilidad.
+                            </SAETypography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    </>
+                  )}
+                  {dialogMode === "show" && (
+                    <>
+                      <Grid size={{ xs: 12, md: 3 }} m={0}>
+                        <SAETextField
+                          label="ID Turno"
+                          type="number"
+                          fullWidth
+                          value={dialogData.id}
+                          onChange={(e) =>
+                            handleDataChange("id", e.target.value)
+                          }
+                          disabled={true}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, md: 9 }} m={0}>
+                        <SAETextField
+                          label="Legajo Estudiante"
+                          value={dialogData.legajo}
+                          onChange={(e) =>
+                            handleDataChange("legajo", e.target.value)
+                          }
+                          fullWidth
+                          disabled={true}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <SAETextField
+                          label="Paciente"
+                          value={dialogData.paciente}
+                          onChange={(e) =>
+                            handleDataChange("paciente", e.target.value)
+                          }
+                          fullWidth
+                          disabled={true}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <SAETextField
+                          label="Fecha de Atención"
+                          type="date"
+                          value={dialogData.fecha_atencion}
+                          onChange={(e) =>
+                            handleDataChange("fecha_atencion", e.target.value)
+                          }
+                          fullWidth
+                          disabled={true}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <SAETextField
+                          label="Horario de Atención"
+                          type="time"
+                          value={
+                            dialogData?.hora_atencion?.split?.("hs")?.[0] || ""
+                          }
+                          onChange={(e) =>
+                            handleDataChange("hora_atencion", e.target.value)
+                          }
+                          slotProps={{ inputLabel: { shrink: true } }}
+                          fullWidth
+                          disabled={true}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <SAETextField
+                          label="Asunto"
+                          value={dialogData.asunto}
+                          onChange={(e) =>
+                            handleDataChange("asunto", e.target.value)
+                          }
+                          multiline
+                          fullWidth
+                          rows={4} // Número inicial de filas
+                          disabled={true}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+              </>
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <SAEButton
+              variant="outlined"
+              onClick={closeDialog}
+              disabled={dialogSaving}
+              startIcon={
+                dialogSaving ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : null
+              }
+            >
+              {dialogMode === "create"
+                ? "Crear"
+                : dialogMode === "delete"
+                  ? "Eliminar"
+                  : "Cerrar"}
+            </SAEButton>
+            {dialogMode !== "show" && (
+              <SAEButton
+                variant="contained"
+                onClick={handleTurnosSave}
+                disabled={dialogSaving}
+                startIcon={
+                  dialogSaving ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : null
+                }
+              >
+                {dialogMode === "create"
+                  ? "Crear"
+                  : dialogMode === "delete"
+                    ? "Eliminar"
+                    : "Cerrar"}
+              </SAEButton>
+            )}
+          </DialogActions>
+        </Dialog>
+      )}
+    </>
+  );
+}
 
 // Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function StudentHealth() {

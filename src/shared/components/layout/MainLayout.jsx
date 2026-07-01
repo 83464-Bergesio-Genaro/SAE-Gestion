@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import SessionExpiredDialog from "../SessionExpiredDialog";
 import ScrollToTop from "../ScrollToTop";
+import DocumentTitle from "./DocumentTitle";
 
 import { Outlet } from 'react-router-dom'; // 👈 Importas Outlet
 import { NotificationProvider } from "../../context/providers/notificationProvider";

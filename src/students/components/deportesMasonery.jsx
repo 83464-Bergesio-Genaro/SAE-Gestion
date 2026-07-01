@@ -119,20 +119,20 @@ function horariosPorUbicacionToTexto(ubicaciones) {
           key={ubicacion.id_espacio_deportivo || idx}
           sx={{
             display: "grid",
-            gridTemplateColumns: "44px 1fr",
-            gap: 1.5,
-            mt: idx ? 1.75 : 0,
+            gridTemplateColumns: { xs: "44px 1fr", sm: "36px 1fr" },
+            gap: { xs: 1.5, sm: 1 },
+            mt: idx ? { xs: 1.75, sm: 1.25 } : 0,
           }}
         >
           <Box
             sx={(theme) => ({
-              width: 44,
-              height: 44,
+              width: { xs: 44, sm: 36 },
+              height: { xs: 44, sm: 36 },
               borderRadius: 2,
               display: "grid",
               placeItems: "center",
               bgcolor: alpha(theme.palette.primary.main, 0.1),
-              color: "primary.main",
+              color: "var(--primary)",
             })}
           >
             <LocationOnOutlinedIcon />
@@ -145,16 +145,10 @@ function horariosPorUbicacionToTexto(ubicaciones) {
               rel="noopener noreferrer"
               target="_blank"
               sx={{
-                color: "#2A548B",
-                fontWeight: 800,
-                lineHeight: 1.2,
+                color: "var(--secondary)",
               }}
             >
-              <Typography
-                component="span"
-                variant="subtitle1"
-                sx={{ fontWeight: 600 }}
-              >
+              <Typography variant="subtitle1">
                 {ubicacion.espacio_deportivo}
               </Typography>
             </Link>
@@ -164,10 +158,10 @@ function horariosPorUbicacionToTexto(ubicaciones) {
                 alignItems: "center",
                 gap: 0.75,
                 mt: 0.25,
-                color: "text.secondary",
+                color: "var(--primary)",
               }}
             >
-              <AccessTimeOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+              <AccessTimeOutlinedIcon sx={{ fontSize: 18 }} />
               <Typography component="div" variant="body2">
                 {horariosToTexto(ubicacion.horarios)}
               </Typography>
@@ -318,7 +312,21 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
         }}
       >
         {/* IZQUIERDA */}
-        <Box display="flex" gap={2}>
+        <Box
+          display="flex"
+          gap={{ xs: 1, sm: 2 }}
+          sx={{
+            width: { xs: "100%", md: "auto" },
+            overflowX: { xs: "auto", md: "visible" },
+            pb: { xs: 0.5, md: 0 },
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+            "& > button": {
+              flex: { xs: "1 0 auto", md: "initial" },
+              whiteSpace: "nowrap",
+            },
+          }}
+        >
           <SAEButton
             variant={filtroActivo === "todos" ? "contained" : "outlined"}
             onClick={() => setFiltro("todos")}
@@ -395,60 +403,121 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
       <Masonry
         spacing={{ xs: 2, sm: 3, md: 2 }}
         columns={{ xs: 1, sm: 2, md: 4 }}
+        sx={{
+          mx: { xs: 0, sm: undefined },
+          py: { xs: 2, sm: 0 },
+          px: { xs: 2, sm: 0 },
+          width: { xs: "100%", sm: "auto" },
+          boxSizing: "border-box",
+          "@media (max-width: 599px)": {
+            display: "flex !important",
+            flexFlow: "row nowrap !important",
+            gap: "14px",
+            height: "auto !important",
+            overflowX: "auto",
+            alignItems: "stretch",
+            scrollSnapType: "x mandatory",
+            scrollPaddingLeft: "16px",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+            "& > *": {
+              width: "86vw !important",
+              maxWidth: "360px",
+              flex: "0 0 86vw",
+              scrollSnapAlign: "start",
+              margin: "0 !important",
+            },
+          },
+        }}
       >
         {agrupadoFiltrado.map((card, index) => (
-          <Grid spacing={10} size={{ xs: 12, sm: 4, md: 4 }} key={index}>
+          <Grid spacing={10} size={{ xs: 12, sm: 4, md: 4 }} key={card.id_deporte ?? index}>
             <Card
               sx={{
                 borderRadius: 4,
-                px: { xs: 1, md: 1.5 },
-                py: { xs: 0.5, md: 1 },
-                m: 1,
+                px: 0,
+                py: 0,
+                m: { xs: 0, sm: 1 },
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
                 boxShadow: "0 18px 45px rgba(21, 61, 113, 0.14)",
                 border: "1px solid rgba(17, 53, 101, 0.1)",
+                transition: "transform .25s ease, box-shadow .25s ease",
+                "&:hover": {
+                  transform: { xs: "none", sm: "translateY(-5px)" },
+                  boxShadow: {
+                    xs: "0 18px 45px rgba(21, 61, 113, 0.14)",
+                    sm: "0 24px 55px rgba(21, 61, 113, 0.22)",
+                  },
+                },
               }}
             >
-              <CardContent sx={{ pb: 1 }}>
-                <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+              <CardContent
+                sx={{
+                  p: 0,
+                  "&:last-child": { pb: 0 },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    p: { xs: 2.25, sm: 1.25 },
+                    color: "white",
+                    background:
+                      "linear-gradient(135deg, var(--primary), var(--lightBlue))",
+                  }}
+                >
                   <Box
                     sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
+                      width: { xs: 52, sm: 36 },
+                      height: { xs: 52, sm: 36 },
+                      borderRadius: { xs: "50%", sm: 0 },
                       display: "grid",
                       placeItems: "center",
-                      bgcolor: "primary.main",
-                      color: "primary.contrastText",
+                      background: {
+                        xs: "rgba(255,255,255,.18)",
+                        sm: "transparent",
+                      },
+                      color: "var(--whiteText)",
                       flexShrink: 0,
+                      boxShadow: "none",
+                      transform: "none",
                     }}
                   >
-                    <SportsBasketballIcon sx={{ fontSize: 28 }} />
+                    <SportsBasketballIcon sx={{ fontSize: { xs: 28, sm: 32 } }} />
                   </Box>
                   <Box>
                     <Typography
                       sx={{
-                        color: "#2A548B",
-                        fontSize: { xs: 16, md: 22 },
-                        fontWeight: 700,
+                        color: "white",
+                        fontSize: { xs: 22, sm: 16.5, md: 17 },
+                        fontWeight: 800,
                         lineHeight: 1.05,
                       }}
                       variant="h5"
                     >
                       {card.deporte}
                     </Typography>
-                    <Box
-                      sx={{
-                        width: 48,
-                        height: 4,
-                        mt: 1,
-                        borderRadius: 999,
-                        bgcolor: "primary.main",
-                      }}
-                    />
                   </Box>
                 </Box>
 
-                <Box sx={{ mt: 3 }}>
+                <Box
+                  sx={{
+                    mt: 0,
+                    px: { xs: 2.25, sm: 1.75 },
+                    pt: { xs: 2.25, sm: 1.5 },
+                    pb: { xs: 1.5, sm: 0.75 },
+                    "& .MuiTypography-subtitle1": {
+                      fontSize: { sm: "0.92rem" },
+                    },
+                    "& .MuiTypography-body2": {
+                      fontSize: { sm: "0.78rem" },
+                    },
+                  }}
+                >
                   {horariosPorUbicacionToTexto(card.horariosPorUbicacion)}
                 </Box>
 
@@ -456,23 +525,34 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                   sx={{
                     borderTop: "1px solid",
                     borderColor: "divider",
-                    mt: 2,
-                    pt: 2,
+                    mt: { xs: 0, sm: 2 },
+                    pt: { xs: 2, sm: 1.25 },
+                    mx: { xs: 2.25, sm: 1.75 },
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <GroupsRoundedIcon color="primary" />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: { xs: 1, sm: 0.5 },
+                      color: "var(--secondary)",
+                    }}
+                  >
+                    <GroupsRoundedIcon sx={{ fontSize: { xs: 24, sm: 18 } }} />
                     <Typography
-                      sx={{ color: "#15203c", fontWeight: 600 }}
                       variant="subtitle1"
+                      sx={{
+                        fontSize: { xs: "1rem", sm: "0.82rem" },
+                        fontWeight: 700,
+                      }}
                     >
                       Profesores
                     </Typography>
                   </Box>
                   <Box
                     sx={{
-                      color: "text.secondary",
-                      fontSize: 14,
+                      color: "var(--secondary)",
+                      fontSize: { xs: 14, sm: 12.5 },
                       mt: 0.5,
                       "& ul": { mb: 0 },
                       "& li::marker": { color: "primary.main" },
@@ -482,7 +562,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                   </Box>
                 </Box>
               </CardContent>
-              <CardActions>
+              <CardActions sx={{ mt: "auto", p: { xs: 2.25, sm: 1 } }}>
                 <SAEButton
                   size="medium"
                   variant="contained"

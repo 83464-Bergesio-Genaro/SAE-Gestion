@@ -53,6 +53,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { Diversity1 } from "@mui/icons-material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import SAEPage from "../../../shared/components/page/SAEPage";
+import TitleBox from "../../../shared/components/titleBox";
 
 const baseUrl = import.meta.env.BASE_URL;
 export default function EmployedTravelInscripts(){
@@ -99,16 +101,7 @@ function EmployedIncriptsContent(){
     };
 
     return(
-        <Box
-        sx={{
-            mt: "-90px",
-            pt: { xs: "90px", md: "100px" },
-            pb: 4,
-            minHeight: "calc(100vh - 90px)",
-            bgcolor: "#f4f8fc",
-        }}
-        >
-            <Container maxWidth="xl">
+        <SAEPage>
                 {travelData && (
                     <>
                     <Box
@@ -118,7 +111,7 @@ function EmployedIncriptsContent(){
                             px: { xs: 3, md: 6 },
                             py: { xs: 4, md: 5 },
                             minHeight: 260,
-                            backgroundImage: `linear-gradient(125deg, rgba(18,54,102,0.97) 0%, rgba(53,108,178,0.93) 58%, rgba(108,171,221,0.88) 100%), url('${baseUrl}images/varias/campus.jpg')`,
+                            backgroundImage: `linear-gradient(125deg, var(--primary) 0%,var(--lightBlue) 100%), url('${baseUrl}images/varias/campus.jpg')`,
                             backgroundSize: "cover",
                             backgroundPosition: "center",
                             color: "white",
@@ -273,9 +266,8 @@ function EmployedIncriptsContent(){
                             )}
                             </Box>
                         </Card>
-                        <Typography variant="h5" fontWeight="bold" px={4} my={2} >
-                            Planilla de Inscriptos
-                        </Typography>                        
+                        <TitleBox title="Planilla de Inscriptos"/>
+                   
                         <Card
                             sx={{
                             borderRadius: 4,
@@ -418,8 +410,7 @@ function EmployedIncriptsContent(){
                 {dialogOpen && dialogType === "documents" && (
                     <DocumentsDialog/>
                 )}
-            </Container>
-        </Box>
+          </SAEPage>
     );
 }
 function DocumentsDialog(){

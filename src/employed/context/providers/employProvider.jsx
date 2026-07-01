@@ -8,7 +8,7 @@ import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario,
 import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService";
 import {mapEmpleadoSAE,mapHorarioSAE} from "../../../api/formatters/EmpleadoFormatter";
 import { EmployContext } from '../employedContext';
-import { formatHeader, generateRows } from "../../../shared/util";
+import { formatHeader, generateRows } from "../../../utils/util.jsx";;
 
 const EMPTY_FORM = {
     dia: 1,

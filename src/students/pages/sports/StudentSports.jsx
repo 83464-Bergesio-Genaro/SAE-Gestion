@@ -37,7 +37,7 @@ import { SportsProvider as EmployedSportsProvider } from "../../../employed/cont
 import { useSportsContext } from "../../context/studentContext";
 import { SportsProvider } from "../../context/providers/sportsProvider";
 
-import HeaderPage from "../../../shared/components/headerPage";
+import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
 import TitleBox from "../../../shared/components/titleBox";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 
@@ -81,11 +81,11 @@ function StudentSportsContent() {
       }}
     >
       <Container maxWidth="xl">
-        <HeaderPage
+        <StudentHeaderPage
           title={C.bigTitle}
           description={C.bigSubtitle}
           backgroundImage="images/carrousel/EntradaUTN.jpg"
-          icon={<SportsHandballIcon />}
+          icon={SportsHandballIcon}
         />
 
         <TitleBox

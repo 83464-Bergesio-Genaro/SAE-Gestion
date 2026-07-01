@@ -26,7 +26,7 @@ import {
 import {
   getFirstRecord as getFirstRecordUtil,
   valuesAreEqual as valuesAreEqualUtil,
-} from "../../../shared/util";
+} from "../../../utils/util.jsx";;
 
 
 export function ScholarshipProvider({ children }) {

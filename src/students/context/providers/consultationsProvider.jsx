@@ -1,23 +1,15 @@
-import {
-  ContarVisualizacionLinkFrecuente,
-  BuscarLinkFrecuentes,
-} from "../../../api/EmpleadoService";
-import { ConsultationContext } from "../studentContext";
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import { useAuth } from "../../../shared/context/sharedContext";
+import {ContarVisualizacionLinkFrecuente,BuscarLinkFrecuentes} from "../../../api/EmpleadoService";
+import { isValidEmail } from "../../../utils/util.jsx";;
 import { sendConsultationEmail } from "../../../api/EmailService";
-import {
-  closeSnackbar as closeSnackbarState,
-  generateRows,
-  showSnackbar as showSnackbarState,
-  isValidEmail
-} from "../../../shared/util";
+import { ConsultationContext } from "../studentContext";
+import { useAuth, useNotification } from "../../../shared/context/sharedContext";
 
 export const ConsultationAlumnoProvider = ({ children }) => {
   const { user } = useAuth();
+  const { showNotification } = useNotification(); //Permite mostrar notificaciones
   const [loadingLinksFrecuentes, setLoadingLinksFrecuentes] = useState(false);
   const [linksFrecuentes, setLinksFrecuentes] = useState([]);
-  const [linksFrecuentesRows, setLinksFrecuentesRows] = useState([]);
   const [sending, setSending] = useState(false);
   const [form, setForm] = useState({
     user_name: user?.nombre ?? "",
@@ -25,20 +17,6 @@ export const ConsultationAlumnoProvider = ({ children }) => {
     subject: "",
     message: "",
   });
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
-  const showSnackbar = useCallback((message, severity = "warning") => {
-    showSnackbarState(setSnackbar, message, severity);
-  }, []);
-
-  const closeSnackbar = useCallback(() => {
-    closeSnackbarState(setSnackbar);
-  }, []);
 
   const invalidFields = useMemo(() => {
     const fields = [];
@@ -64,10 +42,8 @@ export const ConsultationAlumnoProvider = ({ children }) => {
           .filter((link) => link.activo !== false)
           .sort((a, b) => Number(a.id) - Number(b.id)),
       );
-      setLinksFrecuentesRows(generateRows(links));
     } catch {
       setLinksFrecuentes([]);
-      setLinksFrecuentesRows([]);
     } finally {
       setLoadingLinksFrecuentes(false);
     }
@@ -76,14 +52,14 @@ export const ConsultationAlumnoProvider = ({ children }) => {
   const handleLinkFrecuenteClick = async (event, link) => {
     if (!link.hipervinculo) {
       event.preventDefault();
-      showSnackbar("Este link no tiene hipervinculo configurado");
+      useNotification("Este link no tiene hipervínculo configurado","error",6000);
       return;
     }
 
     try {
       await ContarVisualizacionLinkFrecuente(link.id);
     } catch (error) {
-      console.error("Error al contar visualizacion del link:", error);
+      useNotification(("Error al contar visualización del link:"+ error),"error",6000);
     }
   };
 
@@ -91,7 +67,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
     async (event) => {
       event.preventDefault();
       if (invalidFields.length > 0) {
-        showSnackbar("Completá todos los campos con un correo válido.");
+        useNotification("Es necesario que todos los campos sean válidos","warning");
         return;
       }
 
@@ -104,11 +80,11 @@ export const ConsultationAlumnoProvider = ({ children }) => {
           message: form.message.trim(),
           legajo: user?.legajo,
         });
-        showSnackbar("Consulta enviada con éxito.", "success");
+        useNotification("Consulta enviada con éxito.", "success");
         setForm((prev) => ({ ...prev, subject: "", message: "" }));
       } catch (error) {
         console.error("Error al enviar consulta:", error);
-        showSnackbar(
+        useNotification(
           "No se pudo enviar la consulta. Intentá nuevamente.",
           "error",
         );
@@ -116,7 +92,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
         setSending(false);
       }
     },
-    [form, invalidFields.length, showSnackbar, user?.legajo],
+    [form, invalidFields.length, useNotification, user?.legajo],
   );
 
   useEffect(() => {
@@ -129,15 +105,11 @@ export const ConsultationAlumnoProvider = ({ children }) => {
         fetchLinksFrecuentes,
         loadingLinksFrecuentes,
         linksFrecuentes,
-        linksFrecuentesRows,
         form,
         sending,
         handleChange,
         handleSubmit,
-        handleLinkFrecuenteClick,
-        snackbar,
-        closeSnackbar,
-        showSnackbar,
+        handleLinkFrecuenteClick
       }}
     >
       {children}

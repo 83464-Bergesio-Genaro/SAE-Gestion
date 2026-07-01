@@ -11,7 +11,7 @@ import {
   INITIAL_PREVIEW,
   isPdfDocument,
   showSnackbar as showSnackbarState,
-} from "../../../shared/util";
+} from "../../../utils/util.jsx";;
 const MAX_SIZE_MB = 5;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 

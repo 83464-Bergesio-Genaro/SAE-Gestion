@@ -23,7 +23,7 @@ import {
   cleanObjectFields,
   formatHeader,
   generateRows,
-} from "../../../shared/util";
+} from "../../../utils/util.jsx";
 
 const EMPTY_BUSSINESS = {
     id: "-1",

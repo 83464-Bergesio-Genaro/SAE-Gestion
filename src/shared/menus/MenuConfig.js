@@ -4,7 +4,6 @@ import Diversity3Icon from "@mui/icons-material/Diversity3";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import HelpIcon from "@mui/icons-material/Help";
-import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import HubIcon from '@mui/icons-material/Hub';
 import BadgeIcon from '@mui/icons-material/Badge';
@@ -16,20 +15,20 @@ export const sharedMenu = [
   {
     label: "Inicio",
     path: "/",
-    color: "#FFFFFF",
-    image: `${baseUrl}images/navbar/estacionamientoUTN.jpg`,
+    icon: Diversity3Icon,
+    descripcion: "No debería mostrar esta descripcion.",
   },
   {
     label: "Estudiar en la UTN",
     path: "/JPA",
-    color: "#BAE6FF",
-    image: `${baseUrl}images/navbar/IngresoUTN.png`,
+    icon: Diversity3Icon,
+    descripcion: "No debería mostrar esta descripcion.",
   },
   {
     label: "Iniciar Sesion",
     path: "/login",
-    color: "#E5EAFF",
-    image: `${baseUrl}images/navbar/inchaUTN.png`,
+    icon: Diversity3Icon,
+    descripcion: "No debería mostrar esta descripcion.",
   },
 ];
 
@@ -39,14 +38,14 @@ export const studentMenu = [
     path: "/Principal",
     color: "#8FABD4",
     icon: Diversity3Icon,
-    descripcion: "No deberia mostrar esta descripcion.",
+    descripcion: "No debería mostrar esta descripcion.",
   },
   {
     label: "Deportes",
     path: "/Mis-Deportes",
     color: "#3062AC",
     icon: SportsHandballIcon,
-    descripcion: "Gestiona tus inscripciones a los deportes y consulta torneos."
+    descripcion: "Gestiona tus inscripciones a los deportes y consulta los próximos torneos."
   },
   {
     label: "Becas",
@@ -84,7 +83,7 @@ export const employedMenu = [
     path: "/Inicio",
     color: "#8FABD4",
     icon: Diversity3Icon,
-    descripcion: "No deberia mostrar esta descripcion.",
+    descripcion: "No debería mostrar esta descripcion.",
   },
   {
     label: "Deportes",
@@ -98,21 +97,21 @@ export const employedMenu = [
     path: "/Gestion-Becas",
     color:"#3F76C8",
     icon: Diversity3Icon,
-    descripcion: "Permite administrar todas las becas de las secretaria.",       
+    descripcion: "Permite administrar todas las becas de las secretaría.",       
   },
   {
     label: "Prensa",
     path: "/Gestion-Prensa",
     color:"#5E8ACC",
     icon: NewspaperIcon,
-    descripcion: "Gestiona las noticias y documentacion que veran los alumnos.",   
+    descripcion: "Gestiona las noticias y documentación que se mostraran a los alumnos.",   
   },
     {
     label: "Compras",
     path: "/Gestion-Compras",
     color:"#5E8ACC",
     icon: ShoppingCartIcon,
-    descripcion: "Registra las compras que va realizando el area.",   
+    descripcion: "Registra las compras que va realizando el área.",   
   },
     {
     label: "Viajes",
@@ -150,7 +149,7 @@ export const adminMenu = [
     path: "/Inicio",
     color: "#8FABD4",
     icon: Diversity3Icon,
-    descripcion: "No deberia mostrar esta descripcion.",
+    descripcion: "No debería mostrar esta descripcion.",
   },
   {
     label: "Deportes",
@@ -164,21 +163,21 @@ export const adminMenu = [
     path: "/Gestion-Becas",
     color:"#3F76C8",
     icon: Diversity3Icon,
-    descripcion: "Permite administrar todas las becas de las secretaria.",       
+    descripcion: "Permite administrar todas las becas de las secretaría.",       
   },
   {
     label: "Prensa",
     path: "/Gestion-Prensa",
     color:"#5E8ACC",
     icon: NewspaperIcon,
-    descripcion: "Gestiona las noticias y documentacion que veran los alumnos.",   
+    descripcion: "Gestiona las noticias y documentación que se mostraran a los alumnos.",   
   },
       {
     label: "Compras",
     path: "/Gestion-Compras",
     color:"#5E8ACC",
     icon: ShoppingCartIcon,
-    descripcion: "Registra las compras que va realizando el area.",   
+    descripcion: "Registra las compras que va realizando el área.",   
   },
     {
     label: "Viajes",
@@ -213,14 +212,14 @@ export const adminMenu = [
     path: "/Gestion-Usuarios",
     color:"#e4f7d8",
     icon: BadgeIcon,
-    descripcion: "Gestiona los empleados y usuarios que pueden acceder a la aplicacion.",    
+    descripcion: "Gestiona los empleados y usuarios que pueden acceder a la aplicación.",    
   },
   {
     label: "Reportes",
     path: "/Reportes-Estadisticas",
     color:"#e4f7d8",
     icon: QueryStatsIcon,
-    descripcion: "Analiza el funcionamiento de cada Area.",    
+    descripcion: "Analiza el funcionamiento de cada área.",    
   }
 
 ];

@@ -25,7 +25,7 @@ import {
   onlyDigits,
   parseAddress,
   sanitizeAddressPart,
-} from "../../util";
+} from "../../../utils/util.jsx";
 
 const REQUIRED_FIELDS = [
   ["legajo", "Legajo"],

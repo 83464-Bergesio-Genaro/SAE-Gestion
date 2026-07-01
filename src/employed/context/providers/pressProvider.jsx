@@ -31,7 +31,7 @@ import {
   getDisplayDocumentName as getDocumentName,
   getImageSource,
   isPreviewableDocument,
-} from "../../../shared/util";
+} from "../../../utils/util.jsx";;
 const C = PRENSA_STRINGS;
 
 function prioridadChip(prioridad) {

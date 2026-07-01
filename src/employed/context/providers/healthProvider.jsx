@@ -4,7 +4,7 @@ import { Box, IconButton, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from '@mui/icons-material/EditNote';
-import { formatHeader, generateRows } from "../../../shared/util";
+import { formatHeader, generateRows } from "../../../utils/util.jsx";;
 
 import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as ModificarCurso, ModificaEspecialidad, ModificarPersonal, ObtenerCursosMedicos, ObtenerEspecialidades ,ObtenerEstadosTurno, ObtenerPersonalMedico, EliminarCursoMedico, ObtenerHorariosCompleto, ObtenerHorariosXCUIL, CrearHorario, ModificarHorario, EliminarHorario, ObtenerTurnos, RegistrarFalta, ObtenerFaltasXCUIL, CrearTurnos, ModificarTurno, ObtenerTurnosActivos, ObtenerTurnosFinalizados, ObtenerTurnosCancelados} from "../../../api/SaludService";
 import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos} from '../../../api/formatters/SaludFormatters';

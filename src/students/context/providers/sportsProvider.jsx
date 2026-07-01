@@ -29,7 +29,7 @@ import {
   closePreview as closePreviewState,
   closeSnackbar as closeSnackbarState,
   showSnackbar as showSnackbarState,
-} from "../../../shared/util";
+} from "../../../utils/util.jsx";;
 
 const C = SPORTS_STRINGS;
 

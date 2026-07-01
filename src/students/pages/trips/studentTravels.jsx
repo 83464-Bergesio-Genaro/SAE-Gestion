@@ -30,7 +30,7 @@ import {
   Alert,
   Snackbar,
 } from "@mui/material";
-import HeaderPage from "../../../shared/components/headerPage";
+import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
 
 import LocalAirportIcon from '@mui/icons-material/LocalAirport';
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -114,13 +114,13 @@ function StudentTravelContent(){
       >
       <Container maxWidth="xl">
 
-        <HeaderPage
+        <StudentHeaderPage
           title={"Viajes"}
           description={
               "Experimienta aventuras con nuestra universidad"
           }
           backgroundImage="images/carrousel/EntradaUTN.jpg"
-          icon={<LocalAirportIcon />}
+          icon={LocalAirportIcon}
           />
           { !loadingTravel && travelsLegajo?.length > 0 && (
            <NotificacionEstudiante/>

@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { SAETypography } from "./typography/SAETypography";
 
 export default function TitleBox({ title, description, fontweight = 800 }) {
   return (
@@ -20,13 +21,13 @@ export default function TitleBox({ title, description, fontweight = 800 }) {
         }}
       />
       <Box>
-        <Typography variant="h4" fontWeight={fontweight} color="var(--primary)">
+        <SAETypography variant="h4" fontWeight={fontweight} color="var(--primary)">
           {title}
-        </Typography>
+        </SAETypography>
 
-        <Typography variant="body2" color="text.secondary">
+        <SAETypography variant="body1" color="var(--textSecondary)">
           {description}
-        </Typography>
+        </SAETypography>
       </Box>
     </Box>
   );

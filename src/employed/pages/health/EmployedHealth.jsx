@@ -15,6 +15,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 //COMPONENTES
+import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Autocomplete,
@@ -49,11 +50,7 @@ import SAEPage from "../../../shared/components/page/SAEPage";
 
 function EmployedAdminContent() {
   const navigate = useNavigate();
-  const secciones = [
-    { key: "especialidades", label: "Especialidades" },
-    { key: "personal", label: "Personal Medico" }, //En esta seccion se le registra la falta medica
-    { key: "cursos", label: "Cursos Medicos" },
-  ];
+
   const {
     //ABM Faltas
     SetCuilFaltas,
@@ -225,160 +222,10 @@ function EmployedAdminContent() {
           </Box>
         </Card>
 
-        <Card
-          sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            mb: 3,
-            overflow: "hidden",
-          }}
-        >
-          <Box
-            sx={{
-              background: "var(--gradient)",
-              color: "white",
-              px: 3,
-              pt: 0,
-              pb: 0,
-            }}
-          >
-            <Stack
-              direction="row"
-              overflow={{ xs: "scroll", md: "hidden" }}
-              spacing={0}
-            >
-              {secciones.map((item) => (
-                <Box
-                  key={item.key}
-                  onClick={() => handleSectionChange(item.key)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    px: 2.5,
-                    py: 1.5,
-                    cursor: "pointer",
-                    fontWeight: activeSection === item.key ? 700 : 500,
-                    fontSize: "0.85rem",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                    color:
-                      activeSection === item.key
-                        ? "white"
-                        : "rgba(255,255,255,0.6)",
-                    borderBottom:
-                      activeSection === item.key
-                        ? "3px solid white"
-                        : "3px solid transparent",
-                    transition: "all 0.15s",
-                    "&:hover": {
-                      color: "white",
-                      borderBottomColor: "rgba(255,255,255,0.4)",
-                    },
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontWeight: "inherit",
-                      fontSize: "inherit",
-                      letterSpacing: "inherit",
-                      textTransform: "inherit",
-                      color: "inherit",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {item.label}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
-              sx={{ py: 2 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <currentSection.icon sx={{ fontSize: 30 }} />
-                <Typography variant="h6" fontWeight={700}>
-                  {currentSection.title}
-                </Typography>
-              </Stack>
-
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                alignItems={{ sm: "center" }}
-              >
-                <SAETextField
-                  placeholder="Busqueda..."
-                  size="small"
-                  value={busquedaGestion}
-                  onChange={(e) => setBusquedaGestion(e.target.value)}
-                  sx={{
-                    width: { xs: "100%", sm: 240, md: 220 },
-                    "& .MuiOutlinedInput-root": {
-                      bgcolor: "rgba(255,255,255,0.12)",
-                      color: "white",
-                      "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                      "&:hover fieldset": {
-                        borderColor: "rgba(255,255,255,0.6)",
-                      },
-                      "&.Mui-focused fieldset": { borderColor: "white" },
-                    },
-                    "& input::placeholder": {
-                      color: "rgba(255,255,255,0.7)",
-                      opacity: 1,
-                    },
-                    "& .MuiInputAdornment-root svg": {
-                      color: "rgba(255,255,255,0.7)",
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-                <SAEButton
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={currentSection.dialog}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    bgcolor: "rgba(255,255,255,0.18)",
-                    color: "white",
-                    border: "1px solid rgba(255,255,255,0.4)",
-                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                  }}
-                >
-                  {currentSection.addButton}
-                </SAEButton>
-              </Stack>
-            </Stack>
-          </Box>
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ width: "100%" }}>
-              <DataGrid
-                rows={rowsGestionFiltradas}
-                columns={currentSection.columns}
-                loading={currentSection.loading}
-                autoHeight
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25]}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 5 } },
-                }}
-                localeText={{ noRowsLabel: "Sin Registros" }}
-                sx={{ borderRadius: 0, border: "none" }}
-              />
-            </Box>
-          </CardContent>
-        </Card>
+       <SAEDataGrid
+        sectionConfig={sectionConfig}
+        currentSection={currentSection}
+       />
 
         <Card
           sx={{

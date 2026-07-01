@@ -720,7 +720,7 @@ function DegreesCarrousel() {
                             >
                             Empeza tu aventura hoy →
                             </SAETypography>
-                        </Box>                  
+                        </Box>
                     </Card>
                     )})}
                  </Slider>

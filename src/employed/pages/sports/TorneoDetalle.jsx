@@ -47,7 +47,7 @@ import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import { useSports } from "../../context/employedContext";
 
-import { formatDate, isoToInputDate } from "../../../shared/util";
+import { formatDate, isoToInputDate } from "../../../utils/util.jsx";;
 
 const baseUrl = import.meta.env.BASE_URL;
 

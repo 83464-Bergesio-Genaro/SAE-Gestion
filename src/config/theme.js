@@ -91,7 +91,7 @@ export const theme = createTheme({
       lineHeight: 1.6,
     },
     subtitle1: {
-      fontFamily: fontFamily.destacados,
+      fontFamily: fontFamily.general,
       fontWeight: 500,
       fontSize: '1.125rem',
       [baseTheme.breakpoints.up('md')]: {

@@ -1,16 +1,12 @@
 import {
-  Avatar,
   Box,
   Container,
   Divider,
   Stack,
-  Typography,
   Card,
-  CardActionArea,
   CardContent,
   Chip,
   Grid,
-  InputAdornment,
   InputLabel,
   Select,
   Dialog,
@@ -18,32 +14,30 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  FormControlLabel,
-  Switch,
-  CircularProgress,
   MenuItem,
   Alert,
   Snackbar,
+  CircularProgress,
 } from "@mui/material";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-import { useAuth } from "../../../shared/context/sharedContext";
+import { useAuth, useNotification } from "../../../shared/context/sharedContext";
 import { useHealth } from "../../context/studentContext";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useEffect } from "react";
 
+import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
+import SAEPage from "../../../shared/components/page/SAEPage";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
+import TitleBox from "../../../shared/components/titleBox";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
-import EditIcon from "@mui/icons-material/Edit";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SearchIcon from "@mui/icons-material/Search";
 import SchoolIcon from "@mui/icons-material/School";
@@ -58,10 +52,11 @@ import ScienceIcon from "@mui/icons-material/Science";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import BloodtypeIcon from "@mui/icons-material/Bloodtype";
 
-import HeaderPage from "../../../shared/components/headerPage";
+import { calendarDays } from "../../../utils/constants";
+import { SAETypography } from "../../../shared/components/typography/SAETypography";
+import { formatearFecha, mostrarHorasMinutos, ScaleText } from "../../../utils/util";
 import { DataGrid } from "@mui/x-data-grid";
 
-import TitleBox from "../../../shared/components/titleBox";
 const PALETTE = [
   "#8A8A8A", //Pendiente
   "#576DDC", //Asignado
@@ -135,24 +130,6 @@ const settingsSchedule = {
     },
   ],
 };
-const mostrarHorasMinutos = (horario) => {
-  const [h1, m1] = horario.split(":").map(Number);
-  if (m1 === 0) return `${h1}:00hs`;
-  return `${h1}:${m1}hs`;
-};
-const formatearFecha = (fechaString) => {
-  if (!fechaString) return "";
-
-  // Convertimos el texto "2026-05-07" a un objeto de fecha real
-  // Usamos el reemplazo de guiones por barras para evitar problemas de zona horaria
-  const fecha = new Date(fechaString.replace(/-/g, "/"));
-
-  // Le pedimos a JavaScript que solo nos devuelva el día y el mes en español
-  return fecha.toLocaleDateString("es-ES", {
-    day: "2-digit", // Fuerza a que el día tenga 2 dígitos (ej: "07")
-    month: "long", // Muestra el nombre completo del mes (ej: "Mayo")
-  });
-};
 
 const MEDICINE_ICONS = [
   LocalHospitalIcon, // Cruz de hospital / medicina general
@@ -197,30 +174,12 @@ const agruparPorEspecialidad = (horariosMapeados) => {
 };
 
 export function EmployedStudentContent() {
-  function ScaleText({ text }) {
-    if (!text) return;
-    const baseSize = 26; // Tamaño máximo en px para textos cortos
-    const minSize = 13.4; // Tamaño mínimo en px para que siga siendo legible
-
-    // 2. Calculamos el tamaño según el largo del texto
-    // Dividimos un factor (ej. 300) por el largo del texto
-    let calculatedSize = text.length > 0 ? 400 / text.length : baseSize;
-
-    // 3. Ajustamos el tamaño para que no pase de los límites
-    const finalSize = Math.max(minSize, Math.min(baseSize, calculatedSize));
-
-    return (
-      <Typography sx={{ fontSize: `${finalSize}px`, lineHeight: 1.2 }}>
-        {text}
-      </Typography>
-    );
-  }
+  
   const { user } = useAuth();
 
   const {
     allHorarios,
     loadingHorarios,
-    DAYS,
 
     cursos,
     loadingCursos,
@@ -232,57 +191,31 @@ export function EmployedStudentContent() {
     turnsColumns,
     openCreateTurnos,
     openShowTurnos,
-    openDeleteTurnos,
-    handleTurnosSave,
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
-    setDialogError,
-    dialogOpen,
-    setDialogOpen,
-    dialogData,
-    setDialogData,
-    dialogType,
-    dialogMode,
-    dialogError,
-    dialogSaving,
+    openDeleteTurnos
   } = useHealth();
 
   useEffect(() => {
     fetchTurnosEstudiante(user.legajo);
   }, [fetchTurnosEstudiante, user]);
 
-  const handleDialogChange = (field, value) => {
-    setDialogData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const horariosAgrupados = agruparPorEspecialidad(allHorarios);
 
   return (
-    <Box
-      sx={{
-        mt: "-90px",
-        pt: { xs: "114px", md: "100px" },
-        pb: 4,
-        minHeight: "calc(100vh - 90px)",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="xl">
-        <HeaderPage
+    <SAEPage>
+        <StudentHeaderPage
           title={"Salud"}
           description={
-            "Permite sacar turnos medicos y ver los cursos disponibles"
+            "Permite sacar turnos médicos y ver los cursos disponibles"
           }
-          backgroundImage="images/carrousel/EntradaUTN.jpg"
-          icon={<HealingIcon />}
+          backgroundImage="images/varias/campus.jpg"
+          icon={HealingIcon}
         />
 
         <TitleBox
           title="Servicios para Alumnos"
           description="Especialidades médicas disponibles para solicitar turnos"
         />
-        {/*Tarjeta de Medicos */}
+      
         <Card
           sx={{
             position: "relative",
@@ -352,7 +285,7 @@ export function EmployedStudentContent() {
                           borderRadius: 4,
                           my: 3,
                           background:
-                            "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)",
+                            "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)", //GRADIENTE??
                           border: "1px solid #DCE7F5",
                           boxShadow: "0 10px 25px rgba(18,54,102,0.12)",
                           transition: "all .3s ease",
@@ -397,9 +330,9 @@ export function EmployedStudentContent() {
                                 sx={{ fontSize: 30, color: "#2A548B" }}
                               />
                             </Box>
-                            <Typography variant="h6" fontWeight="bold" noWrap>
+                            <SAETypography variant="h6" fontWeight="bold" noWrap>
                               {especialidad.nombre_especialidad}
-                            </Typography>
+                            </SAETypography>
                           </Stack>
 
                           <Divider sx={{ my: 1 }} />
@@ -412,11 +345,11 @@ export function EmployedStudentContent() {
                             }}
                           >
                             {/* SECCIÓN 2: DESCRIPCIÓN (Le damos un alto fijo para que no mueva lo demás) */}
-                            <Box sx={{ height: "80px", overflow: "hidden" }}>
+                            <Box sx={{ height: "80px", overflow: "hidden" }}>                       
                               <ScaleText
-                                text={
-                                  especialidad?.descripcion_especialidad ?? ""
-                                }
+                                text={ especialidad?.descripcion_especialidad ?? ""}
+                                maxWidth={"300px"}
+                                maxHeight={"80px"}
                               />
                             </Box>
 
@@ -431,16 +364,16 @@ export function EmployedStudentContent() {
                               }}
                               my={2}
                             >
-                              <Typography
+                              <SAETypography
                                 variant="body2"
                                 fontWeight="bold"
-                                color="text.secondary"
+                                color="var(--secondary)"
                               >
                                 Horarios de Atención:
-                              </Typography>
+                              </SAETypography>
 
                               {especialidad.diasYHorarios.map((item, index) => {
-                                const diaEncontrado = DAYS.find(
+                                const diaEncontrado = calendarDays.find(
                                   (d) => d.value === item.dia,
                                 );
                                 const nombreDia = diaEncontrado
@@ -459,19 +392,19 @@ export function EmployedStudentContent() {
                                       fontSize="small"
                                       color="action"
                                     />
-                                    <Typography variant="body2">
+                                    <SAETypography variant="body2">
                                       <strong>{nombreDia}:</strong>{" "}
                                       {mostrarHorasMinutos(item.hora_inicio)} a{" "}
                                       {mostrarHorasMinutos(item.hora_fin)}
-                                    </Typography>
+                                    </SAETypography>
                                   </Stack>
                                 );
                               })}
                             </Box>
-                            <Typography variant="body2" sx={{ pt: 1.5 }}>
+                            <SAETypography variant="body2" sx={{ pt: 1.5 }}>
                               <strong>{"Profesional: "}</strong>
                               {especialidad.especialista}
-                            </Typography>
+                            </SAETypography>
                             {/* SECCIÓN EN EL FONDO: EL BOTÓN (Queda alineado abajo siempre igual) */}
                             <SAEButton
                               variant="contained"
@@ -504,7 +437,7 @@ export function EmployedStudentContent() {
 
         <TitleBox
           title="Turnos Activos"
-          description="Podras ver aquellos turnos que tengas activos en estos dias."
+          description="Podrás ver aquellos turnos que tengas activos en estos días."
         />
 
         <Card
@@ -537,7 +470,7 @@ export function EmployedStudentContent() {
             </Grid>
           )}
           {!loadingTurnos && estudianteTurnos.length === 0 && (
-            <Typography
+            <SAETypography
               variant="h3"
               fontWeight="bold"
               sx={{
@@ -548,7 +481,7 @@ export function EmployedStudentContent() {
               }}
             >
               No hay turnos activos
-            </Typography>
+            </SAETypography>
           )}
           <Stack
             direction={{ xs: "column", md: "row" }}
@@ -567,7 +500,7 @@ export function EmployedStudentContent() {
                   sx={{
                     minWidth: 350,
                     maxWidth: 350,
-                    color: "black",
+                    color: "var(--textBlack)",
                     my: 2,
                     borderRadius: 2,
                     p: 1.1,
@@ -583,20 +516,20 @@ export function EmployedStudentContent() {
                       alignItems="center"
                       mb={1.5}
                     >
-                      <Typography
+                      <SAETypography
                         variant="subtitle1"
                         fontWeight="bold"
                         noWrap
                         sx={{ maxWidth: "140px" }}
                       >
                         {turno.fecha_solicitud || "Fecha Solicitud"}
-                      </Typography>
+                      </SAETypography>
                       <Chip
                         label={turno.estado || "Sin Definir"}
                         size="small"
                         sx={{
                           bgcolor: PALETTE[turno.id_estado_turno],
-                          color: "white",
+                          color: "var(--textBlack)",
                           fontSize: "0.75rem",
                           fontWeight: 600,
                         }}
@@ -607,33 +540,33 @@ export function EmployedStudentContent() {
 
                     {/* Datos Mínimos: Fecha y Hora */}
                     <Stack spacing={1} mt={1.5}>
-                      <Typography variant="body2">
+                      <SAETypography variant="body2">
                         <strong>{"Solicitante: "}</strong>
                         <br />
                         {turno.paciente || "Error recuperando el nombre"}
-                      </Typography>
-                      <Typography variant="body2">
+                      </SAETypography>
+                      <SAETypography variant="body2">
                         <strong>{"Asunto: "}</strong>
                         <br />
                         {turno.asunto || "Turno sin Asunto"}
-                      </Typography>
-                      <Typography variant="body2">
+                      </SAETypography>
+                      <SAETypography variant="body2">
                         <strong>{"Atiende: "}</strong>
                         <br />
-                        {turno.especialista || "Sin medico asignado"}
-                      </Typography>
+                        {turno.especialista || "Sin médico asignado"}
+                      </SAETypography>
                       <Stack direction="row" alignItems="center" gap={1}>
                         <CalendarMonthIcon fontSize="medium" />
-                        <Typography variant="body2">
+                        <SAETypography variant="body2">
                           {turno.fecha_atencion || "Sin Fecha Asignada"}
-                        </Typography>
+                        </SAETypography>
                       </Stack>
 
                       <Stack direction="row" alignItems="center" gap={1}>
                         <AccessTimeIcon fontSize="medium" />
-                        <Typography variant="body2">
+                        <SAETypography variant="body2">
                           {turno.hora_atencion || "Sin Horario Asignado"}
-                        </Typography>
+                        </SAETypography>
                       </Stack>
                     </Stack>
                     <Stack spacing={2} mt={1.5} p={2}>
@@ -642,7 +575,7 @@ export function EmployedStudentContent() {
                         onClick={() => openShowTurnos(turno)}
                         sx={{
                           whiteSpace: "nowrap",
-                          color: "white",
+                          color: "var(--textWhite)",
                           border: "1px solid rgba(255,255,255,0.4)",
                         }}
                       >
@@ -696,7 +629,7 @@ export function EmployedStudentContent() {
             </Stack>
           )}
           {!loadingCursos && cursos.length === 0 && (
-            <Typography
+            <SAETypography
               variant="h3"
               fontWeight="bold"
               sx={{
@@ -706,7 +639,7 @@ export function EmployedStudentContent() {
               }}
             >
               No hay cursos actualmente activos
-            </Typography>
+            </SAETypography>
           )}
           {!loadingTurnos && cursos.length > 0 && (
             <Box
@@ -742,7 +675,7 @@ export function EmployedStudentContent() {
                         height: 220,
                         borderRadius: 4,
                         background:
-                          "linear-gradient(180deg,#1D3557 0%,#2A548B 100%)",
+                          "linear-gradient(180deg,#1D3557 0%,#2A548B 100%)", // GRADIENT
                         color: "white",
                         cursor: "pointer",
                         transition: "all .3s ease",
@@ -765,13 +698,16 @@ export function EmployedStudentContent() {
                       >
                         <SchoolIcon
                           sx={{
-                            fontSize: 45,
+                            fontSize: 40,
                             color: COURSE_PALLETE[index],
                           }}
                         />
-                        <Typography variant="h6" fontWeight={400}>
-                          {curso.nombre_curso}
-                        </Typography>
+                        <SAETypography
+                          variant="body1"
+                        >
+                            {curso.nombre_curso}
+                        </SAETypography>
+
                       </Box>
                       <Divider
                         sx={{
@@ -789,10 +725,10 @@ export function EmployedStudentContent() {
                               fontWeight: 700,
                             }}
                           />
-                          <Typography variant="body2">
+                          <SAETypography variant="body2">
                             Docente:<strong> 👨‍🏫 {curso.nombre_docente}</strong>
-                          </Typography>
-                          <Typography variant="body2">
+                          </SAETypography>
+                          <SAETypography variant="body2">
                             Desde el: 📅
                             <strong>
                               {" "}
@@ -800,7 +736,7 @@ export function EmployedStudentContent() {
                             </strong>{" "}
                             hasta el:{" "}
                             <strong>{formatearFecha(curso.fecha_fin)}</strong>
-                          </Typography>
+                          </SAETypography>
                         </Stack>
                       </CardContent>
                     </Card>
@@ -812,7 +748,7 @@ export function EmployedStudentContent() {
         </Card>
 
         <TitleBox
-          title="Historico de Turnos"
+          title="Histórico de Turnos"
           description="Turnos cancelados o finalizados"
         />
         <Card
@@ -825,7 +761,7 @@ export function EmployedStudentContent() {
         >
           <CardContent sx={{ p: 0 }}>
             <Box sx={{ width: "100%" }}>
-              <DataGrid
+              <DataGrid //Este data grid no lo uso con el componente porque es para tener varias secciones
                 rows={turnsRows}
                 columns={turnsColumns}
                 loading={loadingTurnos}
@@ -841,12 +777,38 @@ export function EmployedStudentContent() {
             </Box>
           </CardContent>
         </Card>
-        {dialogOpen && dialogType === "turnos" && (
+      <DialogHealth/>
+    </SAEPage>
+  );
+}
+
+function DialogHealth(){
+const { 
+      dialogOpen, 
+      dialogData, 
+      dialogType, 
+      dialogMode, 
+      dialogError, 
+      dialogSaving,
+      setDialogData, 
+      setDialogError, 
+      handleDataChange,
+      closeDialog } = useNotification();
+  const { handleTurnosSave} = useHealth();
+  //Esta funcion no se puede generalizar al parecer
+  const handleDialogChange = (field, value) => {
+    setDialogData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  return(
+    <>
+    {dialogOpen && dialogType === "turnos" && (
           <Dialog
             open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
-            maxWidth="x1"
+            onClose={closeDialog}
+            maxWidth="md"
             fullWidth
+            autoFocus={true}  
           >
             <DialogTitle
               sx={{
@@ -855,7 +817,7 @@ export function EmployedStudentContent() {
                 alignItems: "center",
               }}
             >
-              <Typography
+              <SAETypography
                 variant="h6"
                 component="span"
                 sx={{ fontWeight: "bold" }}
@@ -863,8 +825,8 @@ export function EmployedStudentContent() {
                 {dialogMode === "cancelados"
                   ? "Turnos Cancelados"
                   : "Turnos Finalizados"}
-              </Typography>
-              <IconButton onClick={() => setDialogOpen(false)} size="small">
+              </SAETypography>
+              <IconButton onClick={closeDialog} size="small">
                 <CloseIcon />
               </IconButton>
             </DialogTitle>
@@ -887,19 +849,19 @@ export function EmployedStudentContent() {
                             }}
                           >
                             <CardContent sx={{ p: 2 }}>
-                              <Typography
-                                variant="subtitle2"
-                                color="textPrimary"
-                                fontWeight={600}
+                              <SAETypography
+                                variant="subtitle1"
+                                color="var(--textBlack)"
                                 gutterBottom
+                                fontWeight={600}
                               >
-                                ¡ATENCION!
-                              </Typography>
-                              <Typography variant="body2" color="textSecondary">
-                                Una vez generado el turno no podra ser
-                                modificado. En caso de equivocacion debera
+                                ¡ATENCIÓN!
+                              </SAETypography>
+                              <SAETypography variant="body2" color="var(--textBlack)">
+                                Una vez generado el turno no podrá ser
+                                modificado. En caso de equivocación debera
                                 eliminarlo y despues volverlo a crear
-                              </Typography>
+                              </SAETypography>
                             </CardContent>
                           </Card>
                         </Grid>
@@ -913,7 +875,7 @@ export function EmployedStudentContent() {
                             fullWidth
                             value={dialogData.legajo}
                             onChange={(e) =>
-                              handleDialogChange("legajo", e.target.value)
+                              handleDataChange("legajo", e.target.value)
                             }
                             disabled={true}
                           />
@@ -924,9 +886,9 @@ export function EmployedStudentContent() {
                             type="date"
                             value={dialogData.fecha_solicitud}
                             onChange={(e) =>
-                              handleDialogChange(
+                              handleDataChange(
                                 "fecha_solicitud",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             fullWidth
@@ -943,13 +905,13 @@ export function EmployedStudentContent() {
                             label="Dia"
                             fullWidth
                             onChange={(e) =>
-                              handleDialogChange(
+                              handleDataChange(
                                 "dia_selecionado",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                           >
-                            {DAYS.map((d) => (
+                            {calendarDays.map((d) => (
                               <MenuItem key={d.value} value={d.value}>
                                 {d.label}
                               </MenuItem>
@@ -963,9 +925,9 @@ export function EmployedStudentContent() {
                             fullWidth
                             value={dialogData.horario_disponible}
                             onChange={(e) =>
-                              handleDialogChange(
+                              handleDataChange(
                                 "horario_disponible",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             slotProps={{ inputLabel: { shrink: true } }}
@@ -975,7 +937,7 @@ export function EmployedStudentContent() {
                               "Revisar los horarios de inicio y fin del especialista"
                             }
                             sx={{
-                              bgcolor: "rgba(255,255,255,0.18)",
+                              bgcolor: "var(--chipBackground)",
                               color: "white",
                               fontWeight: 700,
                             }}
@@ -990,7 +952,7 @@ export function EmployedStudentContent() {
                             label="Explique su dolencia"
                             value={dialogData.asunto}
                             onChange={(e) =>
-                              handleDialogChange("asunto", e.target.value)
+                              handleDataChange("asunto", e.target.value)
                             }
                             multiline
                             fullWidth
@@ -1009,24 +971,22 @@ export function EmployedStudentContent() {
                             }}
                           >
                             <CardContent sx={{ p: 2 }}>
-                              <Typography
+                              <SAETypography
                                 variant="subtitle2"
                                 color="textPrimary"
                                 fontWeight={600}
                                 gutterBottom
                                 fontSize={"22px"}
                               >
-                                ¡ATENCION!
-                              </Typography>
-                              <Typography
+                                ¡ATENCIÓN!
+                              </SAETypography>
+                              <SAETypography
                                 variant="body2"
-                                fontSize={"18px"}
-                                color="textSecondary"
                               >
                                 Esta por cancelar el turno, toda la informacion
                                 que se haya utilizado en este turno se perdera
                                 como tambien la disponibilidad.
-                              </Typography>
+                              </SAETypography>
                             </CardContent>
                           </Card>
                         </Grid>
@@ -1041,7 +1001,7 @@ export function EmployedStudentContent() {
                             fullWidth
                             value={dialogData.id}
                             onChange={(e) =>
-                              handleDialogChange("id", e.target.value)
+                              handleDataChange("id", e.target.value)
                             }
                             disabled={true}
                           />
@@ -1051,7 +1011,7 @@ export function EmployedStudentContent() {
                             label="Legajo Estudiante"
                             value={dialogData.legajo}
                             onChange={(e) =>
-                              handleDialogChange("legajo", e.target.value)
+                              handleDataChange("legajo", e.target.value)
                             }
                             fullWidth
                             disabled={true}
@@ -1062,7 +1022,7 @@ export function EmployedStudentContent() {
                             label="Paciente"
                             value={dialogData.paciente}
                             onChange={(e) =>
-                              handleDialogChange("paciente", e.target.value)
+                              handleDataChange("paciente", e.target.value)
                             }
                             fullWidth
                             disabled={true}
@@ -1070,13 +1030,13 @@ export function EmployedStudentContent() {
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
                           <SAETextField
-                            label="Fecha de Atencion"
+                            label="Fecha de Atención"
                             type="date"
                             value={dialogData.fecha_atencion}
                             onChange={(e) =>
-                              handleDialogChange(
+                              handleDataChange(
                                 "fecha_atencion",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             fullWidth
@@ -1085,16 +1045,16 @@ export function EmployedStudentContent() {
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
                           <SAETextField
-                            label="Horario de Atencion"
+                            label="Horario de Atención"
                             type="time"
                             value={
                               dialogData?.hora_atencion?.split?.("hs")?.[0] ||
                               ""
                             }
                             onChange={(e) =>
-                              handleDialogChange(
+                              handleDataChange(
                                 "hora_atencion",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             slotProps={{ inputLabel: { shrink: true } }}
@@ -1107,7 +1067,7 @@ export function EmployedStudentContent() {
                             label="Asunto"
                             value={dialogData.asunto}
                             onChange={(e) =>
-                              handleDialogChange("asunto", e.target.value)
+                              handleDataChange("asunto", e.target.value)
                             }
                             multiline
                             fullWidth
@@ -1124,7 +1084,7 @@ export function EmployedStudentContent() {
             <DialogActions sx={{ px: 3, pb: 2 }}>
               <SAEButton
                 variant="outlined"
-                onClick={() => setDialogOpen(false)}
+                onClick={closeDialog}
                 disabled={dialogSaving}
               >
                 {dialogMode === "show" ? "Cerrar" : "Cancelar"}
@@ -1150,27 +1110,11 @@ export function EmployedStudentContent() {
             </DialogActions>
           </Dialog>
         )}
-
-        {/* MENSAJE DE EXITO */}
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={3000}
-          onClose={() => setSnackbarOpen(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => setSnackbarOpen(false)}
-            severity="success"
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            {snackbarMsg}
-          </Alert>
-        </Snackbar>
-      </Container>
-    </Box>
-  );
+    </>
+  )
 }
+
+
 // Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function StudentHealth() {
   return (

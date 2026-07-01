@@ -14,7 +14,7 @@ import { SportsContext } from "../employedContext";
 import {
   formatDate,
   generateColumns,
-} from "../../../shared/util";
+} from "../../../utils/util.jsx";;
 
 const EMPTY = {
   docente: { cuil: "", nombres: "", apellidos: "", activo: true, fecha_nacimiento: "" },

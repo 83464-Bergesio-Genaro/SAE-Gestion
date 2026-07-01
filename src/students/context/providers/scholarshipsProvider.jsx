@@ -44,7 +44,7 @@ import {
 import {
   closePreview as closePreviewState,
   showSnackbar as showSnackbarState,
-} from "../../../shared/util";
+} from "../../../utils/util.jsx";;
 
 export function ScholarshipsProvider({ children }) {
 

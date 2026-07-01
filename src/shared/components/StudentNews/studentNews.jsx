@@ -7,36 +7,30 @@ import {
   Stack,
   CardMedia,
   CardContent,
-  Container,
   Dialog,
-  DialogContent,
-  DialogTitle,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import { PressProvider } from "../../context/providers/pressProvider";
+import { usePress } from "../../context/sharedContext";
+
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Masonry from "@mui/lab/Masonry";
-import SearchIcon from "@mui/icons-material/Search";
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import CloseIcon from "@mui/icons-material/Close";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import SettingsIcon from "@mui/icons-material/Settings";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import { PressProvider } from "../../context/providers/pressProvider";
-import { usePress } from "../../context/sharedContext";
+
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
 import NewsPreviewDialog from "./NewsPreviewDialog";
-
-import {
-  ObtenerNoticiasPublicas,
-  descargarDocumentoPorId,
-} from "../../../api/PrensaService";
+import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import TitleBox from "../titleBox";
+
+import {descargarDocumentoPorId} from "../../../api/PrensaService";
+import { SAETypography } from "../typography/SAETypography";
+
 const baseUrl = import.meta.env.BASE_URL;
 const MAX_DESCRIPTION_PREVIEW_LENGTH = 440;
 
@@ -91,10 +85,11 @@ function ItemNovedad({
       <Card
         onClick={() => setDialogOpen(true)}
         sx={{
+          position:"relative",
           borderRadius: 4,
           boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
           border: "1px solid rgba(17, 53, 101, 0.08)",
-          cursor: { xs: "pointer", md: "default" },
+          cursor: { xs: "default", md: "pointer" },
           opacity: 1,
           marginBottom: 3,
           display: "flex",
@@ -102,8 +97,15 @@ function ItemNovedad({
             xs: "column",
             md: invertida ? "row-reverse" : "row",
           },
+          "&:hover": {
+            transform: "scale(1.01)",
+            boxShadow: "0 15px 25px rgba(0,0,0,.15)",
+            },    "&:hover .hover-overlay": {
+            opacity: 1,
+            },
         }}
       >
+
         <CardMedia
           sx={{
             width: { xs: "100%", md: 300 },
@@ -117,15 +119,43 @@ function ItemNovedad({
           alt={portada?.name ?? "UTN"}
         />
 
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{
+          flex: 1
+          }}>
+            <Box
+            sx={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "rgba(0,0,0,.55)",
+                opacity: 0,
+                transition: "all .3s ease",
+                cursor:"pointer"
+            }}
+            className="hover-overlay"
+            >
+                <SAETypography
+                variant="overline"
+                sx={{
+                    color: "white",
+                    letterSpacing: 1,
+                    width: "100px",
+                    textAlign: "center",
+                }}
+                >
+                Ver mas
+                </SAETypography>
+            </Box>
           <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: "#14325c" }}>
+            <SAETypography variant="h6" sx={{color: "var(--secondary)" }}>
               {titulo}
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
+            </SAETypography>
+            <SAETypography variant="body2">
               {fecha_inicio}
-            </Typography>
-            <Typography
+            </SAETypography>
+            <SAETypography
               variant="body1"
               sx={{
                 mt: 1,
@@ -137,17 +167,13 @@ function ItemNovedad({
               {isDescriptionTruncated && (
                 <Box
                   component="span"
-                  sx={{
-                    color: "#14325c",
-                    fontWeight: 700,
-                    whiteSpace: "nowrap",
-                  }}
                 >
                   {" "}
-                  ... Ver más
+                  ...
                 </Box>
               )}
-            </Typography>
+            </SAETypography>
+            
             <Box
               onClick={(event) => event.stopPropagation()}
               sx={{ display: { xs: "none", md: "block" } }}
@@ -194,74 +220,65 @@ export function NovedadesContent() {
   };
 
   return (
-    <Box
-      sx={{
-        mt: "-20px",
-        pt: "40px",
-        pb: 4,
-        minHeight: "100%",
-      }}
-    >
-      <Container maxWidth="xl">
-        <TitleBox
-          title="Novedades Estudiantiles"
-          description="Información actualizada sobre actividades, comunicados y novedades
-            académicas."
-        />
-        <Box sx={{ mt: 1 }}>
-          {isLoading && (
-            <Stack alignItems="center" width={"100%"} gap={1}>
-              <SAESpinner size="S" />
+    <>
+      <TitleBox
+        title="Novedades Estudiantiles"
+        description="Información actualizada sobre actividades, comunicados y novedades
+          académicas."
+      />
+      <Box sx={{ mt: 1 }}>
+        {isLoading && (
+          <Stack alignItems="center" width={"100%"} gap={1}>
+            <SAESpinner size="S" />
+          </Stack>
+        )}
+        {!isLoading && (
+          <>
+            <Stack>
+              {novedadesPaginadas.map((item, i) => (
+                <ItemNovedad
+                  key={item.id}
+                  titulo={item.titulo}
+                  fecha_inicio={item.fecha_inicio}
+                  descripcion={item.descripcion}
+                  invertida={i % 2 === 0}
+                  portada={item.portada}
+                  documentos={item.documentos}
+                />
+              ))}
             </Stack>
-          )}
-          {!isLoading && (
-            <>
-              <Stack>
-                {novedadesPaginadas.map((item, i) => (
-                  <ItemNovedad
-                    key={item.id}
-                    titulo={item.titulo}
-                    fecha_inicio={item.fecha_inicio}
-                    descripcion={item.descripcion}
-                    invertida={i % 2 === 0}
-                    portada={item.portada}
-                    documentos={item.documentos}
-                  />
-                ))}
-              </Stack>
 
-              <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  gap: 0.5,
-                }}
+            <Box
+              sx={{
+                mt: 2,
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: 0.5,
+              }}
+            >
+              <Typography sx={{ fontSize: "0.95rem", color: "#333" }}>
+                {paginaActual} de {totalPaginas}
+              </Typography>
+
+              <IconButton
+                onClick={irPaginaAnterior}
+                disabled={paginaActual === 1}
               >
-                <Typography sx={{ fontSize: "0.95rem", color: "#333" }}>
-                  {paginaActual} de {totalPaginas}
-                </Typography>
+                <ChevronLeftIcon />
+              </IconButton>
 
-                <IconButton
-                  onClick={irPaginaAnterior}
-                  disabled={paginaActual === 1}
-                >
-                  <ChevronLeftIcon />
-                </IconButton>
-
-                <IconButton
-                  onClick={irPaginaSiguiente}
-                  disabled={paginaActual === totalPaginas}
-                >
-                  <ChevronRightIcon />
-                </IconButton>
-              </Box>
-            </>
-          )}
-        </Box>
-      </Container>
-    </Box>
+              <IconButton
+                onClick={irPaginaSiguiente}
+                disabled={paginaActual === totalPaginas}
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+          </>
+        )}
+      </Box>
+    </>
   );
 }
 

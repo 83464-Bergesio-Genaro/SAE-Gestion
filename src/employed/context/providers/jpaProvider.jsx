@@ -20,7 +20,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CastleIcon from "@mui/icons-material/Castle";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import { formatHeader, generateRows, formatTime } from "../../../shared/util";
+import { formatHeader, generateRows, formatTime } from "../../../utils/util.jsx";;
 
 const generateColumns = (data, editAction, deleteAction) => {
   if (!data || data.length === 0) return [];

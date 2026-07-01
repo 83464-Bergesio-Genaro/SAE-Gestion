@@ -1,15 +1,19 @@
-import { Box,Container,Grid, Typography,Stack,Divider} from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
-import SAEButton from "../../components/buttons/SAEButton";
-import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
+import { Box,Container, Typography,Stack,Divider} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
+import SAEButton from "../../components/buttons/SAEButton";
+import SAEPage from "../../components/page/SAEPage";
 const baseUrl = import.meta.env.BASE_URL;
 
 export default function Main(){
   return(
     <>
       <SAEHero/>
-      <NovedadesEstudiantiles/>
+      <Box px={"2vw" //Poniendo la SAE Page queda muy chico y no me gusta
+      }>
+        <NovedadesEstudiantiles/>
+      </Box>
     </>
   );
 }
@@ -161,14 +165,13 @@ function SAEHero() {
           {/* ---------------- DESCRIPCIÓN ---------------- */}
 
           <Typography
-            variant="title"
+            variant="subtitle2"
             sx={{
               mt: 5,
               mb: 4,
-              maxWidth: 700,
+              maxWidth: "60vw",
               textAlign: "center",
-              color: "white",
-              fontWeight: 500,
+              color: "var(--textWhite)",
               opacity: 0.90,
               px: 2,
             }}

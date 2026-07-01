@@ -138,6 +138,7 @@ function EmployedJPAContent() {
   const sectionConfig = useMemo(
     () => ({
       eventosPublicos: {
+        key:"eventosPublicos",
         title: "Eventos Generales",
         dialog: openCreateEventoPublico,
         addButton: "Nuevo Evento Publico",
@@ -147,6 +148,7 @@ function EmployedJPAContent() {
         loading: loadingEventosPublicos,
       },
       eventosInternos: {
+        key:"eventosInternos",
         title: "Eventos Internos",
         dialog: openCreateEventoSAE,
         addButton: "Nuevo Evento SAE",
@@ -156,6 +158,7 @@ function EmployedJPAContent() {
         loading: loadingEventosSAE,
       },
       stands: {
+        key: "stands",
         title: "Puestos",
         dialog: openCreateStands,
         addButton: "Nuevo Puesto",
@@ -165,6 +168,7 @@ function EmployedJPAContent() {
         loading: loadingStands,
       },
       interesados: {
+        key: "interesados",
         title: "Interesados",
         dialog: openCreateInteresados,
         addButton: "Nuevo Interesado",

@@ -9,9 +9,12 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  ListItemIcon,
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { useAuth } from "../../context/sharedContext";
 import SAEButton from "../buttons/SAEButton";
 import { sharedMenu, studentMenu, employedMenu ,adminMenu} from "../../menus/MenuConfig";
@@ -61,6 +64,11 @@ export default function Navbar() {
 
   const handleAvatarClick = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+  const handleProfile = () => {
+    handleMenuClose();
+    handleMobileClose();
+    navigate("/Mi-Perfil");
+  };
 
   return (
     <>
@@ -108,13 +116,35 @@ export default function Navbar() {
                   anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                   transformOrigin={{ vertical: "top", horizontal: "right" }}
                 >
-                  <Box sx={{ px: 2, py: 1 }}>
+                  <Box
+                    onClick={handleProfile}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      cursor: "pointer",
+                      "&:hover": { bgcolor: "action.hover" },
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        bgcolor: "primary.main",
+                        fontWeight: "bold",
+                        width: 32,
+                        height: 32,
+                        fontSize: 14,
+                      }}
+                    >
+                      {getInitials(user.nombre)}
+                    </Avatar>
                     <Typography variant="subtitle2" color="text.secondary">
                       {user.nombre}
                     </Typography>
                   </Box>
                   <Divider />
-                  <MenuItem onClick={() => { handleMenuClose(); navigate("Mi-Perfil"); }} >Perfil</MenuItem>
+                  <MenuItem onClick={handleProfile}>Perfil</MenuItem>
                   <MenuItem onClick={() => { handleMenuClose(); logout(); }}>Cerrar Sesión</MenuItem>
                 </Menu>
               </>
@@ -142,7 +172,18 @@ export default function Navbar() {
         sx={{ display: { xs: "block", md: "none" } }}
       >
         {user && (
-          <Box sx={{ px: 2, py: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box
+            onClick={handleProfile}
+            sx={{
+              px: 2,
+              py: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              cursor: "pointer",
+              "&:hover": { bgcolor: "action.hover" },
+            }}
+          >
             <Avatar sx={{ bgcolor: "primary.main", fontWeight: "bold", width: 32, height: 32, fontSize: 14 }}>
               {getInitials(user.nombre)}
             </Avatar>
@@ -150,15 +191,37 @@ export default function Navbar() {
           </Box>
         )}
         {user && <Divider />}
-        {menu.map((item) => (
-          <MenuItem key={item.path} onClick={() => handleNav(item.path)}>
-            {item.label}
-          </MenuItem>
-        ))}
+        {menu.map((item) => {
+          const ItemIcon = item.icon;
+          return (
+            <MenuItem
+              key={item.path}
+              onClick={() => handleNav(item.path)}
+              sx={{ py: 1.25 }}
+            >
+              {ItemIcon && (
+                <ListItemIcon sx={{ color: "primary.main" }}>
+                  <ItemIcon fontSize="small" />
+                </ListItemIcon>
+              )}
+              {item.label}
+            </MenuItem>
+          );
+        })}
         {user && <Divider />}
-        {user && <MenuItem onClick={() => { handleMobileClose(); navigate("Mi-Perfil");}}>Perfil</MenuItem>}
         {user && (
-          <MenuItem onClick={() => { handleMobileClose(); logout(); }}>
+          <MenuItem onClick={handleProfile} sx={{ py: 1.25 }}>
+            <ListItemIcon>
+              <AccountCircleOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            Perfil
+          </MenuItem>
+        )}
+        {user && (
+          <MenuItem onClick={() => { handleMobileClose(); logout(); }} sx={{ py: 1.25 }}>
+            <ListItemIcon>
+              <LogoutRoundedIcon fontSize="small" />
+            </ListItemIcon>
             Cerrar Sesión
           </MenuItem>
         )}

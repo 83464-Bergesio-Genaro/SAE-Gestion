@@ -18,7 +18,7 @@ import {
 import SAEButton from "../../components/buttons/SAEButton";
 import SAETextField from "../../components/inputs/SAETextField";
 import SAESpinner from "../../components/spinner/SAESpinner";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Login as LoginIcon, Visibility, VisibilityOff } from "@mui/icons-material";
 import { ModificarUsuario } from "../../../api/AuthService";
 
 const carreras = [
@@ -358,6 +358,7 @@ export default function Login() {
               fullWidth
               onClick={handleLogin}
               disabled={isLoading}
+              startIcon={<LoginIcon />}
               sx={{ fontWeight: 600 }}
             >
               Ingresar

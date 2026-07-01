@@ -29,6 +29,7 @@ import {
   MenuItem,
   Alert,
   Snackbar,
+  useMediaQuery,
 } from "@mui/material";
 import HeaderPage from "../../../shared/components/headerPage";
 
@@ -44,7 +45,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 import { useAuth } from "../../../shared/context/sharedContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TravelProvider } from "../../context/providers/travelProvider";
 import { useTravel } from "../../context/studentContext";
 import { HashLink as Link } from "react-router-hash-link";
@@ -197,6 +198,8 @@ function NotificacionEstudiante() {
 }
 function CarrouselVertical() {
   const [indiceActivo, setIndiceActivo] = useState(0);
+  const isMobile = useMediaQuery("(max-width:599px)");
+  const sliderRef = useRef(null);
 
   const tarjetas = [
     {
@@ -236,15 +239,17 @@ function CarrouselVertical() {
     },
   ];
 
-  const ALTURA_TARJETA = 600;
+  const ALTURA_TARJETA = isMobile ? 470 : 600;
 
   const settings = {
     dots: false,
     infinite: false,
-    vertical: true,
+    vertical: !isMobile,
     verticalSwiping: false,
-    swipe: false,
-    slidesToShow: indiceActivo + 1,
+    swipe: isMobile,
+    draggable: isMobile,
+    touchMove: isMobile,
+    slidesToShow: isMobile ? 1 : indiceActivo + 1,
     slidesToScroll: 1,
     beforeChange: (current, next) => setIndiceActivo(next),
   };
@@ -255,19 +260,33 @@ function CarrouselVertical() {
   const handleNext = () => {
     setIndiceActivo((prev) => (prev === tarjetas.length - 1 ? 0 : prev + 1));
   };
+
+  useEffect(() => {
+    if (isMobile) sliderRef.current?.slickGoTo(indiceActivo);
+  }, [indiceActivo, isMobile]);
+
   return (
     <Box
       sx={{
         width: "100%",
         margin: "0",
         pt: 4,
-        touchAction: "none",
+        touchAction: "pan-y",
         overflow: "hidden",
       }}
     >
       {/* Contenedor del mazo de cartas */}
-      <Box sx={{ height: ALTURA_TARJETA + 80, position: "relative" }}>
-        <Slider {...settings}>
+      <Box
+        sx={{
+          height: { xs: ALTURA_TARJETA, sm: ALTURA_TARJETA + 80 },
+          position: "relative",
+          "& .slick-list": {
+            overflow: "hidden",
+            touchAction: "pan-y",
+          },
+        }}
+      >
+        <Slider ref={sliderRef} {...settings}>
           {tarjetas.map((item, index) => {
             const yaPaso = index > indiceActivo;
             const esActiva = index === indiceActivo;
@@ -312,7 +331,9 @@ function CarrouselVertical() {
                     display: "block",
                     height: ALTURA_TARJETA,
                     borderRadius: 5,
-                    transform: `translateY(-${desplazamientoY}px) scale(${escala})`,
+                    transform: isMobile
+                      ? "none"
+                      : `translateY(-${desplazamientoY}px) scale(${escala})`,
                     transformOrigin: "top center",
                     zIndex: zIndex,
                     overflow: "hidden",
@@ -355,14 +376,29 @@ function CarrouselVertical() {
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      p: 4,
+                      p: { xs: 2.5, sm: 4 },
                       color: "white",
                     }}
                   >
-                    <Typography mt={0.5} variant="h5" fontWeight={800}>
+                    <Typography
+                      mt={0.5}
+                      variant="h5"
+                      fontWeight={800}
+                      fontSize={{ xs: "1.35rem", sm: "1.5rem" }}
+                    >
                       {item.titulo}
                     </Typography>
-                    <Typography mt={0.5} variant="body2" fontWeight={300}>
+                    <Typography
+                      mt={0.5}
+                      variant="body2"
+                      fontWeight={300}
+                      sx={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: { xs: 5, sm: "unset" },
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
                       {item.desc}
                     </Typography>
                   </Box>

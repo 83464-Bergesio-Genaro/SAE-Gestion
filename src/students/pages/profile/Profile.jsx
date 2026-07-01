@@ -2,7 +2,6 @@ import {
   Box,
   Card,
   CardContent,
-  Container,
   Typography,
   Grid,
   Divider,
@@ -10,22 +9,37 @@ import {
   Stack,
   Snackbar,
   Alert,
+  Chip,
 } from "@mui/material";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import TitleBox from "../../../shared/components/titleBox";
 import SaveIcon from "@mui/icons-material/Save";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import ContactPhoneOutlinedIcon from "@mui/icons-material/ContactPhoneOutlined";
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import SAEPage from "../../../shared/components/page/SAEPage";
 import { useMyProfile } from "../../context/studentContext";
 import { ProfileContextProvider } from "../../../shared/context/providers/profileProvider";
 
+const SHOW_PROFILE_DOCUMENTS = false;
+
+const formatDocumentSize = (size) => {
+  const bytes = Number(size);
+  if (!Number.isFinite(bytes) || bytes <= 0) return null;
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 export function MyProfileContent() {
   const {
-    user,
     profileInitials,
     datosPerfil,
     loadingPerfil,
+    documentosPerfil,
+    loadingDocumentos,
     handleChange,
     handleMaskedChange,
     handleAddressChange,
@@ -53,12 +67,18 @@ export function MyProfileContent() {
 <SAEPage>
         <Card
           sx={{
-            borderRadius: 4,
-            boxShadow: "0 12px 32px rgba(0,0,0,0.08)",
+            borderRadius: { xs: 3, md: 4 },
+            border: "1px solid rgba(42, 84, 139, 0.1)",
+            boxShadow: {
+              xs: "0 8px 24px rgba(21, 61, 113, 0.08)",
+              md: "0 18px 45px rgba(21, 61, 113, 0.1)",
+            },
             overflow: "hidden",
+            background:
+              "linear-gradient(180deg, #f5f9ff 0%, #ffffff 220px)",
           }}
         >
-          <CardContent sx={{ p: 4 }}>
+          <CardContent sx={{ p: { xs: 1.5, sm: 3, md: 4 } }}>
             {loadingPerfil ? (
               <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }}>
                 <SAESpinner size="S" />
@@ -68,16 +88,28 @@ export function MyProfileContent() {
                 {/* CABECERA */}
                 <Stack
                   direction={{ xs: "column", md: "row" }}
-                  spacing={3}
+                  spacing={{ xs: 1.5, md: 3 }}
                   alignItems="center"
-                  mb={4}
+                  sx={{
+                    p: { xs: 2.5, sm: 3 },
+                    mb: { xs: 2.5, md: 4 },
+                    borderRadius: 3,
+                    color: "white",
+                    textAlign: { xs: "center", md: "left" },
+                    background:
+                      "linear-gradient(135deg, var(--primary) 0%, var(--lightBlue) 100%)",
+                    boxShadow: "0 12px 28px rgba(42, 84, 139, 0.22)",
+                  }}
                 >
                   <Avatar
                     sx={{
-                      width: 96,
-                      height: 96,
-                      fontSize: "2rem",
-                      bgcolor: "primary.main",
+                      width: { xs: 80, sm: 96 },
+                      height: { xs: 80, sm: 96 },
+                      fontSize: { xs: "1.7rem", sm: "2rem" },
+                      bgcolor: "#173B68",
+                      color: "#FFFFFF",
+                      border: "3px solid rgba(255,255,255,0.92)",
+                      boxShadow: "0 8px 22px rgba(9, 35, 68, 0.38)",
                     }}
                   >
                     {profileInitials}
@@ -88,18 +120,31 @@ export function MyProfileContent() {
                       Mi Perfil
                     </Typography>
 
-                    <Typography color="text.secondary">
+                    <Typography sx={{ color: "rgba(255,255,255,0.82)" }}>
                       Información personal y de contacto
                     </Typography>
                   </Box>
                 </Stack>
 
-                <Divider sx={{ mb: 4 }} />
+                <Divider sx={{ mb: { xs: 2.5, md: 4 } }} />
 
                 {/* DATOS PERSONALES */}
-                <TitleBox title="Información Personal" fontweight={400} />
+                <Stack direction="row" alignItems="center" spacing={1.25} mb={2}>
+                  <BadgeOutlinedIcon sx={{ color: "var(--primary)" }} />
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    color="var(--primary)"
+                  >
+                    Información Personal
+                  </Typography>
+                </Stack>
 
-                <Grid container spacing={2} mb={4}>
+                <Grid
+                  container
+                  spacing={{ xs: 1.5, sm: 2 }}
+                  mb={{ xs: 3, md: 4 }}
+                >
                   <Grid size={{ xs: 12, md: 4 }}>
                     <SAETextField
                       label="Legajo"
@@ -216,12 +261,25 @@ export function MyProfileContent() {
                   </Grid>
                 </Grid>
 
-                <Divider sx={{ mb: 4 }} />
+                <Divider sx={{ mb: { xs: 2.5, md: 4 } }} />
 
                 {/* DATOS DE CONTACTO */}
 
-                <TitleBox title="Información Contacto" fontweight={400} />
-                <Grid container spacing={2} mb={4}>
+                <Stack direction="row" alignItems="center" spacing={1.25} mb={2}>
+                  <ContactPhoneOutlinedIcon sx={{ color: "var(--primary)" }} />
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    color="var(--primary)"
+                  >
+                    Información de contacto
+                  </Typography>
+                </Stack>
+                <Grid
+                  container
+                  spacing={{ xs: 1.5, sm: 2 }}
+                  mb={{ xs: 3, md: 4 }}
+                >
                   <Grid size={{ xs: 12, md: 6 }}>
                     <SAETextField
                       label="Correo Electrónico"
@@ -368,18 +426,157 @@ export function MyProfileContent() {
                   )}
                 </Grid>
 
-                <Divider sx={{ mb: 4 }} />
+                <Divider sx={{ mb: { xs: 2.5, md: 4 } }} />
+
+                {SHOW_PROFILE_DOCUMENTS && (
+                  <>
+                {/* DOCUMENTOS */}
+                <Stack direction="row" alignItems="center" spacing={1.25} mb={2}>
+                  <FolderOpenOutlinedIcon sx={{ color: "var(--primary)" }} />
+                  <Box>
+                    <Typography
+                      variant="h6"
+                      fontWeight={700}
+                      color="var(--primary)"
+                    >
+                      Mis documentos
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Archivos presentados en los distintos servicios
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                {loadingDocumentos ? (
+                  <Stack alignItems="center" sx={{ py: 4 }}>
+                    <SAESpinner size="S" />
+                  </Stack>
+                ) : documentosPerfil.length > 0 ? (
+                  <Grid
+                    container
+                    spacing={{ xs: 1.5, sm: 2 }}
+                    mb={{ xs: 3, md: 4 }}
+                  >
+                    {documentosPerfil.map((documento, index) => {
+                      const extension = String(
+                        documento.extension || "",
+                      ).replace(".", "");
+                      const size = formatDocumentSize(documento.tamanio);
+
+                      return (
+                        <Grid
+                          key={documento.id ?? `${documento.nombre_documento}-${index}`}
+                          size={{ xs: 12, sm: 6, lg: 4 }}
+                        >
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              height: "100%",
+                              borderRadius: 3,
+                              borderColor: "rgba(42, 84, 139, 0.14)",
+                              boxShadow: "0 8px 20px rgba(21, 61, 113, 0.06)",
+                            }}
+                          >
+                            <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                              <Stack direction="row" spacing={1.5}>
+                                <Box
+                                  sx={{
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 2,
+                                    bgcolor: "rgba(91, 150, 204, 0.12)",
+                                    color: "var(--primary)",
+                                    display: "grid",
+                                    placeItems: "center",
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  <InsertDriveFileOutlinedIcon />
+                                </Box>
+                                <Box sx={{ minWidth: 0, flex: 1 }}>
+                                  <Typography fontWeight={700} noWrap>
+                                    {documento.nombre_documento ||
+                                      `Documento ${index + 1}`}
+                                  </Typography>
+                                  <Stack
+                                    direction="row"
+                                    spacing={0.75}
+                                    mt={1}
+                                    flexWrap="wrap"
+                                    useFlexGap
+                                  >
+                                    {extension && (
+                                      <Chip
+                                        label={extension.toUpperCase()}
+                                        size="small"
+                                        color="primary"
+                                        variant="outlined"
+                                      />
+                                    )}
+                                    {size && (
+                                      <Chip
+                                        label={size}
+                                        size="small"
+                                        variant="outlined"
+                                      />
+                                    )}
+                                  </Stack>
+                                </Box>
+                              </Stack>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                ) : (
+                  <Box
+                    sx={{
+                      mb: { xs: 3, md: 4 },
+                      p: { xs: 2.5, sm: 3 },
+                      borderRadius: 3,
+                      textAlign: "center",
+                      color: "text.secondary",
+                      bgcolor: "rgba(91, 150, 204, 0.06)",
+                      border: "1px dashed rgba(42, 84, 139, 0.25)",
+                    }}
+                  >
+                    <FolderOpenOutlinedIcon sx={{ fontSize: 36, mb: 0.5 }} />
+                    <Typography fontWeight={600}>
+                      Todavía no hay documentos subidos
+                    </Typography>
+                  </Box>
+                )}
+
+                <Divider sx={{ mb: { xs: 2.5, md: 4 } }} />
+                  </>
+                )}
 
                 {/* ACCIONES */}
-                <Stack direction="row" justifyContent="flex-end" spacing={2}>
-                <SAEButton
-                  variant="contained"
-                  onClick={handleProfileSave}
-                  disabled={loadingPerfil}
-                  startIcon={<SaveIcon />}
+                <Stack
+                  direction="row"
+                  justifyContent="flex-end"
+                  spacing={2}
+                  sx={{
+                    position: { xs: "sticky", sm: "static" },
+                    bottom: { xs: 8, sm: "auto" },
+                    zIndex: 2,
+                  }}
                 >
-                  Guardar Cambios
-                </SAEButton>
+                  <SAEButton
+                    variant="contained"
+                    onClick={handleProfileSave}
+                    disabled={loadingPerfil}
+                    startIcon={<SaveIcon />}
+                    sx={{
+                      width: { xs: "100%", sm: "auto" },
+                      minHeight: 46,
+                      px: 3,
+                      boxShadow: "0 8px 20px rgba(71, 126, 175, 0.28)",
+                    }}
+                  >
+                    Guardar Cambios
+                  </SAEButton>
                 </Stack>
               </>
             )}
@@ -424,7 +621,7 @@ export function MyProfileContent() {
 // Este componente solo inicializa el Proveedor y llama al contenido interno
 export default function MyProfile() {
   return (
-    <ProfileContextProvider>
+    <ProfileContextProvider loadDocuments={SHOW_PROFILE_DOCUMENTS}>
       <MyProfileContent />
     </ProfileContextProvider>
   );

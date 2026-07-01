@@ -24,6 +24,7 @@ import {
   MenuItem,
   Alert,
   Snackbar,
+  useMediaQuery,
 } from "@mui/material";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -32,7 +33,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { useAuth } from "../../../shared/context/sharedContext";
 import { useHealth } from "../../context/studentContext";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
@@ -198,26 +199,97 @@ const agruparPorEspecialidad = (horariosMapeados) => {
   return Object.values(agrupado);
 };
 
-export function EmployedStudentContent() {
-  function ScaleText({ text }) {
-    if (!text) return;
-    const baseSize = 26; // Tamaño máximo en px para textos cortos
-    const minSize = 13.4; // Tamaño mínimo en px para que siga siendo legible
+function ScaleText({
+  text,
+  isMobile,
+  maxFontSize,
+  minFontSize,
+  fontWeight,
+  noWrap = false,
+  maxLines,
+}) {
+  const containerRef = useRef(null);
+  const textRef = useRef(null);
+  const maxSize = maxFontSize ?? (isMobile ? 17 : 15);
+  const minSize = minFontSize ?? (isMobile ? 14 : 12);
+  const [fontSize, setFontSize] = useState(maxSize);
 
-    // 2. Calculamos el tamaño según el largo del texto
-    // Dividimos un factor (ej. 300) por el largo del texto
-    let calculatedSize = text.length > 0 ? 400 / text.length : baseSize;
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const textElement = textRef.current;
+    if (!container || !textElement || !text) return undefined;
 
-    // 3. Ajustamos el tamaño para que no pase de los límites
-    const finalSize = Math.max(minSize, Math.min(baseSize, calculatedSize));
+    const fitText = () => {
+      let lowerSize = minSize;
+      let upperSize = maxSize;
 
-    return (
-      <Typography sx={{ fontSize: `${finalSize}px`, lineHeight: 1.2 }}>
+      while (upperSize - lowerSize > 0.1) {
+        const testSize = (lowerSize + upperSize) / 2;
+        textElement.style.fontSize = `${testSize}px`;
+
+        const fits =
+          textElement.scrollHeight <= container.clientHeight &&
+          textElement.scrollWidth <= container.clientWidth;
+
+        if (fits) lowerSize = testSize;
+        else upperSize = testSize;
+      }
+
+      setFontSize(Number(lowerSize.toFixed(1)));
+    };
+
+    fitText();
+    const resizeObserver = new ResizeObserver(fitText);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, [text, maxSize, minSize]);
+
+  if (!text) return null;
+
+  return (
+    <Box
+      ref={containerRef}
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: noWrap || maxLines ? "center" : "flex-start",
+        justifyContent: "flex-start",
+      }}
+    >
+      <Typography
+        ref={textRef}
+        noWrap={noWrap}
+        sx={{
+          fontSize: `${fontSize}px`,
+          fontWeight,
+          lineHeight: 1.2,
+          textAlign: "left",
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          overflow: "hidden",
+          overflowWrap: "anywhere",
+          ...(maxLines && {
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: maxLines,
+          }),
+        }}
+      >
         {text}
       </Typography>
-    );
-  }
+    </Box>
+  );
+}
+
+export function EmployedStudentContent() {
   const { user } = useAuth();
+  const isMobile = useMediaQuery("(max-width:599px)");
+  const isTablet = useMediaQuery("(max-width:1023px)");
+  const serviceSlidesToShow = isMobile ? 1 : isTablet ? 2 : 4;
+  const courseSlidesToShow = isMobile ? 1 : isTablet ? 2 : 3;
 
   const {
     allHorarios,
@@ -298,7 +370,7 @@ export function EmployedStudentContent() {
           direction={{ xs: "column", md: "row" }}
           alignItems="center"
           spacing={1.5}
-          p={5}
+          p={{ xs: 1, sm: 3, md: 2 }}
         >
           {loadingHorarios && (
             <Stack alignItems="center" width={"100%"} gap={1}>
@@ -308,7 +380,7 @@ export function EmployedStudentContent() {
           {!loadingHorarios && (
             <Box
               sx={{
-                px: { xs: 2, sm: 4 },
+                px: { xs: 0, sm: 4 },
                 width: "100%",
                 boxSizing: "border-box",
                 overflow: "hidden",
@@ -317,10 +389,10 @@ export function EmployedStudentContent() {
                   touchAction: "pan-y",
                 },
                 "& .slick-list": {
-                  margin: "0 -10px",
+                  margin: { xs: 0, sm: "0 -10px" },
                 },
                 "& .slick-slide": {
-                  padding: "0 10px",
+                  padding: { xs: "0 5px", sm: "0 10px" },
                   boxSizing: "border-box",
                   height: "auto",
                   "& > div": {
@@ -329,7 +401,11 @@ export function EmployedStudentContent() {
                 },
               }}
             >
-              <Slider {...settingsSchedule}>
+              <Slider
+                {...settingsSchedule}
+                responsive={[]}
+                slidesToShow={serviceSlidesToShow}
+              >
                 {horariosAgrupados.map((especialidad, index) => {
                   const IconoDinamico =
                     MEDICINE_ICONS[index % MEDICINE_ICONS.length];
@@ -338,12 +414,14 @@ export function EmployedStudentContent() {
                       key={especialidad.id_especialidad}
                       variant="outlined"
                       sx={{
-                        minWidth: 300,
-                        maxWidth: 300,
-                        minHeight: 400,
-                        maxHeight: 400,
-                        borderRadius: 4,
-                        my: 3,
+                        width: { xs: "calc(100% - 10px)", sm: 300 },
+                        minWidth: { xs: 0, sm: 300 },
+                        maxWidth: { xs: "none", sm: 300 },
+                        minHeight: { xs: 420, sm: 400 },
+                        maxHeight: { xs: "none", sm: 400 },
+                        borderRadius: { xs: 3, sm: 4 },
+                        my: { xs: 2, sm: 3, md: 1.5 },
+                        mx: { xs: "auto", sm: 0 },
                         background:
                           "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)",
                         border: "1px solid #DCE7F5",
@@ -377,8 +455,9 @@ export function EmployedStudentContent() {
                         >
                           <Box
                             sx={{
-                              width: 55,
+                              width: 60,
                               height: 60,
+                              flexShrink: 0,
                               borderRadius: "50%",
                               bgcolor: "#E7F1FF",
                               display: "flex",
@@ -390,7 +469,15 @@ export function EmployedStudentContent() {
                               sx={{ fontSize: 30, color: "#2A548B" }}
                             />
                           </Box>
-                          <Typography variant="h6" fontWeight="bold" noWrap>
+                          <Typography
+                            variant="h6"
+                            fontWeight="bold"
+                            sx={{
+                              fontSize: { xs: "1.25rem", sm: "1.35rem" },
+                              lineHeight: 1.2,
+                              overflowWrap: "anywhere",
+                            }}
+                          >
                             {especialidad.nombre_especialidad}
                           </Typography>
                         </Stack>
@@ -407,6 +494,7 @@ export function EmployedStudentContent() {
                           {/* SECCIÓN 2: DESCRIPCIÓN (Le damos un alto fijo para que no mueva lo demás) */}
                           <Box sx={{ height: "80px", overflow: "hidden" }}>
                             <ScaleText
+                              isMobile={isMobile}
                               text={
                                 especialidad?.descripcion_especialidad ?? ""
                               }
@@ -726,7 +814,11 @@ export function EmployedStudentContent() {
               },
             }}
           >
-            <Slider {...settings}>
+            <Slider
+              {...settings}
+              responsive={[]}
+              slidesToShow={courseSlidesToShow}
+            >
               {cursos.map((curso, index) => (
                 <div key={curso.id || index} style={{ width: "100%" }}>
                   <Card
@@ -762,9 +854,16 @@ export function EmployedStudentContent() {
                           color: COURSE_PALLETE[index],
                         }}
                       />
-                      <Typography variant="h6" fontWeight={400}>
-                        {curso.nombre_curso}
-                      </Typography>
+                      <Box sx={{ flex: 1, minWidth: 0, height: 60 }}>
+                        <ScaleText
+                          text={curso.nombre_curso}
+                          isMobile={isMobile}
+                          maxFontSize={isMobile ? 24 : 26}
+                          minFontSize={13}
+                          fontWeight={600}
+                          maxLines={2}
+                        />
+                      </Box>
                     </Box>
                     <Divider
                       sx={{

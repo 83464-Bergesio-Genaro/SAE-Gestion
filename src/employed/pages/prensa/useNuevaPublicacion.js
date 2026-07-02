@@ -2,6 +2,7 @@
 // "Nueva Publicación" dialog, keeping NuevaPublicacionDialog purely presentational.
 
 import { useState, useMemo, useEffect } from "react";
+import { useNotification } from "../../../shared/context/sharedContext";
 import {
   crearPublicacion,
   modificarPublicacion,
@@ -35,17 +36,19 @@ const INITIAL_PREVIEW = {
  * @param {function} opts.onError     Called with a message on hard failure.
  */
 export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
-  // Dialog open/close
-  const [open, setOpen] = useState(false);
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    setDialogSaving,
+    openDialog: openGlobalDialog,
+    closeDialog: closeGlobalDialog,
+  } = useNotification();
 
-  // null = create mode, number = edit mode
-  const [editId, setEditId] = useState(null);
-
-  // Form data
-  const [nuevaData, setNuevaData] = useState(null);
-
-  // Saving
-  const [saving, setSaving] = useState(false);
+  const open = dialogOpen && dialogType === "pressPublication";
+  const nuevaData = dialogData;
+  const isEdit = dialogMode === "edit";
 
   // Document mode: "subir" | "existente"
   const [docMode, setDocMode] = useState("subir");
@@ -99,13 +102,12 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
   // Actions
   // ---------------------------------------------------------------------------
   function openDialog() {
-    setNuevaData(emptyPublicacion());
-    setOpen(true);
+    openGlobalDialog("pressPublication", "create", emptyPublicacion());
   }
 
   function openEdit(pub) {
-    setEditId(pub.id);
-    setNuevaData({
+    openGlobalDialog("pressPublication", "edit", {
+      id: pub.id,
       titulo_publicacion: pub.titulo_publicacion || "",
       descripcion: pub.descripcion || "",
       fecha_inicio: toDateInputValue(pub.fecha_inicio),
@@ -114,23 +116,16 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
       no_dar_baja: pub.no_dar_baja ?? false,
       visualizaciones: pub.visualizaciones ?? 0,
     });
-    setOpen(true);
   }
 
   function closeDialog() {
-    setOpen(false);
-    setEditId(null);
-    setNuevaData(null);
+    closeGlobalDialog();
     setArchivo(null);
     setDocMode("subir");
     setDocSeleccionado("");
     setBusquedaDoc("");
     setPage(1);
     setDocumentosExistentes([]);
-  }
-
-  function handleChange(field, value) {
-    setNuevaData((prev) => ({ ...prev, [field]: value }));
   }
 
   function handleDocModeChange(mode) {
@@ -162,8 +157,7 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
 
   async function handleSave() {
     if (!nuevaData) return;
-    setSaving(true);
-    const isEdit = editId !== null;
+    setDialogSaving(true);
     try {
       const body = {
         ...nuevaData,
@@ -173,8 +167,8 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
 
       let pubId;
       if (isEdit) {
-        await modificarPublicacion(editId, body);
-        pubId = editId;
+        await modificarPublicacion(nuevaData.id, body);
+        pubId = nuevaData.id;
       } else {
         body.id = 0;
         const created = await crearPublicacion(body);
@@ -225,7 +219,7 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
       console.error(isEdit ? "Error al guardar:" : "Error al crear publicación:", err);
       onError?.(isEdit ? PS.snackErrorSave : PS.snackErrorCreate);
     } finally {
-      setSaving(false);
+      setDialogSaving(false);
     }
   }
 
@@ -234,11 +228,7 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
   // ---------------------------------------------------------------------------
 
   /** All state values the dialog needs to render. */
-  const state = {
-    open,
-    nuevaData,
-    saving,
-    isEdit: editId !== null,
+  return {
     docMode,
     archivo,
     docSeleccionado,
@@ -249,14 +239,8 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
     docsPaginados,
     totalPages,
     preview,
-  };
-
-  /** All action callbacks the dialog needs to interact. */
-  const actions = {
-    open: openDialog,
-    openEdit,
-    close: closeDialog,
-    handleChange,
+    openCreatePublication: openDialog,
+    openEditPublication: openEdit,
     handleDocModeChange,
     setArchivo,
     setDocSeleccionado,
@@ -264,8 +248,6 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
     setPage,
     handlePreview,
     closePreview,
-    handleSave,
+    handleSavePublication: handleSave,
   };
-
-  return { state, actions };
 }

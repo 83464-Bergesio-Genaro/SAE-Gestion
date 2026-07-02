@@ -1,25 +1,16 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Chip, Box, IconButton } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import SettingsIcon from "@mui/icons-material/Settings";
-
-import { vigenciaActiva } from "../../pages/prensa/prensa.utils";
 import { useNuevaPublicacion } from "../../pages/prensa/useNuevaPublicacion";
+import { useNotification } from "../../../shared/context/sharedContext";
 
 import { PressContext } from "../employedContext";
 import { PRENSA_STRINGS } from "../../pages/prensa/prensa.strings";
 import {
-  listarPublicacionesActivas,
   listarDocumentosPorPublicacion,
   listarPublicacionesCompleto,
   eliminarPublicacion,
@@ -31,7 +22,7 @@ import {
   getDisplayDocumentName as getDocumentName,
   getImageSource,
   isPreviewableDocument,
-} from "../../../utils/util.jsx";;
+} from "../../../utils/util.jsx";
 const C = PRENSA_STRINGS;
 
 function prioridadChip(prioridad) {
@@ -46,9 +37,7 @@ function prioridadChip(prioridad) {
 }
 
 export function PressProvider({ children }) {
-  const [publicaciones, setPublicaciones] = useState([]);
-
-  const [busqueda, setBusqueda] = useState("");
+  const { showNotification } = useNotification();
   const [selectedPub, setSelectedPub] = useState(null);
   const [documentos, setDocumentos] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
@@ -57,29 +46,6 @@ export function PressProvider({ children }) {
   const [previewDocName, setPreviewDocName] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
-
-  const fetchPublicaciones = useCallback(() => {
-    setLoading(true);
-    listarPublicacionesActivas()
-      .then((data) => setPublicaciones(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Error al cargar publicaciones:", err))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetchPublicaciones();
-  }, [fetchPublicaciones]);
-
-  const publicacionesFiltradas = useMemo(() => {
-    if (!busqueda.trim()) return publicaciones;
-    const termino = busqueda.toLowerCase();
-    return publicaciones.filter(
-      (pub) =>
-        (pub.titulo_publicacion &&
-          pub.titulo_publicacion.toLowerCase().includes(termino)) ||
-        (pub.descripcion && pub.descripcion.toLowerCase().includes(termino)),
-    );
-  }, [publicaciones, busqueda]);
 
   const handleCardClick = async (pub) => {
     setSelectedPub(pub);
@@ -163,36 +129,18 @@ export function PressProvider({ children }) {
 
   /*ADMINISTRAR PRENSA */
   const [rows, setRows] = useState([]);
-  const [filtroEstado, setFiltroEstado] = useState("todos");
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const nueva = useNuevaPublicacion({
+  const publication = useNuevaPublicacion({
     onSuccess: (isEdit) => {
       setRefreshKey((k) => k + 1);
-      setSnackbar({
-        open: true,
-        message: isEdit ? C.snackSaved : C.snackCreated,
-        severity: "success",
-      });
+      showNotification(isEdit ? C.snackSaved : C.snackCreated);
     },
-    onWarning: (msg) =>
-      setSnackbar({ open: true, message: msg, severity: "warning" }),
-    onError: (msg) =>
-      setSnackbar({ open: true, message: msg, severity: "error" }),
+    onWarning: (message) => showNotification(message, "warning"),
+    onError: (message) => showNotification(message, "error"),
   });
-  const publicationDialog = {
-    state: nueva.state,
-    actions: nueva.actions,
-  };
-  const openCreatePublication = nueva.actions.open;
-
   useEffect(() => {
     setLoading(true);
     listarPublicacionesCompleto()
@@ -201,36 +149,22 @@ export function PressProvider({ children }) {
       .finally(() => setLoading(false));
   }, [refreshKey]);
 
-  const rowsFiltradas = useMemo(() => {
-    let filtradas = rows;
-    if (filtroEstado === "activas")
-      filtradas = filtradas.filter((r) => vigenciaActiva(r.fecha_vigencia));
-    if (filtroEstado === "vencidas")
-      filtradas = filtradas.filter((r) => !vigenciaActiva(r.fecha_vigencia));
-    if (busqueda.trim()) {
-      const termino = busqueda.toLowerCase();
-      filtradas = filtradas.filter(
-        (r) =>
-          (r.titulo_publicacion &&
-            r.titulo_publicacion.toLowerCase().includes(termino)) ||
-          (r.descripcion && r.descripcion.toLowerCase().includes(termino)),
-      );
-    }
-    return filtradas;
-  }, [rows, filtroEstado, busqueda]);
-
-  const handleEdit = (pub) => nueva.actions.openEdit(pub);
+  const handleEdit = (pub) => publication.openEditPublication(pub);
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     try {
       await eliminarPublicacion(deleteTarget.id);
+      setDeleteTarget(null);
+      setRefreshKey((k) => k + 1);
+      showNotification(C.snackDeleted);
     } catch (err) {
       console.warn("Respuesta del delete:", err);
+      showNotification(
+        err.message || "No se pudo eliminar la publicación",
+        "error",
+      );
     }
-    setDeleteTarget(null);
-    setRefreshKey((k) => k + 1);
-    setSnackbar({ open: true, message: C.snackDeleted, severity: "error" });
   };
 
   const columns = [
@@ -315,10 +249,7 @@ export function PressProvider({ children }) {
   return (
     <PressContext.Provider
       value={{
-        busqueda,
-        setBusqueda,
         loading,
-        publicacionesFiltradas,
         handleCardClick,
         selectedPub,
         handleClose,
@@ -333,22 +264,15 @@ export function PressProvider({ children }) {
         previewLoading,
         previewError,
         handleDownloadPreview,
-        descargarDocumentoPorId,
         getImageSource,
         getDocumentName,
         getDocumentExtension,
-        filtroEstado,
-        setFiltroEstado,
-        nueva,
-        publicationDialog,
-        openCreatePublication,
-        rowsFiltradas,
+        ...publication,
+        rows,
         columns,
         deleteTarget,
         setDeleteTarget,
         handleDeleteConfirm,
-        snackbar,
-        setSnackbar,
       }}
     >
       {children}

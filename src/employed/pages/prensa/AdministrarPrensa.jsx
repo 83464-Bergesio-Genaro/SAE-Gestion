@@ -1,44 +1,50 @@
 import {
   Box,
   Typography,
-  Container,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   IconButton,
+  FormControlLabel,
   Chip,
   InputAdornment,
-  Snackbar,
-  Alert,
-  Card,
-  CardContent,
-  Stack,
+  Divider,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Radio,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
+  Pagination,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
-import NuevaPublicacionDialog from "./NuevaPublicacionDialog";
-import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
+import SAESwitch from "../../../shared/components/buttons/SAESwitch";
 import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { DataGrid } from "@mui/x-data-grid";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { PRENSA_STRINGS } from "./prensa.strings";
+import { PRIORIDAD_OPTIONS, getTipoDocumento } from "./prensa.utils";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
 import NewsPreviewDialog from "../../../shared/components/StudentNews/NewsPreviewDialog";
 import SchoolIcon from "@mui/icons-material/School";
-
+import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import { useNotification } from "../../../shared/context/sharedContext";
 import { usePress } from "../../context/employedContext";
 import { PressProvider } from "../../context/providers/pressProvider";
 import SAEPage from "../../../shared/components/page/SAEPage";
 const C = PRENSA_STRINGS;
+const PSN = PRENSA_STRINGS.nueva;
 
 export default function AdministrarPrensa() {
   return (
@@ -50,18 +56,10 @@ export default function AdministrarPrensa() {
 
 function AdministrarPrensaContent() {
   const {
-    busqueda,
-    setBusqueda,
-    publicationDialog,
     openCreatePublication,
-    rowsFiltradas,
+    rows,
     columns,
     loading,
-    deleteTarget,
-    setDeleteTarget,
-    handleDeleteConfirm,
-    snackbar,
-    setSnackbar,
     selectedPub,
     handleClose,
     loadingDocs,
@@ -77,25 +75,22 @@ function AdministrarPrensaContent() {
     getDocumentName,
     getDocumentExtension,
   } = usePress();
-  const handleSectionChange = (section) => {
-    setActiveSection(section);
-    setBusqueda("");
-  };
 
-  const secciones = [{ key: "publicaciones", label: "Publicaciones" }];
-  const [activeSection, setActiveSection] = useState("publicaciones");
+  const activeSection = "publicaciones";
   const sectionConfig = useMemo(
     () => ({
       publicaciones: {
-        title: "Gestion Publicaciones",
+        key: "publicaciones",
+        title: "Publicaciones",
+        addButton: "Nueva Publicacion",
         icon: SchoolIcon,
-        rows: rowsFiltradas,
+        rows,
         columns,
         loading,
         dialog: openCreatePublication,
       },
     }),
-    [columns, loading, openCreatePublication, rowsFiltradas],
+    [columns, loading, openCreatePublication, rows],
   );
   const currentSection = useMemo(
     () => sectionConfig[activeSection],
@@ -108,182 +103,12 @@ function AdministrarPrensaContent() {
         title="Gestión de Publicaciones"
         description="Permite gestionar las publicaciones en el módulo de prensa"
       />
-      <Card
-        sx={{
-          borderRadius: 4,
-          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-          mb: 3,
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        {loading && (
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 5,
-              bgcolor: "rgba(255,255,255,0.72)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(1px)",
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        )}
-        <Box
-          sx={{
-            background: "var(--gradient)",
-            color: "white",
-            px: 3,
-            pt: 0,
-            pb: 0,
-          }}
-        >
-          <Stack
-            direction="row"
-            overflow={{ xs: "scroll", md: "hidden" }}
-            spacing={0}
-          >
-            {secciones.map((item) => (
-              <Box
-                key={item.key}
-                onClick={() => handleSectionChange(item.key)}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  px: 2.5,
-                  py: 1.5,
-                  cursor: "pointer",
-                  fontWeight: activeSection === item.key ? 700 : 500,
-                  fontSize: "0.85rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  color:
-                    activeSection === item.key
-                      ? "white"
-                      : "rgba(255,255,255,0.6)",
-                  borderBottom:
-                    activeSection === item.key
-                      ? "3px solid white"
-                      : "3px solid transparent",
-                  transition: "all 0.15s",
-                  "&:hover": {
-                    color: "white",
-                    borderBottomColor: "rgba(255,255,255,0.4)",
-                  },
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontWeight: "inherit",
-                    fontSize: "inherit",
-                    letterSpacing: "inherit",
-                    textTransform: "inherit",
-                    color: "inherit",
-                    lineHeight: 1,
-                  }}
-                >
-                  {item.label}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            alignItems={{ sm: "center" }}
-            justifyContent="space-between"
-            spacing={2}
-            sx={{ py: 2 }}
-          >
-            <Stack direction="row" alignItems="center" spacing={1.5}>
-              <currentSection.icon sx={{ fontSize: 30 }} />
-              <Typography variant="h6" fontWeight={700}>
-                {currentSection.title}
-              </Typography>
-            </Stack>
-
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              alignItems={{ sm: "center" }}
-            >
-              <SAETextField
-                placeholder="Busqueda..."
-                size="small"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                sx={{
-                  width: { xs: "100%", sm: 240, md: 220 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    color: "white",
-                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(255,255,255,0.6)",
-                    },
-                    "&.Mui-focused fieldset": { borderColor: "white" },
-                  },
-                  "& input::placeholder": {
-                    color: "rgba(255,255,255,0.7)",
-                    opacity: 1,
-                  },
-                  "& .MuiInputAdornment-root svg": {
-                    color: "rgba(255,255,255,0.7)",
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-              <SAEButton
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={currentSection.dialog}
-                sx={{
-                  whiteSpace: "nowrap",
-                  bgcolor: "rgba(255,255,255,0.18)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.4)",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                }}
-              >
-                Crear Publicacion
-              </SAEButton>
-            </Stack>
-          </Stack>
-        </Box>
-        <CardContent sx={{ p: 0 }}>
-          <Box sx={{ width: "100%" }}>
-            <DataGrid
-              rows={rowsFiltradas}
-              columns={currentSection.columns}
-              loading={currentSection.loading}
-              autoHeight
-              disableRowSelectionOnClick
-              pageSizeOptions={[5, 10, 25]}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 5 } },
-              }}
-              localeText={{ noRowsLabel: "Sin Registros" }}
-              sx={{ borderRadius: 0, border: "none" }}
-            />
-          </Box>
-        </CardContent>
-      </Card>
-
-      <NuevaPublicacionDialog
-        state={publicationDialog.state}
-        actions={publicationDialog.actions}
+      <SAEDataGrid
+        sectionConfig={sectionConfig}
+        currentSection={currentSection}
       />
+
+      <NuevaPublicacionDialog />
 
       <NewsPreviewDialog
         open={!!selectedPub}
@@ -309,59 +134,380 @@ function AdministrarPrensaContent() {
         error={previewError}
       />
 
-      {/* Delete confirm dialog */}
-      <Dialog
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-            {C.deleteTitle}
-          </Typography>
-          <IconButton onClick={() => setDeleteTarget(null)} size="small">
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Typography>
-            {deleteTarget?.titulo_publicacion}
-            <strong>{deleteTarget?.titulo_publicacion}</strong>?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <SAEButton
-            variant="contained"
-            color="error"
-            onClick={handleDeleteConfirm}
-          >
-            {C.deleteButton}
-          </SAEButton>
-        </DialogActions>
+      <DialogPress />
+    </SAEPage>
+  );
+}
+
+function NuevaPublicacionDialog() {
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    dialogSaving,
+    handleDataChange,
+    closeDialog,
+  } = useNotification();
+
+  const {
+    docMode,
+    archivo,
+    busquedaDoc,
+    page,
+    loadingDocs,
+    docSeleccionado,
+    docsFiltrados,
+    docsPaginados,
+    totalPages,
+    preview,
+    handleDocModeChange,
+    setArchivo,
+    setDocSeleccionado,
+    setBusquedaDoc,
+    setPage,
+    handlePreview,
+    closePreview,
+    handleSavePublication,
+  } = usePress();
+  const open = dialogOpen && dialogType === "pressPublication";
+  const nuevaData = dialogData;
+  const saving = dialogSaving;
+  const isEdit = dialogMode === "edit";
+
+  return (
+    <>
+      <Dialog open={open} onClose={closeDialog} maxWidth="xl" fullWidth>
+        {nuevaData && (
+          <>
+            <DialogTitle
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                {isEdit ? PSN.editTitle : PSN.title}
+              </Typography>
+              <IconButton onClick={closeDialog} size="small">
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+
+            <DialogContent
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                pt: "16px !important",
+              }}
+            >
+              <Divider>
+                <Chip label={PSN.sectionDatos} size="small" />
+              </Divider>
+              <SAETextField
+                label={PSN.fieldTitle}
+                value={nuevaData.titulo_publicacion}
+                onChange={(event) =>
+                  handleDataChange("titulo_publicacion", event.target.value)
+                }
+                fullWidth
+              />
+              <SAETextField
+                label={PSN.fieldDescription}
+                value={nuevaData.descripcion}
+                onChange={(event) =>
+                  handleDataChange("descripcion", event.target.value)
+                }
+                multiline
+                rows={3}
+                fullWidth
+              />
+
+              <Divider>
+                <Chip label={PSN.sectionVigencia} size="small" />
+              </Divider>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <SAETextField
+                  label={PSN.fieldStartDate}
+                  type="date"
+                  value={nuevaData.fecha_inicio}
+                  onChange={(event) =>
+                    handleDataChange("fecha_inicio", event.target.value)
+                  }
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  fullWidth
+                />
+                <SAETextField
+                  label={PSN.fieldEndDate}
+                  type="date"
+                  value={nuevaData.fecha_vigencia}
+                  onChange={(event) =>
+                    handleDataChange("fecha_vigencia", event.target.value)
+                  }
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  fullWidth
+                />
+              </Box>
+              <FormControlLabel
+                control={
+                  <SAESwitch
+                    size="small"
+                    checked={nuevaData.no_dar_baja}
+                    onChange={(event) =>
+                      handleDataChange("no_dar_baja", event.target.checked)
+                    }
+                  />
+                }
+                label={PSN.fieldNoDarBaja}
+              />
+
+              <Divider>
+                <Chip label={PSN.sectionPrioridad} size="small" />
+              </Divider>
+              <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                {PRIORIDAD_OPTIONS.map((option) => {
+                  const selected =
+                    option.value === nuevaData.prioridad ||
+                    (option.value === 0 &&
+                      ![1, 2].includes(nuevaData.prioridad));
+                  return (
+                    <Chip
+                      key={option.value}
+                      label={option.label}
+                      color={selected ? option.chipColor : "default"}
+                      variant={selected ? "filled" : "outlined"}
+                      onClick={() =>
+                        handleDataChange("prioridad", option.value)
+                      }
+                      sx={{ cursor: "pointer" }}
+                    />
+                  );
+                })}
+              </Box>
+
+              <Divider>
+                <Chip label={PSN.sectionDocumentos} size="small" />
+              </Divider>
+              <Tabs
+                centered
+                value={docMode}
+                onChange={(_event, value) => handleDocModeChange(value)}
+              >
+                <Tab value="subir" label={PSN.tabUpload} />
+                <Tab value="existente" label={PSN.tabExisting} />
+              </Tabs>
+
+              {docMode === "subir" ? (
+                <SAEButton
+                  variant="outlined"
+                  component="label"
+                  startIcon={<CloudUploadIcon />}
+                  fullWidth
+                >
+                  {archivo ? archivo.name : PSN.attachButton}
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(event) =>
+                      setArchivo(event.target.files?.[0] || null)
+                    }
+                  />
+                </SAEButton>
+              ) : (
+                <Box>
+                  <SAETextField
+                    placeholder={PSN.searchDocPlaceholder}
+                    value={busquedaDoc}
+                    onChange={(event) => {
+                      setBusquedaDoc(event.target.value);
+                      setPage(1);
+                    }}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small" />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    size="small"
+                    fullWidth
+                    sx={{ mb: 1 }}
+                  />
+                  <TableContainer
+                    component={Paper}
+                    variant="outlined"
+                    sx={{ maxHeight: 245 }}
+                  >
+                    <Table size="small" stickyHeader>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell padding="checkbox" />
+                          <TableCell>{PSN.tableColName}</TableCell>
+                          <TableCell>{PSN.tableColType}</TableCell>
+                          <TableCell align="center">
+                            {PSN.tableColView}
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {loadingDocs ? (
+                          <TableRow>
+                            <TableCell colSpan={4} align="center">
+                              <CircularProgress size={20} />
+                            </TableCell>
+                          </TableRow>
+                        ) : docsPaginados.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={4} align="center">
+                              {PSN.noDocuments}
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          docsPaginados.map((document) => (
+                            <TableRow
+                              key={document.id}
+                              hover
+                              selected={docSeleccionado === document.id}
+                              onClick={() =>
+                                setDocSeleccionado(document.id)
+                              }
+                              sx={{ cursor: "pointer" }}
+                            >
+                              <TableCell padding="checkbox">
+                                <Radio
+                                  checked={docSeleccionado === document.id}
+                                  size="small"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                {document.nombre_documento}
+                              </TableCell>
+                              <TableCell>
+                                {getTipoDocumento(document)}
+                              </TableCell>
+                              <TableCell align="center">
+                                <IconButton
+                                  size="small"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    handlePreview(
+                                      document.id,
+                                      document.nombre_documento,
+                                    );
+                                  }}
+                                >
+                                  <VisibilityIcon fontSize="small" />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  {docsFiltrados.length > 0 && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mt: 1,
+                      }}
+                    >
+                      <Typography variant="caption">
+                        {PSN.docCount(docsFiltrados.length)}
+                      </Typography>
+                      <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={(_event, value) => setPage(value)}
+                        size="small"
+                      />
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </DialogContent>
+
+            <DialogActions>
+              <SAEButton
+                variant="outlined"
+                onClick={closeDialog}
+                disabled={saving}
+              >
+                Cancelar
+              </SAEButton>
+              <SAEButton
+                variant="contained"
+                onClick={handleSavePublication}
+                disabled={saving}
+              >
+                {saving ? PSN.saving : PSN.saveButton}
+              </SAEButton>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      <DocumentPreviewDialog
+        open={preview.open}
+        onClose={closePreview}
+        title={preview.title}
+        imageSrc={preview.imageSrc}
+        isPdf={preview.isPdf}
+        loading={preview.loading}
+        error={preview.error}
+      />
+    </>
+  );
+}
+
+function DialogPress() {
+  const { deleteTarget, setDeleteTarget, handleDeleteConfirm } = usePress();
+
+  return (
+    <Dialog
+      open={!!deleteTarget}
+      onClose={() => setDeleteTarget(null)}
+      maxWidth="xs"
+      fullWidth
+    >
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
-        <Alert
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: "100%" }}
+        <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
+          {C.deleteTitle}
+        </Typography>
+        <IconButton onClick={() => setDeleteTarget(null)} size="small">
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <Typography>
+          ¿Querés eliminar{" "}
+          <strong>{deleteTarget?.titulo_publicacion}</strong>?
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <SAEButton variant="outlined" onClick={() => setDeleteTarget(null)}>
+          Cancelar
+        </SAEButton>
+        <SAEButton
+          variant="contained"
+          color="error"
+          onClick={handleDeleteConfirm}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </SAEPage>
+          {C.deleteButton}
+        </SAEButton>
+      </DialogActions>
+    </Dialog>
   );
 }

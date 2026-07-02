@@ -27,7 +27,7 @@ export const useDialog = () => {
 
   const closeDialog = () => {
     setDialogOpen(false);
-    setDialogData(null);
+    setDialogData({});
     setDialogError(null);
   };
 

@@ -8,7 +8,11 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 
-export default function SAEDataGrid({ sectionConfig, currentSection }) {
+export default function SAEDataGrid({
+  sectionConfig,
+  currentSection,
+  beforeSearch = null,
+}) {
   // 1. Inicializar con la primera clave disponible del objeto
   const firstKey = Object.keys(sectionConfig)[0] || "";
   
@@ -138,6 +142,7 @@ export default function SAEDataGrid({ sectionConfig, currentSection }) {
             spacing={1}
             alignItems={{ sm: "center" }}
           >
+            {beforeSearch}
             <SAETextField
               placeholder="Busqueda..."
               size="small"

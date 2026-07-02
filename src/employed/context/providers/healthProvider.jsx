@@ -1,16 +1,16 @@
-import React, {  useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Box, IconButton, Chip } from '@mui/material';
 
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from '@mui/icons-material/EditNote';
-import { formatHeader, generateRows } from "../../../utils/util.jsx";;
+import { formatHeader, generateRows } from "../../../utils/util.jsx";
 
-import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso as ModificarCurso, ModificaEspecialidad, ModificarPersonal, ObtenerCursosMedicos, ObtenerEspecialidades ,ObtenerEstadosTurno, ObtenerPersonalMedico, EliminarCursoMedico, ObtenerHorariosCompleto, ObtenerHorariosXCUIL, CrearHorario, ModificarHorario, EliminarHorario, ObtenerTurnos, RegistrarFalta, ObtenerFaltasXCUIL, CrearTurnos, ModificarTurno, ObtenerTurnosActivos, ObtenerTurnosFinalizados, ObtenerTurnosCancelados} from "../../../api/SaludService";
+import {CrearCurso, CrearEspecialidad, CrearPersonal, ModificarCurso, ModificaEspecialidad, ModificarPersonal, ObtenerCursosMedicos, ObtenerEspecialidades ,ObtenerEstadosTurno, ObtenerPersonalMedico, EliminarCursoMedico, ObtenerHorariosCompleto, ObtenerHorariosXCUIL, CrearHorario, ModificarHorario, EliminarHorario, ObtenerTurnos, RegistrarFalta, ObtenerFaltasXCUIL, CrearTurnos, ModificarTurno, ObtenerTurnosActivos, ObtenerTurnosFinalizados, ObtenerTurnosCancelados} from "../../../api/SaludService";
 import { mapCursoMedico, mapHorarioSalud, mapPersonalMedico, mapEstado, mapTurnos} from '../../../api/formatters/SaludFormatters';
-import { Try } from '@mui/icons-material';
 import { ObtenerUsuariosXLegajo } from '../../../api/EmpleadoService';
 import { HealthContext } from '../employedContext';
+import { useNotification } from '../../../shared/context/sharedContext';
 
     // FORMULARIOS VACIOS
     const EMPTY_ESPECIALIDAD = 
@@ -163,6 +163,22 @@ import { HealthContext } from '../employedContext';
 };
 
 export const HealthUsersProvider = ({ children }) => {
+    const {
+        showNotification,
+        dialogOpen,
+        dialogData,
+        dialogType,
+        dialogMode,
+        dialogError,
+        dialogSaving,
+        setDialogOpen,
+        setDialogData,
+        setDialogType,
+        setDialogMode,
+        setDialogError,
+        setDialogSaving,
+    } = useNotification();
+
     const DAYS = [
         { label: "Lunes",     value: 1 },
         { label: "Martes",    value: 2 },
@@ -171,16 +187,8 @@ export const HealthUsersProvider = ({ children }) => {
         { label: "Viernes",   value: 5 }
     ];
     // Estados globales de Diálogo compartidos por ambas secciones
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogData, setDialogData] = useState({});
-    const [dialogType, setDialogType] = useState(""); 
-    const [dialogMode, setDialogMode] = useState(""); 
-    const [dialogError, setDialogError] = useState(null);
-    const [dialogSaving, setDialogSaving] = useState(false);
     const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
     // Estados de Notificación
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMsg, setSnackbarMsg] = useState("");
 
     //ESTADOS
     const [estadosTurno, setEstados] = useState([]);
@@ -440,8 +448,7 @@ export const HealthUsersProvider = ({ children }) => {
             // 4. PETICIÓN A LA API
             try {
                 await ModificarTurno(id_turno, body);
-                setSnackbarMsg("Turno Actualizado!");
-                setSnackbarOpen(true);
+                showNotification("Turno Actualizado!");
             } catch {
                 
                 // REVERTIMOS SI FALLA LA API (Devolvemos el foundTurn original)
@@ -449,8 +456,10 @@ export const HealthUsersProvider = ({ children }) => {
                 actualizarListaPorEstado(estadoAnterior, 'agregar', foundTurn);
                 setAllTurnos(prev => prev.map(t => t.id === id_turno ? foundTurn : t));
                 
-                setSnackbarMsg("Error al guardar en el servidor. El cambio fue revertido.");
-                setSnackbarOpen(true);
+                showNotification(
+                    "Error al guardar en el servidor. El cambio fue revertido.",
+                    "error"
+                );
             }            
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
@@ -464,9 +473,8 @@ export const HealthUsersProvider = ({ children }) => {
         setFinalizadoTurnos, 
         setCanceladoTurnos, 
         setReprogramadoTurnos, 
-        setAllTurnos, 
-        setSnackbarMsg, 
-        setSnackbarOpen
+        setAllTurnos,
+        showNotification
     ]);
     const handleTurnosSave = useCallback(async () => {
         setDialogSaving(true);
@@ -568,8 +576,7 @@ export const HealthUsersProvider = ({ children }) => {
             // Éxito: Limpieza de formulario y feedback visual
             setDialogOpen(false);
             setDialogData(EMPTY_TURNO);
-            setSnackbarMsg(dialogMode === "create" ? "Turno Creado!" : "Turno Actualizado!");
-            setSnackbarOpen(true);
+            showNotification(dialogMode === "create" ? "Turno Creado!" : "Turno Actualizado!");
 
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
@@ -592,8 +599,7 @@ export const HealthUsersProvider = ({ children }) => {
         setAllTurnos,
         setDialogOpen,
         setDialogData,
-        setSnackbarMsg,
-        setSnackbarOpen
+        showNotification
     ]);
 
 
@@ -654,8 +660,7 @@ export const HealthUsersProvider = ({ children }) => {
             setDialogOpen(false);
             setDialogData(EMPTY_ESPECIALIDAD);
             fetchEspecialidades();
-            setSnackbarMsg(dialogMode === "create" ? "Especialidad creado!" : "Especialidad modificada correctamente");
-            setSnackbarOpen(true);
+            showNotification(dialogMode === "create" ? "Especialidad creada!" : "Especialidad modificada correctamente");
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
         } finally {
@@ -744,8 +749,7 @@ export const HealthUsersProvider = ({ children }) => {
                 await RegistrarFalta(body);
                 setDialogData(EMPTY_FALTA);
                 fetchFaltas();
-                setSnackbarMsg("Falta Registrada al Personal");
-                setSnackbarOpen(true);                
+                showNotification("Falta registrada al personal");
             }
             else{
                 const body = { cuil: dialogData.cuil,
@@ -768,8 +772,7 @@ export const HealthUsersProvider = ({ children }) => {
                 setDialogOpen(false);
                 setDialogData(EMPTY_PERSONAL);
                 fetchPersonal();
-                setSnackbarMsg(dialogMode === "create" ? "Personal creado!" : "Personal modificado correctamente");
-                setSnackbarOpen(true);
+                showNotification(dialogMode === "create" ? "Personal creado!" : "Personal modificado correctamente");
             }
 
 
@@ -851,8 +854,13 @@ export const HealthUsersProvider = ({ children }) => {
             setDialogOpen(false);
             setDialogData(EMPTY_CURSO);
             fetchCursos();
-            setSnackbarMsg(dialogMode === "create" ? "Curso creado!" : "Curso modificado correctamente");
-            setSnackbarOpen(true);
+            showNotification(
+                dialogMode === "create"
+                    ? "Curso creado!"
+                    : dialogMode === "delete"
+                      ? "Curso eliminado correctamente"
+                      : "Curso modificado correctamente"
+            );
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
         } finally {
@@ -1061,7 +1069,7 @@ export const HealthUsersProvider = ({ children }) => {
             savingHorario,errorHorario,editingId,confirmDelete,deleteId, //Datos de formulario
             handleEmployChange,handleHorarioSaved,handleHorarioCreated,handleClose,handleCreateHorario,handleEditHorario,handleDeleteHorario,handleCancelHorario,//Acciones en el dialog
             //Valores de error, mostrar mensajes, etc.
-            snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
+            setDialogError,
             dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving
             
         }}>

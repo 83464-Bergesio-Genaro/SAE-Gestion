@@ -27,7 +27,6 @@ import {
   Grid,
   Snackbar,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
 
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -36,21 +35,24 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
+import SAETimeField from "../../../shared/components/inputs/SAETimeField";
 import SAEPage from "../../../shared/components/page/SAEPage";
 import HeaderPageEmployed from "../../../shared/components/HeaderPageEmployed";
 import { useNotification } from "../../../shared/context/sharedContext";
+import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
 
 const PALETTE = [
-  "#8A8A8A", //Pendiente
-  "#576DDC", //Asignado
-  "#E77575", //Cancelado
-  "#B8CDFF", //En curso
-  "#99F6B9", //Finalizado
-  "#F1C6A3", //Reprogramado
+  "#a0a0a0", //Pendiente
+  "#1538B8", //Asignado
+  "#d85656", //Cancelado
+  "#a8cfff", //En curso
+  "#6FA958", //Finalizado
+  "#FF8E2C", //Reprogramado
 ];
 
 const CAREERS = [
@@ -84,6 +86,7 @@ export function TurnGrid() {
     usuarioSelected,
     loadingUsuario,
     fetchUsuariosXlegajo,
+    openShowNoActivos,
     // Personal y estados
     personal,
     estadosTurno,
@@ -105,21 +108,35 @@ export function TurnGrid() {
     closeDialog,
   } = useNotification();
 
-  const [busquedaGestion, setBusquedaGestion] = useState("");
   const [careerSearch, setCareerSearch] = useState("");
+  const [inactiveTurnsType, setInactiveTurnsType] = useState(null);
 
-  const rowsGestionFiltradas = useMemo(() => {
-    const term = busquedaGestion.trim().toLowerCase();
-    if (!term) return noActivosRows;
+  const inactiveTurnsConfig = useMemo(
+    () => ({
+      inactiveTurns: {
+        key: "inactiveTurns",
+        title:
+          inactiveTurnsType === "cancelados"
+            ? "Turnos Cancelados"
+            : "Turnos Finalizados",
+        icon: CalendarMonthIcon,
+        rows: noActivosRows,
+        columns: noActivosColumns,
+        loading: loadingNoActivos,
+      },
+    }),
+    [inactiveTurnsType, loadingNoActivos, noActivosColumns, noActivosRows],
+  );
 
-    return noActivosRows.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value ?? "")
-          .toLowerCase()
-          .includes(term),
-      ),
-    );
-  }, [noActivosRows, busquedaGestion]);
+  const handleShowInactiveTurns = (type) => {
+    if (inactiveTurnsType === type) {
+      setInactiveTurnsType(null);
+      return;
+    }
+
+    setInactiveTurnsType(type);
+    openShowNoActivos(type);
+  };
 
   const dialogStatus = Number(dialogData?.id_estado_turno ?? 0);
   const dialogStatusColor = PALETTE[dialogStatus] ?? PALETTE[0];
@@ -142,9 +159,7 @@ export function TurnGrid() {
     }
 
     setDialogError("");
-    fetchUsuariosXlegajo(
-      `${studentId}@${careerSearch}.frc.utn.edu.ar`,
-    );
+    fetchUsuariosXlegajo(`${studentId}@${careerSearch}.frc.utn.edu.ar`);
   };
 
   return (
@@ -240,12 +255,31 @@ export function TurnGrid() {
             />
             <Grid container spacing={1}>
               <Grid size={{ xs: 6 }} m={0}>
-                <TurnList listadoTurnos={[]} estadoActual={4} />
+                <TurnList
+                  listadoTurnos={[]}
+                  estadoActual={4}
+                  onShowInactive={handleShowInactiveTurns}
+                  inactiveTurnsType={inactiveTurnsType}
+                />
               </Grid>
               <Grid size={{ xs: 6 }} m={0}>
-                <TurnList listadoTurnos={[]} estadoActual={2} />
+                <TurnList
+                  listadoTurnos={[]}
+                  estadoActual={2}
+                  onShowInactive={handleShowInactiveTurns}
+                  inactiveTurnsType={inactiveTurnsType}
+                />
               </Grid>
             </Grid>
+
+            {inactiveTurnsType && (
+              <Box sx={{ mt: 3 }}>
+                <SAEDataGrid
+                  sectionConfig={inactiveTurnsConfig}
+                  currentSection="inactiveTurns"
+                />
+              </Box>
+            )}
           </>
         )}
 
@@ -278,22 +312,28 @@ export function TurnGrid() {
               </IconButton>
             </DialogTitle>
             <DialogContent dividers>
-              <Stack spacing={2} sx={{ pt: 1 }}>
+              <Stack spacing={2.5} sx={{ pt: 1.5 }}>
                 {dialogError && (
                   <Alert severity="error" onClose={() => setDialogError("")}>
                     {dialogError}
                   </Alert>
                 )}
                 <>
-                  <Grid container spacing={1}>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12 }}>
+                      <Divider textAlign="center">
+                        <Chip label="Solicitante" size="small" />
+                      </Divider>
+                    </Grid>
                     {dialogMode === "create" && (
                       <Grid size={{ xs: 12 }} m={0}>
                         {/* CASO A: No hay usuario seleccionado -> Mostramos el buscador */}
                         {!usuarioSelected ? (
                           <Stack
                             direction={{ xs: "column", sm: "row" }}
-                            spacing={1}
+                            spacing={1.5}
                             alignItems={{ sm: "flex-start" }}
+                            sx={{ mb: 1 }}
                           >
                             <SAETextField
                               label="Legajo"
@@ -333,10 +373,7 @@ export function TurnGrid() {
                               disabled={loadingUsuario}
                               fullWidth
                               renderInput={(params) => (
-                                <SAETextField
-                                  {...params}
-                                  label="Carrera"
-                                />
+                                <SAETextField {...params} label="Carrera" />
                               )}
                             />
                             <Stack
@@ -431,6 +468,11 @@ export function TurnGrid() {
                         </Grid>
                       </>
                     )}
+                    <Grid size={{ xs: 12 }}>
+                      <Divider textAlign="center">
+                        <Chip label="Especialista" size="small" />
+                      </Divider>
+                    </Grid>
                     <Grid size={{ xs: 12 }} m={0}>
                       <Autocomplete
                         disablePortal
@@ -469,6 +511,11 @@ export function TurnGrid() {
                         )}
                       />
                     </Grid>
+                    <Grid size={{ xs: 12 }}>
+                      <Divider textAlign="center">
+                        <Chip label="Fecha y horario" size="small" />
+                      </Divider>
+                    </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETextField
                         label="Fecha de Atencion"
@@ -482,18 +529,24 @@ export function TurnGrid() {
                       />
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      <SAETextField
-                        label="Hora inicio"
-                        type="time"
+                      <SAETimeField
+                        label="Hora de atención"
                         value={
                           dialogData?.hora_atencion?.split?.("hs")?.[0] || ""
                         }
-                        onChange={(e) =>
-                          handleDataChange("hora_atencion", e.target.value)
+                        onChange={(value) =>
+                          handleDataChange("hora_atencion", value)
                         }
-                        slotProps={{ inputLabel: { shrink: true } }}
+                        minTime="00:00"
+                        maxTime="23:59"
+                        size="big"
                         fullWidth
                       />
+                    </Grid>
+                    <Grid size={{ xs: 12 }}>
+                      <Divider textAlign="center">
+                        <Chip label="Asunto" size="small" />
+                      </Divider>
                     </Grid>
                     <Grid size={{ xs: 12 }}>
                       <SAETextField
@@ -506,6 +559,11 @@ export function TurnGrid() {
                         fullWidth
                         rows={4} // Número inicial de filas
                       />
+                    </Grid>
+                    <Grid size={{ xs: 12 }}>
+                      <Divider textAlign="center">
+                        <Chip label="Estado" size="small" />
+                      </Divider>
                     </Grid>
                     <Grid size={{ xs: 12 }} m={0}>
                       <Autocomplete
@@ -556,6 +614,7 @@ export function TurnGrid() {
                 variant="outlined"
                 onClick={closeDialog}
                 disabled={dialogSaving}
+                startIcon={<CloseIcon />}
               >
                 Cancelar
               </SAEButton>
@@ -566,7 +625,11 @@ export function TurnGrid() {
                 startIcon={
                   dialogSaving ? (
                     <CircularProgress size={16} color="inherit" />
-                  ) : null
+                  ) : dialogMode === "create" ? (
+                    <AddIcon />
+                  ) : (
+                    <SaveOutlinedIcon />
+                  )
                 }
               >
                 {dialogMode === "create"
@@ -578,109 +641,6 @@ export function TurnGrid() {
             </DialogActions>
           </Dialog>
         )}
-        {/*DIALOG DE TURNOS NO ACTIVOS */}
-        {dialogOpen && dialogMode === "show" && (
-          <Dialog
-            open={dialogOpen}
-            onClose={closeDialog}
-            maxWidth="x1"
-            fullWidth
-          >
-            <DialogTitle
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography
-                variant="h6"
-                component="span"
-                sx={{ fontWeight: "bold" }}
-              >
-                {dialogType === "cancelados"
-                  ? "Turnos Cancelados"
-                  : "Turnos Finalizados"}
-              </Typography>
-              <IconButton onClick={closeDialog} size="small">
-                <CloseIcon />
-              </IconButton>
-            </DialogTitle>
-            <DialogContent dividers>
-              <Stack spacing={2} sx={{ pt: 1 }}>
-                {dialogError && (
-                  <Alert severity="error" onClose={() => setDialogError("")}>
-                    {dialogError}
-                  </Alert>
-                )}
-                <Stack
-                  sx={{
-                    backgroundImage:
-                      "linear-gradient(125deg, rgba(45, 95, 169, 0.96) 0%, rgba(53,108,178,0.88) 58%, rgba(108,171,221,0.80) 100%), url('/images/carrousel/EntradaUTN.jpg')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={1}
-                  alignItems={{ sm: "center" }}
-                >
-                  <SAETextField
-                    placeholder="Busqueda..."
-                    size="small"
-                    value={busquedaGestion}
-                    onChange={(e) => setBusquedaGestion(e.target.value)}
-                    sx={{
-                      width: { xs: "100%", sm: 240, md: 220 },
-                      "& .MuiOutlinedInput-root": {
-                        bgcolor: "rgba(255,255,255,0.12)",
-                        color: "white",
-                        "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                        "&:hover fieldset": {
-                          borderColor: "rgba(255,255,255,0.6)",
-                        },
-                        "&.Mui-focused fieldset": { borderColor: "white" },
-                      },
-                      "& input::placeholder": {
-                        color: "rgba(255,255,255,0.7)",
-                        opacity: 1,
-                      },
-                      "& .MuiInputAdornment-root svg": {
-                        color: "rgba(255,255,255,0.7)",
-                      },
-                    }}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon />
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
-                </Stack>
-                <CardContent sx={{ p: 0 }}>
-                  <Box sx={{ width: "100%" }}>
-                    <DataGrid
-                      rows={rowsGestionFiltradas}
-                      columns={noActivosColumns}
-                      loading={loadingNoActivos}
-                      autoHeight
-                      disableRowSelectionOnClick
-                      pageSizeOptions={[5, 10, 25]}
-                      initialState={{
-                        pagination: { paginationModel: { pageSize: 5 } },
-                      }}
-                      localeText={{ noRowsLabel: "Sin Registros" }}
-                      sx={{ borderRadius: 0, border: "none" }}
-                    />
-                  </Box>
-                </CardContent>
-              </Stack>
-            </DialogContent>
-          </Dialog>
-        )}
-
         {/* MENSAJE DE EXITO */}
         <Snackbar
           open={snackbarOpen}
@@ -702,11 +662,16 @@ export function TurnGrid() {
   );
 }
 
-function TurnList({ listadoTurnos, estadoActual, editAction }) {
+function TurnList({
+  listadoTurnos,
+  estadoActual,
+  editAction,
+  onShowInactive,
+  inactiveTurnsType,
+}) {
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const { handleTurnosChangeState, openShowNoActivos, loadingTurnos } =
-    useHealth();
+  const { handleTurnosChangeState, loadingTurnos } = useHealth();
 
   const handleDrop = useCallback(
     async (e, nuevoEstado) => {
@@ -719,6 +684,8 @@ function TurnList({ listadoTurnos, estadoActual, editAction }) {
     },
     [handleTurnosChangeState],
   );
+  const inactiveType = estadoActual === 2 ? "cancelados" : "finalizados";
+  const isInactiveListOpen = inactiveTurnsType === inactiveType;
 
   return (
     <>
@@ -790,25 +757,48 @@ function TurnList({ listadoTurnos, estadoActual, editAction }) {
               (estadoActual === 2 || estadoActual === 4) && (
                 <SAEButton
                   variant="contained"
-                  startIcon={<VisibilityIcon />}
-                  onClick={() =>
-                    openShowNoActivos(
-                      estadoActual === 2 ? "cancelados" : "finalizados",
-                    )
+                  startIcon={
+                    isInactiveListOpen ? <CloseIcon /> : <VisibilityIcon />
                   }
+                  onClick={() => onShowInactive?.(inactiveType)}
                   sx={{
                     whiteSpace: "nowrap",
-                    bgcolor: "white",
-                    color: "black",
+                    bgcolor: isInactiveListOpen
+                      ? "rgba(0,0,0,0.22)"
+                      : "rgba(255,255,255,0.92)",
+                    color: isInactiveListOpen ? "white" : PALETTE[estadoActual],
                     mt: 2,
-                    border: "1px solid rgba(255,255,255,0.4)",
-                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+                    border: "1px solid rgba(255,255,255,0.65)",
+                    "&:hover": {
+                      bgcolor: isInactiveListOpen
+                        ? "rgba(0,0,0,0.32)"
+                        : "white",
+                    },
                   }}
                 >
-                  Ver Turnos
+                  {isInactiveListOpen ? "Ocultar Turnos" : "Ver Turnos"}
                 </SAEButton>
               )
             }
+            {estadoActual !== 2 && estadoActual !== 4 && (
+              <Chip
+                size="large"
+                label={`${listadoTurnos?.length ?? 0} ${
+                  listadoTurnos?.length === 1 ? "turno" : "turnos"
+                }`}
+                sx={{
+                  bgcolor: "rgba(255,255,255,0.92)",
+                  color: PALETTE[estadoActual],
+                  fontWeight: 800,
+                  minWidth: 112,
+                  height: 38,
+                  fontSize: "1rem",
+                  "& .MuiChip-label": {
+                    px: 2,
+                  },
+                }}
+              />
+            )}
           </Stack>
         </Box>
         {/*Lo organizo de esta forma para reciclar el componente. */}

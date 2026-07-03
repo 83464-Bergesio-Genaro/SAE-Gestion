@@ -175,21 +175,22 @@ export default function SAEDataGrid({
                 },
               }}
             />
-            <SAEButton
-              variant="contained"
-              startIcon={<AddIcon />}
-              // Asegúrate que dialog sea una función en la config
-              onClick={currentConfig.dialog} 
-              sx={{
-                whiteSpace: "nowrap",
-                bgcolor: "rgba(255,255,255,0.18)",
-                color: "white",
-                border: "1px solid rgba(255,255,255,0.4)",
-                "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-              }}
-            >
-              {currentConfig.addButton}
-            </SAEButton>
+            {currentConfig.dialog && currentConfig.addButton && (
+              <SAEButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={currentConfig.dialog}
+                sx={{
+                  whiteSpace: "nowrap",
+                  bgcolor: "rgba(255,255,255,0.18)",
+                  color: "white",
+                  border: "1px solid rgba(255,255,255,0.4)",
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+                }}
+              >
+                {currentConfig.addButton}
+              </SAEButton>
+            )}
           </Stack>
         </Stack>
       </Box>

@@ -15,6 +15,8 @@ import {
   IconButton,
   CircularProgress,
   Alert,
+  Chip,
+  Divider,
 } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
 import { PurchaseProvider } from "../../context/providers/purchaseProvider";
@@ -30,6 +32,7 @@ import { useNotification } from "../../../shared/context/sharedContext";
 
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -305,9 +308,9 @@ function DialogPurchase({ dateRange }) {
           <Stack spacing={3}>
             {showPurchaseForm && (
               <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Datos de la compra
-                </Typography>
+                <Divider sx={{ mb: 2 }}>
+                  <Chip label="Datos de la compra" size="small" />
+                </Divider>
                 <Box
                   sx={{
                     display: "grid",
@@ -406,9 +409,9 @@ function DialogPurchase({ dateRange }) {
 
             {showPurchaseForm && (
               <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Informe tecnico
-                </Typography>
+                <Divider sx={{ mb: 2 }}>
+                  <Chip label="Informe técnico" size="small" />
+                </Divider>
                 <Box
                   sx={{
                     display: "grid",
@@ -515,9 +518,9 @@ function DialogPurchase({ dateRange }) {
 
             {showDocumentsForm && (
               <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Documentacion
-                </Typography>
+                <Divider sx={{ mb: 2 }}>
+                  <Chip label="Documentación" size="small" />
+                </Divider>
                 {!isDocsDialog && !isPurchaseDataComplete && (
                   <Alert severity="info" sx={{ mb: 2 }}>
                     Completá primero los datos de la compra para adjuntar
@@ -567,6 +570,7 @@ function DialogPurchase({ dateRange }) {
             variant="outlined"
             onClick={closeDialog}
             disabled={dialogSaving}
+            startIcon={<CloseIcon />}
           >
             Cancelar
           </SAEButton>
@@ -578,7 +582,11 @@ function DialogPurchase({ dateRange }) {
               }
               disabled={dialogSaving}
               startIcon={
-                dialogSaving ? <CircularProgress size={18} /> : undefined
+                dialogSaving ? (
+                  <CircularProgress size={18} color="inherit" />
+                ) : (
+                  <SaveOutlinedIcon />
+                )
               }
             >
               Guardar

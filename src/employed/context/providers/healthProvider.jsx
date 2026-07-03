@@ -285,11 +285,8 @@ export const HealthUsersProvider = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchTurnosFinalizados();
-  }, [fetchTurnosFinalizados]);
-
   const fetchTurnosCancelados = useCallback(async () => {
+    setLoadingNoActivos(true);
     try {
       let data = await ObtenerTurnosCancelados();
       setNoActivosRows(generateRows(data.map(mapTurnos)));
@@ -300,21 +297,11 @@ export const HealthUsersProvider = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchTurnosCancelados();
-  }, [fetchTurnosCancelados]);
-
   const openShowNoActivos = useCallback(
     (type) => {
-      setLoadingNoActivos(true);
       setNoActivosRows([]);
       if (type === "cancelados") fetchTurnosCancelados();
       else fetchTurnosFinalizados();
-
-      setDialogMode("show");
-      setDialogType(type);
-      setDialogError("");
-      setTimeout(() => setDialogOpen(true), 0);
     },
     [fetchTurnosCancelados, fetchTurnosFinalizados],
   );

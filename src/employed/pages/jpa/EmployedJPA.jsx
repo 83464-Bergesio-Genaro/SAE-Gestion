@@ -16,6 +16,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import SchoolIcon from "@mui/icons-material/School";
 import GroupsIcon from "@mui/icons-material/Groups";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
 
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
@@ -269,7 +271,7 @@ function DialogJpa() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {getDialogTitle("Evento", dialogMode)}
+              {getDialogTitle("Evento Publico", dialogMode)}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -385,6 +387,7 @@ function DialogJpa() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -395,7 +398,11 @@ function DialogJpa() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -422,7 +429,7 @@ function DialogJpa() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {getDialogTitle("Evento", dialogMode)}
+              {getDialogTitle("Evento SAE", dialogMode)}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -538,6 +545,7 @@ function DialogJpa() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -548,7 +556,11 @@ function DialogJpa() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -681,6 +693,7 @@ function DialogJpa() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -691,7 +704,11 @@ function DialogJpa() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -788,6 +805,7 @@ function DialogJpa() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -798,7 +816,11 @@ function DialogJpa() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"

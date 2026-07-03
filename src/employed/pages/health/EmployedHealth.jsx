@@ -388,6 +388,7 @@ function DialogHealth() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -398,7 +399,11 @@ function DialogHealth() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -653,6 +658,7 @@ function DialogHealth() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -663,7 +669,11 @@ function DialogHealth() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -793,6 +803,7 @@ function DialogHealth() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -803,7 +814,11 @@ function DialogHealth() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"

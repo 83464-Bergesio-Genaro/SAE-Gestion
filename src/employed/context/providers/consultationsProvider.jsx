@@ -8,6 +8,7 @@ import {
 import { Box, IconButton, Chip, Tooltip, Typography } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -185,11 +186,11 @@ const buildColumns = (
           {deleteAction && (
             <IconButton
               size="small"
-              color="primary"
+              sx={{ color: "var(--primary)" }}
               title="Eliminar"
               onClick={() => deleteAction(params.row)}
             >
-              <CloseIcon fontSize="small" />
+              <DeleteIcon fontSize="small" />
             </IconButton>
           )}
           {registAction && (
@@ -328,6 +329,8 @@ export const ConsultationProvider = ({ children }) => {
   };
 
   const handleLinksFrecuenteDelete = async () => {
+    setDialogSaving(true);
+    setDialogError("");
     try {
       await EliminarLinkFrecuentes(deleteId ?? dialogData.id);
       setDeleteId(null);
@@ -337,6 +340,8 @@ export const ConsultationProvider = ({ children }) => {
       showNotification("Link Frecuente eliminado correctamente", "warning");
     } catch (err) {
       setDialogError(err.message);
+    } finally {
+      setDialogSaving(false);
     }
   };
 

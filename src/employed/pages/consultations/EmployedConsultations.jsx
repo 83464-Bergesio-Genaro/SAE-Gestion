@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import CloseIcon from "@mui/icons-material/Close";
+import { getDialogTitle } from "../../../utils/juan/util";
 
 import { useMemo } from "react";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
@@ -41,6 +42,7 @@ import {
 import SAEPage from "../../../shared/components/page/SAEPage";
 import DataGridPanel from "../../../shared/components/dataGrid/DataGridPanel";
 import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
 
 function EmployedContent() {
   const {
@@ -159,12 +161,6 @@ function DialogConsultation() {
     handleDataChange,
     closeDialog,
   } = useNotification();
-  const dialogTitle =
-    dialogMode === "create"
-      ? "Nuevo Link Frecuente"
-      : dialogMode === "delete"
-        ? "Eliminar Link Frecuente"
-        : "Editar Link Frecuente";
 
   const {
     handleLinksFrecuentesSave,
@@ -182,6 +178,33 @@ function DialogConsultation() {
 
   const SelectedDialogIcon = selectedDialogIcon.icon;
 
+  // Cada nueva tabla puede agregar aquí su entidad, nombre y método de borrado.
+  const deleteDialogConfig = {
+    linkFrecuentes: {
+      entityLabel: "Link frecuente",
+      itemName: dialogData?.titulo,
+      onConfirm: handleLinksFrecuenteDelete,
+    },
+  };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
+    ) : null;
+  }
+
   return (
     <>
       {dialogOpen && dialogType === "linkFrecuentes" && (
@@ -198,7 +221,7 @@ function DialogConsultation() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogTitle}
+              {getDialogTitle("Link Frecuente", dialogMode)}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -211,36 +234,7 @@ function DialogConsultation() {
                   {dialogError}
                 </Alert>
               )}
-              {dialogMode === "delete" ? (
-                <>
-                  <Alert severity="warning">
-                    Esta accion eliminara el link frecuente y no se puede
-                    deshacer.
-                  </Alert>
-                  <Box
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "divider",
-                      borderRadius: 2,
-                      bgcolor: "grey.50",
-                      p: 2,
-                    }}
-                  >
-                    <Typography fontWeight={700}>
-                      {dialogData.titulo || "Sin titulo"}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 0.5, overflowWrap: "anywhere" }}
-                    >
-                      {dialogData.hipervinculo || "Sin hipervinculo"}
-                    </Typography>
-                  </Box>
-                </>
-              ) : (
-                <>
-                  <Grid container spacing={1}>
+              <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6 }} m={0}>
                       <SAETextField
                         label="ID"
@@ -377,9 +371,7 @@ function DialogConsultation() {
                         </Box>
                       </Box>
                     </Grid>
-                  </Grid>
-                </>
-              )}
+              </Grid>
             </Stack>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -392,12 +384,8 @@ function DialogConsultation() {
             </SAEButton>
             <SAEButton
               variant="contained"
-              color={dialogMode === "delete" ? "error" : "primary"}
-              onClick={
-                dialogMode === "delete"
-                  ? handleLinksFrecuenteDelete
-                  : handleLinksFrecuentesSave
-              }
+              color="primary"
+              onClick={handleLinksFrecuentesSave}
               disabled={dialogSaving}
               startIcon={
                 dialogSaving ? (
@@ -407,9 +395,7 @@ function DialogConsultation() {
             >
               {dialogMode === "create"
                 ? "Crear"
-                : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                : "Guardar"}
             </SAEButton>
           </DialogActions>
         </Dialog>

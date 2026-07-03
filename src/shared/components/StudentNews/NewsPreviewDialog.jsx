@@ -1,5 +1,6 @@
 import {
   Box,
+  CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -23,6 +24,7 @@ export default function NewsPreviewDialog({
   description,
   imageSrc,
   documents = [],
+  documentsLoading = false,
   onPreviewDocument,
 }) {
   return (
@@ -34,7 +36,18 @@ export default function NewsPreviewDialog({
           </Typography>
           <Typography color="text.secondary">{date}</Typography>
         </Box>
-        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+        <IconButton
+          onClick={onClose}
+          aria-label="Cerrar"
+          sx={{
+            color: "text.secondary",
+            "&:hover": {
+              bgcolor: "transparent",
+            },
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={2}>
@@ -47,7 +60,15 @@ export default function NewsPreviewDialog({
           <Typography color="text.secondary" sx={{ whiteSpace: "pre-line" }}>
             {description}
           </Typography>
-          {documents.length > 0 && (
+          {documentsLoading && (
+            <Stack direction="row" spacing={1} alignItems="center">
+              <CircularProgress size={18} />
+              <Typography variant="body2" color="text.secondary">
+                Cargando documentos...
+              </Typography>
+            </Stack>
+          )}
+          {!documentsLoading && documents.length > 0 && (
             <Box>
               <Typography variant="subtitle2" fontWeight={700}>
                 Documentos adjuntos
@@ -63,7 +84,11 @@ export default function NewsPreviewDialog({
                     }
                   >
                     <ListItemText
-                      primary={document.nombre_documento || `Documento ${index + 1}`}
+                      primary={
+                        document.nombre_documento ||
+                        document.name ||
+                        `Documento ${index + 1}`
+                      }
                     />
                   </ListItem>
                 ))}

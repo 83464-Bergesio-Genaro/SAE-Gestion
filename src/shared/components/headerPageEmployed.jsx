@@ -8,6 +8,7 @@ export default function HeaderPageEmployed({
   title,
   description,
   hideBackButton = false,
+  backTo = "/Inicio",
 }) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -52,7 +53,8 @@ export default function HeaderPageEmployed({
           {!hideBackButton && (
             <IconButton
               size="small"
-              onClick={() => navigate("/Inicio")}
+              aria-label="Volver"
+              onClick={() => navigate(backTo)}
               sx={{
                 color: "rgba(255,255,255,0.7)",
                 "&:hover": {

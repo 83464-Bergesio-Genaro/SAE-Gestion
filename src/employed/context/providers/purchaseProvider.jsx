@@ -290,7 +290,7 @@ const buildInformeBody = (purchase = {}, idCompra = null) => {
   };
 };
 
-const generateColumns = (data, actionsConfig = []) => {
+const generateColumns = (data, editAction, deleteAction) => {
   const sample = Array.isArray(data) ? data[0] : data;
 
   if (!sample) return [];
@@ -401,39 +401,38 @@ const generateColumns = (data, actionsConfig = []) => {
     },
   );
 
-  // 👉 Columna de acciones dinámica
-  if (actionsConfig !== null && actionsConfig.length > 0) {
-    return [
-      ...dataColumns,
-      {
-        field: "actions",
-        headerName: "Acciones",
-        headerAlign: "center",
-        align: "center",
-        sortable: false,
-        filterable: false,
-        disableColumnMenu: true,
-        width: 40 * actionsConfig.length,
-        renderCell: (params) => (
-          <Box sx={{ display: "block", textAlign: "center" }}>
-            {actionsConfig.map((action, index) => {
-              const IconComponent = action.icon;
-              return (
-                <IconButton
-                  key={index}
-                  size="small"
-                  color={action.color || "primary"}
-                  title={action.title}
-                  onClick={() => action.onClick(params.row)}
-                >
-                  <IconComponent fontSize="small" />
-                </IconButton>
-              );
-            })}
-          </Box>
-        ),
-      },
-    ];
+  if (editAction || deleteAction) {
+    dataColumns.push({
+      field: "actions",
+      headerName: "Acciones",
+      sortable: false,
+      filterable: false,
+      width: 100,
+      renderCell: (params) => (
+        <Box>
+          {editAction && (
+            <IconButton
+              size="small"
+              sx={{ color: "var(--primary)" }}
+              title="Ver documentos"
+              onClick={() => editAction(params.row)}
+            >
+              <FolderIcon fontSize="small" />
+            </IconButton>
+          )}
+          {deleteAction && (
+            <IconButton
+              size="small"
+              sx={{ color: "var(--primary)" }}
+              title="Eliminar compra"
+              onClick={() => deleteAction(params.row)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Box>
+      ),
+    });
   }
 
   return dataColumns;
@@ -664,9 +663,7 @@ export function PurchaseProvider({ children }) {
     }
 
     const id =
-      typeof documentOrId === "object"
-        ? documentOrId?.id
-        : documentOrId;
+      typeof documentOrId === "object" ? documentOrId?.id : documentOrId;
 
     if (!id) {
       setPreview({
@@ -1143,27 +1140,15 @@ export function PurchaseProvider({ children }) {
     ],
   );
 
-  const purchasesActions = useMemo(
-    () => [
-      {
-        icon: FolderIcon,
-        color: "primary",
-        title: "Ver documentos",
-        onClick: handleOpenEditDocs,
-      },
-      {
-        icon: DeleteIcon,
-        color: "error",
-        title: "Eliminar Compra",
-        onClick: openDeletePurchase,
-      },
-    ],
+  const purchasesColumns = useMemo(
+    () =>
+      generateColumns(
+        EMPTY_PURCHASES,
+        handleOpenEditDocs,
+        openDeletePurchase,
+      ),
     [handleOpenEditDocs, openDeletePurchase],
   );
-
-  const purchasesColumns = useMemo(() => {
-    return generateColumns(EMPTY_PURCHASES, purchasesActions);
-  }, [purchasesActions]);
 
   return (
     <PurchaseContext.Provider

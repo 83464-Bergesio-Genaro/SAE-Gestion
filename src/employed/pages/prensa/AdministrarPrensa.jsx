@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Typography,
   Dialog,
@@ -43,7 +44,8 @@ import { useNotification } from "../../../shared/context/sharedContext";
 import { usePress } from "../../context/employedContext";
 import { PressProvider } from "../../context/providers/pressProvider";
 import SAEPage from "../../../shared/components/page/SAEPage";
-const C = PRENSA_STRINGS;
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
+
 const PSN = PRENSA_STRINGS.nueva;
 
 export default function AdministrarPrensa() {
@@ -145,7 +147,9 @@ function NuevaPublicacionDialog() {
     dialogData,
     dialogType,
     dialogMode,
+    dialogError,
     dialogSaving,
+    setDialogError,
     handleDataChange,
     closeDialog,
   } = useNotification();
@@ -203,6 +207,12 @@ function NuevaPublicacionDialog() {
                 pt: "16px !important",
               }}
             >
+              {dialogError && (
+                <Alert severity="error" onClose={() => setDialogError("")}>
+                  {dialogError}
+                </Alert>
+              )}
+
               <Divider>
                 <Chip label={PSN.sectionDatos} size="small" />
               </Divider>
@@ -467,47 +477,43 @@ function NuevaPublicacionDialog() {
 }
 
 function DialogPress() {
-  const { deleteTarget, setDeleteTarget, handleDeleteConfirm } = usePress();
+  const { handleDeleteConfirm } = usePress();
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setDialogError,
+    closeDialog,
+  } = useNotification();
 
-  return (
-    <Dialog
-      open={!!deleteTarget}
-      onClose={() => setDeleteTarget(null)}
-      maxWidth="xs"
-      fullWidth
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          {C.deleteTitle}
-        </Typography>
-        <IconButton onClick={() => setDeleteTarget(null)} size="small">
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <Typography>
-          ¿Querés eliminar{" "}
-          <strong>{deleteTarget?.titulo_publicacion}</strong>?
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <SAEButton variant="outlined" onClick={() => setDeleteTarget(null)}>
-          Cancelar
-        </SAEButton>
-        <SAEButton
-          variant="contained"
-          color="error"
-          onClick={handleDeleteConfirm}
-        >
-          {C.deleteButton}
-        </SAEButton>
-      </DialogActions>
-    </Dialog>
-  );
+  const deleteDialogConfig = {
+    pressPublicationDelete: {
+      entityLabel: "Publicación",
+      itemName: dialogData?.titulo_publicacion,
+      onConfirm: handleDeleteConfirm,
+    },
+  };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+    <SAEDeleteDialog
+      open={dialogOpen}
+      entityLabel={config.entityLabel}
+      itemName={config.itemName}
+      itemId={dialogData?.id}
+      onConfirm={config.onConfirm}
+      onClose={closeDialog}
+      loading={dialogSaving}
+      error={dialogError}
+      onClearError={() => setDialogError("")}
+    />
+    ) : null;
+  }
+
+  return null;
 }

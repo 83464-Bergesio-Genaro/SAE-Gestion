@@ -35,6 +35,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SAEPage from "../../../shared/components/page/SAEPage";
 import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
 
 export default function EmployedPurchases() {
   return (
@@ -243,49 +244,34 @@ function DialogPurchase({ dateRange }) {
     [dialogData.id_usuario, empleados],
   );
 
+  const deleteDialogConfig = {
+    purchaseDelete: {
+      entityLabel: "Compra",
+      itemName: dialogData?.nombre_compra,
+      onConfirm: handleDeletePurchase,
+    },
+  };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
+    ) : null;
+  }
+
   return (
     <>
-      <Dialog
-        open={dialogOpen && dialogType === "purchaseDelete"}
-        onClose={closeDialog}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>Eliminar compra</DialogTitle>
-        <DialogContent dividers>
-          {dialogError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {dialogError}
-            </Alert>
-          )}
-          <Alert severity="warning">
-            ¿Estás seguro de que querés eliminar la compra{" "}
-            <strong>{dialogData.nombre_compra || ""}</strong>? Esta acción no
-            se puede deshacer.
-          </Alert>
-        </DialogContent>
-        <DialogActions>
-          <SAEButton
-            variant="outlined"
-            onClick={closeDialog}
-            disabled={dialogSaving}
-          >
-            Cancelar
-          </SAEButton>
-          <SAEButton
-            variant="contained"
-            color="error"
-            onClick={handleDeletePurchase}
-            disabled={dialogSaving}
-            startIcon={
-              dialogSaving ? <CircularProgress size={18} /> : undefined
-            }
-          >
-            Eliminar
-          </SAEButton>
-        </DialogActions>
-      </Dialog>
-
       <Dialog
         open={dialogOpen && ["purchases", "docs"].includes(dialogType)}
         onClose={closeDialog}

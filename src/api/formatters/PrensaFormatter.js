@@ -1,5 +1,5 @@
 export const mapPublicacionPublica = (publicacion) => {
-  // 1. Convertimos el texto en un array de objetos reales una sola vez
+  // 1. Convertimos el texto en un array de objetos reales una sola vez+
   const todosLosArchivos = parseFiles(publicacion.documentos_asociados);
 
   // 2. Sacamos el primer archivo para la portada (si existe)
@@ -19,31 +19,34 @@ export const mapPublicacionPublica = (publicacion) => {
     visualizaciones: publicacion.visualizaciones,
     portada: portada, // 👈 Primera imagen (ya no aparece en documentos)
     documentos: documentos, // 👈 Todo lo demás
-    ruta_publicacion: "https://www.instagram.com/sae.utn.frc/"
+    ruta_publicacion: "https://www.instagram.com/sae.utn.frc/",
   };
 };
 
 function removerHoras(isoString) {
-  if (!isoString) return ""; 
-  const [year, month, day] = (isoString.split("T")[0]).split("-");
-  return year + '/' + month + '/' + day;
+  if (!isoString) return "";
+  const [year, month, day] = isoString.split("T")[0].split("-");
+  return year + "/" + month + "/" + day;
 }
 
 function parseFiles(filesString) {
   // Validamos que sea un texto útil
   if (!filesString || filesString.length <= 1) return [];
   // Quitamos el último carácter sobrante (como el guion final)
-  const limpia = filesString.endsWith("-") ? filesString.slice(0, -1) : filesString;
+  const limpia = filesString.endsWith("-")
+    ? filesString.slice(0, -1)
+    : filesString;
 
   return limpia
     .split("-")
-    .filter(item => item.includes(",")) // 👈 Ignora textos vacíos o mal formados como "Documento2"
-    .map(item => {
+    .filter((item) => item.includes(",")) // 👈 Ignora textos vacíos o mal formados como "Documento2"
+    .map((item) => {
       const [id, filename] = item.split(",");
       return {
         id: id,
         name: filename || "",
-        extension: filename?.split(".").pop().toLowerCase() || ""
+        nombre_documento: filename || "",
+        extension: filename?.split(".").pop().toLowerCase() || "",
       };
     });
 }

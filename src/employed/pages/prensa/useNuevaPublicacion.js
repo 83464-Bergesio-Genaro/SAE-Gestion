@@ -42,6 +42,7 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
     dialogType,
     dialogMode,
     setDialogSaving,
+    setDialogError,
     openDialog: openGlobalDialog,
     closeDialog: closeGlobalDialog,
   } = useNotification();
@@ -158,6 +159,7 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
   async function handleSave() {
     if (!nuevaData) return;
     setDialogSaving(true);
+    setDialogError("");
     try {
       const body = {
         ...nuevaData,
@@ -217,7 +219,12 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
       onSuccess?.(isEdit);
     } catch (err) {
       console.error(isEdit ? "Error al guardar:" : "Error al crear publicación:", err);
-      onError?.(isEdit ? PS.snackErrorSave : PS.snackErrorCreate);
+      const fallbackMessage = isEdit
+        ? PS.snackErrorSave
+        : PS.snackErrorCreate;
+      const errorMessage = err?.message || fallbackMessage;
+      setDialogError(errorMessage);
+      onError?.(errorMessage);
     } finally {
       setDialogSaving(false);
     }

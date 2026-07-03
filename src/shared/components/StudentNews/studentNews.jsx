@@ -28,21 +28,24 @@ import NewsPreviewDialog from "./NewsPreviewDialog";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import TitleBox from "../titleBox";
 
-import {descargarDocumentoPorId} from "../../../api/PrensaService";
+import { descargarDocumentoPorId } from "../../../api/PrensaService";
 import { SAETypography } from "../typography/SAETypography";
 
 const baseUrl = import.meta.env.BASE_URL;
 const MAX_DESCRIPTION_PREVIEW_LENGTH = 440;
 
 function ItemNovedad({
-  titulo,
-  descripcion,
-  fecha_inicio,
+  item,
   invertida,
-  portada,
-  documentos,
 }) {
-  const { handleOpenPreview } = usePress();
+  const { handleCardClick } = usePress();
+  const {
+    titulo,
+    descripcion,
+    fecha_inicio,
+    portada,
+    documentos,
+  } = item;
   const fullDescription = String(descripcion ?? "").trim();
   const isDescriptionTruncated =
     fullDescription.length > MAX_DESCRIPTION_PREVIEW_LENGTH;
@@ -53,7 +56,6 @@ function ItemNovedad({
   const [imagenUrl, setImagenUrl] = useState(
     `${baseUrl}images/principal/newsGeneric.webp`,
   );
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     // Si no hay portada o no tiene ID, dejamos la imagen genérica
@@ -83,9 +85,9 @@ function ItemNovedad({
   return (
     <>
       <Card
-        onClick={() => setDialogOpen(true)}
+        onClick={() => handleCardClick({ ...item, imageSrc: imagenUrl })}
         sx={{
-          position:"relative",
+          position: "relative",
           borderRadius: 4,
           boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
           border: "1px solid rgba(17, 53, 101, 0.08)",
@@ -100,12 +102,12 @@ function ItemNovedad({
           "&:hover": {
             transform: "scale(1.01)",
             boxShadow: "0 15px 25px rgba(0,0,0,.15)",
-            },    "&:hover .hover-overlay": {
+          },
+          "&:hover .hover-overlay": {
             opacity: 1,
-            },
+          },
         }}
       >
-
         <CardMedia
           sx={{
             width: { xs: "100%", md: 300 },
@@ -119,42 +121,42 @@ function ItemNovedad({
           alt={portada?.name ?? "UTN"}
         />
 
-        <Box sx={{
-          flex: 1
-          }}>
-            <Box
+        <Box
+          sx={{
+            flex: 1,
+          }}
+        >
+          <Box
             sx={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "rgba(0,0,0,.55)",
-                opacity: 0,
-                transition: "all .3s ease",
-                cursor:"pointer"
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "rgba(0,0,0,.55)",
+              opacity: 0,
+              transition: "all .3s ease",
+              cursor: "pointer",
             }}
             className="hover-overlay"
+          >
+            <SAETypography
+              variant="overline"
+              sx={{
+                color: "white",
+                letterSpacing: 1,
+                width: "100px",
+                textAlign: "center",
+              }}
             >
-                <SAETypography
-                variant="overline"
-                sx={{
-                    color: "white",
-                    letterSpacing: 1,
-                    width: "100px",
-                    textAlign: "center",
-                }}
-                >
-                Ver mas
-                </SAETypography>
-            </Box>
+              Ver mas
+            </SAETypography>
+          </Box>
           <CardContent>
-            <SAETypography variant="h6" sx={{color: "var(--secondary)" }}>
+            <SAETypography variant="h6" sx={{ color: "var(--secondary)" }}>
               {titulo}
             </SAETypography>
-            <SAETypography variant="body2">
-              {fecha_inicio}
-            </SAETypography>
+            <SAETypography variant="body2">{fecha_inicio}</SAETypography>
             <SAETypography
               variant="body1"
               sx={{
@@ -164,16 +166,9 @@ function ItemNovedad({
               }}
             >
               {descriptionPreview}
-              {isDescriptionTruncated && (
-                <Box
-                  component="span"
-                >
-                  {" "}
-                  ...
-                </Box>
-              )}
+              {isDescriptionTruncated && <Box component="span"> ...</Box>}
             </SAETypography>
-            
+
             <Box
               onClick={(event) => event.stopPropagation()}
               sx={{ display: { xs: "none", md: "block" } }}
@@ -183,23 +178,19 @@ function ItemNovedad({
           </CardContent>
         </Box>
       </Card>
-
-      <NewsPreviewDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        title={titulo}
-        date={fecha_inicio}
-        description={descripcion}
-        imageSrc={imagenUrl}
-        documents={documentos}
-        onPreviewDocument={handleOpenPreview}
-      />
     </>
   );
 }
 
 export function NovedadesContent() {
-  const { isLoading, novedades } = usePress();
+  const {
+    isLoading,
+    novedades,
+    selectedPub,
+    loadingSelectedDocuments,
+    handleClose,
+    handleOpenPreview,
+  } = usePress();
   const [paginaActual, setPaginaActual] = useState(1);
   const itemsPorPagina = 3;
 
@@ -238,12 +229,8 @@ export function NovedadesContent() {
               {novedadesPaginadas.map((item, i) => (
                 <ItemNovedad
                   key={item.id}
-                  titulo={item.titulo}
-                  fecha_inicio={item.fecha_inicio}
-                  descripcion={item.descripcion}
+                  item={item}
                   invertida={i % 2 === 0}
-                  portada={item.portada}
-                  documentos={item.documentos}
                 />
               ))}
             </Stack>
@@ -278,6 +265,18 @@ export function NovedadesContent() {
           </>
         )}
       </Box>
+
+      <NewsPreviewDialog
+        open={!!selectedPub}
+        onClose={handleClose}
+        title={selectedPub?.titulo}
+        date={selectedPub?.fecha_inicio}
+        description={selectedPub?.descripcion}
+        imageSrc={selectedPub?.imageSrc}
+        documents={selectedPub?.documentos || []}
+        documentsLoading={loadingSelectedDocuments}
+        onPreviewDocument={handleOpenPreview}
+      />
     </>
   );
 }

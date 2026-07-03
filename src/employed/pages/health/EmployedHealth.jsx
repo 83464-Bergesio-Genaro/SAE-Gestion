@@ -47,6 +47,7 @@ import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 import { useNotification } from "../../../shared/context/sharedContext";
 
 import SAEPage from "../../../shared/components/page/SAEPage";
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
 
 function EmployedAdminContent() {
   const navigate = useNavigate();
@@ -270,6 +271,32 @@ function DialogHealth() {
     handlePersonalSave,
     handleCursoSave,
   } = useHealth();
+
+  const deleteDialogConfig = {
+    cursos: {
+      entityLabel: "Curso",
+      itemName: dialogData?.nombre_curso,
+      onConfirm: handleCursoSave,
+    },
+  };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
+    ) : null;
+  }
 
   return (
     <>
@@ -676,19 +703,7 @@ function DialogHealth() {
                   {dialogError}
                 </Alert>
               )}
-              {dialogMode === "delete" ? (
-                <>
-                  <Typography variant="h6" component="span">
-                    Esta seguro que quiere el Curso?:
-                  </Typography>
-                  <Typography variant="h7" component="span">
-                    ID:{dialogData.id} <br />
-                    Nombre: "{dialogData.nombre_curso}"
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Grid container spacing={1}>
+              <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 3 }} m={0}>
                       <SAETextField
                         label="ID"
@@ -770,9 +785,7 @@ function DialogHealth() {
                         }
                       />
                     )}
-                  </Grid>
-                </>
-              )}
+              </Grid>
             </Stack>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -795,9 +808,7 @@ function DialogHealth() {
             >
               {dialogMode === "create"
                 ? "Crear"
-                : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                : "Guardar"}
             </SAEButton>
           </DialogActions>
         </Dialog>

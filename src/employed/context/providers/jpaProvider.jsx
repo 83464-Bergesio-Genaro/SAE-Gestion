@@ -15,7 +15,7 @@ import {
   modificarInteresado,
   eliminarInteresado,
 } from "../../../api/JPAService";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Link } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -38,7 +38,7 @@ const generateColumns = (data, editAction, deleteAction) => {
       "horario_inicio",
       "horario_fin",
     ].includes(key.toLowerCase());
-    return {
+    const column = {
       field: key,
       headerName: formatHeader(key),
 
@@ -48,6 +48,29 @@ const generateColumns = (data, editAction, deleteAction) => {
       align: isId || isShort ? "center" : "left",
       headerAlign: isId || isShort ? "center" : "left",
     };
+
+    if (key.toLowerCase() === "lugar") {
+      column.renderCell = (params) => {
+        const value = String(params.value ?? "").trim();
+        const isLink = /^https?:\/\//i.test(value);
+
+        return isLink ? (
+          <Link
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            onClick={(event) => event.stopPropagation()}
+          >
+            Ver ubicación
+          </Link>
+        ) : (
+          value || "-"
+        );
+      };
+    }
+
+    return column;
   });
 
   // 👉 columna de acciones

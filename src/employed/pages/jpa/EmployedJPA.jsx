@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   Grid,
-  
   Stack,
   Typography,
   Dialog,
@@ -24,11 +23,14 @@ import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAETimeField from "../../../shared/components/inputs/SAETimeField";
 import { useNotification } from "../../../shared/context/sharedContext";
 
+import { getDialogTitle } from "../../../utils/juan/util";
+
 import { DataGrid } from "@mui/x-data-grid";
 import { JPAProvider } from "../../context/providers/jpaProvider";
 import { useJPA } from "../../context/employedContext";
 import SAEPage from "../../../shared/components/page/SAEPage";
 import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
 function CopyURLButton() {
   const ubicacionesComunes = [
     {
@@ -205,11 +207,51 @@ function DialogJpa() {
     handleInteresadoSave,
   } = useJPA();
 
-  const getDialogTitle = (entity) => {
-    if (dialogMode === "create") return `Nuevo ${entity}`;
-    if (dialogMode === "delete") return `Eliminar ${entity}`;
-    return `Editar ${entity}`;
+  // Configuración del diálogo de eliminación según el tipo de entidad seleccionado.
+  // Cada clave debe coincidir con el valor guardado en `dialogType`.
+  const deleteDialogConfig = {
+    eventoPublico: {
+      // Nombre de la entidad que se muestra en el título y en el mensaje.
+      entityLabel: "Evento",
+      // Nombre del registro seleccionado que se mostrará como referencia.
+      itemName: dialogData?.nombre_evento,
+      // Método que confirma y ejecuta la eliminación del registro.
+      onConfirm: handleEventoPublicoSave,
+    },
+    eventosInternos: {
+      entityLabel: "Evento",
+      itemName: dialogData?.nombre_evento,
+      onConfirm: handleEventoSAESave,
+    },
+    stands: {
+      entityLabel: "Puesto",
+      itemName: dialogData?.nombre_stand,
+      onConfirm: handleStandSave,
+    },
+    interesados: {
+      entityLabel: "Interesado",
+      itemName: dialogData?.nombre_interesado,
+      onConfirm: handleInteresadoSave,
+    },
   };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
+    ) : null;
+  }
 
   return (
     <>
@@ -227,7 +269,7 @@ function DialogJpa() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {getDialogTitle("Evento")}
+              {getDialogTitle("Evento", dialogMode)}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -380,7 +422,7 @@ function DialogJpa() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {getDialogTitle("Evento")}
+              {getDialogTitle("Evento", dialogMode)}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -533,7 +575,7 @@ function DialogJpa() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {getDialogTitle("Puesto")}
+              {getDialogTitle("Puesto", dialogMode)}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -676,7 +718,7 @@ function DialogJpa() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {getDialogTitle("Interesado")}
+              {getDialogTitle("Interesado", dialogMode)}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -771,6 +813,7 @@ function DialogJpa() {
     </>
   );
 }
+
 export default function EmployedJPA() {
   return (
     <JPAProvider>

@@ -6,7 +6,7 @@ import PeopleIcon from "@mui/icons-material/People";
 
 // Cada columna cumple doble funcion: configura el DataGrid y tambien define
 // como debe renderizarse ese campo dentro del dialog generico.
-const proyectosColumns = [
+export const proyectosColumns = [
   {
     field: "id",
     headerName: "ID",
@@ -61,7 +61,7 @@ const proyectosColumns = [
   },
 ];
 
-const serviciosColumns = [
+export const serviciosColumns = [
   {
     field: "id",
     headerName: "ID",
@@ -136,7 +136,7 @@ const serviciosColumns = [
     form: {
       type: "time",
       visible: true,
-      step: 300,
+      step: 900,
     },
   },
 
@@ -149,12 +149,12 @@ const serviciosColumns = [
     form: {
       type: "time",
       visible: true,
-      step: 300,
+      step: 900,
     },
   },
 ];
 
-const becariosColumns = [
+export const becariosColumns = [
   {
     field: "id",
     headerName: "ID",
@@ -399,8 +399,8 @@ export const createEmptyObject = (columns) =>
     return acc;
   }, {});
 
-// Arma las cards/secciones que consume SectionGridCard. El componente no conoce
-// entidades concretas; solo lee esta configuracion.
+// Arma las cards/secciones legadas. Scholarships.jsx define ahora las secciones
+// de forma explicita y usa estas columnas como fuente comun.
 export const createSectionConfig = ({
   proyectosRows,
   loadingProyectos,

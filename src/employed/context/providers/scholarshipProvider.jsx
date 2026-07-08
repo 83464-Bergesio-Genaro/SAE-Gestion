@@ -1,5 +1,6 @@
 import {useState, useEffect,useCallback} from "react";
 import { ScholarshipContext } from "../employedContext";
+import { useNotification } from "../../../shared/context/sharedContext";
 
 import {
   ObtenerProyectosInvestigacion,
@@ -27,9 +28,15 @@ import {
   getFirstRecord as getFirstRecordUtil,
   valuesAreEqual as valuesAreEqualUtil,
 } from "../../../utils/util.jsx";;
+import {
+  becariosColumns,
+  proyectosColumns,
+  serviciosColumns,
+} from "../../pages/scholarships/becas.configs";
 
 
 export function ScholarshipProvider({ children }) {
+  const { showNotification } = useNotification();
 
     const getFirstRecord = (value) => {
     // Los endpoints pueden devolver un objeto, una lista o una respuesta vacía.
@@ -168,7 +175,7 @@ export function ScholarshipProvider({ children }) {
     }
 
     // Recorre todas las becas visibles del becario y acumula si alguna realmente se
-    // guardo, para decidir despues si refrescar la grilla y que snackbar mostrar.
+    // guardo, para decidir despues si refrescar la grilla y que mensaje mostrar.
     async function editarBecasSiCambiaron(becas = [], originalBecas = []) {
     let huboCambios = false;
 
@@ -184,12 +191,6 @@ export function ScholarshipProvider({ children }) {
     return huboCambios;
     }
         
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
   // Cargas iniciales de los tres bloques principales de la pantalla:
   // proyectos, servicios y becarios.
   const fetchProyectosInvetigacion = useCallback(async () => {
@@ -324,17 +325,9 @@ export function ScholarshipProvider({ children }) {
           );
       }
 
-      setSnackbar({
-        open: true,
-        message: mensajeSnackbar,
-        severity: "success",
-      });
+      showNotification(mensajeSnackbar, "success");
     } catch (err) {
-      setSnackbar({
-        open: true,
-        message: err.message || "Ocurrio un error al guardar",
-        severity: "error",
-      });
+      showNotification(err.message || "Ocurrio un error al guardar", "error");
       throw err;
     }
   };
@@ -345,12 +338,14 @@ export function ScholarshipProvider({ children }) {
             handleBuscarBecario,
             handleBuscarBecarioPorLegajo,
 
-            snackbar,setSnackbar,
             proyectosRows,
+            proyectosColumns,
             loadingProyectos,
             serviciosRows,
+            serviciosColumns,
             loadingServicios,
             becariosRows,
+            becariosColumns,
             loadingBecarios
           }}
         >

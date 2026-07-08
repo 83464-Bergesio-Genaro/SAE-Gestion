@@ -1,63 +1,53 @@
-import { useState,useMemo,useEffect } from "react";
-import { Box,Card,CardContent,Stack } from "@mui/material";
-import {SAETypography} from "../typography/SAETypography";
-import SAETextField from "../inputs/SAETextField";
-import SAEButton from "../buttons/SAEButton";
+import { useMemo, useState } from "react";
+import { Box, Card, CardContent, Stack } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
+import { SAETypography } from "../typography/SAETypography";
+import SAETextField from "../inputs/SAETextField";
+import SAEButton from "../buttons/SAEButton";
 
 export default function SAEDataGrid({
   sectionConfig,
   currentSection,
   beforeSearch = null,
+  onSectionChange,
 }) {
-  // 1. Inicializar con la primera clave disponible del objeto
   const firstKey = Object.keys(sectionConfig)[0] || "";
-  
-  // Estado local para la sección activa
-  const [activeSectionKey, setActiveSectionKey] = useState(firstKey);
+  const [internalActiveSectionKey, setInternalActiveSectionKey] =
+    useState(firstKey);
   const [busquedaGestion, setBusquedaGestion] = useState("");
 
-  // 2. Sincronizar cuando cambia la prop externa 'currentSection'
-  // O si 'sectionConfig' cambia drásticamente
-  useEffect(() => {
-    // Si currentSection es un objeto con 'key', usamos esa key. 
-    // Si currentSection es solo un string (la key), usamos currentSection directamente.
-    const newKey = currentSection?.key || currentSection;
-    
-    if (newKey && sectionConfig[newKey]) {
-      setActiveSectionKey(newKey);
-      setBusquedaGestion(""); // Opcional: Limpiar búsqueda al cambiar sección externamente
-    }
-  }, [currentSection, sectionConfig]);
+  const currentSectionKey = currentSection?.key || currentSection;
+  const activeSectionKey =
+    currentSectionKey && sectionConfig[currentSectionKey]
+      ? currentSectionKey
+      : internalActiveSectionKey;
 
-  // 3. Obtener el objeto de configuración actual basado en la clave activa
   const currentConfig = sectionConfig[activeSectionKey];
 
-  // 4. Filtrar filas basado en la configuración ACTIVA
   const rowsGestionFiltradas = useMemo(() => {
     if (!currentConfig?.rows) return [];
-    
+
     const term = busquedaGestion.trim().toLowerCase();
     if (!term) return currentConfig.rows;
 
     return currentConfig.rows.filter((row) =>
       Object.values(row).some((value) =>
-        String(value ?? "").toLowerCase().includes(term)
-      )
+        String(value ?? "")
+          .toLowerCase()
+          .includes(term),
+      ),
     );
-  }, [currentConfig, busquedaGestion]); // Dependencia actualizada a currentConfig
+  }, [currentConfig, busquedaGestion]);
 
   const handleSectionChange = (key) => {
-    setActiveSectionKey(key);
+    setInternalActiveSectionKey(key);
     setBusquedaGestion("");
-    // Opcional: Notificar al padre si es necesario
-    // onSectionChange?.(key); 
+    onSectionChange?.(key);
   };
 
-  // Protección contra renderizado si no hay configuración
   if (!currentConfig) return null;
 
   return (
@@ -97,8 +87,14 @@ export default function SAEDataGrid({
                 fontSize: "0.85rem",
                 letterSpacing: "0.05em",
                 textTransform: "uppercase",
-                color: activeSectionKey === key ? "white" : "rgba(255,255,255,0.6)",
-                borderBottom: activeSectionKey === key ? "3px solid white" : "3px solid transparent",
+                color:
+                  activeSectionKey === key
+                    ? "white"
+                    : "rgba(255,255,255,0.6)",
+                borderBottom:
+                  activeSectionKey === key
+                    ? "3px solid white"
+                    : "3px solid transparent",
                 transition: "all 0.15s",
                 "&:hover": {
                   color: "white",
@@ -130,7 +126,6 @@ export default function SAEDataGrid({
           sx={{ py: 2 }}
         >
           <Stack direction="row" alignItems="center" spacing={1.5}>
-            {/* Usar icono de la configuración activa */}
             {currentConfig.icon && <currentConfig.icon sx={{ fontSize: 30 }} />}
             <SAETypography variant="h6" fontWeight={700}>
               {currentConfig.title}
@@ -147,7 +142,7 @@ export default function SAEDataGrid({
               placeholder="Busqueda..."
               size="small"
               value={busquedaGestion}
-              onChange={(e) => setBusquedaGestion(e.target.value)}
+              onChange={(event) => setBusquedaGestion(event.target.value)}
               sx={{
                 width: { xs: "100%", sm: 240, md: 220 },
                 "& .MuiOutlinedInput-root": {
@@ -214,4 +209,4 @@ export default function SAEDataGrid({
       </CardContent>
     </Card>
   );
-}   
+}

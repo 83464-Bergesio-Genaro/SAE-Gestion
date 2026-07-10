@@ -54,31 +54,45 @@ export const HealthUsersProvider = ({ children }) => {
 
     const openCreateTurnos = useCallback((legajo = null,id_especialidad = null,diasYHorarios = null) => {
 
-        //Solo realiza una operacion si existen estos valores
-        if(legajo && id_especialidad != null && diasYHorarios && diasYHorarios.length > 0){
-            setUsuarioSelected(legajo);
-            const hoy = new Date();
-            const ISO = hoy.toLocaleDateString('sv-SE');
-            openDialog("turnos","create",
-            {id: 0,
-            cuil_medico: null,
-            especialista: "",
-            legajo: legajo,
-            paciente: "",
-            fecha_solicitud: ISO,
-            fecha_atencion: null,
-            hora_atencion: null,
-            asunto: "",
-            id_estado_turno: 0,
-            estado: "PENDIENTE",
-            id_especialidad:id_especialidad,
-            horarios_disponibles:diasYHorarios[0],
-            dia_selecionado: diasYHorarios[0].dia,
-            horario_disponible:diasYHorarios[0].hora_inicio});
+        setDialogSaving(true);
+        try {
+             //Solo realiza una operacion si existen estos valores
+            if(legajo && id_especialidad != null && diasYHorarios && diasYHorarios.length > 0){
+                setUsuarioSelected(legajo);
+                const hoy = new Date();
+                const ISO = hoy.toLocaleDateString('sv-SE');
+                openDialog("turnos","create",
+                {id: 0,
+                cuil_medico: null,
+                especialista: "",
+                legajo: legajo,
+                paciente: "",
+                fecha_solicitud: ISO,
+                fecha_atencion: null,
+                hora_atencion: null,
+                asunto: "",
+                id_estado_turno: 0,
+                estado: "PENDIENTE",
+                id_especialidad:id_especialidad,
+                horarios_disponibles:diasYHorarios[0],
+                dia_selecionado: diasYHorarios[0].dia,
+                horario_disponible:diasYHorarios[0].hora_inicio});
+                showNotification("Turno creado exitosamente!","success");
+            }    
         }
+        catch (error) {
+            showNotification("Ocurrio un inconveniente a la hora de crear tu turno: "+error,"error");
+        }
+        finally{
+            setDialogSaving(false);
+        }
+
     }, [openDialog,setUsuarioSelected]);
 
     const openShowTurnos = useCallback((row) => {
+        if (row?.fecha_atencion) {
+             row.fecha_atencion = row.fecha_atencion.substring(0, 10);
+        }
         openDialog("turnos","show",row);
     }, [openDialog]);
 
@@ -96,7 +110,7 @@ export const HealthUsersProvider = ({ children }) => {
         const finishTurns = data.filter(item => [2, 4].includes(item.estadosTurno.id));
         const activeTurnos = data.filter(item => [0, 1, 3, 5].includes(item.estadosTurno.id));
 
-        setEstudianteTurnos(activeTurnos);
+        setEstudianteTurnos(activeTurnos.map(mapTurnos));
         setTurnsRows(generateRows(finishTurns.map(mapTurnosPaciente)));
 
         } catch {
@@ -171,7 +185,7 @@ export const HealthUsersProvider = ({ children }) => {
             }
             fetchTurnosEstudiante(usuarioSelected);
             closeDialog();
-            useNotification(dialogMode === "create" ? "Turno Creado!" : "Turno Actualizado!","sucess");
+            useNotification(dialogMode === "create" ? "Turno Creado!" : "Turno Actualizado!","success");
 
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");

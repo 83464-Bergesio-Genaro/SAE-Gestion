@@ -23,7 +23,7 @@ export const sharedMenu = [
     descripcion: "No debería mostrar esta descripcion.",
   },
   {
-    label: "Iniciar Sesion",
+    label: "Iniciar Sesión",
     path: "/login",
     icon: Diversity3Icon,
     descripcion: "No debería mostrar esta descripcion.",

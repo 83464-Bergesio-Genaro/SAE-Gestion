@@ -1,17 +1,9 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
-
-import {
-  ObtenerPerfilXLegajo,
-  ModificarPerfilEstudiante,
-} from "../../../api/EstudianteService";
+import React, { useState,useCallback,useEffect } from "react";
+import { ObtenerPerfilXLegajo,ModificarPerfilEstudiante } from "../../../api/EstudianteService";
 import { listarDocumentacionXLegajo } from "../../../api/BecasService";
 import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
 import { ProfileContext } from "../../../students/context/studentContext";
-import { useAuth } from "../sharedContext";
+import { useAuth, useNotification } from "../sharedContext";
 import {
   cleanField,
   cleanNumericField,
@@ -27,25 +19,14 @@ import {
   parseAddress,
   sanitizeAddressPart,
 } from "../../../utils/util.jsx";
+import { PROFILE_REQUIRED_FIELDS } from "../../../utils/gena/common.config.js";
+import { PROFILE_STRINGS } from "../../../utils/gena/student.string.js";
 
-const REQUIRED_FIELDS = [
-  ["legajo", "Legajo"],
-  ["nombres", "Nombres"],
-  ["apellidos", "Apellidos"],
-  ["dni", "DNI"],
-  ["cuil", "CUIL"],
-  ["fecha_nacimiento", "Fecha de nacimiento"],
-  ["email", "Correo electrónico"],
-  ["telefono", "Teléfono"],
-  ["direccion", "Dirección"],
-];
-
+const C = PROFILE_STRINGS;
 export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
   const { user } = useAuth();
+  const {showNotification} = useNotification();
   const [formError, setFormError] = useState(null);
-  // Estados de Notificación
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
 
   //ESTADOS
   const [datosPerfil, setDatosPerfil] = useState({});
@@ -123,7 +104,7 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
     ).map(([, label]) => label);
 
     if (camposFaltantes.length > 0) {
-      setFormError(`Completá todos los campos. Faltan: ${camposFaltantes.join(", ")}.`);
+      setFormError(`${C.missingFieldMessage} ${camposFaltantes.join(", ")}.`);
       return;
     }
 
@@ -134,27 +115,27 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
     const cuil = cleanNumericField(datosPerfil.cuil);
 
     if (dni.length !== 8) {
-      setFormError("El DNI debe tener exactamente 8 dígitos.");
+      setFormError(C.DNIRequired);
       return;
     }
 
     if (cuil.length !== 11) {
-      setFormError("El CUIL debe tener exactamente 11 dígitos.");
+      setFormError(C.CUILRequired);
       return;
     }
 
     if (email && !isValidEmail(email)) {
-      setFormError("Ingresá un correo electrónico válido.");
+      setFormError(C.emailRequired);
       return;
     }
 
     if (telefono && !isValidPhone(telefono)) {
-      setFormError("Completá el teléfono con el formato +54 351 123-4567.");
+      setFormError(C.phoneRequired);
       return;
     }
 
     if (direccion && !isValidAddress(direccion)) {
-      setFormError("Completá provincia, ciudad/localidad, calle y altura.");
+      setFormError(C.completeAdressMessage);
       return;
     }
 
@@ -172,11 +153,11 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
         direccion,
       };
       await ModificarPerfilEstudiante(datosPerfil.legajo, body);
+      showNotification(C.savedProfile,"success")
 
-      setSnackbarMsg("Sus datos fueron modificados correctamente!");
-      setSnackbarOpen(true);
     } catch (err) {
-      setFormError(err.message || "Ocurrió un error al guardar");
+      showNotification(C.errorProfile,"error")
+      //setFormError(err.message || "Ocurrió un error al guardar");
     } finally {
       setLoadingPerfil(false);
     }
@@ -243,9 +224,6 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
         cuilHasError,
         missingRequiredFields,
         //Valores de error, mostrar mensajes, etc.
-        snackbarOpen,
-        setSnackbarOpen,
-        snackbarMsg,
         setFormError,
         formError,
         saveAttempted,

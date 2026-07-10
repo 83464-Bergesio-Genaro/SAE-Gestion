@@ -6,11 +6,10 @@ import {
 import { isValidEmail } from "../../../utils/util.jsx";
 import { sendConsultationEmail } from "../../../api/EmailService";
 import { ConsultationContext } from "../studentContext";
-import {
-  useAuth,
-  useNotification,
-} from "../../../shared/context/sharedContext";
+import {useAuth,useNotification} from "../../../shared/context/sharedContext";
+import { CONSULTATIONS_STRINGS } from "../../../utils/gena/student.string.js";
 
+const C = CONSULTATIONS_STRINGS;
 export const ConsultationAlumnoProvider = ({ children }) => {
   const { user } = useAuth();
   const { showNotification } = useNotification(); //Permite mostrar notificaciones
@@ -59,7 +58,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
     if (!link.hipervinculo) {
       event.preventDefault();
       useNotification(
-        "Este link no tiene hipervínculo configurado",
+        C.errorURL,
         "error",
         6000,
       );
@@ -70,7 +69,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
       await ContarVisualizacionLinkFrecuente(link.id);
     } catch (error) {
       useNotification(
-        "Error al contar visualización del link:" + error,
+        C.errorCount + error,
         "error",
         6000,
       );
@@ -82,7 +81,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
       event.preventDefault();
       if (invalidFields.length > 0) {
         useNotification(
-          "Es necesario que todos los campos sean válidos",
+          C.errorValidateSubmit,
           "warning",
         );
         return;
@@ -97,12 +96,12 @@ export const ConsultationAlumnoProvider = ({ children }) => {
           message: form.message.trim(),
           legajo: user?.legajo,
         });
-        useNotification("Consulta enviada con éxito.", "success");
+        useNotification(C.msgSubmit, "success");
         setForm((prev) => ({ ...prev, subject: "", message: "" }));
       } catch (error) {
         console.error("Error al enviar consulta:", error);
         useNotification(
-          "No se pudo enviar la consulta. Intentá nuevamente.",
+          C.errorSubmit,
           "error",
         );
       } finally {

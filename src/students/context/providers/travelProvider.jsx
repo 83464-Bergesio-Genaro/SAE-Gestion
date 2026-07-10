@@ -2,74 +2,23 @@ import { useState,useEffect,useCallback } from "react";
 import { TravelContext } from "../studentContext";
 import { DescargarDocumentacionXId, ObtenerViajesXLegajo } from "../../../api/TravelService";
 import { mapViajes } from "../../../api/formatters/ViajeFormatter";
-import { useAuth } from "../../../shared/context/sharedContext";
+import { useAuth, useNotification } from "../../../shared/context/sharedContext";
 import { crearDocumentoEstudiante } from "../../../api/DeporteService";
 import {
   closePreview as closePreviewState,
-  closeSnackbar as closeSnackbarState,
   construirNombre,
   INITIAL_PREVIEW,
   isPdfDocument,
-  showSnackbar as showSnackbarState,
-} from "../../../utils/util.jsx";;
-const MAX_SIZE_MB = 5;
-const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+} from "../../../utils/util.jsx";
+
+import { MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB } from "../../../utils/gena/constants.js";
+import { TRIPS_STRINGS } from "../../../utils/gena/student.string.js";
+import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/gena/common.config.js";
+const C = TRIPS_STRINGS;
 
 export const TravelProvider = ({ children }) => {
     const { user } = useAuth();
-    const TRAVEL_REQUIRED_DOCUMENTS = [
-    {
-        id_tipo_documento: null,
-        nombre: "Certificado de Alumno Regular",
-        descripcion:
-        "Certificado vigente que acredita tu condición de estudiante regular.",
-        subido: false,
-        archivo: null,
-        archivoNombre: "",
-        formatoNombre: "{legajo}_AlumnoRegular",
-        id_archivo: null,
-        extension: null,
-        required: true,
-    },
-    {
-        id_tipo_documento: null,
-        nombre: "Fotocopia Documento",
-        descripcion:
-        "Copia legible del frente y dorso de tu DNI en un único archivo.",
-        subido: false,
-        archivo: null,
-        archivoNombre: "",
-        formatoNombre: "{legajo}_DNI",
-        id_archivo: null,
-        extension: null,
-        required: true,
-    },
-    {
-        id_tipo_documento: null,
-        nombre: "Declaracion Jurada",
-        descripcion:
-        "Certificadofirmado en el cual establece un heredero a tu fortuna.",
-        subido: false,
-        archivo: null,
-        archivoNombre: "",
-        formatoNombre: "{idViaje}_{legajo}_DDJJ",
-        id_archivo: null,
-        extension: null,
-        required: true,
-    },
-    ];
-
-    const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: "",
-        severity: "success",
-    });
-
-    const showSnackbar = useCallback((message, severity = "success") => {
-        showSnackbarState(setSnackbar, message, severity);
-    }, []);
-    const closeSnackbar = () =>
-        closeSnackbarState(setSnackbar);
+    const {showNotification} = useNotification();
 
     const closePreview = () =>
         closePreviewState(setPreview);
@@ -124,7 +73,7 @@ export const TravelProvider = ({ children }) => {
         setPreview((previous) => ({
             ...previous,
             loading: false,
-            error: "No se pudo cargar el documento",
+            error: C.errorLoadingDocuments,
         }));
         }
     };
@@ -144,14 +93,14 @@ export const TravelProvider = ({ children }) => {
        .map((value) => value.trim().toLowerCase());
  
      if (!allowedExtensions.includes(extension)) {
-       showSnackbar(`Solo se permiten archivos: ${item.extension}`, "warning");
+       showNotification(`${C.errorExtensionMsg} ${item.extension}`, "warning");
        event.target.value = "";
        return;
      }
  
-     if (file.size > MAX_SIZE_BYTES) {
-       showSnackbar(
-         `El archivo no puede superar los ${MAX_SIZE_MB} MB.`,
+     if (file.size > MAX_FILE_SIZE_BYTES) {
+       showNotification(
+         `${C.errorMaxMBMsg}${MAX_FILE_SIZE_MB} MB.`,
          "warning",
        );
        event.target.value = "";
@@ -187,10 +136,10 @@ export const TravelProvider = ({ children }) => {
              : documento,
          ),
        );
-       showSnackbar("Archivo subido con éxito");
+       showNotification(C.savedFile);
      } catch (error) {
        console.error("Error al subir el archivo:", error);
-       showSnackbar("Error al subir el archivo", "error");
+       showNotification(C.errorFile, "error");
      } finally {
        setLoadingDocuments(false);
        event.target.value = "";
@@ -209,8 +158,7 @@ export const TravelProvider = ({ children }) => {
             TRAVEL_REQUIRED_DOCUMENTS,
             handlePreview,preview,setPreview,openPopup,setOpenPopup,
             documentoAEliminar,setDocumentoAEliminar,
-
-            snackbar, setSnackbar,closeSnackbar,closePreview,closeDeleteDialog,
+            closePreview,closeDeleteDialog,
             handleArchivoChange,documentos,loadingDocuments,requestDeleteDocument
         }}
     >

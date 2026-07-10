@@ -28,12 +28,15 @@ import {
 import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
 import TitleBox from "../../../shared/components/titleBox";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
+import SAEPage from "../../../shared/components/page/SAEPage";
 import { SAETypography } from "../../../shared/components/typography/SAETypography";
+import { CONSULTATIONS_STRINGS } from "../../../utils/gena/student.string";
 
 import { getLinkFrecuenteIconByIndex } from "../../../shared/pages/consultations/linkFrecuentesIcons";
 import { ConsultationAlumnoProvider } from "../../../students/context/providers/consultationsProvider";
 import { useConsultationContext } from "../../context/studentContext";
-import SAEPage from "../../../shared/components/page/SAEPage";
+
+const C = CONSULTATIONS_STRINGS;
 
 export function StudentContent() {
   const navigate = useNavigate();
@@ -52,14 +55,14 @@ export function StudentContent() {
   return (
     <SAEPage>
       <StudentHeaderPage
-        title="Consultas SAE"
-        description="Encontrá respuestas rápidas o escribinos para recibir ayuda personalizada."
+        title={C.headerTitle}
+        description={C.headerDescription}
         backgroundImage="images/buildings/inchaurrondo/FrenteVidriado.jpg"
         icon={ContactSupportIcon}
       />
       <TitleBox
-        title="Links frecuentes"
-        description="Accesos rápidos a recursos útiles de SAE."
+        title={C.linktreeTitle}
+        description={C.linktreeDescription}
       />
 
       {loadingLinksFrecuentes ? (
@@ -141,7 +144,7 @@ export function StudentContent() {
           {linksFrecuentes.length === 0 && (
             <Grid size={{ xs: 12 }}>
               <Alert severity="info">
-                No hay links frecuentes disponibles.
+                {C.linktreeNoData}
               </Alert>
             </Grid>
           )}
@@ -149,8 +152,8 @@ export function StudentContent() {
       )}
 
       <TitleBox
-        title="Preguntas frecuentes"
-        description="Las Preguntas frecuentes"
+        title={C.faqsTitle}
+        description={C.faqsDescription}
       />
 
       <Grid container spacing={2.5} alignItems="flex-start" sx={{ mt: 1 }}>
@@ -194,8 +197,8 @@ export function StudentContent() {
 
       <Box>
         <TitleBox
-          title="Más respuestas rápidas"
-          description="Revisá estas preguntas antes de enviar una consulta."
+          title={C.moreFaqsTitle}
+          description={C.moreFaqsDescription}
         />
 
         {QUICK_CONSULTATION_FAQS.map((faq) => (
@@ -232,10 +235,10 @@ export function StudentContent() {
       <Card sx={{ mt: 5, borderRadius: 4 }}>
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
           <SAETypography variant="h5" fontWeight={800}>
-            Enviar una consulta
+            {C.sendMailTitle}
           </SAETypography>
           <SAETypography color="var(--textSecondary)" sx={{ mt: 1, mb: 3 }}>
-            Tu consulta se enviará por correo a {SAE_EMAIL}.
+            {C.emailClaration}{SAE_EMAIL}.
           </SAETypography>
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={2}>
@@ -243,7 +246,7 @@ export function StudentContent() {
                 <SAETextField
                   fullWidth
                   required
-                  label="Nombre"
+                  label={C.formNameLabel}
                   name="user_name"
                   value={form.user_name}
                   onChange={handleChange}
@@ -254,7 +257,7 @@ export function StudentContent() {
                   fullWidth
                   required
                   type="email"
-                  label="Correo"
+                  label={C.formMailLabel}
                   name="user_email"
                   value={form.user_email}
                   onChange={handleChange}
@@ -264,7 +267,7 @@ export function StudentContent() {
                 <SAETextField
                   fullWidth
                   required
-                  label="Asunto"
+                  label={C.formSubjectLabel}
                   name="subject"
                   value={form.subject}
                   onChange={handleChange}
@@ -276,7 +279,7 @@ export function StudentContent() {
                   required
                   multiline
                   minRows={5}
-                  label="Consulta"
+                  label={C.formQuestionLabel}
                   name="message"
                   value={form.message}
                   onChange={handleChange}
@@ -290,7 +293,7 @@ export function StudentContent() {
                 endIcon={<SendIcon />}
                 disabled={sending}
               >
-                {sending ? "Enviando..." : "Enviar consulta"}
+                {sending ? C.sendingButton : C.sendButton}
               </SAEButton>
             </Stack>
           </Box>

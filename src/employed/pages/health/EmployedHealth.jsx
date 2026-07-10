@@ -1,5 +1,5 @@
 //FUNCIONES
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useHealth } from "../../context/employedContext";
@@ -38,15 +38,16 @@ import {
   Switch,
   CircularProgress,
   Alert,
-  Snackbar,
 } from "@mui/material";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import { EmployedCalendar } from "./HealthCalendar";
 import GestionarHorariosDialog from "./HorariosDialog";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
+import { useNotification } from "../../../shared/context/sharedContext";
 
 import SAEPage from "../../../shared/components/page/SAEPage";
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
 
 function EmployedAdminContent() {
   const navigate = useNavigate();
@@ -54,42 +55,22 @@ function EmployedAdminContent() {
   const {
     //ABM Faltas
     SetCuilFaltas,
-    faltasRows,
-    faltasColumns,
-    loadingFaltas,
     //ABM Especialidades
-    especialidades,
-    especialidadesActivas,
     especialidadesRows,
     especialidadesColumns,
     loadingEspecialidades,
     openCreateEspecialidades,
-    handleEspecialidadesSave,
     //ABM de Personal
     personalRows,
     personalColumns,
     loadingPersonal,
     openCreatePersonal,
-    handlePersonalSave,
     //ABM de Cursos
     cursosRows,
     cursosColumns,
     loadingCursos,
     openCreateCurso,
-    handleCursoSave,
     //Valores de error, mostrar mensajes, etc.
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
-    setDialogError,
-    dialogOpen,
-    setDialogOpen,
-    dialogData,
-    setDialogData,
-    dialogType,
-    dialogMode,
-    dialogError,
-    dialogSaving,
     setHorariosDialogOpen,
     horariosDialogOpen,
   } = useHealth();
@@ -139,153 +120,188 @@ function EmployedAdminContent() {
       openCreateCurso,
     ],
   );
-  const [activeSection, setActiveSection] = useState("especialidades");
-  const [busquedaGestion, setBusquedaGestion] = useState("");
-  const handleSectionChange = (section) => {
-    setActiveSection(section);
-    setBusquedaGestion("");
-  };
+  const activeSection = "especialidades";
 
   const currentSection = useMemo(
     () => sectionConfig[activeSection],
     [activeSection, sectionConfig],
   );
-  const rowsGestionFiltradas = useMemo(() => {
-    const term = busquedaGestion.trim().toLowerCase();
-    if (!term) return currentSection.rows;
 
-    return currentSection.rows.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value ?? "")
-          .toLowerCase()
-          .includes(term),
-      ),
-    );
-  }, [currentSection.rows, busquedaGestion]);
-  const handleDialogChange = (field, value) => {
-    setDialogData((prev) => ({ ...prev, [field]: value }));
-  };
   return (
     <SAEPage>
-<HeaderPageEmployed
-          header=" Módulo de Salud"
-          title="Gestión de las capacidades medicas de nuestra area"
-          description="Permite cargar especialidades, personal, cursos, horarios para el personal y gestionar los turnos de los estudiantes"
-        />
+      <HeaderPageEmployed
+        header=" Módulo de Salud"
+        title="Gestión de las capacidades medicas de nuestra area"
+        description="Permite cargar especialidades, personal, cursos, horarios para el personal y gestionar los turnos de los estudiantes"
+      />
 
-        <Card
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          overflow: "hidden",
+          mt: 3,
+          mb: 4,
+        }}
+      >
+        <Box
           sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            overflow: "hidden",
-            mt: 3,
-            mb: 4,
+            background: "var(--purpleGradient)",
+            color: "white",
+            px: 3,
+            py: 2.5,
           }}
         >
-          <Box
-            sx={{
-              background: "var(--purpleGradient)",
-              color: "white",
-              px: 3,
-              py: 2.5,
-            }}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ sm: "center" }}
+            justifyContent="space-between"
+            spacing={2}
           >
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
-            >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <DashboardIcon sx={{ fontSize: 32 }} />
-                <Box>
-                  <Typography variant="h4" fontWeight={700}>
-                    Gestion de Turnos
-                  </Typography>
-                </Box>
-              </Stack>
-              <SAEButton
-                variant="contained"
-                startIcon={<DashboardIcon />}
-                onClick={() => navigate("/Gestion-Salud/Turnos")}
-                sx={{
-                  whiteSpace: "nowrap",
-                  bgcolor: "rgba(255,255,255,0.18)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.4)",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                }}
-              >
-                Ingresar al Turnero
-              </SAEButton>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <DashboardIcon sx={{ fontSize: 32 }} />
+              <Box>
+                <Typography variant="h4" fontWeight={700}>
+                  Gestion de Turnos
+                </Typography>
+              </Box>
             </Stack>
-          </Box>
-        </Card>
+            <SAEButton
+              variant="contained"
+              startIcon={<DashboardIcon />}
+              onClick={() => navigate("/Gestion-Salud/Turnos")}
+              sx={{
+                whiteSpace: "nowrap",
+                bgcolor: "rgba(255,255,255,0.18)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.4)",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+              }}
+            >
+              Ingresar al Turnero
+            </SAEButton>
+          </Stack>
+        </Box>
+      </Card>
 
-       <SAEDataGrid
+      <SAEDataGrid
         sectionConfig={sectionConfig}
         currentSection={currentSection}
-       />
+      />
 
-        <Card
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          overflow: "hidden",
+          mt: 3,
+        }}
+      >
+        <Box
           sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            overflow: "hidden",
-            mt: 3,
+            background: "var(--gradient)",
+            color: "white",
+            px: 3,
+            py: 2.5,
           }}
         >
-          <Box
-            sx={{
-              background: "var(--gradient)",
-              color: "white",
-              px: 3,
-              py: 2.5,
-            }}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ sm: "center" }}
+            justifyContent="space-between"
+            spacing={2}
           >
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
-            >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <ScheduleIcon sx={{ fontSize: 32 }} />
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    Horarios Empleados
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.85 }}>
-                    Nuestros Horarios
-                  </Typography>
-                </Box>
-              </Stack>
-              <SAEButton
-                variant="contained"
-                startIcon={<ScheduleIcon />}
-                onClick={() => setHorariosDialogOpen(true)}
-                sx={{
-                  whiteSpace: "nowrap",
-                  bgcolor: "rgba(255,255,255,0.18)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.4)",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                }}
-              >
-                Gestionar Horarios
-              </SAEButton>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <ScheduleIcon sx={{ fontSize: 32 }} />
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  Horarios Empleados
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.85 }}>
+                  Nuestros Horarios
+                </Typography>
+              </Box>
             </Stack>
-          </Box>
-        </Card>
-        {/*CALENDARIO */}
-        <EmployedCalendar />
-{dialogOpen && dialogType === "especialidades" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
+            <SAEButton
+              variant="contained"
+              startIcon={<ScheduleIcon />}
+              onClick={() => setHorariosDialogOpen(true)}
+              sx={{
+                whiteSpace: "nowrap",
+                bgcolor: "rgba(255,255,255,0.18)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.4)",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+              }}
+            >
+              Gestionar Horarios
+            </SAEButton>
+          </Stack>
+        </Box>
+      </Card>
+      {/*CALENDARIO */}
+      <EmployedCalendar />
+
+      <GestionarHorariosDialog open={horariosDialogOpen} />
+      <DialogHealth />
+    </SAEPage>
+  );
+}
+
+function DialogHealth() {
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setDialogError,
+    handleDataChange,
+    closeDialog,
+  } = useNotification();
+
+  const {
+    especialidades,
+    especialidadesActivas,
+    handleEspecialidadesSave,
+    faltasRows,
+    faltasColumns,
+    loadingFaltas,
+    handlePersonalSave,
+    handleCursoSave,
+  } = useHealth();
+
+  const deleteDialogConfig = {
+    cursos: {
+      entityLabel: "Curso",
+      itemName: dialogData?.nombre_curso,
+      onConfirm: handleCursoSave,
+    },
+  };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
+    ) : null;
+  }
+
+  return (
+    <>
+      {dialogOpen && dialogType === "especialidades" && (
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -298,9 +314,9 @@ function EmployedAdminContent() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogMode === "create" ? "Nuevo Empleado" : "Editar Empleado"}
+              {dialogMode === "create" ? "Nuevo Especialidad" : "Editar Especialidad"}
             </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -319,7 +335,7 @@ function EmployedAdminContent() {
                       type="number"
                       fullWidth
                       value={dialogData.id}
-                      onChange={(e) => handleDialogChange("id", e.target.value)}
+                      onChange={(e) => handleDataChange("id", e.target.value)}
                       disabled={true}
                     />
                   </Grid>
@@ -328,7 +344,7 @@ function EmployedAdminContent() {
                       label="Nombre Completo"
                       value={dialogData.nombre}
                       onChange={(e) =>
-                        handleDialogChange("nombre", e.target.value)
+                        handleDataChange("nombre", e.target.value)
                       }
                       fullWidth
                     />
@@ -338,7 +354,7 @@ function EmployedAdminContent() {
                       label="Descripción"
                       value={dialogData.descripcion}
                       onChange={(e) =>
-                        handleDialogChange("descripcion", e.target.value)
+                        handleDataChange("descripcion", e.target.value)
                       }
                       multiline
                       fullWidth
@@ -351,7 +367,7 @@ function EmployedAdminContent() {
                         <Switch
                           checked={dialogData.activo}
                           onChange={(e) =>
-                            handleDialogChange("activo", e.target.checked)
+                            handleDataChange("activo", e.target.checked)
                           }
                           color="primary"
                         />
@@ -370,8 +386,9 @@ function EmployedAdminContent() {
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -382,7 +399,11 @@ function EmployedAdminContent() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -397,12 +418,7 @@ function EmployedAdminContent() {
 
       {/*DIALOG DE PERSONAL*/}
       {dialogOpen && dialogType === "personal" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -421,14 +437,14 @@ function EmployedAdminContent() {
                   ? "Editar Empleado" //Segunda condicion
                   : "Registrar Falta"}
             </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
               {dialogError && (
-                <Alert severity="error" onClose={() => setDialogError("")}>
+                <Alert severity="error" onClose={closeDialog}>
                   {dialogError}
                 </Alert>
               )}
@@ -474,7 +490,7 @@ function EmployedAdminContent() {
                           label="Observacion de la Falta"
                           value={dialogData.observacion}
                           onChange={(e) =>
-                            handleDialogChange("observacion", e.target.value)
+                            handleDataChange("observacion", e.target.value)
                           }
                           multiline
                           fullWidth
@@ -487,7 +503,7 @@ function EmployedAdminContent() {
                           type="date"
                           value={dialogData.fecha_alta}
                           onChange={(e) =>
-                            handleDialogChange("fecha_alta", e.target.value)
+                            handleDataChange("fecha_alta", e.target.value)
                           }
                           fullWidth
                           slotProps={{ inputLabel: { shrink: true } }}
@@ -530,7 +546,7 @@ function EmployedAdminContent() {
                           fullWidth
                           value={dialogData.cuil}
                           onChange={(e) =>
-                            handleDialogChange("cuil", e.target.value)
+                            handleDataChange("cuil", e.target.value)
                           }
                           disabled={dialogMode === "edit"}
                         />
@@ -540,7 +556,7 @@ function EmployedAdminContent() {
                           label="Nombre"
                           value={dialogData.nombre}
                           onChange={(e) =>
-                            handleDialogChange("nombre", e.target.value)
+                            handleDataChange("nombre", e.target.value)
                           }
                           fullWidth
                         />
@@ -550,7 +566,7 @@ function EmployedAdminContent() {
                           label="Apellido"
                           value={dialogData.apellido}
                           onChange={(e) =>
-                            handleDialogChange("apellido", e.target.value)
+                            handleDataChange("apellido", e.target.value)
                           }
                           fullWidth
                         />
@@ -564,13 +580,10 @@ function EmployedAdminContent() {
                           onChange={(event, newValue) => {
                             // 'newValue' es el objeto completo del perfil seleccionado (o null)
                             if (newValue) {
-                              handleDialogChange(
-                                "id_especialidad",
-                                newValue.id,
-                              );
+                              handleDataChange("id_especialidad", newValue.id);
                             } else {
                               // Maneja el caso de que se borre la selección
-                              handleDialogChange("id_especialidad", null);
+                              handleDataChange("id_especialidad", null);
                             }
                           }}
                           // Asegura que la comparación se haga por id
@@ -621,7 +634,7 @@ function EmployedAdminContent() {
                               <Switch
                                 checked={dialogData.activo}
                                 onChange={(e) =>
-                                  handleDialogChange("activo", e.target.checked)
+                                  handleDataChange("activo", e.target.checked)
                                 }
                                 color="primary"
                               />
@@ -643,8 +656,9 @@ function EmployedAdminContent() {
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -655,7 +669,11 @@ function EmployedAdminContent() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -669,12 +687,7 @@ function EmployedAdminContent() {
       )}
       {/* DIALOG DE CURSOS */}
       {dialogOpen && dialogType === "cursos" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -689,7 +702,7 @@ function EmployedAdminContent() {
             >
               {dialogMode === "create" ? "Nuevo Curso" : "Editar Curso"}
             </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -700,28 +713,14 @@ function EmployedAdminContent() {
                   {dialogError}
                 </Alert>
               )}
-              {dialogMode === "delete" ? (
-                <>
-                  <Typography variant="h6" component="span">
-                    Esta seguro que quiere el Curso?:
-                  </Typography>
-                  <Typography variant="h7" component="span">
-                    ID:{dialogData.id} <br />
-                    Nombre: "{dialogData.nombre_curso}"
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Grid container spacing={1}>
+              <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 3 }} m={0}>
                       <SAETextField
                         label="ID"
                         type="number"
                         fullWidth
                         value={dialogData.id}
-                        onChange={(e) =>
-                          handleDialogChange("id", e.target.value)
-                        }
+                        onChange={(e) => handleDataChange("id", e.target.value)}
                         disabled={true}
                       />
                     </Grid>
@@ -732,7 +731,7 @@ function EmployedAdminContent() {
                         fullWidth
                         value={dialogData.cupo_maximo}
                         onChange={(e) =>
-                          handleDialogChange("cupo_maximo", e.target.value)
+                          handleDataChange("cupo_maximo", e.target.value)
                         }
                       />
                     </Grid>
@@ -741,7 +740,7 @@ function EmployedAdminContent() {
                         label="Nombre Curso"
                         value={dialogData.nombre_curso}
                         onChange={(e) =>
-                          handleDialogChange("nombre_curso", e.target.value)
+                          handleDataChange("nombre_curso", e.target.value)
                         }
                         fullWidth
                       />
@@ -751,7 +750,7 @@ function EmployedAdminContent() {
                         label="Nombre del Docente"
                         value={dialogData.nombre_docente}
                         onChange={(e) =>
-                          handleDialogChange("nombre_docente", e.target.value)
+                          handleDataChange("nombre_docente", e.target.value)
                         }
                         fullWidth
                       />
@@ -762,7 +761,7 @@ function EmployedAdminContent() {
                         type="date"
                         value={dialogData.fecha_inicio}
                         onChange={(e) =>
-                          handleDialogChange("fecha_inicio", e.target.value)
+                          handleDataChange("fecha_inicio", e.target.value)
                         }
                         fullWidth
                         slotProps={{ inputLabel: { shrink: true } }}
@@ -774,7 +773,7 @@ function EmployedAdminContent() {
                         type="date"
                         value={dialogData.fecha_fin}
                         onChange={(e) =>
-                          handleDialogChange("fecha_fin", e.target.value)
+                          handleDataChange("fecha_fin", e.target.value)
                         }
                         fullWidth
                         slotProps={{ inputLabel: { shrink: true } }}
@@ -786,7 +785,7 @@ function EmployedAdminContent() {
                           <Switch
                             checked={dialogData.activo}
                             onChange={(e) =>
-                              handleDialogChange("activo", e.target.checked)
+                              handleDataChange("activo", e.target.checked)
                             }
                             color="primary"
                           />
@@ -796,16 +795,15 @@ function EmployedAdminContent() {
                         }
                       />
                     )}
-                  </Grid>
-                </>
-              )}
+              </Grid>
             </Stack>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -816,36 +814,21 @@ function EmployedAdminContent() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
                 ? "Crear"
-                : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                : "Guardar"}
             </SAEButton>
           </DialogActions>
         </Dialog>
       )}
-      <GestionarHorariosDialog open={horariosDialogOpen} />
-      {/* MENSAJE DE EXITO */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackbarMsg}
-        </Alert>
-      </Snackbar>        
-    </SAEPage>
+    </>
   );
 }
 // Este componente solo inicializa el Proveedor y llama al contenido interno

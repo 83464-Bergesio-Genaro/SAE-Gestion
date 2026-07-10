@@ -1,3 +1,4 @@
+import { useAuth } from "../../../shared/context/sharedContext";
 import {
   Box,
   Container,
@@ -11,49 +12,30 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  DialogContentText,
-  Snackbar,
-  Alert,
+  DialogContentText
 } from "@mui/material";
-import { SCHOLARSHIP_STRINGS } from "./scholarship.string";
+
+import {AddCircleOutline} from "@mui/icons-material";
+import Diversity3Icon from '@mui/icons-material/Diversity3';
+
+import { SCHOLARSHIP_STRINGS } from "../../../utils/gena/student.string"; 
+import { SCHOLARSHIPS_STATES ,SCHOLARSHIP_TYPE } from "../../../utils/gena/constants";
+import { useScholarships } from "../../context/studentContext";
+import { ScholarshipsProvider } from "../../context/providers/scholarshipsProvider";
+import { formatDate } from "../../../utils/util";
+
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import {
-  AddCircleOutline,
-  AttachMoney,
-  Diversity3,
-  School,
-} from "@mui/icons-material";
 import SAEPage from "../../../shared/components/page/SAEPage";
-
-import {
-  INITIAL_PREVIEW,
-  formatDate,
-  getEstadoBecaConfig,
-  MAX_SIZE_BYTES,
-  MAX_SIZE_MB,
-} from "./scholarship.utils";
-import {
-  TIPO_BECA,
-  REQUERID_DOCUMENTS,
-  ECONOMIC_DOCUMENTS,
-  ECONOMIC_OPTIONAL_DOCUMENTS,
-} from "./scholarship.configs";
-
+import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
 import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
-import Diversity3Icon from "@mui/icons-material/Diversity3";
+
 import DocumentCard from "../../../shared/components/documents/DocumentCard";
 import TitleBox from "../../../shared/components/titleBox";
+import ScholarshipsForm from "./scholarshipsForm";
 
 const C = SCHOLARSHIP_STRINGS;
-
-import { useScholarships } from "../../context/studentContext";
-import { ScholarshipsProvider } from "../../context/providers/scholarshipsProvider";
-import { useAuth } from "../../../shared/context/sharedContext";
-import ScholarshipsForm from "./scholarshipsForm";
 /*
   Componente Scholarships
   -----------------------
@@ -65,6 +47,24 @@ import ScholarshipsForm from "./scholarshipsForm";
   - Recargar la pantalla para que el usuario vea inmediatamente la nueva solicitud.
 
 */
+function getEstadoBecaConfig(estado) {
+  switch (estado) {
+    case SCHOLARSHIPS_STATES.SOLICITADO:
+      return { label: "Solicitado", color: "warning" };
+    case SCHOLARSHIPS_STATES.RECHAZADO:
+      return { label: "Rechazado", color: "error" };
+    case SCHOLARSHIPS_STATES.ACEPTADO_INICIO:
+      return { label: "Aceptado", color: "info" };
+    case SCHOLARSHIPS_STATES.ACEPTADO_PAGADO:
+      return { label: "Pagado", color: "success" };
+    case SCHOLARSHIPS_STATES.FIN_BECADO:
+      return { label: "Finalizado", color: "secondary" };
+    default:
+      return { label: estado || "Sin estado", color: "default" };
+  }
+}
+
+
 export default function Scholarships() {
   return (
     <ScholarshipsProvider>
@@ -80,8 +80,6 @@ function ScholarshipsContent() {
     perfilEstudiante,
     camposPerfilFaltantes,
     perfilIncompleto,
-    snackbar,
-    setSnackbar,
     becarioActual,
     loadingScholarships,
     loadingDocuments,
@@ -106,12 +104,9 @@ function ScholarshipsContent() {
     handleDelete,
     handlePreview,
     DeleteDocument,
-    ObtenerTipoDocumentos,
-    ObtenerDocumentosEstudiante,
 
     setOpenDialog,
     setBecarioActual,
-    showSnackbar,
     setOpenPopup,
   } = useScholarships();
 
@@ -175,10 +170,7 @@ function ScholarshipsContent() {
         >
           {misBecas.map((item) => (
             <Grid
-              item
-              xs={12}
-              sm={6}
-              md={4}
+            size={{ xs: 12, sm: 6, md: 4 }}
               key={`${item.tipoBeca}-${item.id}`}
             >
               <Card
@@ -269,7 +261,7 @@ function ScholarshipsContent() {
                       </Typography>
                     </Box>
 
-                    {item.tipoBeca === TIPO_BECA.INVESTIGACION && (
+                    {item.tipoBeca === SCHOLARSHIP_TYPE.INVESTIGACION && (
                       <Box
                         sx={{
                           display: "flex",
@@ -288,7 +280,7 @@ function ScholarshipsContent() {
                       </Box>
                     )}
 
-                    {item.tipoBeca === TIPO_BECA.SERVICIO && (
+                    {item.tipoBeca === SCHOLARSHIP_TYPE.SERVICIO && (
                       <Box
                         sx={{
                           display: "flex",
@@ -313,7 +305,7 @@ function ScholarshipsContent() {
           ))}
 
           {/* Card especial para abrir el formulario de nueva solicitud. */}
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
               onClick={!perfilIncompleto ? handleAgregarBeca : undefined}
               sx={{
@@ -462,11 +454,7 @@ function ScholarshipsContent() {
           sx={{ mt: 1, display: loadingDocuments ? "none" : "flex" }}
         >
           {documentos.map((item) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={4}
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}
               key={item.id_tipo_documento ?? item.id ?? item.nombre}
             >
               <DocumentCard
@@ -485,7 +473,7 @@ function ScholarshipsContent() {
             </Grid>
           ))}
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12}}>
             <Card
               sx={{
                 width: "100%",
@@ -565,11 +553,7 @@ function ScholarshipsContent() {
             <Box sx={{ mt: 4, position: "relative" }}>
               <Grid container spacing={2.5} sx={{ mt: 1 }}>
                 {documentosEconomica.map((item) => (
-                  <Grid
-                    item
-                    xs={12}
-                    sm={6}
-                    md={4}
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}
                     key={item.id_tipo_documento ?? item.id ?? item.nombre}
                   >
                     <DocumentCard
@@ -607,7 +591,6 @@ function ScholarshipsContent() {
         documentosEconomica={documentosEconomica}
         handlePreview={handlePreview}
         handleDeleteDocument={DeleteDocument}
-        showSnackbar={showSnackbar}
         perfilCompleto={!perfilIncompleto}
         camposPerfilFaltantes={camposPerfilFaltantes}
       />
@@ -642,21 +625,7 @@ function ScholarshipsContent() {
       />
 
       {/* Mensaje final de éxito/error/advertencia. */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      
     </SAEPage>
   );
 }

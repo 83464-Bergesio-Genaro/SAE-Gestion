@@ -1,14 +1,12 @@
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
+import SAETimeField from "../../../shared/components/inputs/SAETimeField";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Box,
-  Card,
-  CardContent,
   Stack,
   Typography,
-  InputAdornment,
   IconButton,
   FormControlLabel,
   Switch,
@@ -20,9 +18,7 @@ import {
   Tabs,
   Button,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
 import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import Visibility from "@mui/icons-material/Visibility";
 import {
@@ -40,19 +36,19 @@ import {
   ECONOMIC_DOCUMENTS,
   ECONOMIC_OPTIONAL_DOCUMENTS,
   REQUERID_DOCUMENTS,
-} from "../../../students/pages/scholarships/scholarship.configs";
+} from "./becas.configs";
+import {isPdfDocument, INITIAL_PREVIEW } from "../../../utils/util";
 import {
-  INITIAL_PREVIEW,
   asignarArchivosADocumentos,
   asignarTiposADocumentos,
-  hasDocumentFile,
-  isPdfDocument,
-} from "../../../students/pages/scholarships/scholarship.utils";
+  hasDocumentFile
+} from "../../../utils/gena/util";
 import {
   descargarDocumentacionXId,
   listarDocumentacionXLegajo,
 } from "../../../api/BecasService";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
+import { formatTime } from "../../../utils/juan/util.js";
 
 const carreras = [
   { value: "sistemas", label: "Sistemas" },
@@ -216,6 +212,35 @@ export default function GenericFormFields({
           />
         );
       }
+      if (col.form?.type === "time") {
+        if (isViewMode) {
+          return (
+            <SAETextField
+              key={col.field}
+              label={col.headerName}
+              value={formatTime(value)}
+              disabled
+              fullWidth
+            />
+          );
+        }
+
+        return (
+          <SAETimeField
+            key={col.field}
+            label={col.headerName}
+            value={value}
+            onChange={(newValue) => handleDialogChange(col.field, newValue)}
+            minTime={col.form?.min ?? "00:00"}
+            maxTime={col.form?.max ?? "23:59"}
+            size="big"
+            fullWidth
+            disabled={disabled}
+            error={Boolean(fieldErrors[col.field])}
+            helperText={fieldErrors[col.field] ?? ""}
+          />
+        );
+      }
 
       return (
         <SAETextField
@@ -234,7 +259,7 @@ export default function GenericFormFields({
             ["date", "time", "datetime-local"].includes(col.form?.type)
               ? {
                   inputLabel: { shrink: true },
-                  input: {
+                  htmlInput: {
                     min: col.form?.min,
                     max: col.form?.max,
                     step: col.form?.step,
@@ -457,7 +482,8 @@ function BecarioForm({
   );
 }
 
-export function SectionGridCard({
+// eslint-disable-next-line react-refresh/only-export-components
+export function useScholarshipDialogController({
   cardKey,
   card,
   onSave,
@@ -482,8 +508,6 @@ export function SectionGridCard({
   });
   const [loadingDocumentos, setLoadingDocumentos] = useState(false);
   const [preview, setPreview] = useState(INITIAL_PREVIEW);
-
-  const [busquedaGestion, setBusquedaGestion] = useState("");
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState({});
@@ -518,8 +542,8 @@ export function SectionGridCard({
     view: currentSection?.actionButton?.textView,
   };
 
-  const getDialogDataFromRow = (row = {}) =>
-    currentSection.columns
+  const getDialogDataFromRow = (section, row = {}) =>
+    section.columns
       .filter((col) => col.form !== false)
       .reduce(
         (acc, col) => {
@@ -655,7 +679,7 @@ export function SectionGridCard({
       setBecarioBuscado(becario);
       setDialogData((prev) => ({
         ...prev,
-        ...getDialogDataFromRow(becario),
+        ...getDialogDataFromRow(currentSection, becario),
         legajo: becario.legajo ?? legajoArmado,
         nombre_becario:
           becario.nombre_usuario ??
@@ -676,7 +700,6 @@ export function SectionGridCard({
 
   const handleSectionChange = (sectionKey) => {
     setActiveSection(sectionKey);
-    setBusquedaGestion("");
     clearBecarioBuscado();
     resetDocumentosBecario();
   };
@@ -743,9 +766,11 @@ export function SectionGridCard({
     return updated;
   };
 
-  const openCreate = () => {
-    const emptyEntity = { ...currentSection.emptyEntity };
+  const openCreate = (sectionKey = activeSection) => {
+    const section = card.sections[sectionKey];
+    const emptyEntity = { ...section.emptyEntity };
 
+    handleSectionChange(sectionKey);
     setDialogData(emptyEntity);
     setOriginalDialogData(cloneValue(emptyEntity));
     setDialogMode("create");
@@ -762,8 +787,11 @@ export function SectionGridCard({
     setTipoBecaSeleccionada("");
   };
 
-  async function openEdit(row, tabTitle) {
-    const parsedData = getDialogDataFromRow(row);
+  async function openEdit(row, tabTitle, sectionKey = activeSection) {
+    const section = card.sections[sectionKey];
+    const parsedData = getDialogDataFromRow(section, row);
+
+    handleSectionChange(sectionKey);
     setDialogData(parsedData);
     setOriginalDialogData(cloneValue(parsedData));
     setDialogMode("edit");
@@ -793,9 +821,11 @@ export function SectionGridCard({
     }
   }
 
-  async function openView(row, tabTitle) {
-    const parsedData = getDialogDataFromRow(row);
+  async function openView(row, tabTitle, sectionKey = activeSection) {
+    const section = card.sections[sectionKey];
+    const parsedData = getDialogDataFromRow(section, row);
 
+    handleSectionChange(sectionKey);
     setDialogData(parsedData);
     setOriginalDialogData(cloneValue(parsedData));
     setDialogMode("view");
@@ -870,6 +900,14 @@ export function SectionGridCard({
       ) {
         errors[col.field] =
           col.form.requiredMessage ?? `${col.headerName} es obligatorio`;
+        return;
+      }
+
+      if (col.form?.validate) {
+        const validationMessage = col.form.validate(value, dialogData);
+        if (validationMessage) {
+          errors[col.field] = validationMessage;
+        }
       }
     });
 
@@ -902,22 +940,8 @@ export function SectionGridCard({
     }
   };
 
-  const rowsFiltradas = useMemo(() => {
-    const term = busquedaGestion.trim().toLowerCase();
-
-    if (!term) return currentSection.rows;
-
-    return currentSection.rows.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value ?? "")
-          .toLowerCase()
-          .includes(term),
-      ),
-    );
-  }, [currentSection.rows, busquedaGestion]);
-
-  const gridColumns = [
-    ...currentSection.columns,
+  const getGridColumns = (section, sectionKey) => [
+    ...section.columns,
     {
       field: "acciones",
       headerName: "Acciones",
@@ -930,13 +954,15 @@ export function SectionGridCard({
         <>
           <IconButton
             size="small"
-            onClick={() => openView(params.row, currentSection.tabTitle)}
+            onClick={() => openView(params.row, section.tabTitle, sectionKey)}
+            sx={{ color: "var(--primary)" }}
           >
             <Visibility fontSize="small" />
           </IconButton>
           <IconButton
             size="small"
-            onClick={() => openEdit(params.row, currentSection.tabTitle)}
+            onClick={() => openEdit(params.row, section.tabTitle, sectionKey)}
+            sx={{ color: "var(--primary)" }}
           >
             <EditIcon fontSize="small" />
           </IconButton>
@@ -945,160 +971,8 @@ export function SectionGridCard({
     },
   ];
 
-  const DialogIcon = currentSection.icon;
-
-  return (
+  const dialogs = (
     <>
-      <Card
-        sx={{
-          borderRadius: 4,
-          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-          mb: 3,
-          overflow: "hidden",
-        }}
-      >
-        <Box
-          sx={{
-            background: "var(--gradient)",
-            color: "white",
-            px: 3,
-          }}
-        >
-          <Stack
-            direction="row"
-            overflow={{ xs: "auto", md: "hidden" }}
-            spacing={0}
-          >
-            {Object.entries(card.sections).map(([key, section]) => (
-              <Box
-                key={key}
-                onClick={() => handleSectionChange(key)}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  flexShrink: 0,
-                  px: 2.5,
-                  py: 1.5,
-                  cursor: "pointer",
-                  fontWeight: activeSection === key ? 700 : 500,
-                  fontSize: "0.85rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  color:
-                    activeSection === key ? "white" : "rgba(255,255,255,0.6)",
-                  borderBottom:
-                    activeSection === key
-                      ? "3px solid white"
-                      : "3px solid transparent",
-                  transition: "all 0.15s",
-                  "&:hover": {
-                    color: "white",
-                    borderBottomColor: "rgba(255,255,255,0.4)",
-                  },
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontWeight: "inherit",
-                    fontSize: "inherit",
-                    letterSpacing: "inherit",
-                    textTransform: "inherit",
-                    color: "inherit",
-                    lineHeight: 1,
-                  }}
-                >
-                  {section.tabTitle}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
-
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            alignItems={{ sm: "center" }}
-            justifyContent="space-between"
-            spacing={2}
-            sx={{ py: 2 }}
-          >
-            <Stack direction="row" alignItems="center" spacing={1.5}>
-              <DialogIcon sx={{ fontSize: 30 }} />
-              <Typography variant="h6" fontWeight={700}>
-                {currentSection.title}
-              </Typography>
-            </Stack>
-
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-              <SAETextField
-                placeholder="Buscar..."
-                size="small"
-                value={busquedaGestion}
-                onChange={(e) => setBusquedaGestion(e.target.value)}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-                sx={{
-                  width: { xs: "100%", sm: 240, md: 220 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    color: "white",
-                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(255,255,255,0.6)",
-                    },
-                    "&.Mui-focused fieldset": { borderColor: "white" },
-                  },
-                  "& input::placeholder": {
-                    color: "rgba(255,255,255,0.7)",
-                    opacity: 1,
-                  },
-                  "& .MuiInputAdornment-root svg": {
-                    color: "rgba(255,255,255,0.7)",
-                  },
-                }}
-              />
-
-              {currentSection?.actionButton && (
-                <SAEButton
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={openCreate}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    bgcolor: "rgba(255,255,255,0.18)",
-                    color: "white",
-                    border: "1px solid rgba(255,255,255,0.4)",
-                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                  }}
-                >
-                  {currentSection.actionButton.textNew}
-                </SAEButton>
-              )}
-            </Stack>
-          </Stack>
-        </Box>
-
-        <CardContent sx={{ p: 0 }}>
-          <DataGrid
-            rows={rowsFiltradas}
-            columns={gridColumns}
-            loading={currentSection.loading}
-            autoHeight
-            disableRowSelectionOnClick
-            pageSizeOptions={[5, 10, 25]}
-            initialState={{
-              pagination: { paginationModel: { pageSize: 5 } },
-            }}
-            sx={{ borderRadius: 0, border: "none" }}
-          />
-        </CardContent>
-      </Card>
-
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -1401,4 +1275,12 @@ export function SectionGridCard({
       />
     </>
   );
+
+  return {
+    activeSection,
+    dialogs,
+    getGridColumns,
+    openCreate,
+    setActiveSection: handleSectionChange,
+  };
 }

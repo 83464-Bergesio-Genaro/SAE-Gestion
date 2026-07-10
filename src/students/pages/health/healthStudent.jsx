@@ -37,6 +37,8 @@ import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import TitleBox from "../../../shared/components/titleBox";
+import { SAETypography } from "../../../shared/components/typography/SAETypography";
+import { formatearFecha,mostrarHorasMinutos,ScaleText} from "../../../utils/util";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -56,14 +58,10 @@ import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import BloodtypeIcon from "@mui/icons-material/Bloodtype";
 
 import { calendarDays } from "../../../utils/constants";
-import { SAETypography } from "../../../shared/components/typography/SAETypography";
-import {
-  formatearFecha,
-  mostrarHorasMinutos,
-  ScaleText,
-} from "../../../utils/util";
+import { HEALTH_STRINGS } from "../../../utils/gena/student.string";
 import { DataGrid } from "@mui/x-data-grid";
 
+const C = HEALTH_STRINGS;
 const PALETTE = [
   "#8A8A8A", //Pendiente
   "#576DDC", //Asignado
@@ -208,17 +206,15 @@ export function EmployedStudentContent() {
   return (
     <SAEPage>
       <StudentHeaderPage
-        title={"Salud"}
-        description={
-          "Permite sacar turnos médicos y ver los cursos disponibles"
-        }
+        title={C.headerTitle}
+        description={C.headerDescription }
         backgroundImage="images/varias/campus.jpg"
         icon={HealingIcon}
       />
 
       <TitleBox
-        title="Servicios para Alumnos"
-        description="Especialidades médicas disponibles para solicitar turnos"
+        title={C.servicesTitle}
+        description={C.servicesDescription}
       />
 
       <Card
@@ -362,7 +358,6 @@ export function EmployedStudentContent() {
 
                           <Divider sx={{ my: 0.5, borderStyle: "dashed" }} />
 
-                          {/* SECCIÓN 3: HORARIOS Y PROFESIONAL (Alto fijo y control de scroll por si hay muchos días) */}
                           <Box
                             sx={{
                               height: "90px",
@@ -376,7 +371,7 @@ export function EmployedStudentContent() {
                               fontWeight="bold"
                               color="var(--secondary)"
                             >
-                              Horarios de Atención:
+                              {C.servicesCardSche}
                             </SAETypography>
 
                             {especialidad.diasYHorarios.map((item, index) => {
@@ -385,7 +380,7 @@ export function EmployedStudentContent() {
                               );
                               const nombreDia = diaEncontrado
                                 ? diaEncontrado.label
-                                : "Día no asignado";
+                                : C.servicesNoDay;
 
                               return (
                                 <Stack
@@ -429,7 +424,7 @@ export function EmployedStudentContent() {
                               mt: 1, // Pequeño margen superior de seguridad
                             }}
                           >
-                            Pedir Turno
+                           {C.servicesButton}
                           </SAEButton>
                         </Stack>
                       </CardContent>
@@ -443,8 +438,8 @@ export function EmployedStudentContent() {
       </Card>
 
       <TitleBox
-        title="Turnos Activos"
-        description="Podrás ver aquellos turnos que tengas activos en estos días."
+        title={C.activeTurnsTitle}
+        description={C.activeTurnsDescription}
       />
 
       <Card
@@ -473,7 +468,7 @@ export function EmployedStudentContent() {
             alignItems="center"
             justifyContent="center"
           >
-            <SAESpinner></SAESpinner>
+            <SAESpinner/>
           </Grid>
         )}
         {!loadingTurnos && estudianteTurnos.length === 0 && (
@@ -487,7 +482,7 @@ export function EmployedStudentContent() {
               textAlign: { xs: "center" },
             }}
           >
-            No hay turnos activos
+            {C.noActiveTurns}
           </SAETypography>
         )}
         <Stack
@@ -526,17 +521,16 @@ export function EmployedStudentContent() {
                     <SAETypography
                       variant="subtitle1"
                       fontWeight="bold"
-                      noWrap
-                      sx={{ maxWidth: "140px" }}
+                      sx={{ maxWidth: "140px"}}
                     >
-                      {turno.fecha_solicitud || "Fecha Solicitud"}
+                      {turno.fecha_solicitud || "-"}
                     </SAETypography>
                     <Chip
-                      label={turno.estado || "Sin Definir"}
+                      label={turno.estado || "-"}
                       size="small"
                       sx={{
                         bgcolor: PALETTE[turno.id_estado_turno],
-                        color: "var(--textBlack)",
+                        color: "var(--textWhite)",
                         fontSize: "0.75rem",
                         fontWeight: 600,
                       }}
@@ -548,31 +542,31 @@ export function EmployedStudentContent() {
                   {/* Datos Mínimos: Fecha y Hora */}
                   <Stack spacing={1} mt={1.5}>
                     <SAETypography variant="body2">
-                      <strong>{"Solicitante: "}</strong>
+                      <strong>{C.turnsCardPacient}</strong>
                       <br />
-                      {turno.paciente || "Error recuperando el nombre"}
+                      {turno.paciente || C.noNameTurn}
                     </SAETypography>
                     <SAETypography variant="body2">
-                      <strong>{"Asunto: "}</strong>
+                      <strong>{C.turnsCardSuject}</strong>
                       <br />
-                      {turno.asunto || "Turno sin Asunto"}
+                      {turno.asunto || C.noSubject}
                     </SAETypography>
                     <SAETypography variant="body2">
-                      <strong>{"Atiende: "}</strong>
+                      <strong>{C.turnsCardMedic}</strong>
                       <br />
-                      {turno.especialista || "Sin médico asignado"}
+                      {turno.especialista || C.noMedic}
                     </SAETypography>
                     <Stack direction="row" alignItems="center" gap={1}>
                       <CalendarMonthIcon fontSize="medium" />
                       <SAETypography variant="body2">
-                        {turno.fecha_atencion || "Sin Fecha Asignada"}
+                        {turno.fecha_atencion || C.noDate}
                       </SAETypography>
                     </Stack>
 
                     <Stack direction="row" alignItems="center" gap={1}>
                       <AccessTimeIcon fontSize="medium" />
                       <SAETypography variant="body2">
-                        {turno.hora_atencion || "Sin Horario Asignado"}
+                        {turno.hora_atencion || C.noSchedule}
                       </SAETypography>
                     </Stack>
                   </Stack>
@@ -586,7 +580,7 @@ export function EmployedStudentContent() {
                         border: "1px solid rgba(255,255,255,0.4)",
                       }}
                     >
-                      Ver datos turno
+                     {C.showTurn}
                     </SAEButton>
                     <SAEButton
                       variant="contained"
@@ -598,7 +592,7 @@ export function EmployedStudentContent() {
                         border: "1px solid rgba(255,255,255,0.4)",
                       }}
                     >
-                      Eliminar Turno
+                      {C.deleteTurn}
                     </SAEButton>
                   </Stack>
                 </CardContent>
@@ -608,8 +602,8 @@ export function EmployedStudentContent() {
       </Card>
 
       <TitleBox
-        title="Cursos y Capacitaciones"
-        description=" Descubrí que lo primero es la salud"
+        title={C.courseTitle}
+        description={C.courseDescription}
       />
 
       <Card
@@ -646,7 +640,7 @@ export function EmployedStudentContent() {
                 textAlign: { xs: "center" },
               }}
             >
-              No hay cursos actualmente activos
+              {C.noCourses}
             </SAETypography>
           )}
           {!loadingCursos && cursos.length > 0 && (
@@ -680,8 +674,8 @@ export function EmployedStudentContent() {
                       key={curso.id || index}
                       variant="outlined"
                       sx={{
-                        width: { xs: "calc(100% - 10px)", sm: 300 },
-                        minWidth: { xs: 0, sm: 300 },
+                        width: { xs: "calc(100% - 5px)", sm: 350 },
+                        minWidth: { xs: 0, sm: 350 },
                         maxWidth: { xs: "none", sm: 300 },
                         height: 210,
                         borderRadius: { xs: 3, sm: 4 },
@@ -701,9 +695,7 @@ export function EmployedStudentContent() {
                         flexDirection: "column",
                       }}
                     >
-                      {/* NUEVO: Forzamos a CardContent a ocupar el 100% del alto y usar Flexbox */}
 
-                      {/* SECCIÓN 1: CABECERA (Alto fijo implícito por el icono de 55px) */}
                       <Stack
                         direction="row"
                         justifyContent="flex-start"
@@ -764,7 +756,7 @@ export function EmployedStudentContent() {
                       >
                         <Stack spacing={1}>
                           <Chip
-                            label={`${curso.cupo_maximo} Vacantes`}
+                            label={`${curso.cupo_maximo} ${C.available}`}
                             sx={{
                               width: "fit-content",
                               height: 28,
@@ -774,15 +766,14 @@ export function EmployedStudentContent() {
                             }}
                           />
                           <SAETypography variant="body2">
-                            Docente:<strong> 👨‍🏫 {curso.nombre_docente}</strong>
+                            {C.courseTeacher}<strong> 👨‍🏫 {curso.nombre_docente}</strong>
                           </SAETypography>
                           <SAETypography variant="body2">
-                            Desde el: 📅
+                            {C.courseStart}
                             <strong>
                               {" "}
                               {formatearFecha(curso.fecha_inicio)}
-                            </strong>{" "}
-                            hasta el:{" "}
+                            </strong>{C.courseEnd}
                             <strong>{formatearFecha(curso.fecha_fin)}</strong>
                           </SAETypography>
                         </Stack>
@@ -797,8 +788,8 @@ export function EmployedStudentContent() {
       </Card>
 
       <TitleBox
-        title="Histórico de Turnos"
-        description="Turnos cancelados o finalizados"
+        title={C.turnsHistoryTitle}
+        description={C.turnsHistoryDescription}
       />
       <Card
         sx={{
@@ -820,7 +811,7 @@ export function EmployedStudentContent() {
               initialState={{
                 pagination: { paginationModel: { pageSize: 5 } },
               }}
-              localeText={{ noRowsLabel: "Sin Registros" }}
+              localeText={{ noRowsLabel: C.noRegisters }}
               sx={{ borderRadius: 0, border: "none" }}
             />
           </Box>
@@ -844,6 +835,7 @@ function DialogHealth() {
     closeDialog,
   } = useNotification();
   const { handleTurnosSave } = useHealth();
+
   return (
     <>
       {dialogOpen && dialogType === "turnos" && (
@@ -861,8 +853,8 @@ function DialogHealth() {
               sx={{ fontWeight: "bold" }}
             >
               {dialogMode === "cancelados"
-                ? "Turnos Cancelados"
-                : "Turnos Finalizados"}
+                ? C.cancelTurnsTitle
+                : C.realizedTurnsTitle}
             </SAETypography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -893,26 +885,24 @@ function DialogHealth() {
                               gutterBottom
                               fontWeight={600}
                             >
-                              ¡ATENCIÓN!
+                              {C.dialogSubtitle}
                             </SAETypography>
                             <SAETypography
                               variant="body2"
                               color="var(--textBlack)"
                             >
-                              Una vez generado el turno no podrá ser modificado.
-                              En caso de equivocación debera eliminarlo y
-                              despues volverlo a crear
+                              {C.creationAclaration}
                             </SAETypography>
                           </CardContent>
                         </Card>
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
-                        <InputLabel>Sus datos</InputLabel>
+                        <InputLabel>{C.yourData}</InputLabel>
                       </Grid>
 
                       <Grid size={{ xs: 12 }} m={0}>
                         <SAETextField
-                          label="Tu legajo:"
+                          label={C.youtID}
                           fullWidth
                           value={dialogData.legajo}
                           onChange={(e) =>
@@ -923,7 +913,7 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
                         <SAETextField
-                          label="Fecha de Solicitud"
+                          label={C.solicitudDate}
                           type="date"
                           value={dialogData.fecha_solicitud}
                           onChange={(e) =>
@@ -935,12 +925,12 @@ function DialogHealth() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
-                        <InputLabel>Disponibilidad</InputLabel>
+                        <InputLabel>{C.availability}</InputLabel>
                       </Grid>
                       <Grid size={{ xs: 12, md: 6 }} m={0}>
                         <Select
                           value={dialogData.dia_selecionado}
-                          label="Dia"
+                          label={C.day}
                           fullWidth
                           onChange={(e) =>
                             handleDataChange("dia_selecionado", e.target.value)
@@ -955,7 +945,7 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12, md: 6 }} m={0}>
                         <SAETextField
-                          label="Hora Aproximada"
+                          label={C.estimateSchedule}
                           type="time"
                           fullWidth
                           value={dialogData.horario_disponible}
@@ -968,9 +958,7 @@ function DialogHealth() {
                           slotProps={{ inputLabel: { shrink: true } }}
                         />
                         <Chip
-                          label={
-                            "Revisar los horarios de inicio y fin del especialista"
-                          }
+                          label={C.seeMedicAvaila}
                           sx={{
                             bgcolor: "var(--chipBackground)",
                             color: "white",
@@ -979,19 +967,19 @@ function DialogHealth() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
-                        <InputLabel>Asunto</InputLabel>
+                        <InputLabel>{C.turnsCardSuject}</InputLabel>
                       </Grid>
 
                       <Grid size={{ xs: 12 }} mt={-1}>
                         <SAETextField
-                          label="Explique su dolencia"
+                          label={C.yourSympthoms}
                           value={dialogData.asunto}
                           onChange={(e) =>
                             handleDataChange("asunto", e.target.value)
                           }
                           multiline
                           fullWidth
-                          rows={4} // Número inicial de filas
+                          rows={4} 
                         />
                       </Grid>
                     </Grid>
@@ -1013,12 +1001,10 @@ function DialogHealth() {
                               gutterBottom
                               fontSize={"22px"}
                             >
-                              ¡ATENCIÓN!
+                              {C.dialogSubtitle}
                             </SAETypography>
                             <SAETypography variant="body2">
-                              Esta por cancelar el turno, toda la informacion
-                              que se haya utilizado en este turno se perdera
-                              como tambien la disponibilidad.
+                              {C.deleteAclaration}
                             </SAETypography>
                           </CardContent>
                         </Card>
@@ -1029,7 +1015,7 @@ function DialogHealth() {
                     <>
                       <Grid size={{ xs: 12, md: 3 }} m={0}>
                         <SAETextField
-                          label="ID Turno"
+                          label={C.dialogIdTurn}
                           type="number"
                           fullWidth
                           value={dialogData.id}
@@ -1041,7 +1027,7 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12, md: 9 }} m={0}>
                         <SAETextField
-                          label="Legajo Estudiante"
+                          label={C.dialogStudentId}
                           value={dialogData.legajo}
                           onChange={(e) =>
                             handleDataChange("legajo", e.target.value)
@@ -1052,7 +1038,7 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
                         <SAETextField
-                          label="Paciente"
+                          label={C.turnsCardPacient}
                           value={dialogData.paciente}
                           onChange={(e) =>
                             handleDataChange("paciente", e.target.value)
@@ -1063,19 +1049,20 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12, md: 6 }}>
                         <SAETextField
-                          label="Fecha de Atención"
+                          label={C.dialogDate}
                           type="date"
-                          value={dialogData.fecha_atencion}
+                          value={dialogData?.fecha_atencion||""}
                           onChange={(e) =>
                             handleDataChange("fecha_atencion", e.target.value)
                           }
                           fullWidth
                           disabled={true}
+                          InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
                       <Grid size={{ xs: 12, md: 6 }}>
                         <SAETextField
-                          label="Horario de Atención"
+                          label={C.dialogSchedule}
                           type="time"
                           value={
                             dialogData?.hora_atencion?.split?.("hs")?.[0] || ""
@@ -1090,7 +1077,7 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12 }}>
                         <SAETextField
-                          label="Asunto"
+                          label={C.subject}
                           value={dialogData.asunto}
                           onChange={(e) =>
                             handleDataChange("asunto", e.target.value)
@@ -1119,10 +1106,10 @@ function DialogHealth() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
+                ? C.close
                 : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Cerrar"}
+                  ? C.delete
+                  : C.close}
             </SAEButton>
             {dialogMode !== "show" && (
               <SAEButton
@@ -1136,10 +1123,10 @@ function DialogHealth() {
                 }
               >
                 {dialogMode === "create"
-                  ? "Crear"
+                  ? C.create
                   : dialogMode === "delete"
-                    ? "Eliminar"
-                    : "Cerrar"}
+                  ? C.delete
+                  : C.close}
               </SAEButton>
             )}
           </DialogActions>

@@ -1,48 +1,40 @@
 import { useMemo, useState } from "react";
 import {
-  Box,
   Grid,
-  Container,
   Stack,
   Typography,
-  Card,
-  CardContent,
-  Chip,
-  InputAdornment,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   IconButton,
-  FormControlLabel,
-  Switch,
   CircularProgress,
   Alert,
-  Snackbar,
 } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import PeopleIcon from "@mui/icons-material/People";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
-import AddIcon from "@mui/icons-material/Add";
 import CastleIcon from "@mui/icons-material/Castle";
-import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import SchoolIcon from "@mui/icons-material/School";
 import GroupsIcon from "@mui/icons-material/Groups";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import SearchIcon from "@mui/icons-material/Search";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAETimeField from "../../../shared/components/inputs/SAETimeField";
+import { useNotification } from "../../../shared/context/sharedContext";
+
+import { getDialogTitle } from "../../../utils/juan/util";
 
 import { DataGrid } from "@mui/x-data-grid";
 import { JPAProvider } from "../../context/providers/jpaProvider";
 import { useJPA } from "../../context/employedContext";
 import SAEPage from "../../../shared/components/page/SAEPage";
+import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
+import { isValidEmail } from "../../../utils/util.jsx";
+
 function CopyURLButton() {
   const ubicacionesComunes = [
     {
@@ -89,73 +81,49 @@ function CopyURLButton() {
     </div>
   );
 }
-const secciones = [
-  { key: "eventosPublicos", label: "Eventos Publicos" },
-
-  { key: "eventosInternos", label: "Eventos SAE" },
-  { key: "stands", label: "Puestos" },
-  { key: "interesados", label: "Interesados" },
-];
 function EmployedJPAContent() {
   const {
-    snackbarOpen,
-    snackbarMsg,
-
     eventosPublicosRows,
+    eventosPublicosColumns,
     loadingEventosPublicos,
     openCreateEventoPublico,
-    handleEventoPublicoSave,
 
     eventosSAERows,
-    eventoColumns,
+    eventosSAEColumns,
     loadingEventosSAE,
     openCreateEventoSAE,
-    handleEventoSAESave,
 
     standsRows,
     standsColumns,
     loadingStands,
     openCreateStands,
-    handleStandSave,
 
     interesadosRows,
     interesadosColumns,
     loadingInteresados,
     openCreateInteresados,
-    handleInteresadoSave,
-
-    dialogOpen,
-    dialogType,
-    dialogMode,
-    dialogData,
-    dialogSaving,
-    dialogError,
-    setDialogData,
-    setDialogOpen,
-    setDialogError,
-    setSnackbarOpen,
   } = useJPA();
 
   const sectionConfig = useMemo(
     () => ({
       eventosPublicos: {
-        key:"eventosPublicos",
+        key: "eventosPublicos",
         title: "Eventos Generales",
         dialog: openCreateEventoPublico,
         addButton: "Nuevo Evento Publico",
         icon: SchoolIcon,
         rows: eventosPublicosRows,
-        columns: eventoColumns,
+        columns: eventosPublicosColumns,
         loading: loadingEventosPublicos,
       },
       eventosInternos: {
-        key:"eventosInternos",
+        key: "eventosInternos",
         title: "Eventos Internos",
         dialog: openCreateEventoSAE,
         addButton: "Nuevo Evento SAE",
         icon: CastleIcon,
         rows: eventosSAERows,
-        columns: eventoColumns,
+        columns: eventosSAEColumns,
         loading: loadingEventosSAE,
       },
       stands: {
@@ -182,10 +150,11 @@ function EmployedJPAContent() {
     [
       eventosPublicosRows,
       loadingEventosPublicos,
-      eventoColumns,
+      eventosPublicosColumns,
       openCreateEventoPublico,
       eventosSAERows,
       loadingEventosSAE,
+      eventosSAEColumns,
       openCreateEventoSAE,
       standsRows,
       loadingStands,
@@ -198,203 +167,100 @@ function EmployedJPAContent() {
     ],
   );
 
-  const [activeSection, setActiveSection] = useState("eventosPublicos");
-  const [busquedaGestion, setBusquedaGestion] = useState("");
-  const handleSectionChange = (section) => {
-    setActiveSection(section);
-    setBusquedaGestion("");
-  };
+  const [activeSection] = "eventosPublicos";
 
   const currentSection = useMemo(
     () => sectionConfig[activeSection],
     [activeSection, sectionConfig],
   );
-  const rowsGestionFiltradas = useMemo(() => {
-    const term = busquedaGestion.trim().toLowerCase();
-    if (!term) return currentSection.rows;
 
-    return currentSection.rows.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value ?? "")
-          .toLowerCase()
-          .includes(term),
-      ),
-    );
-  }, [currentSection.rows, busquedaGestion]);
-
-  const handleDialogChange = (field, value) => {
-    setDialogData((prev) => ({ ...prev, [field]: value }));
-  };
   return (
     <SAEPage>
-        <HeaderPageEmployed
-          header=" Módulo de JPA"
-          title="Gestión de la Jornada de Puertas Abiertas"
-          description="Administrá los recursos que hacen a la JPA."
-        />
+      <HeaderPageEmployed
+        header=" Módulo de JPA"
+        title="Gestión de la Jornada de Puertas Abiertas"
+        description="Administrá los recursos que hacen a la JPA."
+      />
 
-        <Card
-          sx={{
-            borderRadius: 4,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            mb: 3,
-            overflow: "hidden",
-          }}
-        >
-          <Box
-            sx={{
-              background: "var(--gradient)",
-              color: "white",
-              px: 3,
-              pt: 0,
-              pb: 0,
-            }}
-          >
-            <Stack
-              direction="row"
-              overflow={{ xs: "scroll", md: "hidden" }}
-              spacing={0}
-            >
-              {secciones.map((item) => (
-                <Box
-                  key={item.key}
-                  onClick={() => handleSectionChange(item.key)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    px: 2.5,
-                    py: 1.5,
-                    cursor: "pointer",
-                    fontWeight: activeSection === item.key ? 700 : 500,
-                    fontSize: "0.85rem",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                    color:
-                      activeSection === item.key
-                        ? "white"
-                        : "rgba(255,255,255,0.6)",
-                    borderBottom:
-                      activeSection === item.key
-                        ? "3px solid white"
-                        : "3px solid transparent",
-                    transition: "all 0.15s",
-                    "&:hover": {
-                      color: "white",
-                      borderBottomColor: "rgba(255,255,255,0.4)",
-                    },
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontWeight: "inherit",
-                      fontSize: "inherit",
-                      letterSpacing: "inherit",
-                      textTransform: "inherit",
-                      color: "inherit",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {item.label}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              alignItems={{ sm: "center" }}
-              justifyContent="space-between"
-              spacing={2}
-              sx={{ py: 2 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <currentSection.icon sx={{ fontSize: 30 }} />
-                <Typography variant="h6" fontWeight={700}>
-                  {currentSection.title}
-                </Typography>
-              </Stack>
+      <SAEDataGrid
+        sectionConfig={sectionConfig}
+        currentSection={currentSection}
+      />
+      <DialogJpa />
+    </SAEPage>
+  );
+}
 
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                alignItems={{ sm: "center" }}
-              >
-                <SAETextField
-                  placeholder="Busqueda..."
-                  size="small"
-                  value={busquedaGestion}
-                  onChange={(e) => setBusquedaGestion(e.target.value)}
-                  sx={{
-                    width: { xs: "100%", sm: 240, md: 220 },
-                    "& .MuiOutlinedInput-root": {
-                      bgcolor: "rgba(255,255,255,0.12)",
-                      color: "white",
-                      "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                      "&:hover fieldset": {
-                        borderColor: "rgba(255,255,255,0.6)",
-                      },
-                      "&.Mui-focused fieldset": { borderColor: "white" },
-                    },
-                    "& input::placeholder": {
-                      color: "rgba(255,255,255,0.7)",
-                      opacity: 1,
-                    },
-                    "& .MuiInputAdornment-root svg": {
-                      color: "rgba(255,255,255,0.7)",
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-                <SAEButton
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={currentSection.dialog}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    bgcolor: "rgba(255,255,255,0.18)",
-                    color: "white",
-                    border: "1px solid rgba(255,255,255,0.4)",
-                    "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                  }}
-                >
-                  {currentSection.addButton}
-                </SAEButton>
-              </Stack>
-            </Stack>
-          </Box>
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ width: "100%" }}>
-              <DataGrid
-                rows={rowsGestionFiltradas}
-                columns={currentSection.columns}
-                loading={currentSection.loading}
-                autoHeight
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25]}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 5 } },
-                }}
-                localeText={{ noRowsLabel: "No hay torneos activos" }}
-                sx={{ borderRadius: 0, border: "none" }}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-              {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
+function DialogJpa() {
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setDialogError,
+    handleDataChange,
+    closeDialog,
+  } = useNotification();
+
+  const {
+    handleEventoPublicoSave,
+    handleEventoSAESave,
+    handleStandSave,
+    handleInteresadoSave,
+  } = useJPA();
+
+  // Configuración del diálogo de eliminación según el tipo de entidad seleccionado.
+  // Cada clave debe coincidir con el valor guardado en `dialogType`.
+  const deleteDialogConfig = {
+    eventoPublico: {
+      // Nombre de la entidad que se muestra en el título y en el mensaje.
+      entityLabel: "Evento",
+      // Nombre del registro seleccionado que se mostrará como referencia.
+      itemName: dialogData?.nombre_evento,
+      // Método que confirma y ejecuta la eliminación del registro.
+      onConfirm: handleEventoPublicoSave,
+    },
+    eventosInternos: {
+      entityLabel: "Evento",
+      itemName: dialogData?.nombre_evento,
+      onConfirm: handleEventoSAESave,
+    },
+    stands: {
+      entityLabel: "Puesto",
+      itemName: dialogData?.nombre_stand,
+      onConfirm: handleStandSave,
+    },
+    interesados: {
+      entityLabel: "Interesado",
+      itemName: dialogData?.nombre_interesado,
+      onConfirm: handleInteresadoSave,
+    },
+  };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
+    ) : null;
+  }
+
+  return (
+    <>
       {dialogOpen && dialogType === "eventoPublico" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -407,9 +273,9 @@ function EmployedJPAContent() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogMode === "create" ? "Nuevo Evento" : "Editar Evento"}
+              {getDialogTitle("Evento Publico", dialogMode)}
             </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -422,7 +288,7 @@ function EmployedJPAContent() {
               )}
               {dialogMode === "delete" ? (
                 <>
-                  <Typography variant="h6" component="span">
+                  <Typography variant="subtitle2" component="span">
                     Esta seguro que quiere eliminar el evento:
                   </Typography>
                   <Typography variant="h7" component="span">
@@ -439,9 +305,7 @@ function EmployedJPAContent() {
                         type="number"
                         fullWidth
                         value={dialogData.id}
-                        onChange={(e) =>
-                          handleDialogChange("id", e.target.value)
-                        }
+                        onChange={(e) => handleDataChange("id", e.target.value)}
                         disabled={true}
                       />
                     </Grid>
@@ -450,7 +314,7 @@ function EmployedJPAContent() {
                         label="Encargado"
                         value={dialogData.encargado}
                         onChange={(e) =>
-                          handleDialogChange("encargado", e.target.value)
+                          handleDataChange("encargado", e.target.value)
                         }
                         fullWidth
                       />
@@ -461,16 +325,14 @@ function EmployedJPAContent() {
                     label="Nombre del Evento"
                     value={dialogData.nombre_evento}
                     onChange={(e) =>
-                      handleDialogChange("nombre_evento", e.target.value)
+                      handleDataChange("nombre_evento", e.target.value)
                     }
                     fullWidth
                   />
                   <SAETextField
                     label="URL Maps"
                     value={dialogData.lugar}
-                    onChange={(e) =>
-                      handleDialogChange("lugar", e.target.value)
-                    }
+                    onChange={(e) => handleDataChange("lugar", e.target.value)}
                     fullWidth
                   />
                   {/* Es la grilla de url que se usan comunmente en nuestra facultad */}
@@ -481,7 +343,7 @@ function EmployedJPAContent() {
                     type="date"
                     value={dialogData.fecha_evento}
                     onChange={(e) =>
-                      handleDialogChange("fecha_evento", e.target.value)
+                      handleDataChange("fecha_evento", e.target.value)
                     }
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
@@ -494,7 +356,7 @@ function EmployedJPAContent() {
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
                         onChange={(value) =>
-                          handleDialogChange("horario_inicio", value)
+                          handleDataChange("horario_inicio", value)
                         }
                         minTime="08:00"
                         maxTime="24:00"
@@ -509,7 +371,7 @@ function EmployedJPAContent() {
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
                         onChange={(value) =>
-                          handleDialogChange("horario_fin", value)
+                          handleDataChange("horario_fin", value)
                         }
                         minTime="08:00"
                         maxTime="24:00"
@@ -525,8 +387,9 @@ function EmployedJPAContent() {
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -537,7 +400,11 @@ function EmployedJPAContent() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -549,16 +416,9 @@ function EmployedJPAContent() {
           </DialogActions>
         </Dialog>
       )}
-      {/*Yo hago por separado para que quede mas ordenado se puede cambiar a futuro 
-                SECCION EVENTO SAE
-            */}
+      {/*       SECCION EVENTO SAE     */}
       {dialogOpen && dialogType === "eventosInternos" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -571,9 +431,9 @@ function EmployedJPAContent() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogMode === "create" ? "Nuevo Evento" : "Editar Evento"}
+              {getDialogTitle("Evento SAE", dialogMode)}
             </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -586,7 +446,7 @@ function EmployedJPAContent() {
               )}
               {dialogMode === "delete" ? (
                 <>
-                  <Typography variant="h6" component="span">
+                  <Typography variant="subtitle2" component="span">
                     Esta seguro que quiere eliminar el evento:
                   </Typography>
                   <Typography variant="h7" component="span">
@@ -603,9 +463,7 @@ function EmployedJPAContent() {
                         type="number"
                         fullWidth
                         value={dialogData.id}
-                        onChange={(e) =>
-                          handleDialogChange("id", e.target.value)
-                        }
+                        onChange={(e) => handleDataChange("id", e.target.value)}
                         disabled={true}
                       />
                     </Grid>
@@ -614,7 +472,7 @@ function EmployedJPAContent() {
                         label="Encargado"
                         value={dialogData.encargado}
                         onChange={(e) =>
-                          handleDialogChange("encargado", e.target.value)
+                          handleDataChange("encargado", e.target.value)
                         }
                         fullWidth
                       />
@@ -625,16 +483,14 @@ function EmployedJPAContent() {
                     label="Nombre del Evento"
                     value={dialogData.nombre_evento}
                     onChange={(e) =>
-                      handleDialogChange("nombre_evento", e.target.value)
+                      handleDataChange("nombre_evento", e.target.value)
                     }
                     fullWidth
                   />
                   <SAETextField
                     label="URL Maps"
                     value={dialogData.lugar}
-                    onChange={(e) =>
-                      handleDialogChange("lugar", e.target.value)
-                    }
+                    onChange={(e) => handleDataChange("lugar", e.target.value)}
                     fullWidth
                   />
                   {/* Es la grilla de url que se usan comunmente en nuestra facultad */}
@@ -645,7 +501,7 @@ function EmployedJPAContent() {
                     type="date"
                     value={dialogData.fecha_evento}
                     onChange={(e) =>
-                      handleDialogChange("fecha_evento", e.target.value)
+                      handleDataChange("fecha_evento", e.target.value)
                     }
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
@@ -658,7 +514,7 @@ function EmployedJPAContent() {
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
                         onChange={(value) =>
-                          handleDialogChange("horario_inicio", value)
+                          handleDataChange("horario_inicio", value)
                         }
                         minTime="08:00"
                         maxTime="24:00"
@@ -673,7 +529,7 @@ function EmployedJPAContent() {
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
                         onChange={(value) =>
-                          handleDialogChange("horario_fin", value)
+                          handleDataChange("horario_fin", value)
                         }
                         minTime="08:00"
                         maxTime="24:00"
@@ -689,8 +545,9 @@ function EmployedJPAContent() {
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -701,7 +558,11 @@ function EmployedJPAContent() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -715,12 +576,7 @@ function EmployedJPAContent() {
       )}
       {/*       SECCION STANDS        */}
       {dialogOpen && dialogType === "stands" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -733,9 +589,9 @@ function EmployedJPAContent() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogMode === "create" ? "Nuevo Puesto" : "Editar Puesto"}
+              {getDialogTitle("Puesto", dialogMode)}
             </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -748,12 +604,13 @@ function EmployedJPAContent() {
               )}
               {dialogMode === "delete" ? (
                 <>
-                  <Typography variant="h6" component="span">
+                  <Typography variant="subtitle2" component="span">
                     Esta seguro que quiere eliminar el Puesto:
                   </Typography>
                   <Typography variant="h7" component="span">
                     ID:{dialogData.id} <br />
                     Nombre: "{dialogData.nombre_stand}"
+                    {console.log("dialogData", dialogData)}
                   </Typography>
                 </>
               ) : (
@@ -765,9 +622,7 @@ function EmployedJPAContent() {
                         type="number"
                         fullWidth
                         value={dialogData.id}
-                        onChange={(e) =>
-                          handleDialogChange("id", e.target.value)
-                        }
+                        onChange={(e) => handleDataChange("id", e.target.value)}
                         disabled={true}
                       />
                     </Grid>
@@ -776,7 +631,7 @@ function EmployedJPAContent() {
                         label="Expositor"
                         value={dialogData.expositor}
                         onChange={(e) =>
-                          handleDialogChange("expositor", e.target.value)
+                          handleDataChange("expositor", e.target.value)
                         }
                         fullWidth
                       />
@@ -787,7 +642,7 @@ function EmployedJPAContent() {
                     label="Nombre del Stand"
                     value={dialogData.nombre_stand}
                     onChange={(e) =>
-                      handleDialogChange("nombre_stand", e.target.value)
+                      handleDataChange("nombre_stand", e.target.value)
                     }
                     fullWidth
                   />
@@ -795,7 +650,7 @@ function EmployedJPAContent() {
                     label="Lugar en la Facultad"
                     value={dialogData.ubicacion}
                     onChange={(e) =>
-                      handleDialogChange("ubicacion", e.target.value)
+                      handleDataChange("ubicacion", e.target.value)
                     }
                     fullWidth
                   />
@@ -807,7 +662,7 @@ function EmployedJPAContent() {
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
                         onChange={(value) =>
-                          handleDialogChange("horario_inicio", value)
+                          handleDataChange("horario_inicio", value)
                         }
                         minTime="08:00"
                         maxTime="24:00"
@@ -822,7 +677,7 @@ function EmployedJPAContent() {
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
                         onChange={(value) =>
-                          handleDialogChange("horario_fin", value)
+                          handleDataChange("horario_fin", value)
                         }
                         minTime="08:00"
                         maxTime="24:00"
@@ -838,8 +693,9 @@ function EmployedJPAContent() {
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -850,7 +706,11 @@ function EmployedJPAContent() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -864,12 +724,7 @@ function EmployedJPAContent() {
       )}
       {/*      SECCION INTERESADOS    */}
       {dialogOpen && dialogType === "interesados" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -882,11 +737,9 @@ function EmployedJPAContent() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogMode === "create"
-                ? "Nuevo Interesado"
-                : "Editar Interesado"}
+              {getDialogTitle("Interesado", dialogMode)}
             </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -899,7 +752,7 @@ function EmployedJPAContent() {
               )}
               {dialogMode === "delete" ? (
                 <>
-                  <Typography variant="h6" component="span">
+                  <Typography variant="subtitle2" component="span">
                     Esta seguro que quiere eliminar el Interesado:
                   </Typography>
                   <Typography variant="h7" component="span">
@@ -916,9 +769,7 @@ function EmployedJPAContent() {
                         type="number"
                         fullWidth
                         value={dialogData.id}
-                        onChange={(e) =>
-                          handleDialogChange("id", e.target.value)
-                        }
+                        onChange={(e) => handleDataChange("id", e.target.value)}
                         disabled={true}
                       />
                     </Grid>
@@ -927,10 +778,7 @@ function EmployedJPAContent() {
                         label="Nombre del Interesado"
                         value={dialogData.nombre_interesado}
                         onChange={(e) =>
-                          handleDialogChange(
-                            "nombre_interesado",
-                            e.target.value,
-                          )
+                          handleDataChange("nombre_interesado", e.target.value)
                         }
                         fullWidth
                       />
@@ -940,15 +788,21 @@ function EmployedJPAContent() {
                     label="Contacto Telefonico"
                     value={dialogData.contacto}
                     onChange={(e) =>
-                      handleDialogChange("contacto", e.target.value)
+                      handleDataChange("contacto", e.target.value)
                     }
                     fullWidth
                   />
                   <SAETextField
                     label="Contacto Electronico"
                     value={dialogData.email}
-                    onChange={(e) =>
-                      handleDialogChange("email", e.target.value)
+                    onChange={(e) => handleDataChange("email", e.target.value)}
+                    error={Boolean(
+                      dialogData.email && !isValidEmail(dialogData.email),
+                    )}
+                    helperText={
+                      dialogData.email && !isValidEmail(dialogData.email)
+                        ? "Ingrese un correo electrónico válido"
+                        : ""
                     }
                     fullWidth
                   />
@@ -959,8 +813,9 @@ function EmployedJPAContent() {
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               Cancelar
             </SAEButton>
@@ -971,7 +826,11 @@ function EmployedJPAContent() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <EditIcon />
+                )
               }
             >
               {dialogMode === "create"
@@ -983,23 +842,7 @@ function EmployedJPAContent() {
           </DialogActions>
         </Dialog>
       )}
-      {/* MENSAJE DE EXITO */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackbarMsg}
-        </Alert>
-      </Snackbar>
-     </SAEPage>
+    </>
   );
 }
 

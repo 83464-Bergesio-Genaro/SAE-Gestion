@@ -9,7 +9,8 @@ dayjs.extend(customParseFormat);
 
 function parseTime(time) {
   if (!time) return null;
-  const normalizedTime = time === "24:00" ? "23:59" : time;
+  const timeText = String(time).slice(0, 5);
+  const normalizedTime = timeText === "24:00" ? "23:59" : timeText;
   return dayjs(normalizedTime, "HH:mm", true);
 }
 
@@ -22,6 +23,9 @@ export default function SAETimeField({
   width = 130, // Ancho por defecto
   size = "small",
   fullWidth = false,
+  disabled = false,
+  error = false,
+  helperText = "",
 }) {
   const textFieldSize = size === "big" ? "medium" : size;
 
@@ -42,6 +46,7 @@ export default function SAETimeField({
         timeSteps={{ minutes: 15 }}
         minTime={parseTime(minTime)}
         maxTime={parseTime(maxTime)}
+        disabled={disabled}
         localeText={{
           cancelButtonLabel: "Volver",
           okButtonLabel: "Confirmar",
@@ -50,6 +55,8 @@ export default function SAETimeField({
           textField: {
             size: textFieldSize,
             fullWidth,
+            error,
+            helperText,
             sx: fullWidth ? undefined : { width },
           },
           // Forzar la barra de botones en entornos de escritorio si es necesario

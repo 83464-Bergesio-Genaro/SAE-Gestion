@@ -22,7 +22,7 @@ export const NotificationProvider = ({ children }) => {
     if (reason === 'clickaway') return;
     setConfig((prev) => ({ ...prev, open: false }));
   };
-
+  
   return (//dialogState es un array proviste por dialog.js
     <NotificationContext.Provider value={{ showNotification,
     ...dialogState 
@@ -32,9 +32,12 @@ export const NotificationProvider = ({ children }) => {
         open={config.open}
         autoHideDuration={config.duration}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+       
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        
       >
         <Alert
+         
           onClose={handleClose}
           severity={config.severity}
           variant="filled"

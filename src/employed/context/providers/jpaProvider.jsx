@@ -15,12 +15,16 @@ import {
   modificarInteresado,
   eliminarInteresado,
 } from "../../../api/JPAService";
-import { Box, IconButton } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import CastleIcon from "@mui/icons-material/Castle";
+import { Box, IconButton, Link } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import { formatHeader, generateRows, formatTime } from "../../../utils/util.jsx";;
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  formatHeader,
+  generateRows,
+  formatTime,
+} from "../../../utils/util.jsx";
+import { useNotification } from "../../../shared/context/sharedContext";
 
 const generateColumns = (data, editAction, deleteAction) => {
   if (!data || data.length === 0) return [];
@@ -34,7 +38,7 @@ const generateColumns = (data, editAction, deleteAction) => {
       "horario_inicio",
       "horario_fin",
     ].includes(key.toLowerCase());
-    return {
+    const column = {
       field: key,
       headerName: formatHeader(key),
 
@@ -44,6 +48,29 @@ const generateColumns = (data, editAction, deleteAction) => {
       align: isId || isShort ? "center" : "left",
       headerAlign: isId || isShort ? "center" : "left",
     };
+
+    if (key.toLowerCase() === "lugar") {
+      column.renderCell = (params) => {
+        const value = String(params.value ?? "").trim();
+        const isLink = /^https?:\/\//i.test(value);
+
+        return isLink ? (
+          <Link
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            onClick={(event) => event.stopPropagation()}
+          >
+            Ver ubicación
+          </Link>
+        ) : (
+          value || "-"
+        );
+      };
+    }
+
+    return column;
   });
 
   // 👉 columna de acciones
@@ -57,7 +84,7 @@ const generateColumns = (data, editAction, deleteAction) => {
       <Box>
         <IconButton
           size="small"
-          color="primary"
+          sx={{ color: "var(--primary)" }}
           title="Ver / Editar"
           onClick={() => editAction(params.row)}
         >
@@ -65,11 +92,11 @@ const generateColumns = (data, editAction, deleteAction) => {
         </IconButton>
         <IconButton
           size="small"
-          color="primary"
+          sx={{ color: "var(--primary)" }}
           title="Eliminar"
           onClick={() => deleteAction(params.row)}
         >
-          <CloseIcon fontSize="small" />
+          <DeleteIcon fontSize="small" />
         </IconButton>
       </Box>
     ),
@@ -102,8 +129,17 @@ const EMPTY_INTERESADOS = {
   email: "",
 };
 export function JPAProvider({ children }) {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
+  const {
+    showNotification,
+    dialogData,
+    dialogMode,
+    setDialogOpen,
+    setDialogData,
+    setDialogType,
+    setDialogMode,
+    setDialogError,
+    setDialogSaving,
+  } = useNotification();
 
   {
     /*Seccion Eventos Publicos */
@@ -151,6 +187,15 @@ export function JPAProvider({ children }) {
     setDialogSaving(true);
     setDialogError("");
     try {
+      if (dialogMode === "delete") {
+        await eliminarEvento(dialogData.id);
+        setDialogOpen(false);
+        setDialogData(EMPTY_EVENTO_PUBLICO);
+        await fetchEventosPublicos();
+        showNotification("Se elimino el evento correctamente","success");
+        return;
+      }
+
       const { id, duracion, lugar, ...rest } = dialogData;
       dialogData.duracion = duracion; //Me molestaba el error de no uso
       let id_nuevo =
@@ -170,24 +215,22 @@ export function JPAProvider({ children }) {
       };
       if (dialogMode === "create") {
         await crearEvento(body);
-      } else if (dialogMode === "edit") {
-        await modificarEvento(dialogData.id, body);
       } else {
-        await eliminarEvento(dialogData.id);
+        await modificarEvento(dialogData.id, body);
       }
       setDialogOpen(false);
       setDialogData(EMPTY_EVENTO_PUBLICO);
-      fetchEventosPublicos();
-      setSnackbarMsg(
+      await fetchEventosPublicos();
+      showNotification(
         dialogMode === "create"
           ? "Evento creado!"
           : dialogMode === "edit"
             ? "Evento modificado correctamente"
-            : "Se elimino el evento correctamente",
+            : "Se elimino el evento correctamente","success"
       );
-      setSnackbarOpen(true);
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -203,7 +246,7 @@ export function JPAProvider({ children }) {
   const [eventosSAERows, setEventosSAERows] = useState([]);
   const [loadingEventosSAE, setLoadingEventosSAE] = useState(true);
   const fetchEventosSAE = useCallback(async () => {
-    setLoadingEventosPublicos(true);
+    setLoadingEventosSAE(true);
     try {
       const data = await ObtenerEventosSAE();
       setEventosSAE(data);
@@ -245,6 +288,15 @@ export function JPAProvider({ children }) {
     setDialogSaving(true);
     setDialogError("");
     try {
+      if (dialogMode === "delete") {
+        await eliminarEvento(dialogData.id);
+        setDialogOpen(false);
+        setDialogData(EMPTY_EVENTO_PUBLICO);
+        await fetchEventosSAE();
+        showNotification("Se elimino el evento correctamente","success");
+        return;
+      }
+
       const { id, duracion, lugar, ...rest } = dialogData;
       dialogData.duracion = duracion; //Me molestaba el error de no uso
       let id_nuevo =
@@ -264,24 +316,22 @@ export function JPAProvider({ children }) {
       };
       if (dialogMode === "create") {
         await crearEvento(body);
-      } else if (dialogMode === "edit") {
-        await modificarEvento(dialogData.id, body);
       } else {
-        await eliminarEvento(dialogData.id);
+        await modificarEvento(dialogData.id, body);
       }
       setDialogOpen(false);
       setDialogData(EMPTY_EVENTO_PUBLICO);
-      fetchEventosSAE();
-      setSnackbarMsg(
+      await fetchEventosSAE();
+      showNotification(
         dialogMode === "create"
           ? "Evento creado!"
           : dialogMode === "edit"
             ? "Evento modificado correctamente"
-            : "Se elimino el evento correctamente",
+            : "Se elimino el evento correctamente","success"
       );
-      setSnackbarOpen(true);
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -360,16 +410,17 @@ export function JPAProvider({ children }) {
       setDialogOpen(false);
       setDialogData(EMPTY_STANDS);
       fetchStands();
-      setSnackbarMsg(
+      showNotification(
         dialogMode === "create"
           ? "Puesto creado!"
           : dialogMode === "edit"
             ? "Puesto modificado correctamente"
             : "Se elimino el puesto correctamente",
+        "success"
       );
-      setSnackbarOpen(true);
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -448,16 +499,17 @@ export function JPAProvider({ children }) {
       setDialogOpen(false);
       setDialogData(EMPTY_INTERESADOS);
       fetchInteresados();
-      setSnackbarMsg(
+      showNotification(
         dialogMode === "create"
           ? "Interesado creado!"
           : dialogMode === "edit"
             ? "Interesado modificado correctamente"
             : "Se elimino el interesado correctamente",
+        "success"
       );
-      setSnackbarOpen(true);
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -469,17 +521,8 @@ export function JPAProvider({ children }) {
   {
     /*Necesario para cargar los datos en el dialog (ALTA) */
   }
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] =
-    useState(
-      "",
-    ); /* Puede ser "eventoPublico", "eventosInternos", "stands" o "interesados" */
-  const [dialogMode, setDialogMode] = useState("create");
-  const [dialogData, setDialogData] = useState(EMPTY_EVENTO_PUBLICO);
-  const [dialogSaving, setDialogSaving] = useState(false);
-  const [dialogError, setDialogError] = useState("");
 
-  const eventoColumns = useMemo(
+  const eventosPublicosColumns = useMemo(
     () =>
       generateColumns(
         EMPTY_EVENTO_PUBLICO,
@@ -488,9 +531,18 @@ export function JPAProvider({ children }) {
       ),
     [openEditEventoPublico, openDeleteEvento],
   );
+  const eventosSAEColumns = useMemo(
+    () =>
+      generateColumns(
+        EMPTY_EVENTO_PUBLICO,
+        openEditEventoSAE,
+        openDeleteEventoSAE,
+      ),
+    [openEditEventoSAE, openDeleteEventoSAE],
+  );
   const standsColumns = useMemo(
-    () => generateColumns(EMPTY_STANDS, openEditStands, openDeleteEvento),
-    [openEditStands, openDeleteEvento],
+    () => generateColumns(EMPTY_STANDS, openEditStands, openDeleteStands),
+    [openEditStands, openDeleteStands],
   );
   const interesadosColumns = useMemo(
     () =>
@@ -505,10 +557,8 @@ export function JPAProvider({ children }) {
   return (
     <JPAContext.Provider
       value={{
-        snackbarOpen,
-        snackbarMsg,
-
         eventosPublicosRows,
+        eventosPublicosColumns,
         loadingEventosPublicos,
         fetchEventosPublicos,
         openCreateEventoPublico,
@@ -518,7 +568,7 @@ export function JPAProvider({ children }) {
 
         eventosSAE,
         eventosSAERows,
-        eventoColumns,
+        eventosSAEColumns,
         loadingEventosSAE,
         fetchEventosSAE,
         openCreateEventoSAE,
@@ -541,17 +591,6 @@ export function JPAProvider({ children }) {
         openEditInteresados,
         openDeleteInteresados,
         handleInteresadoSave,
-
-        dialogOpen,
-        dialogType,
-        dialogMode,
-        dialogData,
-        dialogSaving,
-        dialogError,
-        setDialogData,
-        setDialogOpen,
-        setDialogError,
-        setSnackbarOpen,
       }}
     >
       {children}

@@ -1,8 +1,33 @@
-export const TIPO_BECA = {
-  ECONOMICA: "Beca Economica",
-  SERVICIO: "Beca de Servicio",
-  INVESTIGACION: "Beca de Investigacion",
-};
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+export const EMPTY_TOURNAMENT = {
+  nombre_torneo: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  fecha_limite_inscripcion:"",
+  activo:"",
+  nombre_deporte:"",
+  docente_responsable:"",
+  cupo_jugadores:""
+}
+
+export const PROFILE_REQUIRED_FIELDS = [
+  ["legajo", "Legajo"],
+  ["nombres", "Nombres"],
+  ["apellidos", "Apellidos"],
+  ["dni", "DNI"],
+  ["cuil", "CUIL"],
+  ["fecha_nacimiento", "Fecha de nacimiento"],
+  ["email", "Correo electrónico"],
+  ["telefono", "Teléfono"],
+  ["direccion", "Dirección"],
+];
+
 
 export const PERSONAL_FIELDS = [
   { name: "nombres", label: "Nombres", type: "text", md: 6 },
@@ -22,8 +47,51 @@ export const PERSONAL_FIELDS = [
   { name: "direccion", label: "Domicilio", type: "text", md: 12 },
 ];
 
+export const SPORTS_REQUIRED_DOCUMENTS = [
+  { 
+    id_tipo_documento: null,
+    nombre: "Certificado de Alumno Regular",
+    descripcion:
+      "Certificado vigente que acredita tu condición de estudiante regular.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_AlumnoRegular",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+  {
+    id_tipo_documento: null,
+    nombre: "Fotocopia Documento",
+    descripcion:
+      "Copia legible del frente y dorso de tu DNI en un único archivo.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_DNI",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+  {
+    id_tipo_documento: null,
+    nombre: "Ficha Medica o E.M.M.A.C",
+    descripcion:
+      "Certificado médico vigente que indica que estás apto para realizar actividad física.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_FichaMedica",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+];
+
+
 // Documentos comunes a cualquier solicitud de beca.
-export const REQUERID_DOCUMENTS = [
+export const SCHOLARSHIPS_REQUERID_DOCUMENTS = [
   {
     id_tipo_documento: null,
     nombre: "Comprobante de CBU",
@@ -174,3 +242,44 @@ export const ECONOMIC_OPTIONAL_DOCUMENTS = [
     id_archivo: null,
   },
 ];
+export const TRAVEL_REQUIRED_DOCUMENTS = [
+    {
+        id_tipo_documento: null,
+        nombre: "Certificado de Alumno Regular",
+        descripcion:
+        "Certificado vigente que acredita tu condición de estudiante regular.",
+        subido: false,
+        archivo: null,
+        archivoNombre: "",
+        formatoNombre: "{legajo}_AlumnoRegular",
+        id_archivo: null,
+        extension: null,
+        required: true,
+    },
+    {
+        id_tipo_documento: null,
+        nombre: "Fotocopia Documento",
+        descripcion:
+        "Copia legible del frente y dorso de tu DNI en un único archivo.",
+        subido: false,
+        archivo: null,
+        archivoNombre: "",
+        formatoNombre: "{legajo}_DNI",
+        id_archivo: null,
+        extension: null,
+        required: true,
+    },
+    {
+        id_tipo_documento: null,
+        nombre: "Declaracion Jurada",
+        descripcion:
+        "Certificadofirmado en el cual establece un heredero a tu fortuna.",
+        subido: false,
+        archivo: null,
+        archivoNombre: "",
+        formatoNombre: "{idViaje}_{legajo}_DDJJ",
+        id_archivo: null,
+        extension: null,
+        required: true,
+    },
+    ];

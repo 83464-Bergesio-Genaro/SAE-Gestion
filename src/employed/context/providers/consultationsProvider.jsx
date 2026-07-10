@@ -4,11 +4,11 @@ import {
   CrearLinkFrecuentes,
   EliminarLinkFrecuentes,
   BuscarLinkFrecuentes,
-  ContarVisualizacionLinkFrecuente,
 } from "../../../api/EmpleadoService";
 import { Box, IconButton, Chip, Tooltip, Typography } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -16,8 +16,13 @@ import {
   LINK_FRECUENTE_ICONS,
   getLinkFrecuenteIconByIndex,
 } from "../../../shared/pages/consultations/linkFrecuentesIcons";
+import { useNotification } from "../../../shared/context/sharedContext";
 
-import { generateRows, formatHeader } from "../../../utils/util.jsx";;
+import {
+  formatHeader,
+  generateRows,
+} from "../../../utils/util.jsx";
+import { isValidHyperlink } from "../../../utils/juan/util.js";
 
 const EMPTY_LINKFRECUENTE = {
   id: 0,
@@ -100,7 +105,7 @@ const buildColumns = (
                   event.stopPropagation();
                   copyAction?.(params.value);
                 }}
-                sx={{color: "var(--primary)",}}
+                sx={{ color: "var(--primary)" }}
               >
                 <ContentCopyIcon fontSize="small" />
               </IconButton>
@@ -185,11 +190,11 @@ const buildColumns = (
           {deleteAction && (
             <IconButton
               size="small"
-              color="primary"
+              sx={{ color: "var(--primary)" }}
               title="Eliminar"
               onClick={() => deleteAction(params.row)}
             >
-              <CloseIcon fontSize="small" />
+              <DeleteIcon fontSize="small" />
             </IconButton>
           )}
           {registAction && (
@@ -210,23 +215,23 @@ const buildColumns = (
 };
 
 export const ConsultationProvider = ({ children }) => {
-  // Estados globales de Diálogo
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogData, setDialogData] = useState({});
-  const [dialogType, setDialogType] = useState("");
-  const [dialogMode, setDialogMode] = useState("");
-  const [dialogError, setDialogError] = useState(null);
-  const [dialogSaving, setDialogSaving] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const {
+    showNotification,
+    dialogData,
+    dialogMode,
+    setDialogOpen,
+    setDialogData,
+    setDialogType,
+    setDialogMode,
+    setDialogError,
+    setDialogSaving,
+  } = useNotification();
 
-  // Estados de Notificación
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
+  // Estados globales de Diálogo
+
+  const [deleteId, setDeleteId] = useState(null);
 
   //Secciones linksFrecuentes
-  const [linksFrecuentes, setLinksFrecuentes] = useState([]);
-  const [linkFrecuentesActivos, setLinksFrecuentesActivos] = useState([]);
   const [linksFrecuentesRows, setLinksFrecuentesRows] = useState([]);
   const [loadingLinksFrecuentes, setLoadingLinksFrecuentes] = useState(false);
 
@@ -234,8 +239,6 @@ export const ConsultationProvider = ({ children }) => {
     setLoadingLinksFrecuentes(true);
     try {
       let data = await BuscarLinkFrecuentes();
-      setLinksFrecuentes(data);
-      setLinksFrecuentesActivos(data.filter((esp) => esp.activo));
       setLinksFrecuentesRows(generateRows(data));
     } catch {
       setLinksFrecuentesRows([]);
@@ -254,14 +257,7 @@ export const ConsultationProvider = ({ children }) => {
     setDialogData(EMPTY_LINKFRECUENTE);
     setDialogError("");
     setTimeout(() => setDialogOpen(true), 0);
-  }, []);
-  const openEditLinksFrecuentes = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("linkFrecuentes");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+  }, [setDialogData, setDialogError, setDialogMode, setDialogOpen, setDialogType]);
 
   const openDeleteLinksFrecuentes = useCallback((row) => {
     setDialogData(row);
@@ -269,24 +265,23 @@ export const ConsultationProvider = ({ children }) => {
     setDialogMode("delete");
     setDialogError("");
     setDialogOpen(true);
-  }, []);
+  }, [setDialogData, setDialogError, setDialogMode, setDialogOpen, setDialogType]);
 
   const handleCopyLinkFrecuente = useCallback(async (hipervinculo) => {
     if (!hipervinculo) {
-      setSnackbarMsg("No hay hipervinculo para copiar");
-      setSnackbarOpen(true);
+      showNotification("No hay hipervinculo para copiar", "warning", 2000);
       return;
     }
 
     try {
       await navigator.clipboard.writeText(hipervinculo);
-      setSnackbarMsg("Hipervinculo copiado");
+      showNotification("Hipervinculo copiado", "success", 2000);
     } catch {
-      setSnackbarMsg("No se pudo copiar el hipervinculo");
+      showNotification("No se pudo copiar el hipervinculo", "error", 2000);
     } finally {
-      setSnackbarOpen(true);
+      // setSnackbarOpen(true);
     }
-  }, []);
+  }, [showNotification]);
 
   const linksFrecuentesColumns = useMemo(
     () =>
@@ -304,6 +299,10 @@ export const ConsultationProvider = ({ children }) => {
     setDialogSaving(true);
     setDialogError("");
     try {
+      if (!isValidHyperlink(dialogData.hipervinculo)) {
+        throw new Error("Ingresa un hipervinculo valido con http:// o https://");
+      }
+
       const { id } = dialogData;
       let id_nuevo = id === "" ? 0 : id;
       const body = {
@@ -325,30 +324,33 @@ export const ConsultationProvider = ({ children }) => {
       setDialogOpen(false);
       setDialogData(EMPTY_LINKFRECUENTE);
       fetchLinksFrecuentes();
-      setSnackbarMsg(
+      showNotification(
         dialogMode === "create"
           ? "Link Frecuente creado!"
-          : "Link Frecuente modificada correctamente",
+          : "Link Frecuente modificado correctamente","success"
       );
-      setSnackbarOpen(true);
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
   };
 
   const handleLinksFrecuenteDelete = async () => {
+    setDialogSaving(true);
+    setDialogError("");
     try {
       await EliminarLinkFrecuentes(deleteId ?? dialogData.id);
       setDeleteId(null);
       fetchLinksFrecuentes();
-      setConfirmDelete(false);
       setDialogOpen(false);
       setDialogData(EMPTY_LINKFRECUENTE);
+      showNotification("Link Frecuente eliminado correctamente", "warning");
     } catch (err) {
-      setConfirmDelete(false);
       setDialogError(err.message);
+    } finally {
+      setDialogSaving(false);
     }
   };
 
@@ -356,31 +358,13 @@ export const ConsultationProvider = ({ children }) => {
     <ConsultationContext.Provider
       value={{
         // ABM Link Frecuentes
-        linksFrecuentes,
-        linkFrecuentesActivos,
         linksFrecuentesRows,
         linksFrecuentesColumns,
         loadingLinksFrecuentes,
         openCreatelinksFrecuentes,
-        openEditLinksFrecuentes,
         handleLinksFrecuentesSave,
         handleLinksFrecuenteDelete,
         linksFrecuentesIcons: LINK_FRECUENTE_ICONS,
-
-        confirmDelete,
-        //Valores
-        snackbarOpen,
-        setSnackbarOpen,
-        snackbarMsg,
-        setDialogError,
-        dialogOpen,
-        setDialogOpen,
-        dialogData,
-        setDialogData,
-        dialogType,
-        dialogMode,
-        dialogError,
-        dialogSaving,
       }}
     >
       {children}

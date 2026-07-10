@@ -11,7 +11,8 @@ import {
   validateEspacio,
 } from "../../pages/sports/sports.validations";
 import { SportsContext } from "../employedContext";
-import { formatDate, generateColumns } from "../../../utils/util.jsx";
+import { formatDateForDisplay, formatHeader } from "../../../utils/util.jsx";
+import { useNotification } from "../../../shared/context/sharedContext";
 
 const EMPTY = {
   docente: {
@@ -33,8 +34,54 @@ const EMPTY = {
 };
 const inputDate = (value) => (value ? value.split("T")[0] : "");
 
+const generateSportsColumns = (
+  data,
+  { overrides = {}, actions = null } = {},
+) => {
+  const sample = Array.isArray(data) ? data[0] : data;
+
+  if (!sample) return actions ? [actions] : [];
+
+  const columns = Object.keys(sample).map((key) => {
+    const normalizedKey = key.toLowerCase();
+    const isId =
+      normalizedKey === "id" ||
+      normalizedKey.startsWith("id_") ||
+      normalizedKey.endsWith("_id");
+    const isShort = ["estado", "cupo", "duracion"].includes(normalizedKey);
+    return {
+      field: key,
+      headerName: formatHeader(key),
+      flex: isId ? 0.4 : 1,
+      minWidth: isId || isShort ? 50 : 120,
+      maxWidth: isId ? 70 : isShort ? 100 : undefined,
+      align: isId || isShort ? "center" : "left",
+      headerAlign: isId || isShort ? "center" : "left",
+      ...overrides[key],
+    };
+  });
+
+  if (actions) columns.push(actions);
+
+  return columns;
+};
+
 export function SportsProvider({ children, autoLoad = true }) {
   const navigate = useNavigate();
+  const {
+    showNotification,
+    dialogOpen,
+    dialogType,
+    dialogMode,
+    dialogData,
+    dialogSaving,
+    dialogError,
+    setDialogError,
+    setDialogSaving,
+    handleDataChange,
+    openDialog,
+    closeDialog,
+  } = useNotification();
   const [torneosRows, setTorneosRows] = useState([]);
   const [profesoresRows, setProfesoresRows] = useState([]);
   const [espaciosRows, setEspaciosRows] = useState([]);
@@ -48,12 +95,6 @@ export function SportsProvider({ children, autoLoad = true }) {
   const [torneoFormOpen, setTorneoFormOpen] = useState(false);
   const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState("docente");
-  const [dialogMode, setDialogMode] = useState("create");
-  const [dialogData, setDialogData] = useState(EMPTY.docente);
-  const [dialogSaving, setDialogSaving] = useState(false);
-  const [dialogError, setDialogError] = useState("");
   const [dialogFieldErrors, setDialogFieldErrors] = useState({});
 
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -69,8 +110,6 @@ export function SportsProvider({ children, autoLoad = true }) {
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [previewError, setPreviewError] = useState("");
   const [previewDocRef, setPreviewDocRef] = useState(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
 
   const load = useCallback(async (setter, loading, request, map = (x) => x) => {
     loading(true);
@@ -128,14 +167,13 @@ export function SportsProvider({ children, autoLoad = true }) {
     fetchTorneos,
   ]);
 
-  const open = useCallback((type, mode, data) => {
-    setDialogType(type);
-    setDialogMode(mode);
-    setDialogData(data);
-    setDialogError("");
-    setDialogFieldErrors({});
-    setDialogOpen(true);
-  }, []);
+  const open = useCallback(
+    (type, mode, data) => {
+      setDialogFieldErrors({});
+      openDialog(type, mode, data);
+    },
+    [openDialog],
+  );
   const openCreateDocente = useCallback(
     () => open("docente", "create", EMPTY.docente),
     [open],
@@ -262,10 +300,15 @@ export function SportsProvider({ children, autoLoad = true }) {
     }
   }, []);
 
-  const handleDialogChange = useCallback((field, value) => {
-    setDialogData((x) => ({ ...x, [field]: value }));
-    setDialogFieldErrors((x) => (x[field] ? { ...x, [field]: undefined } : x));
-  }, []);
+  const handleDialogChange = useCallback(
+    (field, value) => {
+      handleDataChange(field, value);
+      setDialogFieldErrors((x) =>
+        x[field] ? { ...x, [field]: undefined } : x,
+      );
+    },
+    [handleDataChange],
+  );
 
   const executeSave = useCallback(async () => {
     setDialogSaving(true);
@@ -281,11 +324,21 @@ export function SportsProvider({ children, autoLoad = true }) {
           ? api.crearDocenteDeportivo(body)
           : api.modificarDocenteDeportivo(dialogData.cuil, body));
         await fetchProfesores();
+        showNotification(
+          dialogMode === "create"
+            ? "Docente creado correctamente"
+            : "Docente modificado correctamente","success"
+        );
       } else if (dialogType === "espacio") {
         await (dialogMode === "create"
           ? api.crearEspacioDeportivo(dialogData)
           : api.modificarEspacioDeportivo(dialogData.id, dialogData));
         await fetchEspacios();
+        showNotification(
+          dialogMode === "create"
+            ? "Espacio creado correctamente"
+            : "Espacio modificado correctamente","success"
+        );
       } else if (dialogType === "deportista") {
         const body = {
           ...dialogData,
@@ -297,19 +350,26 @@ export function SportsProvider({ children, autoLoad = true }) {
           ? api.crearDeportista(body)
           : api.modificarDeportista(dialogData.id, body));
         await fetchDeportistas();
+        showNotification(
+          dialogMode === "create"
+            ? "Deportista creado correctamente"
+            : "Deportista modificado correctamente","success"
+        );
       } else {
         await (dialogMode === "create"
           ? api.crearDeporte(dialogData)
           : api.modificarDeporte(dialogData.id, dialogData));
-        if (dialogMode === "edit") {
-          setSnackbarMsg("Deporte modificado correctamente");
-          setSnackbarOpen(true);
-        }
         await fetchDeportes();
+        showNotification(
+          dialogMode === "create"
+            ? "Deporte creado correctamente"
+            : "Deporte modificado correctamente","success"
+        );
       }
-      setDialogOpen(false);
+      closeDialog();
     } catch (e) {
       setDialogError(e.message || "Ocurrió un error al guardar");
+      showNotification(e.message || "Ocurrió un error al guardar", "error");
     } finally {
       setDialogSaving(false);
     }
@@ -321,6 +381,10 @@ export function SportsProvider({ children, autoLoad = true }) {
     fetchDeportistas,
     fetchEspacios,
     fetchProfesores,
+    showNotification,
+    closeDialog,
+    setDialogError,
+    setDialogSaving,
   ]);
 
   const handleDialogSave = useCallback(() => {
@@ -334,7 +398,7 @@ export function SportsProvider({ children, autoLoad = true }) {
     setDialogFieldErrors(errors);
     setDialogError("");
     if (!Object.keys(errors).length) executeSave();
-  }, [dialogData, dialogMode, dialogType, executeSave]);
+  }, [dialogData, dialogMode, dialogType, executeSave, setDialogError]);
 
   const booleanColumn = (yes = "Activo", no = "Inactivo") => ({
     width: 120,
@@ -347,20 +411,31 @@ export function SportsProvider({ children, autoLoad = true }) {
       />
     ),
   });
-  const actionColumn = (renderCell, width = 70) => ({
+  const actionColumn = (renderCell, width = 120) => ({
     field: "acciones",
     headerName: "Acciones",
     width,
+    minWidth: width,
+    maxWidth: width,
     sortable: false,
     filterable: false,
     headerAlign: "center",
     align: "center",
-    renderCell,
+    renderCell: (params) => (
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="center"
+        sx={{ width: "100%" }}
+      >
+        {renderCell(params)}
+      </Stack>
+    ),
   });
 
   const profesoresColumns = useMemo(
     () =>
-      generateColumns(profesoresRows, {
+      generateSportsColumns(profesoresRows, {
         overrides: {
           cuil: { headerName: "CUIL", width: 150, flex: 0 },
           activo: booleanColumn(),
@@ -368,11 +443,15 @@ export function SportsProvider({ children, autoLoad = true }) {
             headerName: "Fecha de nacimiento",
             width: 170,
             flex: 0,
-            valueFormatter: formatDate,
+            valueFormatter: formatDateForDisplay,
           },
         },
         actions: actionColumn(({ row }) => (
-          <IconButton size="small" onClick={() => openEditDocente(row)}>
+          <IconButton
+            size="small"
+            onClick={() => openEditDocente(row)}
+            sx={{ color: "var(--primary)" }}
+          >
             <EditIcon fontSize="small" />
           </IconButton>
         )),
@@ -381,10 +460,14 @@ export function SportsProvider({ children, autoLoad = true }) {
   );
   const espaciosColumns = useMemo(
     () =>
-      generateColumns(espaciosRows, {
+      generateSportsColumns(espaciosRows, {
         overrides: { activo: booleanColumn() },
         actions: actionColumn(({ row }) => (
-          <IconButton size="small" onClick={() => openEditEspacio(row)}>
+          <IconButton
+            size="small"
+            onClick={() => openEditEspacio(row)}
+            sx={{ color: "var(--primary)" }}
+          >
             <EditIcon fontSize="small" />
           </IconButton>
         )),
@@ -393,7 +476,7 @@ export function SportsProvider({ children, autoLoad = true }) {
   );
   const deportistasColumns = useMemo(
     () =>
-      generateColumns(deportistasRows, {
+      generateSportsColumns(deportistasRows, {
         overrides: {
           habilitado_deportado: booleanColumn("Sí", "No"),
           habilitado_deporte: booleanColumn("Sí", "No"),
@@ -401,35 +484,49 @@ export function SportsProvider({ children, autoLoad = true }) {
             headerName: "Venc. ficha",
             width: 140,
             flex: 0,
-            valueFormatter: formatDate,
+            valueFormatter: formatDateForDisplay,
           },
         },
         actions: actionColumn(
           ({ row }) => (
-            <Stack direction="row" spacing={0.5}>
-              <IconButton size="small" onClick={() => openEditDeportista(row)}>
+            <Stack
+              direction="row"
+              spacing={0.5}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <IconButton
+                size="small"
+                onClick={() => openEditDeportista(row)}
+                sx={{ color: "var(--primary)" }}
+              >
                 <EditIcon fontSize="small" />
               </IconButton>
               <IconButton
                 size="small"
                 title="Ver documentación"
                 onClick={() => openDocsDialog(row.legajo)}
+                sx={{ color: "var(--primary)" }}
               >
                 <FolderOpenIcon fontSize="small" />
               </IconButton>
             </Stack>
           ),
-          110,
+          140,
         ),
       }),
     [deportistasRows, openDocsDialog, openEditDeportista],
   );
   const deportesColumns = useMemo(
     () =>
-      generateColumns(deportesRows, {
+      generateSportsColumns(deportesRows, {
         overrides: { activo: booleanColumn() },
         actions: actionColumn(({ row }) => (
-          <IconButton size="small" onClick={() => openEditDeporte(row)}>
+          <IconButton
+            size="small"
+            onClick={() => openEditDeporte(row)}
+            sx={{ color: "var(--primary)" }}
+          >
             <EditIcon fontSize="small" />
           </IconButton>
         )),
@@ -438,16 +535,31 @@ export function SportsProvider({ children, autoLoad = true }) {
   );
   const torneosColumns = useMemo(
     () =>
-      generateColumns(torneosRows, {
+      generateSportsColumns(torneosRows, {
         overrides: {
-          fecha_inicio: { width: 120, flex: 0, valueFormatter: formatDate },
-          fecha_fin: { width: 120, flex: 0, valueFormatter: formatDate },
+          fecha_inicio: {
+            width: 120,
+            flex: 0,
+            valueFormatter: formatDateForDisplay,
+          },
+          fecha_fin: {
+            width: 120,
+            flex: 0,
+            valueFormatter: formatDateForDisplay,
+          },
+          fecha_limite_inscripcion: {
+            width: 180,
+            flex: 0,
+            valueFormatter: formatDateForDisplay,
+          },
           cupo_jugadores: { headerName: "Cupo", width: 80, flex: 0 },
+          activo: booleanColumn(),
         },
         actions: actionColumn(({ row }) => (
           <IconButton
             size="small"
             onClick={() => navigate(`/Gestion-Torneos/${row.id}`)}
+            sx={{ color: "var(--primary)" }}
           >
             <EditIcon fontSize="small" />
           </IconButton>
@@ -471,7 +583,6 @@ export function SportsProvider({ children, autoLoad = true }) {
     deportesRows,
     loadingDeportes,
     dialogOpen,
-    setDialogOpen,
     dialogType,
     dialogMode,
     dialogData,
@@ -496,9 +607,7 @@ export function SportsProvider({ children, autoLoad = true }) {
     loadingPreview,
     previewError,
     previewDocRef,
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
+    closeDialog,
     openCreateDocente,
     openEditDocente,
     openCreateEspacio,

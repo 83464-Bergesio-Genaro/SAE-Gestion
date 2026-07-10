@@ -9,6 +9,8 @@ import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService"
 import {mapEmpleadoSAE,mapHorarioSAE} from "../../../api/formatters/EmpleadoFormatter";
 import { EmployContext } from '../employedContext';
 import { formatHeader, generateRows } from "../../../utils/util.jsx";;
+import { useNotification } from "../../../shared/context/sharedContext";
+import { calendarDays } from "../../../utils/constants";
 
 const EMPTY_FORM = {
     dia: 1,
@@ -95,12 +97,17 @@ const EMPTY_USUARIO =
 
 export const AdminUsersProvider = ({ children }) => {
     // Estados globales de Diálogo compartidos por ambas secciones
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogData, setDialogData] = useState({});
-    const [dialogType, setDialogType] = useState(""); // "empleados" o "usuarios"
-    const [dialogMode, setDialogMode] = useState(""); // "create" o "edit"
-    const [dialogError, setDialogError] = useState(null);
-    const [dialogSaving, setDialogSaving] = useState(false);
+    const {
+        showNotification,
+        dialogData,
+        dialogType,
+        dialogMode,
+        dialogError,
+        setDialogError,
+        setDialogSaving,
+        openDialog,
+        closeDialog,
+    } = useNotification();
     const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
 
     const [perfiles, setPerfiles] = useState([]);
@@ -134,8 +141,6 @@ export const AdminUsersProvider = ({ children }) => {
     }, [fetchCarreras]);
 
     // Estados de Notificación
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMsg, setSnackbarMsg] = useState("");
 
     // --- SECCIÓN EMPLEADOS ---
     const [empleados,setEmpleados] = useState([]);
@@ -159,20 +164,12 @@ export const AdminUsersProvider = ({ children }) => {
     useEffect(() => { fetchEmpleados(); }, [fetchEmpleados]);
 
     const openCreateEmpleados = useCallback(() => {
-        setDialogType("empleados");
-        setDialogMode("create");
-        setDialogData({ id: "", legajo: "", nombre_empleado: "", nombres: "", apellidos: "", activo: true, id_perfil: "", nombre_perfil: "" }); 
-        setDialogError("");
-        setTimeout(() => setDialogOpen(true), 0);
-    }, []);
+        openDialog("empleados", "create", { id: "", legajo: "", nombre_empleado: "", nombres: "", apellidos: "", activo: true, id_perfil: "", nombre_perfil: "" });
+    }, [openDialog]);
 
     const openEditEmpleados = useCallback((row) => {
-        setDialogData({ id: row.id, legajo: row.legajo, nombre_empleado: row.nombre_empleado, nombres: row.nombres, apellidos: row.apellidos, activo: row.activo, id_perfil: row.id_perfil, nombre_perfil: row.nombre_perfil });
-        setDialogType("empleados");
-        setDialogMode("edit");
-        setDialogError("");
-        setDialogOpen(true);
-    }, []);
+        openDialog("empleados", "edit", { id: row.id, legajo: row.legajo, nombre_empleado: row.nombre_empleado, nombres: row.nombres, apellidos: row.apellidos, activo: row.activo, id_perfil: row.id_perfil, nombre_perfil: row.nombre_perfil });
+    }, [openDialog]);
 
     const handleEmpleadosSave = async () => {
         setDialogSaving(true);
@@ -191,11 +188,9 @@ export const AdminUsersProvider = ({ children }) => {
             } else if (dialogMode === "edit") {
                 await ModificarUsuario(id_nuevo, body);
             }
-            setDialogOpen(false);
-            setDialogData(EMPTY_EMPLEADO);
+            closeDialog();
             fetchEmpleados();
-            setSnackbarMsg(dialogMode === "create" ? "Empleado creado!" : "Empleado modificado correctamente");
-            setSnackbarOpen(true);
+            showNotification(dialogMode === "create" ? "Empleado creado!" : "Empleado modificado correctamente", "success");
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
         } finally {
@@ -223,20 +218,12 @@ export const AdminUsersProvider = ({ children }) => {
     useEffect(() => { fetchUsuarios(); }, [fetchUsuarios]);
 
     const openCreateUsuarios = useCallback(() => {
-        setDialogType("usuarios");
-        setDialogMode("create");
-        setDialogData({ id: "", legajo: "", nombre_usuario: "", nombres: "", apellidos: "", id_perfil: 1, activo: true, id_carrera: "", nombre_carrera: "" }); 
-        setDialogError("");
-        setTimeout(() => setDialogOpen(true), 0);
-    }, []);
+        openDialog("usuarios", "create", { id: "", legajo: "", nombre_usuario: "", nombres: "", apellidos: "", id_perfil: 1, activo: true, id_carrera: "", nombre_carrera: "" });
+    }, [openDialog]);
 
     const openEditUsuarios = useCallback((row) => {
-        setDialogData({ id: row.id, legajo: row.legajo, nombre_usuario: row.nombre_usuario, nombres: row.nombres, apellidos: row.apellidos, id_perfil: row.id_perfil, activo: row.activo, id_carrera: row.id_carrera, nombre_carrera: row.nombre_carrera });
-        setDialogType("usuarios");
-        setDialogMode("edit");
-        setDialogError("");
-        setDialogOpen(true);
-    }, []);
+        openDialog("usuarios", "edit", { id: row.id, legajo: row.legajo, nombre_usuario: row.nombre_usuario, nombres: row.nombres, apellidos: row.apellidos, id_perfil: row.id_perfil, activo: row.activo, id_carrera: row.id_carrera, nombre_carrera: row.nombre_carrera });
+    }, [openDialog]);
 
     const handleUsuariosSave = async () => {
         setDialogSaving(true);
@@ -255,11 +242,9 @@ export const AdminUsersProvider = ({ children }) => {
             } else if (dialogMode === "edit") {
                 await ModificarUsuario(dialogData.id, body);
             }
-            setDialogOpen(false);
-            setDialogData(EMPTY_USUARIO);
+            closeDialog();
             fetchUsuarios();
-            setSnackbarMsg(dialogMode === "create" ? "Usuario creado!" : "Usuario modificado correctamente");
-            setSnackbarOpen(true);
+            showNotification(dialogMode === "create" ? "Usuario creado!" : "Usuario modificado correctamente", "success");
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
         } finally {
@@ -299,7 +284,7 @@ export const AdminUsersProvider = ({ children }) => {
         } finally {
             setLoadingHorarios(false);
         }
-    }, []);
+    }, [setDialogError]);
     useEffect(() => { fetchHorarios(); }, [fetchHorarios]);
 
     const fetchHorariosXEmpleado = useCallback(async () => {
@@ -324,7 +309,7 @@ export const AdminUsersProvider = ({ children }) => {
         } finally {
             setSelectedHorariosLoading(false);
         }
-    }, [selectedEmploy,setSelectedHorarios]);
+    }, [selectedEmploy,setSelectedHorarios,setDialogError]);
 
     useEffect(() => { fetchHorariosXEmpleado(); }, [fetchHorariosXEmpleado]);
 
@@ -419,25 +404,9 @@ export const AdminUsersProvider = ({ children }) => {
         setEditingId(null);
         setErrorHorario("");
     };
-    const DAYS = [
-        { label: "Lunes",     value: 1 },
-        { label: "Martes",    value: 2 },
-        { label: "Miércoles", value: 3 },
-        { label: "Jueves",    value: 4 },
-        { label: "Viernes",   value: 5 }
-    ];
     // --- COLUMNAS MEMORIZADAS ---
     const empleadosColumns = useMemo(() => buildColumns(EMPTY_EMPLEADO, openEditEmpleados), [openEditEmpleados]);
     const usuariosColumns = useMemo(() => buildColumns(EMPTY_USUARIO, openEditUsuarios), [openEditUsuarios]);
-
-    // Enrutador unificado para la acción "Guardar" según el tipo de diálogo activo
-    const handleGlobalSave = async () => {
-        if (dialogType === "empleados") {
-            await handleEmpleadosSave();
-        } else if (dialogType === "usuarios") {
-            await handleUsuariosSave();
-        }
-    };
 
     return (
         <EmployContext.Provider value={{
@@ -447,16 +416,15 @@ export const AdminUsersProvider = ({ children }) => {
             //Valores para las tablas y funciones de guardado Empleados y Usuarios
             empleadosRows, empleadosColumns, loadingEmpleados, openCreateEmpleados,
             usuariosRows, usuariosColumns, loadingUsuarios, openCreateUsuarios,
-            handleUsuariosSave,handleEmpleadosSave,handleGlobalSave,
+            handleUsuariosSave,handleEmpleadosSave,
             //Valores para la seccion de horarios
             loadingHorarios, horariosDialogOpen, setHorariosDialogOpen,selectedHorariosLoading,selectedHorarios,selectedEmploy,setSelectedEmploy,
 
-            handleEmployChange,handleHorarioSaved,handleHorarioCreated,handleClose,showNuevoForm,setShowNuevoForm,form,setForm,handleChangeForm,DAYS,
+            handleEmployChange,handleHorarioSaved,handleHorarioCreated,handleClose,showNuevoForm,setShowNuevoForm,form,setForm,handleChangeForm,DAYS: calendarDays,
             savingHorario,errorHorario,setErrorHorario,handleCreateHorario,handleEditHorario,handleDeleteHorario,handleCancelHorario,
             editingId, setEditingId,confirmDelete,deleteId,setDeleteId,setConfirmDelete,
             //Valores de error, mostrar mensajes, etc.
-            snackbarOpen, setSnackbarOpen,snackbarMsg,setDialogError,
-            dialogOpen, setDialogOpen, dialogData, setDialogData, dialogType, dialogMode, dialogError, dialogSaving
+            dialogType, dialogError
             
         }}>
             {children}

@@ -6,32 +6,15 @@ import {
   Box,
   Button,
   Container,
-  Divider,
   Stack,
   Typography,
   Card,
-  CardActionArea,
   CardContent,
-  CardMedia,
   Chip,
   Grid,
-  InputAdornment,
-  InputLabel,
-  Select,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   IconButton,
-  FormControlLabel,
-  Switch,
-  CircularProgress,
-  MenuItem,
-  Alert,
-  Snackbar,
   useMediaQuery,
 } from "@mui/material";
-import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
 
 import LocalAirportIcon from "@mui/icons-material/LocalAirport";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -50,16 +33,20 @@ import { TravelProvider } from "../../context/providers/travelProvider";
 import { useTravel } from "../../context/studentContext";
 import { HashLink as Link } from "react-router-hash-link";
 
+import SAEPage from "../../../shared/components/page/SAEPage";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import DocumentCard from "../../../shared/components/documents/DocumentCard";
 import TitleBox from "../../../shared/components/titleBox";
+import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
+
+import { TRIPS_STRINGS } from "../../../utils/gena/student.string";
+import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/gena/common.config";
 //import { useNavigate } from "react-router-dom";
-import SAEPage from "../../../shared/components/page/SAEPage";
 
 const baseUrl = import.meta.env.BASE_URL;
-
-const QUICK_CONSULTATION_FAQS = [
+const C = TRIPS_STRINGS;
+const TRAVELS_INFORMATION = [
   {
     id: "cneisi",
     category: "Sistemas",
@@ -89,7 +76,43 @@ const QUICK_CONSULTATION_FAQS = [
       "La Central Nuclear Embalse es una planta de generación nucleoeléctrica ubicada en la costa sur del lago Ministro Pistarini, a unos 4 km de la ciudad de Embalse, Córdoba. La UTN (Universidad Tecnológica Nacional) frecuentemente organiza visitas técnicas a sus instalaciones para estudiantes de carreras de ingeniería.",
   },
 ];
-
+const tarjetas = [
+    {
+      id: 1,
+      titulo: "Viaje a Jujuy",
+      desc: "El Cerro de los Siete Colores es un espectacular accidente geográfico ubicado en Purmamarca, provincia de Jujuy, Argentina. Su singular paleta tonal se formó hace millones de años por la sedimentación de minerales. Es el gran atractivo del noroeste argentino y se puede recorrer a pie todo el año.",
+      color: "#1a73e8",
+      image: `${baseUrl}images/travels/CerroColores.jpeg`,
+    },
+    {
+      id: 2,
+      titulo: "Viaje a Perito Moreno",
+      desc: "El Glaciar Perito Moreno es una de las maravillas naturales más imponentes del mundo. Ubicado dentro del Parque Nacional Los Glaciares (provincia de Santa Cruz, Argentina), destaca por su fácil acceso, sus impresionantes paredes de hielo de hasta 70 metros de altura y sus constantes desprendimientos.",
+      color: "#f4b400",
+      image: `${baseUrl}images/travels/peritoMoreno.jpg`,
+    },
+    {
+      id: 3,
+      titulo: "Viaje a las Cataratas",
+      desc: "Las Cataratas del Iguazú son una de las Siete Maravillas Naturales del Mundo. Conformadas por 275 saltos de agua, el 80% se encuentra del lado argentino y el 20% en el lado brasileño. Su mayor atractivo es la imponente Garganta del Diablo, con una caída de 82 metros",
+      color: "#0f9d58",
+      image: `${baseUrl}images/travels/cataratas.jpeg`,
+    },
+    {
+      id: 4,
+      titulo: "Viaje a Bariloche",
+      desc: "Bariloche es conocida por su arquitectura al estilo alpino de Suiza y su chocolate, que se vende en tiendas de la calle Mitre, la avenida principal. También es una base popular para el excursionismo y el esquí en las montañas cercanas, y para explorar los alrededores del Distrito de los Lagos.",
+      color: "#212121",
+      image: `${baseUrl}images/travels/bariloche.jpg`,
+    },
+    {
+      id: 6,
+      titulo: "Viaje a los Reyunos",
+      desc: "Los Reyunos es un imponente embalse artificial ubicado en San Rafael, Mendoza, a unos 35 km (40 minutos en auto) de la ciudad homónima. Destaca por sus aguas turquesas rodeadas de cerros y es famoso por su oferta de deportes acuáticos, aventura y complejos turísticos.",
+      color: "#CF6ED1",
+      image: `${baseUrl}images/travels/losreyunos.jpeg`,
+    },
+  ];
 export default function StudentTravels() {
   return (
     <TravelProvider>
@@ -101,14 +124,16 @@ export default function StudentTravels() {
 function StudentTravelContent() {
   const { user } = useAuth();
   const { travelsLegajo, loadingTravel, fetchTravelsLegajo } = useTravel();
+
   useEffect(() => {
     fetchTravelsLegajo(user.legajo);
   }, [fetchTravelsLegajo, user]);
+
   return (
     <SAEPage>
       <StudentHeaderPage
-        title={"Viajes"}
-        description={"Experimienta aventuras con nuestra universidad"}
+        title={C.headerTitle}
+        description={C.headerDescription}
         backgroundImage="images/carrousel/EntradaUTN.jpg"
         icon={LocalAirportIcon}
       />
@@ -152,12 +177,11 @@ function NotificacionEstudiante() {
 
             <Box>
               <Typography variant="h6" fontWeight={700} color="#123666">
-                Documentación pendiente
+                {C.documentationTitle}
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
-                Para confirmar tu participación en el viaje, verificá que toda
-                la documentación requerida haya sido presentada.
+                {C.documentationAclaration}
               </Typography>
             </Box>
           </Stack>
@@ -188,7 +212,7 @@ function NotificacionEstudiante() {
                 },
               }}
             >
-              Revisar documentación
+              {C.documentationButton}
             </SAEButton>
           </Link>
         </Stack>
@@ -200,44 +224,6 @@ function CarrouselVertical() {
   const [indiceActivo, setIndiceActivo] = useState(0);
   const isMobile = useMediaQuery("(max-width:599px)");
   const sliderRef = useRef(null);
-
-  const tarjetas = [
-    {
-      id: 1,
-      titulo: "Viaje a Jujuy",
-      desc: "El Cerro de los Siete Colores es un espectacular accidente geográfico ubicado en Purmamarca, provincia de Jujuy, Argentina. Su singular paleta tonal se formó hace millones de años por la sedimentación de minerales. Es el gran atractivo del noroeste argentino y se puede recorrer a pie todo el año.",
-      color: "#1a73e8",
-      image: `${baseUrl}images/travels/CerroColores.jpeg`,
-    },
-    {
-      id: 2,
-      titulo: "Viaje a Perito Moreno",
-      desc: "El Glaciar Perito Moreno es una de las maravillas naturales más imponentes del mundo. Ubicado dentro del Parque Nacional Los Glaciares (provincia de Santa Cruz, Argentina), destaca por su fácil acceso, sus impresionantes paredes de hielo de hasta 70 metros de altura y sus constantes desprendimientos.",
-      color: "#f4b400",
-      image: `${baseUrl}images/travels/peritoMoreno.jpg`,
-    },
-    {
-      id: 3,
-      titulo: "Viaje a las Cataratas",
-      desc: "Las Cataratas del Iguazú son una de las Siete Maravillas Naturales del Mundo. Conformadas por 275 saltos de agua, el 80% se encuentra del lado argentino y el 20% en el lado brasileño. Su mayor atractivo es la imponente Garganta del Diablo, con una caída de 82 metros",
-      color: "#0f9d58",
-      image: `${baseUrl}images/travels/cataratas.jpeg`,
-    },
-    {
-      id: 4,
-      titulo: "Viaje a Bariloche",
-      desc: "Bariloche es conocida por su arquitectura al estilo alpino de Suiza y su chocolate, que se vende en tiendas de la calle Mitre, la avenida principal. También es una base popular para el excursionismo y el esquí en las montañas cercanas, y para explorar los alrededores del Distrito de los Lagos.",
-      color: "#212121",
-      image: `${baseUrl}images/travels/bariloche.jpg`,
-    },
-    {
-      id: 6,
-      titulo: "Viaje a los Reyunos",
-      desc: "Los Reyunos es un imponente embalse artificial ubicado en San Rafael, Mendoza, a unos 35 km (40 minutos en auto) de la ciudad homónima. Destaca por sus aguas turquesas rodeadas de cerros y es famoso por su oferta de deportes acuáticos, aventura y complejos turísticos.",
-      color: "#CF6ED1",
-      image: `${baseUrl}images/travels/losreyunos.jpeg`,
-    },
-  ];
 
   const ALTURA_TARJETA = isMobile ? 470 : 600;
 
@@ -423,7 +409,7 @@ function CarrouselVertical() {
                         letterSpacing: 1,
                       }}
                     >
-                      Conoce mas de este viaje →
+                      {C.travelCardMessage}
                     </Typography>
                   </Box>
                 </Card>
@@ -478,7 +464,6 @@ function CarrouselVertical() {
 }
 function DocSection() {
   const {
-    TRAVEL_REQUIRED_DOCUMENTS,
     loadingTravel,
     travelsLegajo,
     handlePreview,
@@ -505,7 +490,7 @@ function DocSection() {
               fontWeight={800}
               textAlign={"center"}
             >
-              Tu Documentacion
+              {C.myDocumentTitle}
             </Typography>
             <Grid container spacing={2} sx={{ mt: 4 }}>
               {TRAVEL_REQUIRED_DOCUMENTS.map((item) => (
@@ -540,11 +525,11 @@ function InformationSection() {
   return (
     <Box>
       <TitleBox
-        title="Más respuestas rápidas"
-        description="Revisá estas preguntas antes de enviar una consulta."
+        title={C.faqsTitle}
+        description={C.faqsDescription}
       />
 
-      {QUICK_CONSULTATION_FAQS.map((faq) => (
+      {TRAVELS_INFORMATION.map((faq) => (
         <Accordion
           key={faq.id}
           disableGutters

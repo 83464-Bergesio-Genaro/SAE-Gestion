@@ -1,4 +1,4 @@
-import {
+ import {
   Autocomplete,
   Box,
   Container,
@@ -15,7 +15,8 @@ import {
   IconButton,
   CircularProgress,
   Alert,
-  Snackbar,
+  Chip,
+  Divider,
 } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
 import { PurchaseProvider } from "../../context/providers/purchaseProvider";
@@ -27,13 +28,17 @@ import SAEButton from "../../../shared/components/buttons/SAEButton";
 import HeaderPageEmployed from "../../../shared/components/HeaderPageEmployed";
 import DocumentCard from "../../../shared/components/documents/DocumentCard";
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import { useNotification } from "../../../shared/context/sharedContext";
 
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SAEPage from "../../../shared/components/page/SAEPage";
+import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
 
 export default function EmployedPurchases() {
   return (
@@ -44,70 +49,17 @@ export default function EmployedPurchases() {
     </AdminUsersProvider>
   );
 }
-const secciones = [{ key: "compras", label: "Compras" }];
-
-const formatDateInput = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-const getCurrentMonthDateRange = () => {
-  const today = new Date();
-  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  const fechaHasta = lastDayOfMonth > today ? today : lastDayOfMonth;
-
-  return {
-    fechaDesde: formatDateInput(firstDayOfMonth),
-    fechaHasta: formatDateInput(fechaHasta),
-    today: formatDateInput(today),
-  };
-};
 
 function EmployedPurchasesContent() {
-  const { empleados, loadingEmpleados } = useEmploy();
   const {
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
-
     purchasesRows,
     purchasesColumns,
     loadingPurchase,
     fetchPurchases,
     openCreatePurchases,
-    handlePurchaseDialogSave,
-    handleDialogChange,
-    handleInformeTecnicoChange,
-    handleEmpleadoChange,
-    setFocusedCurrencyField,
-    getCurrencyValue,
-    handleCurrencyInputChange,
-    handleCurrencyBlur,
-    isPurchaseDataComplete,
-    isInformeReady,
-    purchaseDocuments,
-    handleFacturaChange,
-    handleInformePdfChange,
-    handleRemoveFactura,
-    handleDeletePurchaseDocument,
-    getFileName,
     preview,
+    getDefaultPurchaseDateRange,
     closePreview,
-    handlePreview,
-    getDocumentId,
-
-    dialogOpen,
-    setDialogOpen,
-    dialogType,
-    dialogMode,
-    dialogData,
-    dialogSaving,
-    dialogError,
-    setDialogError,
   } = usePurchase();
 
   const sectionConfig = useMemo(
@@ -124,31 +76,26 @@ function EmployedPurchasesContent() {
     }),
     [purchasesRows, purchasesColumns, loadingPurchase, openCreatePurchases],
   );
-  const [activeSection, setActiveSection] = useState("compras");
-  const [busquedaGestion, setBusquedaGestion] = useState("");
-  const [dateRange, setDateRange] = useState(getCurrentMonthDateRange);
-  const [warningOpen, setWarningOpen] = useState(false);
-  const handleSectionChange = (section) => {
-    setActiveSection(section);
-    setBusquedaGestion("");
-  };
+  const [activeSection] = useState("compras");
+  const [dateRange, setDateRange] = useState(getDefaultPurchaseDateRange);
 
   const handleFechaDesdeChange = (event) => {
     const fechaDesde = event.target.value;
 
-    setDateRange((prev) => ({
-      ...prev,
+    setDateRange((previous) => ({
+      ...previous,
       fechaDesde,
-      fechaHasta: prev.fechaHasta < fechaDesde ? fechaDesde : prev.fechaHasta,
+      fechaHasta:
+        previous.fechaHasta < fechaDesde ? fechaDesde : previous.fechaHasta,
     }));
   };
 
   const handleFechaHastaChange = (event) => {
     const fechaHasta = event.target.value;
 
-    setDateRange((prev) => ({
-      ...prev,
-      fechaHasta: fechaHasta > prev.today ? prev.today : fechaHasta,
+    setDateRange((previous) => ({
+      ...previous,
+      fechaHasta: fechaHasta > previous.today ? previous.today : fechaHasta,
     }));
   };
 
@@ -160,36 +107,137 @@ function EmployedPurchasesContent() {
     () => sectionConfig[activeSection],
     [activeSection, sectionConfig],
   );
-  const rowsGestionFiltradas = useMemo(() => {
-    const term = busquedaGestion.trim().toLowerCase();
-    if (!term) return currentSection.rows;
+  return (
+    <SAEPage>
+      <HeaderPageEmployed
+        header="Módulo de Compras"
+        title="Gestion de las Compras"
+        description="En este módulo se registran todas las compras que hace la secretaria."
+      />
+      
 
-    return currentSection.rows.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value ?? "")
-          .toLowerCase()
-          .includes(term),
-      ),
-    );
-  }, [currentSection.rows, busquedaGestion]);
+      <SAEDataGrid
+        sectionConfig={sectionConfig}
+        currentSection={currentSection}
+        beforeSearch={
+          <>
+            <SAETextField
+              size="small"
+              label="Fecha Desde"
+              type="date"
+              value={dateRange.fechaDesde}
+              onChange={handleFechaDesdeChange}
+              sx={{
+                width: { xs: "100%", sm: 180 },
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "rgba(255,255,255,0.12)",
+                  color: "white",
+                  "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255,255,255,0.6)",
+                  },
+                  "&.Mui-focused fieldset": { borderColor: "white" },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(255,255,255,0.7)",
+                },
+                "& .MuiInputLabel-root.Mui-focused": { color: "white" },
+                "& .MuiInputAdornment-root svg": {
+                  color: "rgba(255,255,255,0.7)",
+                },
+              }}
+              slotProps={{
+                htmlInput: { max: dateRange.fechaHasta },
+              }}
+            />
+            <SAETextField
+              size="small"
+              label="Fecha Hasta"
+              type="date"
+              value={dateRange.fechaHasta}
+              onChange={handleFechaHastaChange}
+              sx={{
+                width: { xs: "100%", sm: 180 },
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "rgba(255,255,255,0.12)",
+                  color: "white",
+                  "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255,255,255,0.6)",
+                  },
+                  "&.Mui-focused fieldset": { borderColor: "white" },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(255,255,255,0.7)",
+                },
+                "& .MuiInputLabel-root.Mui-focused": { color: "white" },
+                "& .MuiInputAdornment-root svg": {
+                  color: "rgba(255,255,255,0.7)",
+                },
+              }}
+              slotProps={{
+                input: {},
+                htmlInput: {
+                  min: dateRange.fechaDesde,
+                  max: dateRange.today,
+                },
+              }}
+            />
+          </>
+        }
+      />
+      <DocumentPreviewDialog
+        open={preview.open}
+        onClose={closePreview}
+        title={preview.title}
+        imageSrc={preview.imageSrc}
+        isPdf={preview.isPdf}
+        loading={preview.loading}
+        error={preview.error}
+      />
+      <DialogPurchase dateRange={dateRange} />
+    </SAEPage>
+  );
+}
 
-  const handleSavePurchase = () => {
-    if (
-      dialogMode === "create" &&
-      isPurchaseDataComplete &&
-      (dialogData.facturas_documentos || []).length > 0 &&
-      !isInformeReady
-    ) {
-      setWarningOpen(true);
-      return;
-    }
-    handlePurchaseDialogSave(dateRange.fechaDesde, dateRange.fechaHasta);
-  };
+function DialogPurchase({ dateRange }) {
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setDialogError,
+    handleDataChange,
+    closeDialog,
+  } = useNotification();
+  const isDocsDialog = dialogType === "docs";
+  const showPurchaseForm = dialogType === "purchases";
+  const showDocumentsForm = dialogMode === "create" || isDocsDialog;
+  const { empleados, loadingEmpleados } = useEmploy();
 
-  const handleConfirmWithoutInforme = () => {
-    setWarningOpen(false);
-    handlePurchaseDialogSave(dateRange.fechaDesde, dateRange.fechaHasta);
-  };
+  const {
+    isPurchaseDataComplete,
+    handleCurrencyInputChange,
+    getCurrencyValue,
+    setFocusedCurrencyField,
+    handleCurrencyBlur,
+    handleInformeTecnicoChange,
+    handleEmpleadoChange,
+    handleFacturaChange,
+    handleInformePdfChange,
+    handleDeletePurchaseDocument,
+    handleRemoveFactura,
+    getFileName,
+    handlePreview,
+    purchaseDocuments,
+    handleSavePurchase,
+    handleConfirmWithoutInforme,
+    warningOpen,
+    setWarningOpen,
+    handleDeletePurchase,
+  } = usePurchase();
 
   const selectedEmpleado = useMemo(
     () =>
@@ -199,278 +247,37 @@ function EmployedPurchasesContent() {
     [dialogData.id_usuario, empleados],
   );
 
-  const isDocsDialog = dialogType === "docs";
-  const showPurchaseForm = dialogType === "purchases";
-  const showDocumentsForm = dialogMode === "create" || isDocsDialog;
+  const deleteDialogConfig = {
+    purchaseDelete: {
+      entityLabel: "Compra",
+      itemName: dialogData?.nombre_compra,
+      onConfirm: handleDeletePurchase,
+    },
+  };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
+    ) : null;
+  }
 
   return (
-    <SAEPage>
-      <HeaderPageEmployed
-        header="Módulo de Compras"
-        title="Gestion de las Compras"
-        description="En este módulo se registran todas las compras que hace la secretaria."
-      />
-      <Card
-        sx={{
-          borderRadius: 4,
-          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-          mb: 3,
-          overflow: "hidden",
-        }}
-      >
-        <Box
-          sx={{
-            background: "var(--gradient)",
-            color: "white",
-            px: 3,
-            pt: 0,
-            pb: 0,
-          }}
-        >
-          <Stack
-            direction="row"
-            overflow={{ xs: "scroll", md: "hidden" }}
-            spacing={0}
-          >
-            {secciones.map((item) => (
-              <Box
-                key={item.key}
-                onClick={() => handleSectionChange(item.key)}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  px: 2.5,
-                  py: 1.5,
-                  cursor: "pointer",
-                  fontWeight: activeSection === item.key ? 700 : 500,
-                  fontSize: "0.85rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  color:
-                    activeSection === item.key
-                      ? "white"
-                      : "rgba(255,255,255,0.6)",
-                  borderBottom:
-                    activeSection === item.key
-                      ? "3px solid white"
-                      : "3px solid transparent",
-                  transition: "all 0.15s",
-                  "&:hover": {
-                    color: "white",
-                    borderBottomColor: "rgba(255,255,255,0.4)",
-                  },
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontWeight: "inherit",
-                    fontSize: "inherit",
-                    letterSpacing: "inherit",
-                    textTransform: "inherit",
-                    color: "inherit",
-                    lineHeight: 1,
-                  }}
-                >
-                  {item.label}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            alignItems={{ sm: "center" }}
-            justifyContent="space-between"
-            spacing={2}
-            sx={{ py: 2 }}
-          >
-            <Stack direction="row" alignItems="center" spacing={1.5}>
-              <currentSection.icon sx={{ fontSize: 30 }} />
-              <Typography variant="h6" fontWeight={700}>
-                {currentSection.title}
-              </Typography>
-            </Stack>
-
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              alignItems={{ sm: "center" }}
-            >
-              <SAETextField
-                size="small"
-                label="Fecha Desde"
-                type="date"
-                value={dateRange.fechaDesde}
-                onChange={handleFechaDesdeChange}
-                sx={{
-                  width: { xs: "100%", sm: 240, md: 220 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    color: "white",
-                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(255,255,255,0.6)",
-                    },
-                    "&.Mui-focused fieldset": { borderColor: "white" },
-                  },
-                  "& input::placeholder": {
-                    color: "rgba(255,255,255,0.7)",
-                    opacity: 1,
-                  },
-                  "& .MuiInputAdornment-root svg": {
-                    color: "rgba(255,255,255,0.7)",
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "rgba(255,255,255,0.7)",
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "white",
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <CalendarMonthIcon />
-                      </InputAdornment>
-                    ),
-                  },
-                  htmlInput: {
-                    max: dateRange.fechaHasta,
-                  },
-                }}
-              ></SAETextField>
-              <SAETextField
-                size="small"
-                label="Fecha Hasta"
-                type="date"
-                value={dateRange.fechaHasta}
-                onChange={handleFechaHastaChange}
-                sx={{
-                  width: { xs: "100%", sm: 240, md: 220 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    color: "white",
-                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(255,255,255,0.6)",
-                    },
-                    "&.Mui-focused fieldset": { borderColor: "white" },
-                  },
-                  "& input::placeholder": {
-                    color: "rgba(255,255,255,0.7)",
-                    opacity: 1,
-                  },
-                  "& .MuiInputAdornment-root svg": {
-                    color: "rgba(255,255,255,0.7)",
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "rgba(255,255,255,0.7)",
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "white",
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <CalendarMonthIcon />
-                      </InputAdornment>
-                    ),
-                  },
-                  htmlInput: {
-                    min: dateRange.fechaDesde,
-                    max: dateRange.today,
-                  },
-                }}
-              ></SAETextField>
-              <SAETextField
-                placeholder="Busqueda..."
-                size="small"
-                value={busquedaGestion}
-                onChange={(e) => setBusquedaGestion(e.target.value)}
-                sx={{
-                  width: { xs: "100%", sm: 240, md: 220 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    color: "white",
-                    "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(255,255,255,0.6)",
-                    },
-                    "&.Mui-focused fieldset": { borderColor: "white" },
-                  },
-                  "& input::placeholder": {
-                    color: "rgba(255,255,255,0.7)",
-                    opacity: 1,
-                  },
-                  "& .MuiInputAdornment-root svg": {
-                    color: "rgba(255,255,255,0.7)",
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-              <SAEButton
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={currentSection.dialog}
-                sx={{
-                  whiteSpace: "nowrap",
-                  bgcolor: "rgba(255,255,255,0.18)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.4)",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
-                }}
-              >
-                {currentSection.addButton}
-              </SAEButton>
-            </Stack>
-          </Stack>
-        </Box>
-        <CardContent sx={{ p: 0 }}>
-          <Box sx={{ width: "100%", overflowX: "auto" }}>
-            <DataGrid
-              rows={rowsGestionFiltradas}
-              columns={currentSection.columns}
-              loading={currentSection.loading}
-              autoHeight
-              disableRowSelectionOnClick
-              pageSizeOptions={[5, 10, 25]}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 5 } },
-                pinnedColumns: { left: ["actions"] },
-              }}
-              localeText={{ noRowsLabel: "Sin Registros" }}
-              sx={{
-                minWidth: 1250,
-                borderRadius: 0,
-                border: "none",
-                "& .MuiDataGrid-cell[data-field='actions'], & .MuiDataGrid-columnHeader[data-field='actions']":
-                  {
-                    position: "sticky",
-                    left: 0,
-                    zIndex: 2,
-                  },
-                "& .MuiDataGrid-columnHeader[data-field='actions']": {
-                  zIndex: 3,
-                },
-              }}
-            />
-          </Box>
-        </CardContent>
-      </Card>
-
+    <>
       <Dialog
         open={dialogOpen && ["purchases", "docs"].includes(dialogType)}
-        onClose={() => setDialogOpen(false)}
+        onClose={closeDialog}
         maxWidth="md"
         fullWidth
       >
@@ -482,7 +289,7 @@ function EmployedPurchasesContent() {
           }}
         >
           {isDocsDialog ? "Documentos de la compra" : "Registrar Compra"}
-          <IconButton onClick={() => setDialogOpen(false)} size="small">
+          <IconButton onClick={closeDialog} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -501,9 +308,9 @@ function EmployedPurchasesContent() {
           <Stack spacing={3}>
             {showPurchaseForm && (
               <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Datos de la compra
-                </Typography>
+                <Divider sx={{ mb: 2 }}>
+                  <Chip label="Datos de la compra" size="small" />
+                </Divider>
                 <Box
                   sx={{
                     display: "grid",
@@ -535,7 +342,7 @@ function EmployedPurchasesContent() {
                     required
                     value={dialogData.nombre_compra ?? ""}
                     onChange={(e) =>
-                      handleDialogChange("nombre_compra", e.target.value)
+                      handleDataChange("nombre_compra", e.target.value)
                     }
                     fullWidth
                   />
@@ -551,14 +358,14 @@ function EmployedPurchasesContent() {
                       handleCurrencyBlur(
                         "precio_sugerido",
                         dialogData.precio_sugerido,
-                        handleDialogChange,
+                        handleDataChange,
                       )
                     }
                     onChange={(e) =>
                       handleCurrencyInputChange(
                         "precio_sugerido",
                         e.target.value,
-                        handleDialogChange,
+                        handleDataChange,
                       )
                     }
                     fullWidth
@@ -578,9 +385,7 @@ function EmployedPurchasesContent() {
                     label="Motivo"
                     required
                     value={dialogData.motivo ?? ""}
-                    onChange={(e) =>
-                      handleDialogChange("motivo", e.target.value)
-                    }
+                    onChange={(e) => handleDataChange("motivo", e.target.value)}
                     fullWidth
                     multiline
                     minRows={3}
@@ -592,7 +397,7 @@ function EmployedPurchasesContent() {
                     type="date"
                     value={dialogData.fecha_compra ?? ""}
                     onChange={(e) =>
-                      handleDialogChange("fecha_compra", e.target.value)
+                      handleDataChange("fecha_compra", e.target.value)
                     }
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
@@ -604,9 +409,9 @@ function EmployedPurchasesContent() {
 
             {showPurchaseForm && (
               <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Informe tecnico
-                </Typography>
+                <Divider sx={{ mb: 2 }}>
+                  <Chip label="Informe técnico" size="small" />
+                </Divider>
                 <Box
                   sx={{
                     display: "grid",
@@ -713,9 +518,9 @@ function EmployedPurchasesContent() {
 
             {showDocumentsForm && (
               <Box>
-                <Typography variant="subtitle1" fontWeight={700} mb={1.5}>
-                  Documentacion
-                </Typography>
+                <Divider sx={{ mb: 2 }}>
+                  <Chip label="Documentación" size="small" />
+                </Divider>
                 {!isDocsDialog && !isPurchaseDataComplete && (
                   <Alert severity="info" sx={{ mb: 2 }}>
                     Completá primero los datos de la compra para adjuntar
@@ -740,7 +545,6 @@ function EmployedPurchasesContent() {
                         onPreview={handlePreview}
                         documents={documentType.documentos}
                         getDocumentName={getFileName}
-                        getDocumentId={getDocumentId}
                         onDeleteDocument={(index) =>
                           documentType.key === "facturas"
                             ? handleRemoveFactura(index)
@@ -764,18 +568,25 @@ function EmployedPurchasesContent() {
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <SAEButton
             variant="outlined"
-            onClick={() => setDialogOpen(false)}
+            onClick={closeDialog}
             disabled={dialogSaving}
+            startIcon={<CloseIcon />}
           >
             Cancelar
           </SAEButton>
           {!isDocsDialog && (
             <SAEButton
               variant="contained"
-              onClick={handleSavePurchase}
+              onClick={() =>
+                handleSavePurchase(dateRange.fechaDesde, dateRange.fechaHasta)
+              }
               disabled={dialogSaving}
               startIcon={
-                dialogSaving ? <CircularProgress size={18} /> : undefined
+                dialogSaving ? (
+                  <CircularProgress size={18} color="inherit" />
+                ) : (
+                  <SaveOutlinedIcon />
+                )
               }
             >
               Guardar
@@ -795,36 +606,19 @@ function EmployedPurchasesContent() {
           <SAEButton variant="outlined" onClick={() => setWarningOpen(false)}>
             Volver
           </SAEButton>
-          <SAEButton variant="contained" onClick={handleConfirmWithoutInforme}>
+          <SAEButton
+            variant="contained"
+            onClick={() =>
+              handleConfirmWithoutInforme(
+                dateRange.fechaDesde,
+                dateRange.fechaHasta,
+              )
+            }
+          >
             Crear sin informe
           </SAEButton>
         </DialogActions>
       </Dialog>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          severity="success"
-          variant="filled"
-          onClose={() => setSnackbarOpen(false)}
-        >
-          {snackbarMsg}
-        </Alert>
-      </Snackbar>
-
-      <DocumentPreviewDialog
-        open={preview.open}
-        onClose={closePreview}
-        title={preview.title}
-        imageSrc={preview.imageSrc}
-        isPdf={preview.isPdf}
-        loading={preview.loading}
-        error={preview.error}
-      />
-    </SAEPage>
+    </>
   );
 }

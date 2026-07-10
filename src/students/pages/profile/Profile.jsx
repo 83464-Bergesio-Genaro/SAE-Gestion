@@ -7,24 +7,25 @@ import {
   Divider,
   Avatar,
   Stack,
-  Snackbar,
-  Alert,
   Chip,
 } from "@mui/material";
+
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
+import SAEPage from "../../../shared/components/page/SAEPage";
+
 import SaveIcon from "@mui/icons-material/Save";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import ContactPhoneOutlinedIcon from "@mui/icons-material/ContactPhoneOutlined";
 import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
-import SAEPage from "../../../shared/components/page/SAEPage";
+
 import { useMyProfile } from "../../context/studentContext";
 import { ProfileContextProvider } from "../../../shared/context/providers/profileProvider";
-
-const SHOW_PROFILE_DOCUMENTS = false;
-
+import { PROFILE_STRINGS } from "../../../utils/gena/student.string";
+const SHOW_PROFILE_DOCUMENTS = true;
+const C = PROFILE_STRINGS;
 const formatDocumentSize = (size) => {
   const bytes = Number(size);
   if (!Number.isFinite(bytes) || bytes <= 0) return null;
@@ -56,15 +57,13 @@ export function MyProfileContent() {
     cuilHasError,
     missingRequiredFields,
     //Valores de error, mostrar mensajes, etc.
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
+
     setFormError,
     formError,
   } = useMyProfile();
 
   return (
-<SAEPage>
+    <SAEPage>
         <Card
           sx={{
             borderRadius: { xs: 3, md: 4 },
@@ -75,7 +74,7 @@ export function MyProfileContent() {
             },
             overflow: "hidden",
             background:
-              "linear-gradient(180deg, #f5f9ff 0%, #ffffff 220px)",
+              "linear-gradient(180deg, #f5f9ff 0%, #ffffff 220px)", //Gradiente de tarjeta
           }}
         >
           <CardContent sx={{ p: { xs: 1.5, sm: 3, md: 4 } }}>
@@ -117,11 +116,11 @@ export function MyProfileContent() {
 
                   <Box>
                     <Typography variant="h5" fontWeight={700}>
-                      Mi Perfil
+                     {C.myProfileTitle}
                     </Typography>
 
                     <Typography sx={{ color: "rgba(255,255,255,0.82)" }}>
-                      Información personal y de contacto
+                      {C.myProfileSubtitle}
                     </Typography>
                   </Box>
                 </Stack>
@@ -136,7 +135,7 @@ export function MyProfileContent() {
                     fontWeight={700}
                     color="var(--primary)"
                   >
-                    Información Personal
+                    {C.personalInfoTitle}
                   </Typography>
                 </Stack>
 
@@ -147,7 +146,7 @@ export function MyProfileContent() {
                 >
                   <Grid size={{ xs: 12, md: 4 }}>
                     <SAETextField
-                      label="Legajo"
+                      label={C.personalInfoID}
                       fullWidth
                       disabled
                       value={datosPerfil.legajo}
@@ -163,7 +162,7 @@ export function MyProfileContent() {
                   </Grid>
                   <Grid size={{ xs: 12, md: 4 }}>
                     <SAETextField
-                      label="Nombres"
+                      label={C.personalInfoNames}
                       fullWidth
                       value={datosPerfil.nombres}
                       onChange={(e) => handleChange("nombres", e.target.value)}
@@ -173,7 +172,7 @@ export function MyProfileContent() {
                       error={requiredError(datosPerfil.nombres)}
                       helperText={
                         requiredError(datosPerfil.nombres)
-                          ? "El nombre es obligatorio"
+                          ? C.nameRequired
                           : ""
                       }
                     />
@@ -181,7 +180,7 @@ export function MyProfileContent() {
 
                   <Grid size={{ xs: 12, md: 4 }}>
                     <SAETextField
-                      label="Apellidos"
+                      label={C.personalInfoLastNames}
                       fullWidth
                       value={datosPerfil.apellidos}
                       onChange={(e) =>
@@ -193,7 +192,7 @@ export function MyProfileContent() {
                       error={requiredError(datosPerfil.apellidos)}
                       helperText={
                         requiredError(datosPerfil.apellidos)
-                          ? "El apellido es obligatorio"
+                          ? C.lastNameRequired
                           : ""
                       }
                     />
@@ -201,7 +200,7 @@ export function MyProfileContent() {
 
                   <Grid size={{ xs: 12, md: 4 }}>
                     <SAETextField
-                      label="DNI"
+                      label={C.personalInfoDNI}
                       fullWidth
                       value={formatDni(datosPerfil.dni)}
                       onChange={handleMaskedChange("dni", formatDni)}
@@ -213,14 +212,14 @@ export function MyProfileContent() {
                       required
                       error={dniHasError}
                       helperText={
-                        dniHasError ? "El DNI debe tener 8 dígitos" : ""
+                        dniHasError ? C.DNIRequired: ""
                       }
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12, md: 4 }}>
                     <SAETextField
-                      label="CUIL"
+                      label={C.personalInfoCUIL}
                       fullWidth
                       value={formatCuil(datosPerfil.cuil)}
                       onChange={handleMaskedChange("cuil", formatCuil)}
@@ -232,14 +231,14 @@ export function MyProfileContent() {
                       required
                       error={cuilHasError}
                       helperText={
-                        cuilHasError ? "El CUIL debe tener 11 dígitos" : ""
+                        cuilHasError ? C.CUILRequired: ""
                       }
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12, md: 4 }}>
                     <SAETextField
-                      label="Fecha de Nacimiento"
+                      label={C.personalInfoBirth}
                       type="date"
                       value={datosPerfil.fecha_nacimiento}
                       onChange={(e) =>
@@ -254,7 +253,7 @@ export function MyProfileContent() {
                       error={requiredError(datosPerfil.fecha_nacimiento)}
                       helperText={
                         requiredError(datosPerfil.fecha_nacimiento)
-                          ? "La fecha de nacimiento es obligatoria"
+                          ? C.birthDateRequired
                           : ""
                       }
                     />
@@ -272,7 +271,7 @@ export function MyProfileContent() {
                     fontWeight={700}
                     color="var(--primary)"
                   >
-                    Información de contacto
+                    {C.contactInfoTitle}
                   </Typography>
                 </Stack>
                 <Grid
@@ -282,7 +281,7 @@ export function MyProfileContent() {
                 >
                   <Grid size={{ xs: 12, md: 6 }}>
                     <SAETextField
-                      label="Correo Electrónico"
+                      label={C.contactInfoEmail}
                       type="email"
                       fullWidth
                       value={datosPerfil.email}
@@ -293,7 +292,7 @@ export function MyProfileContent() {
                       required
                       helperText={
                         emailHasError
-                          ? "Ingresá un correo válido. Ejemplo: nombre@dominio.com"
+                          ? C.emailRequired
                           : ""
                       }
                     />
@@ -301,7 +300,7 @@ export function MyProfileContent() {
 
                   <Grid size={{ xs: 12, md: 6 }}>
                     <SAETextField
-                      label="Teléfono"
+                      label={C.contactInfoPhone}
                       fullWidth
                       value={datosPerfil.telefono}
                       onChange={handleMaskedChange("telefono", formatPhone)}
@@ -314,7 +313,7 @@ export function MyProfileContent() {
                       required
                       helperText={
                         phoneHasError
-                          ? "Completá el teléfono con el formato +54 351 123-4567"
+                          ? C.phoneRequired
                           : ""
                       }
                     />
@@ -322,7 +321,7 @@ export function MyProfileContent() {
 
                   <Grid size={{ xs: 12, md: 3 }}>
                     <SAETextField
-                      label="Provincia"
+                      label={C.contactInfoProvince}
                       fullWidth
                       value={addressParts[0]}
                       onChange={(e) => handleAddressChange(0, e.target.value)}
@@ -332,14 +331,14 @@ export function MyProfileContent() {
                       error={requiredError(addressParts[0])}
                       helperText={
                         requiredError(addressParts[0])
-                          ? "La provincia es obligatoria"
+                          ? C.provinceRequired
                           : ""
                       }
                     />
                   </Grid>
                   <Grid size={{ xs: 12, md: 3 }}>
                     <SAETextField
-                      label="Ciudad / Localidad"
+                      label={C.contactInfoCity}
                       fullWidth
                       value={addressParts[1]}
                       onChange={(e) => handleAddressChange(1, e.target.value)}
@@ -349,7 +348,7 @@ export function MyProfileContent() {
                       error={requiredError(addressParts[1])}
                       helperText={
                         requiredError(addressParts[1])
-                          ? "La ciudad/localidad es obligatoria"
+                          ? C.cityRequired
                           : ""
                       }
                     />
@@ -357,7 +356,7 @@ export function MyProfileContent() {
 
                   <Grid size={{ xs: 12, md: 4 }}>
                     <SAETextField
-                      label="Nombre de la calle"
+                      label={C.contactInfoStreet}
                       fullWidth
                       value={addressParts[2]}
                       onChange={(e) => handleAddressChange(2, e.target.value)}
@@ -367,7 +366,7 @@ export function MyProfileContent() {
                       error={requiredError(addressParts[2])}
                       helperText={
                         requiredError(addressParts[2])
-                          ? "La calle es obligatoria"
+                          ? C.streetRequired
                           : ""
                       }
                     />
@@ -375,7 +374,7 @@ export function MyProfileContent() {
 
                   <Grid size={{ xs: 12, md: 2 }}>
                     <SAETextField
-                      label="Altura"
+                      label={C.contactInfoNumber}
                       fullWidth
                       value={addressParts[3]}
                       onChange={(e) => handleAddressChange(3, e.target.value)}
@@ -387,7 +386,7 @@ export function MyProfileContent() {
                       error={requiredError(addressParts[3])}
                       helperText={
                         requiredError(addressParts[3])
-                          ? "La altura es obligatoria"
+                          ? C.numberRequired
                           : ""
                       }
                     />
@@ -408,7 +407,7 @@ export function MyProfileContent() {
                             fontWeight={600}
                             py={1}
                           >
-                            ¡ATENCIÓN!
+                            {C.missingSubtitle}
                           </Typography>
                           <Typography
                             variant="body2"
@@ -416,8 +415,8 @@ export function MyProfileContent() {
                             sx={{ lineHeight: 2 }}
                           >
                             {missingRequiredFields.length === 1
-                              ? "Falta completar el campo: "
-                              : "Faltan completar los campos: "}
+                              ? C.missingOneField
+                              : C.missingMultipleFields}
                             {missingRequiredFields.join(", ")}.
                           </Typography>
                         </CardContent>
@@ -439,10 +438,10 @@ export function MyProfileContent() {
                       fontWeight={700}
                       color="var(--primary)"
                     >
-                      Mis documentos
+                      {C.myDocumentsTitle}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Archivos presentados en los distintos servicios
+                      {C.myDocumentsSubtitle}
                     </Typography>
                   </Box>
                 </Stack>
@@ -543,7 +542,7 @@ export function MyProfileContent() {
                   >
                     <FolderOpenOutlinedIcon sx={{ fontSize: 36, mb: 0.5 }} />
                     <Typography fontWeight={600}>
-                      Todavía no hay documentos subidos
+                      {C.myDocumentsNoData}
                     </Typography>
                   </Box>
                 )}
@@ -575,45 +574,14 @@ export function MyProfileContent() {
                       boxShadow: "0 8px 20px rgba(71, 126, 175, 0.28)",
                     }}
                   >
-                    Guardar Cambios
+                    {C.saveChangesButton}
                   </SAEButton>
                 </Stack>
               </>
             )}
           </CardContent>
         </Card>
-        {/* MENSAJES */}
-        <Snackbar
-          open={Boolean(formError)}
-          autoHideDuration={5000}
-          onClose={() => setFormError("")}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => setFormError("")}
-            severity="warning"
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            {formError}
-          </Alert>
-        </Snackbar>
 
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={3000}
-          onClose={() => setSnackbarOpen(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => setSnackbarOpen(false)}
-            severity="success"
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            {snackbarMsg}
-          </Alert>
-        </Snackbar>
      </SAEPage>
   );
 }

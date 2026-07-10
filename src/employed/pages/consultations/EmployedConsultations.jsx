@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Container,
   Grid,
   Stack,
   Typography,
@@ -20,22 +19,22 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Snackbar,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import CloseIcon from "@mui/icons-material/Close";
+import {
+  getDialogTitle,
+  isValidHyperlink,
+} from "../../../utils/juan/util";
 
-import React, { useState, useMemo } from "react";
+import { useMemo } from "react";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import LinkIcon from "@mui/icons-material/Link";
 
-import StorageIcon from "@mui/icons-material/Storage";
-import PublicIcon from "@mui/icons-material/Public";
-import CodeIcon from "@mui/icons-material/Code";
-import TitleBox from "../../../shared/components/titleBox";
 import { useConsultations } from "../../context/employedContext";
 import { ConsultationProvider } from "../../context/providers/consultationsProvider";
+import { useNotification } from "../../../shared/context/sharedContext";
 
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
 import {
@@ -45,55 +44,16 @@ import {
 } from "../../../shared/pages/consultations/consultations.config";
 import SAEPage from "../../../shared/components/page/SAEPage";
 import DataGridPanel from "../../../shared/components/dataGrid/DataGridPanel";
-
-const options = [
-  {
-    icon: StorageIcon,
-    title: "API y tabla de preguntas",
-    description:
-      "Opción recomendada. Permite alta, edición, baja, orden y publicación desde este panel para todos los estudiantes.",
-  },
-  {
-    icon: PublicIcon,
-    title: "CMS externo",
-    description:
-      "Útil si SAE necesita editar contenido sin desplegar la aplicación. Requiere integrar un proveedor de contenido.",
-  },
-  {
-    icon: CodeIcon,
-    title: "Configuración versionada",
-    description:
-      "La opción actual: las preguntas viven en un archivo compartido y se publican junto con cada despliegue.",
-  },
-];
-
-const secciones = [{ key: "linksFrecuentes", label: "Links Frecuentes" }];
+import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
 
 function EmployedContent() {
   const {
-    //ABM LinkFrecuentes
     // ABM Link Frecuentes
     linksFrecuentesRows,
     linksFrecuentesColumns,
     loadingLinksFrecuentes,
     openCreatelinksFrecuentes,
-    handleLinksFrecuentesSave,
-    handleLinksFrecuenteDelete,
-    linksFrecuentesIcons,
-
-    //Valores
-    setDialogError,
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
-    dialogOpen,
-    setDialogOpen,
-    dialogData,
-    setDialogData,
-    dialogType,
-    dialogMode,
-    dialogError,
-    dialogSaving,
   } = useConsultations();
 
   const sectionConfig = useMemo(
@@ -116,83 +76,24 @@ function EmployedContent() {
     ],
   );
 
-  const [activeSection, setActiveSection] = useState("linksFrecuentes");
-  const [busquedaGestion, setBusquedaGestion] = useState("");
-  const handleSectionChange = (section) => {
-    setActiveSection(section);
-    setBusquedaGestion("");
-  };
+  const activeSection = "linksFrecuentes";
   const currentSection = useMemo(
     () => sectionConfig[activeSection],
     [activeSection, sectionConfig],
   );
-  const rowsGestionFiltradas = useMemo(() => {
-    const term = busquedaGestion.trim().toLowerCase();
-    if (!term) return currentSection.rows;
-
-    return currentSection.rows.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value ?? "")
-          .toLowerCase()
-          .includes(term),
-      ),
-    );
-  }, [currentSection.rows, busquedaGestion]);
-  const handleDialogChange = (field, value) => {
-    setDialogData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const selectedDialogIcon = useMemo(() => {
-    const iconIndex = Number(dialogData.id_index_ico) || 0;
-    return (
-      linksFrecuentesIcons.find((iconOption) => iconOption.id === iconIndex) ??
-      linksFrecuentesIcons[0]
-    );
-  }, [dialogData.id_index_ico, linksFrecuentesIcons]);
-
-  const SelectedDialogIcon = selectedDialogIcon.icon;
-
-  const dialogTitle =
-    dialogMode === "create"
-      ? "Nuevo Link Frecuente"
-      : dialogMode === "delete"
-        ? "Eliminar Link Frecuente"
-        : "Editar Link Frecuente";
 
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header=" Módulo de Consultas"
+        header="Módulo de Consultas"
         title="Gestión de Consultas"
         description="Revisá el contenido visible para estudiantes y planificá su administración."
       />
-      <DataGridPanel
-        tabs={secciones}
-        activeTab={activeSection}
-        onTabChange={handleSectionChange}
-        title={currentSection.title}
-        icon={currentSection.icon}
-        searchValue={busquedaGestion}
-        onSearchChange={setBusquedaGestion}
-        searchPlaceholder="Búsqueda..."
-        actionLabel={currentSection.addButton}
-        onAction={currentSection.dialog}
-        sx={{ mb: 3 }}
-      >
-        <DataGrid
-          rows={rowsGestionFiltradas}
-          columns={currentSection.columns}
-          loading={currentSection.loading}
-          autoHeight
-          disableRowSelectionOnClick
-          pageSizeOptions={[5, 10, 25]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 5 } },
-          }}
-          localeText={{ noRowsLabel: "Sin Registros" }}
-          sx={{ borderRadius: 0, border: "none" }}
-        />
-      </DataGridPanel>
+
+      <SAEDataGrid
+        sectionConfig={sectionConfig}
+        currentSection={currentSection}
+      />
 
       <Alert severity="info" sx={{ mt: 2 }}>
         Actualmente las preguntas son contenido versionado. Sin una API o CMS,
@@ -247,14 +148,82 @@ function EmployedContent() {
         Las consultas preparadas por estudiantes se dirigen actualmente a:{" "}
         <strong> {SAE_EMAIL}</strong>
       </Typography>
+      <DialogConsultation />
+    </SAEPage>
+  );
+}
+function DialogConsultation() {
+  const {
+    dialogOpen,
+    dialogData,
+    dialogType,
+    dialogMode,
+    dialogError,
+    dialogSaving,
+    setDialogError,
+    handleDataChange,
+    closeDialog,
+  } = useNotification();
 
+  const {
+    handleLinksFrecuentesSave,
+    handleLinksFrecuenteDelete,
+    linksFrecuentesIcons,
+  } = useConsultations();
+
+  const selectedDialogIcon = useMemo(() => {
+    const iconIndex = Number(dialogData?.id_index_ico) || 0;
+    return (
+      linksFrecuentesIcons.find((iconOption) => iconOption.id === iconIndex) ??
+      linksFrecuentesIcons[0]
+    );
+  }, [dialogData?.id_index_ico, linksFrecuentesIcons]);
+
+  const SelectedDialogIcon = selectedDialogIcon.icon;
+  const hyperlinkError =
+    Boolean(dialogData.hipervinculo) && !isValidHyperlink(dialogData.hipervinculo)
+      ? "Ingresa un hipervinculo valido con http:// o https://"
+      : "";
+  const handleSaveLinkFrecuente = () => {
+    if (hyperlinkError) {
+      setDialogError("Revisa los campos marcados antes de guardar.");
+      return;
+    }
+
+    handleLinksFrecuentesSave();
+  };
+
+  // Cada nueva tabla puede agregar aquí su entidad, nombre y método de borrado.
+  const deleteDialogConfig = {
+    linkFrecuentes: {
+      entityLabel: "Link frecuente",
+      itemName: dialogData?.titulo,
+      onConfirm: handleLinksFrecuenteDelete,
+    },
+  };
+
+  if (dialogOpen && dialogMode === "delete") {
+    const config = deleteDialogConfig[dialogType];
+
+    return config ? (
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
+    ) : null;
+  }
+
+  return (
+    <>
       {dialogOpen && dialogType === "linkFrecuentes" && (
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
           <DialogTitle
             sx={{
               display: "flex",
@@ -267,9 +236,9 @@ function EmployedContent() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogTitle}
+              {getDialogTitle("Link Frecuente", dialogMode)}
             </Typography>
-            <IconButton onClick={() => setDialogOpen(false)} size="small">
+            <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -280,45 +249,14 @@ function EmployedContent() {
                   {dialogError}
                 </Alert>
               )}
-              {dialogMode === "delete" ? (
-                <>
-                  <Alert severity="warning">
-                    Esta accion eliminara el link frecuente y no se puede
-                    deshacer.
-                  </Alert>
-                  <Box
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "divider",
-                      borderRadius: 2,
-                      bgcolor: "grey.50",
-                      p: 2,
-                    }}
-                  >
-                    <Typography fontWeight={700}>
-                      {dialogData.titulo || "Sin titulo"}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 0.5, overflowWrap: "anywhere" }}
-                    >
-                      {dialogData.hipervinculo || "Sin hipervinculo"}
-                    </Typography>
-                  </Box>
-                </>
-              ) : (
-                <>
-                  <Grid container spacing={1}>
+              <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6 }} m={0}>
                       <SAETextField
                         label="ID"
                         type="number"
                         fullWidth
                         value={dialogData.id}
-                        onChange={(e) =>
-                          handleDialogChange("id", e.target.value)
-                        }
+                        onChange={(e) => handleDataChange("id", e.target.value)}
                         disabled={true}
                       />
                     </Grid>
@@ -332,7 +270,7 @@ function EmployedContent() {
                           label="Icono"
                           value={Number(dialogData.id_index_ico) || 0}
                           onChange={(e) =>
-                            handleDialogChange("id_index_ico", e.target.value)
+                            handleDataChange("id_index_ico", e.target.value)
                           }
                           renderValue={() => {
                             const Icon = selectedDialogIcon.icon;
@@ -373,7 +311,7 @@ function EmployedContent() {
                         label="Titulo"
                         value={dialogData.titulo}
                         onChange={(e) =>
-                          handleDialogChange("titulo", e.target.value)
+                          handleDataChange("titulo", e.target.value)
                         }
                         fullWidth
                       />
@@ -384,8 +322,10 @@ function EmployedContent() {
                         label="Hipervinculo"
                         value={dialogData.hipervinculo}
                         onChange={(e) =>
-                          handleDialogChange("hipervinculo", e.target.value)
+                          handleDataChange("hipervinculo", e.target.value)
                         }
+                        error={Boolean(hyperlinkError)}
+                        helperText={hyperlinkError}
                         fullWidth
                       />
                     </Grid>
@@ -448,27 +388,21 @@ function EmployedContent() {
                         </Box>
                       </Box>
                     </Grid>
-                  </Grid>
-                </>
-              )}
+              </Grid>
             </Stack>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <SAEButton
               variant="outlined"
-              onClick={() => setDialogOpen(false)}
+              onClick={closeDialog}
               disabled={dialogSaving}
             >
               Cancelar
             </SAEButton>
             <SAEButton
               variant="contained"
-              color={dialogMode === "delete" ? "error" : "primary"}
-              onClick={
-                dialogMode === "delete"
-                  ? handleLinksFrecuenteDelete
-                  : handleLinksFrecuentesSave
-              }
+              color="primary"
+              onClick={handleSaveLinkFrecuente}
               disabled={dialogSaving}
               startIcon={
                 dialogSaving ? (
@@ -478,31 +412,15 @@ function EmployedContent() {
             >
               {dialogMode === "create"
                 ? "Crear"
-                : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                : "Guardar"}
             </SAEButton>
           </DialogActions>
         </Dialog>
       )}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackbarMsg}
-        </Alert>
-      </Snackbar>
-    </SAEPage>
+    </>
   );
 }
+
 export default function EmployedConsultations() {
   return (
     <ConsultationProvider>

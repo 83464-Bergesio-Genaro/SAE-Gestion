@@ -3,10 +3,16 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import PersonIcon from "@mui/icons-material/Person";
 import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import PeopleIcon from "@mui/icons-material/People";
-
+import { Chip } from "@mui/material";
+import {
+  formatTime,
+  isTimeAfter,
+  isValidEmail,
+  isValidMinLengthPhone,
+} from "../../../utils/juan/util.js";
 // Cada columna cumple doble funcion: configura el DataGrid y tambien define
 // como debe renderizarse ese campo dentro del dialog generico.
-const proyectosColumns = [
+export const proyectosColumns = [
   {
     field: "id",
     headerName: "ID",
@@ -25,6 +31,13 @@ const proyectosColumns = [
     width: 100,
     defaultValue: false,
     valueFormatter: (value) => (value ? "Sí" : "No"),
+    renderCell: (params) => (
+      <Chip
+        size="small"
+        label={params.value ? "Sí" : "No"}
+        color={params.value ? "success" : "default"}
+      />
+    ),
     form: {
       type: "switch",
       visible: true,
@@ -61,7 +74,7 @@ const proyectosColumns = [
   },
 ];
 
-const serviciosColumns = [
+export const serviciosColumns = [
   {
     field: "id",
     headerName: "ID",
@@ -89,7 +102,7 @@ const serviciosColumns = [
   },
   {
     field: "nro_telefono",
-    headerName: "Número de Teléfono",
+    headerName: "Numero de Telefono",
     minWidth: 100,
     flex: 1,
     defaultValue: "",
@@ -97,12 +110,16 @@ const serviciosColumns = [
       type: "text",
       visible: true,
       required: true,
-      requiredMessage: "El número de teléfono es obligatorio",
+      requiredMessage: "El numero de telefono es obligatorio",
+      validate: (value) =>
+        isValidMinLengthPhone(value)
+          ? ""
+          : "El telefono debe tener al menos 8 numeros",
     },
   },
   {
     field: "nro_telefono_interno",
-    headerName: "Número de Teléfono Interno",
+    headerName: "Numero de Telefono Interno",
     minWidth: 250,
     flex: 1,
     defaultValue: "",
@@ -110,7 +127,11 @@ const serviciosColumns = [
       type: "text",
       visible: true,
       required: true,
-      requiredMessage: "El número de teléfono interno es obligatorio",
+      requiredMessage: "El numero de telefono interno es obligatorio",
+      validate: (value) =>
+        isValidMinLengthPhone(value)
+          ? ""
+          : "El telefono interno debe tener al menos 8 numeros",
     },
   },
   {
@@ -125,36 +146,43 @@ const serviciosColumns = [
       fullRow: true,
       required: true,
       requiredMessage: "El email institucional es obligatorio",
+      validate: (value) =>
+        isValidEmail(value) ? "" : "Ingresa un email valido",
     },
   },
   {
     field: "horario_atencion",
-    headerName: "Horario de Atención",
+    headerName: "Horario de Atencion",
     minWidth: 170,
     flex: 1,
     defaultValue: "",
+    valueFormatter: (value) => formatTime(value),
     form: {
       type: "time",
       visible: true,
-      step: 300,
+      step: 900,
     },
   },
 
   {
     field: "horario_atencion_final",
-    headerName: "Horario de Atención Final",
+    headerName: "Horario de Atencion Final",
     minWidth: 170,
     flex: 1,
     defaultValue: "",
+    valueFormatter: (value) => formatTime(value),
     form: {
       type: "time",
       visible: true,
-      step: 300,
+      step: 900,
+      validate: (value, data) =>
+        isTimeAfter(value, data.horario_atencion)
+          ? ""
+          : "La hora final debe ser mayor a la hora de inicio",
     },
   },
 ];
-
-const becariosColumns = [
+export const becariosColumns = [
   {
     field: "id",
     headerName: "ID",
@@ -184,7 +212,13 @@ const becariosColumns = [
     minWidth: 100,
     defaultValue: false,
     flex: 1,
-    valueFormatter: (value) => (value ? "Sí" : "No"),
+    renderCell: (params) => (
+      <Chip
+        size="small"
+        label={params.value ? "Sí" : "No"}
+        color={params.value ? "success" : "default"}
+      />
+    ),
     form: {
       type: "switch",
       visible: true,
@@ -197,7 +231,13 @@ const becariosColumns = [
     minWidth: 100,
     flex: 1,
     defaultValue: false,
-    valueFormatter: (value) => (value ? "Sí" : "No"),
+    renderCell: (params) => (
+      <Chip
+        size="small"
+        label={params.value ? "Sí" : "No"}
+        color={params.value ? "success" : "default"}
+      />
+    ),
     form: {
       type: "switch",
       visible: true,
@@ -209,7 +249,13 @@ const becariosColumns = [
     minWidth: 100,
     flex: 1,
     defaultValue: false,
-    valueFormatter: (value) => (value ? "Sí" : "No"),
+    renderCell: (params) => (
+      <Chip
+        size="small"
+        label={params.value ? "Sí" : "No"}
+        color={params.value ? "success" : "default"}
+      />
+    ),
     form: {
       type: "switch",
       visible: true,
@@ -399,8 +445,8 @@ export const createEmptyObject = (columns) =>
     return acc;
   }, {});
 
-// Arma las cards/secciones que consume SectionGridCard. El componente no conoce
-// entidades concretas; solo lee esta configuracion.
+// Arma las cards/secciones legadas. Scholarships.jsx define ahora las secciones
+// de forma explicita y usa estas columnas como fuente comun.
 export const createSectionConfig = ({
   proyectosRows,
   loadingProyectos,
@@ -563,3 +609,4 @@ export const becasGridConfig = (serviciosRows, proyectosRows) => ({
     ],
   },
 });
+

@@ -1,10 +1,7 @@
 import {useState, useEffect,useCallback,useMemo,useRef} from "react";
-import { Box,IconButton,Chip } from "@mui/material";
+import { IconButton, Chip, Stack } from "@mui/material";
 
-import AddIcon from "@mui/icons-material/Add";
-import LocalAirportIcon from '@mui/icons-material/LocalAirport';
 import EditIcon from "@mui/icons-material/Edit";
-import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from '@mui/icons-material/Folder';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 
@@ -21,9 +18,11 @@ import { useNavigate } from "react-router-dom";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
 import {
   cleanObjectFields,
+  formatDateForDisplay,
   formatHeader,
   generateRows,
 } from "../../../utils/util.jsx";
+import { useNotification } from "../../../shared/context/sharedContext";
 
 const EMPTY_BUSSINESS = {
     id: "-1",
@@ -91,8 +90,14 @@ const generateColumns = (data, actionsConfig = []) => {
 
   const columns = Object.keys(sample).map((key) => {
     // Nota: Se asume que data es un array, por eso data[0] para las keys
-    const isId = key.toLowerCase().includes("id");
-    const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(key.toLowerCase());
+    const normalizedKey = key.toLowerCase();
+    const isId =
+        normalizedKey === "id" ||
+        normalizedKey.startsWith("id_") ||
+        normalizedKey.endsWith("_id");
+    const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(normalizedKey);
+    const isDate = normalizedKey.startsWith("fecha_");
+    const isAddress = ["origen", "destino"].includes(normalizedKey);
     
     if (key.toLowerCase() === "activo" ) {
     return {
@@ -130,11 +135,12 @@ const generateColumns = (data, actionsConfig = []) => {
         return {
             field: key,
             headerName: formatHeader(key),
-            flex: isId ? 0.4 : 1,
-            minWidth: isId || isShort? 50 : 120,
-            maxWidth: isId ? 70 : isShort ? 100 : NaN,
-            align: isId || isShort ? "center" : "left",
-            headerAlign: isId || isShort ? "center" : "left",
+            flex: isId ? 0.4 : isDate ? 0 : isAddress ? 1.4 : 1,
+            minWidth: isId || isShort? 50 : isDate ? 105 : isAddress ? 170 : 120,
+            maxWidth: isId ? 70 : isShort ? 100 : isDate ? 115 : undefined,
+            align: isId || isShort || isDate ? "center" : "left",
+            headerAlign: isId || isShort || isDate ? "center" : "left",
+            valueFormatter: isDate ? formatDateForDisplay : undefined,
         };
     }
   });
@@ -146,17 +152,23 @@ const generateColumns = (data, actionsConfig = []) => {
       headerAlign:"center",
       sortable: false,
       filterable: false,
-      minWidth:60 * actionsConfig.length,
-      maxWidth: 65 * actionsConfig.length,
+      minWidth: 120,
+      width: 136,
       renderCell: (params) => (
-        <Box sx={{display:"block",textAlign:"center"}}>
+        <Stack
+          direction="row"
+          spacing={0.5}
+          justifyContent="center"
+          alignItems="center"
+          sx={{ width: "100%", height: "100%" }}
+        >
           {actionsConfig.map((action, index) => {
             const IconComponent = action.icon;
             return (
               <IconButton
                 key={index}
                 size="small"
-                color={action.color || "primary"}
+                sx={{ color: "var(--primary)" }}
                 title={action.title}
                 onClick={() => action.onClick(params.row)}
               >
@@ -164,7 +176,7 @@ const generateColumns = (data, actionsConfig = []) => {
               </IconButton>
             );
           })}
-        </Box>
+        </Stack>
       ),
     });
   }
@@ -175,11 +187,24 @@ const checkAndCleanDialogData = (data) => cleanObjectFields(data);
 
 export function TravelProvider({ children }){
     const navigate = useNavigate();
+    const {
+        showNotification,
+        dialogOpen,
+        setDialogOpen,
+        dialogType,
+        setDialogType,
+        dialogMode,
+        setDialogMode,
+        dialogData,
+        setDialogData,
+        dialogSaving,
+        setDialogSaving,
+        dialogError,
+        setDialogError,
+        openDialog,
+    } = useNotification();
 
     const [travelData, setTravelData] = useState(null);
-
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMsg, setSnackbarMsg] = useState("");
 
     const [inscriptsTravel,setInscriptsTravel] = useState(null);
     const [loadingInscripts,setLoadingInscripts] = useState(false);
@@ -197,7 +222,7 @@ export function TravelProvider({ children }){
         finally{
             setLoadingInscripts(false)
         }
-    }, [])
+    }, [setDialogError])
     
     useEffect(() => { fetchInscriptosXTravel(); }, [fetchInscriptosXTravel]);
 
@@ -222,20 +247,12 @@ export function TravelProvider({ children }){
     }, [fetchBussiness]);
 
     const openCreateBussiness = () => {
-        setDialogData(EMPTY_BUSSINESS);
-        setDialogType("bussiness");
-        setDialogMode("create");
-        setDialogError("");
-        setDialogOpen(true);
+        openDialog("bussiness", "create", EMPTY_BUSSINESS);
     };
 
     const openEditBussiness = useCallback((row) => {
-        setDialogData(row);
-        setDialogType("bussiness");
-        setDialogMode("edit");
-        setDialogError("");
-        setDialogOpen(true);
-    }, []);
+        openDialog("bussiness", "edit", row);
+    }, [openDialog]);
 
     const handleOpenEditBussiness = useCallback((row) => {
     openEditBussiness(row);
@@ -269,11 +286,10 @@ export function TravelProvider({ children }){
             else{
                 await ModificarEmpresa(id_nuevo,body);
             }
-            fetchBussiness();
+            await fetchBussiness();
             setDialogOpen(false);
             setDialogData(EMPTY_BUSSINESS);
-            setSnackbarMsg(dialogMode === "create"? "Empresa creada!":"Empresa Modificada!");
-            setSnackbarOpen(true);
+            showNotification(dialogMode === "create"? "Empresa creada!":"Empresa modificada!");
         }
         catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
@@ -308,23 +324,15 @@ export function TravelProvider({ children }){
     }, [fetchTravels]);
 
     const openCreateTravels = () => {
-        setDialogData(EMPTY_VIAJES_FORM);
-        setDialogType("travels");
-        setDialogMode("create");
-        setDialogError("");
-        setDialogOpen(true);
+        openDialog("travels", "create", EMPTY_VIAJES_FORM);
     };
 
     const openEditTravels = useCallback((row) => {
         const viajeEncontrado = travels.find(viaje => viaje.id === Number(row.id));
         if(!viajeEncontrado) return;
 
-        setDialogData(viajeEncontrado);
-        setDialogType("travels");
-        setDialogMode("edit");
-        setDialogError("");
-        setDialogOpen(true);
-    }, [travels]);
+        openDialog("travels", "edit", viajeEncontrado);
+    }, [openDialog, travels]);
 
     const fetchDocsXTravel = useCallback(async (row) => {
             setLoadingViajeDocs(true);
@@ -361,7 +369,7 @@ export function TravelProvider({ children }){
             setLoadingViajeDocs(false);
         }
         
-    }, [fetchDocsXTravel]);
+    }, [fetchDocsXTravel, setDialogError, setDialogOpen, setDialogType]);
     
     const handleTravelSave  = async () => {
         setDialogSaving(true);
@@ -395,11 +403,10 @@ export function TravelProvider({ children }){
             else{
                 await ModificarViaje(id_nuevo,body);
             }
-            fetchTravels();
+            await fetchTravels();
             setDialogOpen(false);
             setDialogData(EMPTY_VIAJES_FORM);
-            setSnackbarMsg(dialogMode === "create"? "Viaje creado!":"Viaje Modificado!");
-            setSnackbarOpen(true);
+            showNotification(dialogMode === "create"? "Viaje creado!":"Viaje modificado!");
         }
         catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
@@ -424,13 +431,6 @@ export function TravelProvider({ children }){
     const handleOpenInscripTravels = useCallback((row) => {
     openInscripTravels(row);
     }, [openInscripTravels]);
-
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogType, setDialogType] = useState(""); 
-    const [dialogMode, setDialogMode] = useState("create");
-    const [dialogData, setDialogData] = useState(EMPTY_VIAJES);
-    const [dialogSaving, setDialogSaving] = useState(false);
-    const [dialogError, setDialogError] = useState("");
 
     const bussinessActions = useMemo(() => [{
     icon: EditIcon,
@@ -492,7 +492,7 @@ export function TravelProvider({ children }){
         finally{
             setLoadingUsuario(false);
         }
-    }, [])
+    }, [setDialogError])
     
     useEffect(() => { fetchUsuariosXlegajo(); }, [fetchUsuariosXlegajo]);
 
@@ -512,12 +512,11 @@ export function TravelProvider({ children }){
                 await CrearInscriptoViaje(body);
                 setUsuarioSelected(null);
                 await fetchInscriptosXTravel(travelData.id);
-                setSnackbarMsg("Se inscribio esta persona al viaje");
-                setSnackbarOpen(true);
+                showNotification("Se inscribio esta persona al viaje");
                 setLoadingInscripts(false);
         }
             catch (err) {
-                setSnackbarMsg(err.message || "Ocurrió un error al guardar");
+                showNotification(err.message || "Ocurrió un error al guardar", "error");
             } finally {
                 setDialogSaving(false);
             }
@@ -532,7 +531,7 @@ export function TravelProvider({ children }){
         setDialogMode("delete");
         setDialogError("");
         setDialogOpen(true);        
-    }, []);
+    }, [setDialogError, setDialogMode, setDialogOpen, setDialogType]);
  
     const handleDeleteInscript  = async () => {
         if(travelData&&inscriptToDelete){
@@ -544,8 +543,7 @@ export function TravelProvider({ children }){
                     await fetchInscriptosXTravel(travelData.id);
                     setDialogOpen(false);
                     setUsuarioSelected(null);
-                    setSnackbarMsg("Se elimino el estudiante");
-                    setSnackbarOpen(true);
+                    showNotification("Se elimino el estudiante");
                 }
                 else{
                     setDialogError("Ocurrio un error al intentar eliminar este inscripto");
@@ -569,8 +567,7 @@ export function TravelProvider({ children }){
                 await ModificarInscripto(estudiante.id,estudiante);
                 
                 setUsuarioSelected(null);
-                setSnackbarOpen(true);
-                setSnackbarMsg("Actualizado!");
+                showNotification("Actualizado!");
             }
             catch (err) {
                 setDialogError(err.message || "Ocurrió un error actualizar");
@@ -625,7 +622,7 @@ export function TravelProvider({ children }){
         } finally {
         setLoadingPreview(false);
         }
-    }, []);
+    }, [setDialogError]);
 
     const handleDownloadDoc = useCallback(
         async (id, nombreDocumento, extension) => {
@@ -661,7 +658,7 @@ export function TravelProvider({ children }){
             setDownloadingDocId(null);
         }
         },
-        [],
+        [setDialogError],
     );
     const [openPopup, setOpenPopup] = useState(false);
     const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
@@ -679,13 +676,12 @@ export function TravelProvider({ children }){
             setLoadingViajeDocs(true);
             await fetchDocsXTravel(docsViaje);
 
-            setSnackbarMsg("Documento Eliminado");
+            showNotification("Documento eliminado");
         } catch  {
 
-            setSnackbarMsg("Error al eliminar el documento");
+            showNotification("Error al eliminar el documento", "error");
             
         } finally {
-            setSnackbarOpen(true);
             setLoadingViajeDocs(false);
         }
     };
@@ -718,8 +714,7 @@ export function TravelProvider({ children }){
         .map((value) => value.trim().toLowerCase());
 
         if (!allowedExtensions.includes(extension)) {
-            setSnackbarMsg(`Solo se permiten archivos: ${documentType.extension}`, "warning");
-            setSnackbarOpen(true);
+            showNotification(`Solo se permiten archivos: ${documentType.extension}`, "warning");
             return;
         }
         const fileName =`${documentType.nombre.replace(/\s/g, "_")}${extension}`
@@ -740,15 +735,14 @@ export function TravelProvider({ children }){
 
             await fetchDocsXTravel(docsViaje);
         
-            setSnackbarMsg("Archivo ",savedFile.nombre_documento," subido con éxito");
+            showNotification(`Archivo ${savedFile.nombre_documento} subido con exito`);
             setTravelNewFile(null);
             setTypeDoc(null);
 
         } catch (error) {
             console.error("Error al subir el archivo:", error);
-            setSnackbarMsg("Error al subir el archivo", "error");
+            showNotification("Error al subir el archivo", "error");
         } finally {
-            setSnackbarOpen(true);
             setLoadingViajeDocs(false);
         }
     };
@@ -784,14 +778,11 @@ export function TravelProvider({ children }){
             
             setDialogError(err.message || "Error al cargar documentación");
         }
-    }, [fetchDocsXInscript]);
+    }, [fetchDocsXInscript, setDialogError, setDialogOpen, setDialogType]);
 
     return (
     <TravelContext.Provider
         value={{
-        snackbarOpen,setSnackbarOpen,
-        snackbarMsg,setSnackbarMsg,
-
         bussiness,bussinessRows, setBussinessRows,
         loadingBussiness, setLoadingBussiness,bussinessColumns,
         fetchBussiness,openCreateBussiness,handleBussinessSave,

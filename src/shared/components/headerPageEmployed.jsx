@@ -10,6 +10,8 @@ export default function HeaderPageEmployed({
   backgroundImage = "images/carrousel/EntradaUTN.jpg",
   hideBackButton = false,
   backTo = "/Inicio",
+  chips = null,
+  showUserChips = true,
 }) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -116,28 +118,50 @@ export default function HeaderPageEmployed({
           >
             {description}
           </Typography>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1.5}
-            sx={{ mt: 3 }}
-          >
-            <Chip
-              label={`Perfil ${getPerfilName(user?.id_perfil) ?? "-"}`}
-              sx={{
-                bgcolor: "var(--chipBackground)",
-                color: "white",
-                fontWeight: 700,
-              }}
-            />
-            <Chip
-              label={user?.legajo ? `Legajo ${user.legajo}` : "Sesión activa"}
-              sx={{
-                bgcolor: "var(--chipBackground)",
-                color: "white",
-                fontWeight: 700,
-              }}
-            />
-          </Stack>
+          {(chips?.length > 0 || showUserChips) && (
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              flexWrap="wrap"
+              gap={1.5}
+              sx={{ mt: 3 }}
+            >
+              {chips?.map((chip, index) => (
+                <Chip
+                  key={`${chip.label}-${index}`}
+                  size={chip.size}
+                  label={chip.label}
+                  color={chip.color}
+                  sx={{
+                    bgcolor: chip.bgcolor || "var(--chipBackground)",
+                    color: chip.color ? undefined : "white",
+                    fontWeight: 700,
+                    border: chip.border,
+                    ...chip.sx,
+                  }}
+                />
+              ))}
+              {showUserChips && (
+                <>
+                  <Chip
+                    label={`Perfil ${getPerfilName(user?.id_perfil) ?? "-"}`}
+                    sx={{
+                      bgcolor: "var(--chipBackground)",
+                      color: "white",
+                      fontWeight: 700,
+                    }}
+                  />
+                  <Chip
+                    label={user?.legajo ? `Legajo ${user.legajo}` : "Sesion activa"}
+                    sx={{
+                      bgcolor: "var(--chipBackground)",
+                      color: "white",
+                      fontWeight: 700,
+                    }}
+                  />
+                </>
+              )}
+            </Stack>
+          )}
         </Box>
         <Box
           component="img"

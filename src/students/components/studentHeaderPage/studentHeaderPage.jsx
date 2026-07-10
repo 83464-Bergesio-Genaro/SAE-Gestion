@@ -23,7 +23,7 @@ export default function StudentHeaderPage({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          flexDirection: { xs: "column", md: "row" },
+          flexDirection: "row" ,
           '&::before': {
             content: '""',
             position: 'absolute',

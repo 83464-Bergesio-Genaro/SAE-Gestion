@@ -36,14 +36,13 @@ import {
   ECONOMIC_DOCUMENTS,
   ECONOMIC_OPTIONAL_DOCUMENTS,
   REQUERID_DOCUMENTS,
-} from "../../../students/pages/scholarships/scholarship.configs";
+} from "./becas.configs";
+import {isPdfDocument, INITIAL_PREVIEW } from "../../../utils/util";
 import {
-  INITIAL_PREVIEW,
   asignarArchivosADocumentos,
   asignarTiposADocumentos,
-  hasDocumentFile,
-  isPdfDocument,
-} from "../../../students/pages/scholarships/scholarship.utils";
+  hasDocumentFile
+} from "../../../utils/gena/util";
 import {
   descargarDocumentacionXId,
   listarDocumentacionXLegajo,

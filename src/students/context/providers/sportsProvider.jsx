@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useAuth } from "../../../shared/context/sharedContext";
+import { useAuth, useNotification } from "../../../shared/context/sharedContext";
 import {
   obtenerIdDeportista,
   listarDocumentacionXLegajo,
@@ -13,28 +13,26 @@ import {
   crearDeportista,
 } from "../../../api/DeporteService";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
-import { SPORTS_STRINGS } from "../../pages/sports/sports.strings";
+import { SPORTS_STRINGS } from "../../../utils/gena/student.string.js";
 import {
-  construirNombre,
-  filterTournaments,
   INITIAL_PREVIEW,
   isPdfDocument,
-  MAX_SIZE_BYTES,
-  MAX_SIZE_MB,
-  SPORTS_REQUIRED_DOCUMENTS,
-  SPORTS_TOURNAMENT_COLUMNS,
-} from "../../pages/sports/sports.utils";
+  construirNombre,
+  generateColumns
+} from "../../../utils/util.jsx";
+
+import { filterTournaments} from "../../../utils/gena/util.jsx";
+
+import {SCHOLARSHIPS_STATES , SCHOLARSHIP_TYPE,MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB} from "../../../utils/gena/constants.js";
+import { EMPTY_TOURNAMENT, SPORTS_REQUIRED_DOCUMENTS } from "../../../utils/gena/common.config.js";
+
 import { SportsContext } from "../studentContext";
-import {
-  closePreview as closePreviewState,
-  closeSnackbar as closeSnackbarState,
-  showSnackbar as showSnackbarState,
-} from "../../../utils/util.jsx";;
 
 const C = SPORTS_STRINGS;
 
 export function SportsProvider({ children }) {
   const { user } = useAuth();
+  const {showNotification} = useNotification();
   const [documentos, setDocumentos] = useState(() =>
     SPORTS_REQUIRED_DOCUMENTS.map((documento) => ({ ...documento })),
   );
@@ -48,16 +46,6 @@ export function SportsProvider({ children }) {
   const [preview, setPreview] = useState(INITIAL_PREVIEW);
   const [openPopup, setOpenPopup] = useState(false);
   const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
-  const showSnackbar = useCallback((message, severity = "success") => {
-    showSnackbarState(setSnackbar, message, severity);
-  }, []);
-  const closeSnackbar = () => closeSnackbarState(setSnackbar);
 
   const closePreview = () => closePreviewState(setPreview);
 
@@ -102,14 +90,14 @@ export function SportsProvider({ children }) {
       .map((value) => value.trim().toLowerCase());
 
     if (!allowedExtensions.includes(extension)) {
-      showSnackbar(`Solo se permiten archivos: ${item.extension}`, "warning");
+      showNotification(`Solo se permiten archivos: ${item.extension}`, "warning");
       event.target.value = "";
       return;
     }
 
-    if (file.size > MAX_SIZE_BYTES) {
-      showSnackbar(
-        `El archivo no puede superar los ${MAX_SIZE_MB} MB.`,
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      showNotification(
+        `El archivo no puede superar los ${MAX_FILE_SIZE_MB} MB.`,
         "warning",
       );
       event.target.value = "";
@@ -145,10 +133,10 @@ export function SportsProvider({ children }) {
             : documento,
         ),
       );
-      showSnackbar("Archivo subido con éxito");
+      showNotification("Archivo subido con éxito");
     } catch (error) {
       console.error("Error al subir el archivo:", error);
-      showSnackbar("Error al subir el archivo", "error");
+      showNotification("Error al subir el archivo", "error");
     } finally {
       setLoadingDocuments(false);
       event.target.value = "";
@@ -178,10 +166,10 @@ export function SportsProvider({ children }) {
             : documento,
         ),
       );
-      showSnackbar(C.docEliminado);
+      showNotification(C.docEliminado,"success");
     } catch (error) {
       console.error("Error al eliminar el documento:", error);
-      showSnackbar(C.docEliminadoError, "error");
+      showNotification(C.docEliminadoError, "error");
     } finally {
       setLoadingDocuments(false);
     }
@@ -211,12 +199,12 @@ export function SportsProvider({ children }) {
         setTorneoDeportista(tournaments);
       } catch (error) {
         console.error("Error al cargar torneos:", error);
-        showSnackbar(C.erroLoadTournaments, "error");
+        showNotification(C.erroLoadTournaments, "error");
       } finally {
         setLoadingTournaments(false);
       }
     },
-    [showSnackbar],
+    [showNotification],
   );
 
   const requiredDocumentsUploaded = () =>
@@ -260,7 +248,7 @@ export function SportsProvider({ children }) {
       const successMessage = card.esta_inscripto
         ? C.successUnsuscription
         : C.successInsncription;
-      showSnackbar(
+      showNotification(
         missingRequiredDocuments
           ? `${successMessage}. Recordá subir toda la documentación obligatoria.`
           : successMessage,
@@ -271,7 +259,7 @@ export function SportsProvider({ children }) {
       await loadTournamentsForSchedules(schedules);
     } catch (error) {
       console.error("Error al manejar la inscripción:", error);
-      showSnackbar(C.errorHandleSucscription, "error");
+      showNotification(C.errorHandleSucscription, "error");
     } finally {
       setLoadingSports(false);
     }
@@ -327,7 +315,7 @@ export function SportsProvider({ children }) {
           );
         } catch (error) {
           console.error("Error al cargar documentos deportivos:", error);
-          showSnackbar(C.errotLoadDocumentsType, "error");
+          showNotification(C.errotLoadDocumentsType, "error");
         } finally {
           setLoadingDocuments(false);
         }
@@ -341,7 +329,7 @@ export function SportsProvider({ children }) {
           schedules = sportsman ? await loadSportsmanSchedules(sportsman) : [];
         } catch (error) {
           console.error("Error al cargar deportes del estudiante:", error);
-          showSnackbar(C.errorLoadSports, "error");
+          showNotification(C.errorLoadSports, "error");
         } finally {
           setLoadingSports(false);
         }
@@ -353,7 +341,7 @@ export function SportsProvider({ children }) {
     };
 
     initialize();
-  }, [user?.email, loadTournamentsForSchedules, showSnackbar]);
+  }, [user?.email, loadTournamentsForSchedules, showNotification]);
 
   const rowsTorneosFiltradas = useMemo(
     () => filterTournaments(torneoDeportista, busquedaTorneos),
@@ -367,6 +355,9 @@ export function SportsProvider({ children }) {
         .map((horario) => horario.id_deporte),
     [horariosDeportista],
   );
+  const tournamentsColumns = useMemo(() => {
+    return generateColumns(EMPTY_TOURNAMENT, []);
+  }, [ ]); 
 
   return (
     <SportsContext.Provider
@@ -374,7 +365,6 @@ export function SportsProvider({ children }) {
         busquedaTorneos,
         closeDeleteDialog,
         closePreview,
-        closeSnackbar,
         documentoAEliminar,
         documentos,
         handleArchivoChange,
@@ -390,10 +380,9 @@ export function SportsProvider({ children }) {
         requestDeleteDocument,
         rowsTorneosFiltradas,
         setBusquedaTorneos,
-        snackbar,
         subscribedSportIds,
         torneoDeportista,
-        torneosColumns: SPORTS_TOURNAMENT_COLUMNS,
+        torneosColumns: tournamentsColumns,
       }}
     >
       {children}

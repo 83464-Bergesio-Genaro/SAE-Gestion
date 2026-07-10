@@ -1,46 +1,41 @@
 import {
   CardContent,
-  Typography,
   Card,
-  Container,
   Box,
   Grid,
   Dialog,
-  InputAdornment,
+  InputAdornment, 
   DialogActions,
   DialogContent,
   DialogTitle,
   DialogContentText,
-  Stack,
-  Snackbar,
-  Alert,
+  Stack
 } from "@mui/material";
 
 import { DataGrid } from "@mui/x-data-grid";
-
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import DocumentCard from "../../../shared/components/documents/DocumentCard";
 
 import DeportesMasonry from "../../components/deportesMasonery";
 import JsonArrayDataGrid from "../../../shared/components/jsonArrayDataGrid/jsonArrayDataGrid";
 
 import SearchIcon from "@mui/icons-material/Search";
+import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 
+import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import DocumentCard from "../../../shared/components/documents/DocumentCard";
 import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-
-import { SPORTS_STRINGS } from "./sports.strings";
+import SAEPage from "../../../shared/components/page/SAEPage";
+import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
+import TitleBox from "../../../shared/components/titleBox";
 
 import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
+import { SPORTS_STRINGS } from "../../../utils/gena/student.string";
+
 import { SportsProvider as EmployedSportsProvider } from "../../../employed/context/providers/sportsProvider";
 import { useSportsContext } from "../../context/studentContext";
 import { SportsProvider } from "../../context/providers/sportsProvider";
 
-import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
-import TitleBox from "../../../shared/components/titleBox";
-import SportsHandballIcon from "@mui/icons-material/SportsHandball";
-import SAEPage from "../../../shared/components/page/SAEPage";
 const C = SPORTS_STRINGS;
 
 function StudentSportsContent() {
@@ -48,7 +43,6 @@ function StudentSportsContent() {
     busquedaTorneos,
     closeDeleteDialog,
     closePreview,
-    closeSnackbar,
     documentoAEliminar,
     documentos,
     handleArchivoChange,
@@ -64,7 +58,6 @@ function StudentSportsContent() {
     requestDeleteDocument,
     rowsTorneosFiltradas,
     setBusquedaTorneos,
-    snackbar,
     subscribedSportIds,
     torneoDeportista,
     torneosColumns,
@@ -94,7 +87,6 @@ function StudentSportsContent() {
             <Grid
               key={item.id_tipo_documento ?? item.nombre}
               size={{ xs: 12, sm: 6, md: 4 }}
-              item
               sx={{ justifyContent: "center", alignItems: "center" }}
             >
               <DocumentCard
@@ -263,21 +255,6 @@ function StudentSportsContent() {
         error={preview.error}
       />
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={closeSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={closeSnackbar}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </SAEPage>
   );
 }

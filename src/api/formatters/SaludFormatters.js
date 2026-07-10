@@ -61,6 +61,6 @@ export const mapTurnosPaciente = (turno) => ({
 
 function removerHoras(isoString) {
     if (!isoString) return "";  
-    const [year, month, day] = (isoString.split("T")[0]).split("-");
+    const [year, month, day] = isoString.substring(0, 10).split("-");
     return year+'-'+month+'-'+day;
 }

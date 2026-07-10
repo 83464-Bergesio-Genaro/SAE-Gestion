@@ -33,6 +33,8 @@ import { useJPA } from "../../context/employedContext";
 import SAEPage from "../../../shared/components/page/SAEPage";
 import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
 import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
+import { isValidEmail } from "../../../utils/util.jsx";
+
 function CopyURLButton() {
   const ubicacionesComunes = [
     {
@@ -794,6 +796,14 @@ function DialogJpa() {
                     label="Contacto Electronico"
                     value={dialogData.email}
                     onChange={(e) => handleDataChange("email", e.target.value)}
+                    error={Boolean(
+                      dialogData.email && !isValidEmail(dialogData.email),
+                    )}
+                    helperText={
+                      dialogData.email && !isValidEmail(dialogData.email)
+                        ? "Ingrese un correo electrónico válido"
+                        : ""
+                    }
                     fullWidth
                   />
                 </>

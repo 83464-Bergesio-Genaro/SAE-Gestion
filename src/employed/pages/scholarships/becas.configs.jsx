@@ -3,7 +3,8 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import PersonIcon from "@mui/icons-material/Person";
 import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import PeopleIcon from "@mui/icons-material/People";
-
+import { Chip } from "@mui/material";
+import { formatTime } from "../../../utils/util.jsx";
 // Cada columna cumple doble funcion: configura el DataGrid y tambien define
 // como debe renderizarse ese campo dentro del dialog generico.
 export const proyectosColumns = [
@@ -25,6 +26,13 @@ export const proyectosColumns = [
     width: 100,
     defaultValue: false,
     valueFormatter: (value) => (value ? "Sí" : "No"),
+    renderCell: (params) => (
+      <Chip
+        size="small"
+        label={params.value ? "Sí" : "No"}
+        color={params.value ? "success" : "default"}
+      />
+    ),
     form: {
       type: "switch",
       visible: true,
@@ -184,7 +192,13 @@ export const becariosColumns = [
     minWidth: 100,
     defaultValue: false,
     flex: 1,
-    valueFormatter: (value) => (value ? "Sí" : "No"),
+    renderCell: (params) => (
+      <Chip
+        size="small"
+        label={params.value ? "Sí" : "No"}
+        color={params.value ? "success" : "default"}
+      />
+    ),
     form: {
       type: "switch",
       visible: true,
@@ -197,7 +211,13 @@ export const becariosColumns = [
     minWidth: 100,
     flex: 1,
     defaultValue: false,
-    valueFormatter: (value) => (value ? "Sí" : "No"),
+    renderCell: (params) => (
+      <Chip
+        size="small"
+        label={params.value ? "Sí" : "No"}
+        color={params.value ? "success" : "default"}
+      />
+    ),
     form: {
       type: "switch",
       visible: true,
@@ -209,7 +229,13 @@ export const becariosColumns = [
     minWidth: 100,
     flex: 1,
     defaultValue: false,
-    valueFormatter: (value) => (value ? "Sí" : "No"),
+    renderCell: (params) => (
+      <Chip
+        size="small"
+        label={params.value ? "Sí" : "No"}
+        color={params.value ? "success" : "default"}
+      />
+    ),
     form: {
       type: "switch",
       visible: true,

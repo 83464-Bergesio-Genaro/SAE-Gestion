@@ -327,7 +327,7 @@ export function SportsProvider({ children, autoLoad = true }) {
         showNotification(
           dialogMode === "create"
             ? "Docente creado correctamente"
-            : "Docente modificado correctamente",
+            : "Docente modificado correctamente","success"
         );
       } else if (dialogType === "espacio") {
         await (dialogMode === "create"
@@ -337,7 +337,7 @@ export function SportsProvider({ children, autoLoad = true }) {
         showNotification(
           dialogMode === "create"
             ? "Espacio creado correctamente"
-            : "Espacio modificado correctamente",
+            : "Espacio modificado correctamente","success"
         );
       } else if (dialogType === "deportista") {
         const body = {
@@ -353,7 +353,7 @@ export function SportsProvider({ children, autoLoad = true }) {
         showNotification(
           dialogMode === "create"
             ? "Deportista creado correctamente"
-            : "Deportista modificado correctamente",
+            : "Deportista modificado correctamente","success"
         );
       } else {
         await (dialogMode === "create"
@@ -363,12 +363,13 @@ export function SportsProvider({ children, autoLoad = true }) {
         showNotification(
           dialogMode === "create"
             ? "Deporte creado correctamente"
-            : "Deporte modificado correctamente",
+            : "Deporte modificado correctamente","success"
         );
       }
       closeDialog();
     } catch (e) {
       setDialogError(e.message || "Ocurrió un error al guardar");
+      showNotification(e.message || "Ocurrió un error al guardar", "error");
     } finally {
       setDialogSaving(false);
     }

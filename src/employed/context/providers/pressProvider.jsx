@@ -267,7 +267,7 @@ export function PressProvider({ children }) {
       await eliminarPublicacion(dialogData.id);
       closeDialog();
       setRefreshKey((k) => k + 1);
-      showNotification(C.snackDeleted);
+      showNotification(C.snackDeleted,"success");
     } catch (err) {
       console.warn("Respuesta del delete:", err);
       setDialogError(err.message || "No se pudo eliminar la publicación");

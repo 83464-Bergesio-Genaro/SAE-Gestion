@@ -289,10 +289,11 @@ export function TravelProvider({ children }){
             await fetchBussiness();
             setDialogOpen(false);
             setDialogData(EMPTY_BUSSINESS);
-            showNotification(dialogMode === "create"? "Empresa creada!":"Empresa modificada!");
+            showNotification(dialogMode === "create"? "Empresa creada!":"Empresa modificada!","success");
         }
         catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
+            showNotification(err.message || "Ocurrió un error al guardar", "error");
         } finally {
             setDialogSaving(false);
         }
@@ -512,7 +513,7 @@ export function TravelProvider({ children }){
                 await CrearInscriptoViaje(body);
                 setUsuarioSelected(null);
                 await fetchInscriptosXTravel(travelData.id);
-                showNotification("Se inscribio esta persona al viaje");
+                showNotification("Se inscribio esta persona al viaje","success");
                 setLoadingInscripts(false);
         }
             catch (err) {
@@ -543,14 +544,16 @@ export function TravelProvider({ children }){
                     await fetchInscriptosXTravel(travelData.id);
                     setDialogOpen(false);
                     setUsuarioSelected(null);
-                    showNotification("Se elimino el estudiante");
+                    showNotification("Se elimino el estudiante","success");
                 }
                 else{
                     setDialogError("Ocurrio un error al intentar eliminar este inscripto");
+
                 }
             }
             catch (err) {
                 setDialogError(err.message || "Ocurrió un error al guardar");
+                showNotification(err.message || "Ocurrió un error al guardar", "error");
             } finally {
                 setDialogSaving(false);
             }
@@ -567,10 +570,11 @@ export function TravelProvider({ children }){
                 await ModificarInscripto(estudiante.id,estudiante);
                 
                 setUsuarioSelected(null);
-                showNotification("Actualizado!");
+                showNotification("Actualizado!","success");
             }
             catch (err) {
                 setDialogError(err.message || "Ocurrió un error actualizar");
+                showNotification(err.message || "Ocurrió un error al guardar", "error");
             } finally {
                 setDialogSaving(false);
             }
@@ -676,7 +680,7 @@ export function TravelProvider({ children }){
             setLoadingViajeDocs(true);
             await fetchDocsXTravel(docsViaje);
 
-            showNotification("Documento eliminado");
+            showNotification("Documento eliminado","success ");
         } catch  {
 
             showNotification("Error al eliminar el documento", "error");
@@ -735,7 +739,7 @@ export function TravelProvider({ children }){
 
             await fetchDocsXTravel(docsViaje);
         
-            showNotification(`Archivo ${savedFile.nombre_documento} subido con exito`);
+            showNotification(`Archivo ${savedFile.nombre_documento} subido con exito`,"success");
             setTravelNewFile(null);
             setTypeDoc(null);
 

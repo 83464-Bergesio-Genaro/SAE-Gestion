@@ -319,10 +319,11 @@ export const ConsultationProvider = ({ children }) => {
       showNotification(
         dialogMode === "create"
           ? "Link Frecuente creado!"
-          : "Link Frecuente modificada correctamente",
+          : "Link Frecuente modificado correctamente","success"
       );
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }

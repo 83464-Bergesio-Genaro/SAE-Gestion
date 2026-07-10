@@ -611,9 +611,10 @@ export function PurchaseProvider({ children }) {
       );
       setDialogOpen(false);
       setDialogData(clonePurchase());
-      showNotification("Compra eliminada!");
+      showNotification("Compra eliminada!","success");
     } catch (error) {
       setDialogError(error.message || "No se pudo eliminar la compra");
+      showNotification(error.message || "No se pudo eliminar la compra", "error");
     } finally {
       setDialogSaving(false);
       setLoadingPurchase(false);
@@ -1040,10 +1041,11 @@ export function PurchaseProvider({ children }) {
             ? "Compra creada!"
             : dialogMode === "docs"
               ? "Documentos actualizados!"
-              : "Cambios guardados!",
+              : "Cambios guardados!","success"
         );
       } catch (err) {
         setDialogError(err.message || "Ocurrió un error al guardar");
+        showNotification(err.message || "Ocurrió un error al guardar", "error");
       } finally {
         setDialogSaving(false);
       }

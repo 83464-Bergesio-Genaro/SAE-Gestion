@@ -518,7 +518,7 @@ export const HealthUsersProvider = ({ children }) => {
         // 4. PETICIÓN A LA API
         try {
           await ModificarTurno(id_turno, body);
-          showNotification("Turno Actualizado!");
+          showNotification("Turno Actualizado!","success");
         } catch {
           // REVERTIMOS SI FALLA LA API (Devolvemos el foundTurn original)
           actualizarListaPorEstado(id_estado_nuevo, "sacar");
@@ -534,6 +534,7 @@ export const HealthUsersProvider = ({ children }) => {
         }
       } catch (err) {
         setDialogError(err.message || "Ocurrió un error al guardar");
+        showNotification("Ocurrió un error al guardar", "error", 2000);
       }
     },
     [

@@ -192,7 +192,7 @@ export function JPAProvider({ children }) {
         setDialogOpen(false);
         setDialogData(EMPTY_EVENTO_PUBLICO);
         await fetchEventosPublicos();
-        showNotification("Se elimino el evento correctamente");
+        showNotification("Se elimino el evento correctamente","success");
         return;
       }
 
@@ -226,10 +226,11 @@ export function JPAProvider({ children }) {
           ? "Evento creado!"
           : dialogMode === "edit"
             ? "Evento modificado correctamente"
-            : "Se elimino el evento correctamente",
+            : "Se elimino el evento correctamente","success"
       );
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -292,7 +293,7 @@ export function JPAProvider({ children }) {
         setDialogOpen(false);
         setDialogData(EMPTY_EVENTO_PUBLICO);
         await fetchEventosSAE();
-        showNotification("Se elimino el evento correctamente");
+        showNotification("Se elimino el evento correctamente","success");
         return;
       }
 
@@ -326,10 +327,11 @@ export function JPAProvider({ children }) {
           ? "Evento creado!"
           : dialogMode === "edit"
             ? "Evento modificado correctamente"
-            : "Se elimino el evento correctamente",
+            : "Se elimino el evento correctamente","success"
       );
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -414,9 +416,11 @@ export function JPAProvider({ children }) {
           : dialogMode === "edit"
             ? "Puesto modificado correctamente"
             : "Se elimino el puesto correctamente",
+        "success"
       );
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -501,9 +505,11 @@ export function JPAProvider({ children }) {
           : dialogMode === "edit"
             ? "Interesado modificado correctamente"
             : "Se elimino el interesado correctamente",
+        "success"
       );
     } catch (err) {
       setDialogError(err.message || "Ocurrió un error al guardar");
+      showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }

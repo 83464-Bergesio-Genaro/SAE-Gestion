@@ -13,6 +13,7 @@ import {
   DialogActions,
   IconButton,
   FormControlLabel,
+  InputAdornment,
   Switch,
   CircularProgress,
   Alert,
@@ -561,6 +562,17 @@ function TravelsDialog() {
                 onChange={(e) =>
                   handleDialogChange("costo_aproximado", e.target.value)
                 }
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  },
+                  htmlInput: {
+                    inputMode: "decimal",
+                    placeholder: "99.999,99",
+                  },
+                }}
               />
             </Grid>
             <Grid sx={{ display: "flex" }} size={{ xs: 12, md: 3 }} m={0}>

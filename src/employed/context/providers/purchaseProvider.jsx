@@ -23,8 +23,6 @@ import {
   buildDocumentName,
   closePreview as closePreviewState,
   createInitialPreview,
-  formatCurrency,
-  formatCurrencyInput,
   formatDateForDisplay,
   formatDateForInput,
   formatHeader,
@@ -36,13 +34,17 @@ import {
   isPdfDocument,
   MAX_FILE_SIZE_BYTES,
   MAX_FILE_SIZE_MB,
-  normalizeCurrencyValue,
   renameFile,
-  sanitizeCurrencyInput,
   sanitizeFileNamePart,
 } from "../../../utils/util.jsx";
 
-import { formatDateInput } from "../../../utils/juan/util.js";
+import {
+  formatCurrency,
+  formatCurrencyInput,
+  formatDateInput,
+  normalizeCurrencyValue,
+  sanitizeCurrencyInput,
+} from "../../../utils/juan/util.js";
 
 const EMPTY_PURCHASES = {
   id: null,

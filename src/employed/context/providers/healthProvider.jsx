@@ -1290,9 +1290,7 @@ export const HealthUsersProvider = ({ children }) => {
         //Valores de error, mostrar mensajes, etc.
         setDialogError,
         dialogOpen,
-        setDialogOpen,
         dialogData,
-        setDialogData,
         dialogType,
         dialogMode,
         dialogError,

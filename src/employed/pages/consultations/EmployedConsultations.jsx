@@ -22,7 +22,10 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import CloseIcon from "@mui/icons-material/Close";
-import { getDialogTitle } from "../../../utils/juan/util";
+import {
+  getDialogTitle,
+  isValidHyperlink,
+} from "../../../utils/juan/util";
 
 import { useMemo } from "react";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
@@ -177,6 +180,18 @@ function DialogConsultation() {
   }, [dialogData?.id_index_ico, linksFrecuentesIcons]);
 
   const SelectedDialogIcon = selectedDialogIcon.icon;
+  const hyperlinkError =
+    Boolean(dialogData.hipervinculo) && !isValidHyperlink(dialogData.hipervinculo)
+      ? "Ingresa un hipervinculo valido con http:// o https://"
+      : "";
+  const handleSaveLinkFrecuente = () => {
+    if (hyperlinkError) {
+      setDialogError("Revisa los campos marcados antes de guardar.");
+      return;
+    }
+
+    handleLinksFrecuentesSave();
+  };
 
   // Cada nueva tabla puede agregar aquí su entidad, nombre y método de borrado.
   const deleteDialogConfig = {
@@ -309,6 +324,8 @@ function DialogConsultation() {
                         onChange={(e) =>
                           handleDataChange("hipervinculo", e.target.value)
                         }
+                        error={Boolean(hyperlinkError)}
+                        helperText={hyperlinkError}
                         fullWidth
                       />
                     </Grid>
@@ -385,7 +402,7 @@ function DialogConsultation() {
             <SAEButton
               variant="contained"
               color="primary"
-              onClick={handleLinksFrecuentesSave}
+              onClick={handleSaveLinkFrecuente}
               disabled={dialogSaving}
               startIcon={
                 dialogSaving ? (

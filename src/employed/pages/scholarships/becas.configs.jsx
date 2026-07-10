@@ -4,7 +4,12 @@ import PersonIcon from "@mui/icons-material/Person";
 import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import PeopleIcon from "@mui/icons-material/People";
 import { Chip } from "@mui/material";
-import { formatTime } from "../../../utils/util.jsx";
+import {
+  formatTime,
+  isTimeAfter,
+  isValidEmail,
+  isValidMinLengthPhone,
+} from "../../../utils/juan/util.js";
 // Cada columna cumple doble funcion: configura el DataGrid y tambien define
 // como debe renderizarse ese campo dentro del dialog generico.
 export const proyectosColumns = [
@@ -97,7 +102,7 @@ export const serviciosColumns = [
   },
   {
     field: "nro_telefono",
-    headerName: "Número de Teléfono",
+    headerName: "Numero de Telefono",
     minWidth: 100,
     flex: 1,
     defaultValue: "",
@@ -105,12 +110,16 @@ export const serviciosColumns = [
       type: "text",
       visible: true,
       required: true,
-      requiredMessage: "El número de teléfono es obligatorio",
+      requiredMessage: "El numero de telefono es obligatorio",
+      validate: (value) =>
+        isValidMinLengthPhone(value)
+          ? ""
+          : "El telefono debe tener al menos 8 numeros",
     },
   },
   {
     field: "nro_telefono_interno",
-    headerName: "Número de Teléfono Interno",
+    headerName: "Numero de Telefono Interno",
     minWidth: 250,
     flex: 1,
     defaultValue: "",
@@ -118,7 +127,11 @@ export const serviciosColumns = [
       type: "text",
       visible: true,
       required: true,
-      requiredMessage: "El número de teléfono interno es obligatorio",
+      requiredMessage: "El numero de telefono interno es obligatorio",
+      validate: (value) =>
+        isValidMinLengthPhone(value)
+          ? ""
+          : "El telefono interno debe tener al menos 8 numeros",
     },
   },
   {
@@ -133,14 +146,17 @@ export const serviciosColumns = [
       fullRow: true,
       required: true,
       requiredMessage: "El email institucional es obligatorio",
+      validate: (value) =>
+        isValidEmail(value) ? "" : "Ingresa un email valido",
     },
   },
   {
     field: "horario_atencion",
-    headerName: "Horario de Atención",
+    headerName: "Horario de Atencion",
     minWidth: 170,
     flex: 1,
     defaultValue: "",
+    valueFormatter: (value) => formatTime(value),
     form: {
       type: "time",
       visible: true,
@@ -150,18 +166,22 @@ export const serviciosColumns = [
 
   {
     field: "horario_atencion_final",
-    headerName: "Horario de Atención Final",
+    headerName: "Horario de Atencion Final",
     minWidth: 170,
     flex: 1,
     defaultValue: "",
+    valueFormatter: (value) => formatTime(value),
     form: {
       type: "time",
       visible: true,
       step: 900,
+      validate: (value, data) =>
+        isTimeAfter(value, data.horario_atencion)
+          ? ""
+          : "La hora final debe ser mayor a la hora de inicio",
     },
   },
 ];
-
 export const becariosColumns = [
   {
     field: "id",
@@ -589,3 +609,4 @@ export const becasGridConfig = (serviciosRows, proyectosRows) => ({
     ],
   },
 });
+

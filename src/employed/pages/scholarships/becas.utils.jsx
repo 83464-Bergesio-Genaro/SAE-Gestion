@@ -49,6 +49,7 @@ import {
   listarDocumentacionXLegajo,
 } from "../../../api/BecasService";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
+import { formatTime } from "../../../utils/juan/util.js";
 
 const carreras = [
   { value: "sistemas", label: "Sistemas" },
@@ -213,6 +214,18 @@ export default function GenericFormFields({
         );
       }
       if (col.form?.type === "time") {
+        if (isViewMode) {
+          return (
+            <SAETextField
+              key={col.field}
+              label={col.headerName}
+              value={formatTime(value)}
+              disabled
+              fullWidth
+            />
+          );
+        }
+
         return (
           <SAETimeField
             key={col.field}
@@ -224,6 +237,8 @@ export default function GenericFormFields({
             size="big"
             fullWidth
             disabled={disabled}
+            error={Boolean(fieldErrors[col.field])}
+            helperText={fieldErrors[col.field] ?? ""}
           />
         );
       }
@@ -886,6 +901,14 @@ export function useScholarshipDialogController({
       ) {
         errors[col.field] =
           col.form.requiredMessage ?? `${col.headerName} es obligatorio`;
+        return;
+      }
+
+      if (col.form?.validate) {
+        const validationMessage = col.form.validate(value, dialogData);
+        if (validationMessage) {
+          errors[col.field] = validationMessage;
+        }
       }
     });
 

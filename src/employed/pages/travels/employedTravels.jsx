@@ -38,12 +38,16 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
 import SAEPage from "../../../shared/components/page/SAEPage";
-import { isValidEmail } from "../../../utils/util.jsx";
 import {
+  digitsOnly,
   formatCbu,
   formatCuit,
+  formatCurrencyInputFromText,
   isValidCbu,
   isValidCuit,
+  isValidEmail,
+  parseCurrencyInput,
+  sanitizeCurrencyInput,
 } from "../../../utils/juan/util";
 
 const TRAVELS_REQUIRED_DOCUMENTS = [
@@ -165,6 +169,10 @@ function BussinessDialog() {
   };
 
   const fieldErrors = {
+    contacto:
+      Boolean(dialogData.contacto) && !/^\d+$/.test(String(dialogData.contacto))
+        ? "El contacto solo puede contener numeros."
+        : "",
     email:
       Boolean(dialogData.email) && !isValidEmail(dialogData.email)
         ? "Ingresá un email válido."
@@ -235,7 +243,11 @@ function BussinessDialog() {
               <SAETextField
                 label="Telefono"
                 value={dialogData.contacto}
-                onChange={(e) => handleDialogChange("contacto", e.target.value)}
+                onChange={(e) =>
+                  handleDialogChange("contacto", digitsOnly(e.target.value))
+                }
+                error={Boolean(fieldErrors.contacto)}
+                helperText={fieldErrors.contacto}
                 fullWidth
               />
             </Grid>
@@ -556,11 +568,23 @@ function TravelsDialog() {
             <Grid size={{ xs: 12, md: 4 }} m={0}>
               <SAETextField
                 label="Presupuesto"
-                type="number"
                 fullWidth
-                value={dialogData.costo_aproximado}
+                value={
+                  typeof dialogData.costo_aproximado === "number"
+                    ? formatCurrencyInputFromText(dialogData.costo_aproximado)
+                    : (dialogData.costo_aproximado ?? "")
+                }
                 onChange={(e) =>
-                  handleDialogChange("costo_aproximado", e.target.value)
+                  handleDialogChange(
+                    "costo_aproximado",
+                    sanitizeCurrencyInput(e.target.value),
+                  )
+                }
+                onBlur={(e) =>
+                  handleDialogChange(
+                    "costo_aproximado",
+                    parseCurrencyInput(e.target.value),
+                  )
                 }
                 slotProps={{
                   input: {

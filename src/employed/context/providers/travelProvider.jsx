@@ -22,6 +22,10 @@ import {
   formatHeader,
   generateRows,
 } from "../../../utils/util.jsx";
+import {
+  formatCurrency,
+  normalizeCurrencyValue,
+} from "../../../utils/juan/util.js";
 import { useNotification } from "../../../shared/context/sharedContext";
 
 const EMPTY_BUSSINESS = {
@@ -98,6 +102,7 @@ const generateColumns = (data, actionsConfig = []) => {
     const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(normalizedKey);
     const isDate = normalizedKey.startsWith("fecha_");
     const isAddress = ["origen", "destino"].includes(normalizedKey);
+    const isCurrency = normalizedKey === "costo_aproximado";
     
     if (key.toLowerCase() === "activo" ) {
     return {
@@ -136,11 +141,15 @@ const generateColumns = (data, actionsConfig = []) => {
             field: key,
             headerName: formatHeader(key),
             flex: isId ? 0.4 : isDate ? 0 : isAddress ? 1.4 : 1,
-            minWidth: isId || isShort? 50 : isDate ? 105 : isAddress ? 170 : 120,
+            minWidth: isId || isShort? 50 : isDate ? 105 : isAddress ? 170 : isCurrency ? 135 : 120,
             maxWidth: isId ? 70 : isShort ? 100 : isDate ? 115 : undefined,
-            align: isId || isShort || isDate ? "center" : "left",
-            headerAlign: isId || isShort || isDate ? "center" : "left",
-            valueFormatter: isDate ? formatDateForDisplay : undefined,
+            align: isId || isShort || isDate || isCurrency ? "center" : "left",
+            headerAlign: isId || isShort || isDate || isCurrency ? "center" : "left",
+            valueFormatter: isDate
+                ? formatDateForDisplay
+                : isCurrency
+                  ? formatCurrency
+                  : undefined,
         };
     }
   });
@@ -189,17 +198,13 @@ export function TravelProvider({ children }){
     const navigate = useNavigate();
     const {
         showNotification,
-        dialogOpen,
         setDialogOpen,
-        dialogType,
         setDialogType,
         dialogMode,
         setDialogMode,
         dialogData,
         setDialogData,
-        dialogSaving,
         setDialogSaving,
-        dialogError,
         setDialogError,
         openDialog,
     } = useNotification();
@@ -390,6 +395,7 @@ export function TravelProvider({ children }){
             const body = {
                     ...rest,
                     id: id_nuevo,
+                    costo_aproximado: normalizeCurrencyValue(rest.costo_aproximado),
                     seguro_confirmado:seguro,
                     fecha_inicio: cleanedData.fecha_inicio
                     ? `${cleanedData.fecha_inicio}T00:00:00`:new Date(),
@@ -801,13 +807,6 @@ export function TravelProvider({ children }){
         handleAddIncriptos,handleDeleteInscript,handleUpdateInscriptos,handleClickRemove,
 
         docsInscript,loadingInscriptDocs,openSeeDocInscript,seletedInscripts, setSeletedInscripts,
-
-        dialogOpen, setDialogOpen,
-        dialogType, setDialogType,
-        dialogMode, setDialogMode,
-        dialogData, setDialogData,
-        dialogSaving, setDialogSaving,
-        dialogError, setDialogError,
 
         travelData, setTravelData,documentTypes,selectedTypeDoc,setTypeDoc,
 

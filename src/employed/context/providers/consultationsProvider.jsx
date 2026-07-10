@@ -18,7 +18,11 @@ import {
 } from "../../../shared/pages/consultations/linkFrecuentesIcons";
 import { useNotification } from "../../../shared/context/sharedContext";
 
-import { generateRows, formatHeader } from "../../../utils/util.jsx";
+import {
+  formatHeader,
+  generateRows,
+} from "../../../utils/util.jsx";
+import { isValidHyperlink } from "../../../utils/juan/util.js";
 
 const EMPTY_LINKFRECUENTE = {
   id: 0,
@@ -253,7 +257,7 @@ export const ConsultationProvider = ({ children }) => {
     setDialogData(EMPTY_LINKFRECUENTE);
     setDialogError("");
     setTimeout(() => setDialogOpen(true), 0);
-  }, []);
+  }, [setDialogData, setDialogError, setDialogMode, setDialogOpen, setDialogType]);
 
   const openDeleteLinksFrecuentes = useCallback((row) => {
     setDialogData(row);
@@ -261,7 +265,7 @@ export const ConsultationProvider = ({ children }) => {
     setDialogMode("delete");
     setDialogError("");
     setDialogOpen(true);
-  }, []);
+  }, [setDialogData, setDialogError, setDialogMode, setDialogOpen, setDialogType]);
 
   const handleCopyLinkFrecuente = useCallback(async (hipervinculo) => {
     if (!hipervinculo) {
@@ -277,7 +281,7 @@ export const ConsultationProvider = ({ children }) => {
     } finally {
       // setSnackbarOpen(true);
     }
-  }, []);
+  }, [showNotification]);
 
   const linksFrecuentesColumns = useMemo(
     () =>
@@ -295,6 +299,10 @@ export const ConsultationProvider = ({ children }) => {
     setDialogSaving(true);
     setDialogError("");
     try {
+      if (!isValidHyperlink(dialogData.hipervinculo)) {
+        throw new Error("Ingresa un hipervinculo valido con http:// o https://");
+      }
+
       const { id } = dialogData;
       let id_nuevo = id === "" ? 0 : id;
       const body = {

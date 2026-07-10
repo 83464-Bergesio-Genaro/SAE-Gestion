@@ -12,8 +12,11 @@ export const getDialogTitle = (entity, dialogMode) => {
   return `Editar ${entity}`;
 };
 
-const onlyDigits = (value = "", maxLength = Infinity) =>
+export const onlyDigits = (value = "", maxLength = Infinity) =>
   String(value).replace(/\D/g, "").slice(0, maxLength);
+
+export const digitsOnly = (value = "", maxLength = Infinity) =>
+  onlyDigits(value).slice(0, maxLength);
 
 export const formatCuit = (value = "") => {
   const digits = onlyDigits(value, 11);
@@ -41,4 +44,96 @@ export const isValidCuit = (value = "") => {
   const checkDigit = remainder === 0 ? 0 : remainder === 1 ? 9 : 11 - remainder;
 
   return checkDigit === Number(digits[10]);
+};
+
+export const isValidEmail = (value = "") =>
+  /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(String(value).trim());
+
+export const isValidMinLengthPhone = (value = "", minLength = 8) =>
+  onlyDigits(value).length >= minLength;
+
+export const isValidHyperlink = (value = "") => {
+  try {
+    const url = new URL(String(value).trim());
+    return ["http:", "https:"].includes(url.protocol);
+  } catch {
+    return false;
+  }
+};
+
+export const isTimeAfter = (endTime = "", startTime = "") => {
+  if (!startTime || !endTime) return true;
+
+  const toMinutes = (time) => {
+    const [hours, minutes] = String(time).slice(0, 5).split(":").map(Number);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+    return hours * 60 + minutes;
+  };
+
+  const startMinutes = toMinutes(startTime);
+  const endMinutes = toMinutes(endTime);
+
+  if (startMinutes === null || endMinutes === null) return true;
+
+  return endMinutes > startMinutes;
+};
+
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+export const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === "") return "";
+
+  const numberValue = Number(value);
+  return Number.isNaN(numberValue) ? "" : currencyFormatter.format(numberValue);
+};
+
+export const formatCurrencyInput = (value) => {
+  if (value === null || value === undefined || value === "") return "";
+
+  const numberValue = Number(value);
+  if (Number.isNaN(numberValue)) return "";
+
+  return numberValue.toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+export const parseCurrencyInput = (value) => {
+  const normalized = String(value)
+    .replace(/[^\d,.]/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+
+  if (!normalized) return "";
+
+  const numberValue = Number(normalized);
+  return Number.isNaN(numberValue) ? "" : numberValue;
+};
+
+export const formatCurrencyInputFromText = (value) =>
+  formatCurrencyInput(parseCurrencyInput(value));
+
+export const normalizeCurrencyValue = (value) =>
+  typeof value === "string" ? parseCurrencyInput(value) : value;
+
+export const sanitizeCurrencyInput = (value) => {
+  const cleanValue = String(value).replace(/[^\d,.]/g, "");
+  const [integerPart, ...decimalParts] = cleanValue.split(",");
+
+  return decimalParts.length === 0
+    ? integerPart
+    : `${integerPart},${decimalParts.join("").replace(/,/g, "")}`;
+};
+
+export const formatTime = (time) => {
+  if (!time) return time;
+
+  const normalizedTime = String(time).slice(0, 5);
+  return normalizedTime.endsWith("hs") ? normalizedTime : `${normalizedTime}hs`;
 };

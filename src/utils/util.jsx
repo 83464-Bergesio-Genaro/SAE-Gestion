@@ -295,7 +295,39 @@ export const sanitizeAddressPart = (value = "") =>
 export const isValidEmail = (value = "") =>
   /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(String(value).trim());
 
+export const digitsOnly = (value = "", maxLength = Infinity) =>
+  onlyDigits(value).slice(0, maxLength);
+
 export const isValidPhone = (value = "") => onlyDigits(value).length === 12;
+
+export const isValidMinLengthPhone = (value = "", minLength = 8) =>
+  onlyDigits(value).length >= minLength;
+
+export const isValidHyperlink = (value = "") => {
+  try {
+    const url = new URL(String(value).trim());
+    return ["http:", "https:"].includes(url.protocol);
+  } catch {
+    return false;
+  }
+};
+
+export const isTimeAfter = (endTime = "", startTime = "") => {
+  if (!startTime || !endTime) return true;
+
+  const toMinutes = (time) => {
+    const [hours, minutes] = String(time).slice(0, 5).split(":").map(Number);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+    return hours * 60 + minutes;
+  };
+
+  const startMinutes = toMinutes(startTime);
+  const endMinutes = toMinutes(endTime);
+
+  if (startMinutes === null || endMinutes === null) return true;
+
+  return endMinutes > startMinutes;
+};
 
 export const isValidAddress = (value = "") => {
   const parts = String(value).split(/\s+-\s+/);
@@ -351,6 +383,9 @@ export const formatCurrencyInput = (value) => {
     maximumFractionDigits: 2,
   });
 };
+
+export const formatCurrencyInputFromText = (value) =>
+  formatCurrencyInput(parseCurrencyInput(value));
 
 export const parseCurrencyInput = (value) => {
   const normalized = String(value)
@@ -449,11 +484,10 @@ export const MAX_FILE_SIZE_MB = 5;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export const formatTime = (time) => {
-  return time
-    ? time.endsWith("hs")
-      ? time.replace("hs", ":00")
-      : `${time}:00`
-    : time;
+  if (!time) return time;
+
+  const normalizedTime = String(time).slice(0, 5);
+  return normalizedTime.endsWith("hs") ? normalizedTime : `${normalizedTime}hs`;
 };
 
 export const getFirstRecord = (value) => {

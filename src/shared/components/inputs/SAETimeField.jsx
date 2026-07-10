@@ -24,6 +24,8 @@ export default function SAETimeField({
   size = "small",
   fullWidth = false,
   disabled = false,
+  error = false,
+  helperText = "",
 }) {
   const textFieldSize = size === "big" ? "medium" : size;
 
@@ -53,6 +55,8 @@ export default function SAETimeField({
           textField: {
             size: textFieldSize,
             fullWidth,
+            error,
+            helperText,
             sx: fullWidth ? undefined : { width },
           },
           // Forzar la barra de botones en entornos de escritorio si es necesario

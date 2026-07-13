@@ -43,6 +43,14 @@ export const PREVIEW_EXTENSIONS = new Set([
   "pdf",
 ]);
 
+export const DOCUMENT_PREVIEW_DEFAULT_MESSAGES = {
+  fallbackTitle: "Vista previa",
+  fallbackName: "archivo",
+  noId: "No se encontro el id del documento para previsualizar.",
+  notSupported: "Solo se permite vista previa para imagenes o PDF.",
+  loadError: "No se pudo cargar la imagen.",
+};
+
 export const CAREERS = [
   { value: "sistemas", label: "Sistemas" },
   { value: "electrica", label: "Electrica" },

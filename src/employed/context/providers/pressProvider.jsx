@@ -5,6 +5,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { useNuevaPublicacion } from "../../pages/prensa/useNuevaPublicacion";
+import { useDocumentPreview } from "../../../shared/hooks/useDocumentPreview";
 import { useNotification } from "../../../shared/context/sharedContext";
 
 import { booleanChip, prioridadChip } from "../../../utils/datagrid.utils.jsx";
@@ -17,13 +18,6 @@ import {
   descargarDocumentoPorId,
 } from "../../../api/PrensaService";
 
-import {
-  getDocumentExtension,
-  getDocumentId,
-  getDocumentName,
-  getImageSource,
-  isPreviewableDocument,
-} from "../../../utils/documents.utils.js";
 import { EMPTY_PUBLICACION } from "../../../utils/common/common.config";
 import {
   generateRows,
@@ -31,7 +25,6 @@ import {
 } from "../../../utils/datagrid.utils.jsx";
 
 const C = PRENSA_STRINGS;
-
 
 export function PressProvider({ children }) {
   const {
@@ -44,10 +37,10 @@ export function PressProvider({ children }) {
   } = useNotification();
 
   const [publicacionesRows, setPublicacionesRows] = useState([]);
-  const [publicacionesLoading, setLoadingpublicaciones] = useState(true);
+  const [publicacionesLoading, setPublicacionesLoading] = useState(true);
 
   const fetchPublicaciones = useCallback(async () => {
-    setLoadingpublicaciones(true);
+    setPublicacionesLoading(true);
     try {
       const data = await listarPublicacionesCompleto();
       setPublicacionesRows(generateRows(data));
@@ -56,7 +49,7 @@ export function PressProvider({ children }) {
       showNotification(C.errorLoadPublicaciones, "error");
       setPublicacionesRows([]);
     } finally {
-      setLoadingpublicaciones(false);
+      setPublicacionesLoading(false);
     }
   }, [showNotification]);
 
@@ -77,29 +70,16 @@ export function PressProvider({ children }) {
     },
     [publication],
   );
-  const openDeletePublicacion = useCallback(
-    (row) => {
-      openDialog("pressPublicationDelete", "delete", row);
-    },
-    [openDialog],
-  );
 
   useEffect(() => {
     fetchPublicaciones();
   }, [fetchPublicaciones]);
 
-  const handleEditPublicacion = useCallback(
-    (pub) => {
-      openEditPublicacion(pub);
-    },
-    [openEditPublicacion],
-  );
-
   const handleDeletePublicacion = useCallback(
     (pub) => {
-      openDeletePublicacion(pub);
+      openDialog("pressPublicationDelete", "delete", pub);
     },
-    [openDeletePublicacion],
+    [openDialog],
   );
 
   const handlePreviewPublicacion = useCallback(async (pub) => {
@@ -128,7 +108,7 @@ export function PressProvider({ children }) {
         icon: EditIcon,
         color: "primary",
         title: "Editar publicación",
-        onClick: handleEditPublicacion,
+        onClick: openEditPublicacion,
       },
       {
         icon: DeleteIcon,
@@ -137,7 +117,11 @@ export function PressProvider({ children }) {
         onClick: handleDeletePublicacion,
       },
     ],
-    [handleEditPublicacion, handleDeletePublicacion, handlePreviewPublicacion],
+    [
+      handleDeletePublicacion,
+      handlePreviewPublicacion,
+      openEditPublicacion,
+    ],
   );
 
   const publicacionesColumns = useMemo(() => {
@@ -164,94 +148,14 @@ export function PressProvider({ children }) {
   const [selectedPub, setSelectedPub] = useState(null);
   const [documentos, setDocumentos] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState(null);
-  const [previewDocName, setPreviewDocName] = useState("");
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewError, setPreviewError] = useState("");
-
-  const handleCardClick = useCallback(
-    async (pub) => {
-      setSelectedPub(pub);
-      setLoadingDocs(true);
-      setDocumentos([]);
-      try {
-        const data = await listarDocumentosPorPublicacion(pub.id);
-        setDocumentos(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(C.errorLoadDocumentos, err);
-        showNotification(C.errorLoadDocumentos, "error");
-      } finally {
-        setLoadingDocs(false);
-      }
-    },
-    [showNotification],
-  );
+  const documentPreview = useDocumentPreview({
+    downloadById: descargarDocumentoPorId,
+    messages: C.documentPreview,
+  });
 
   const handleClose = () => {
     setSelectedPub(null);
     setDocumentos([]);
-  };
-
-  const handleOpenPreview = async (doc) => {
-    const documentId = getDocumentId(doc);
-    console.log(doc);
-    setPreviewDocName(getDocumentName(doc, "Vista previa"));
-    setPreviewOpen(true);
-    setPreviewLoading(true);
-    setPreviewError("");
-    setPreviewDoc(null);
-
-    if (!documentId) {
-      setPreviewError("No se encontró el id del documento para previsualizar.");
-      setPreviewLoading(false);
-      return;
-    }
-
-    try {
-      const data = await descargarDocumentoPorId(documentId);
-
-      if (!isPreviewableDocument(data) && !isPreviewableDocument(doc)) {
-        setPreviewError("Solo se permite vista previa para imágenes o PDF.");
-        return;
-      }
-
-      setPreviewDoc(data);
-    } catch (error) {
-      console.error("Error al descargar documento:", error);
-      setPreviewError("No se pudo cargar la imagen.");
-    } finally {
-      setPreviewLoading(false);
-    }
-  };
-
-  const handleClosePreview = () => {
-    setPreviewOpen(false);
-    setPreviewDoc(null);
-    setPreviewDocName("");
-    setPreviewError("");
-    setPreviewLoading(false);
-  };
-
-  const handleDownloadPreview = () => {
-    if (!previewDoc) return;
-
-    const imageSource = getImageSource(previewDoc);
-    if (!imageSource) return;
-
-    const extension = getDocumentExtension(previewDoc);
-    const fileName = getDocumentName(previewDoc, previewDocName || "archivo");
-    const hasExtension = fileName.includes(".");
-    const downloadName = hasExtension
-      ? fileName
-      : `${fileName}.${extension || "jpg"}`;
-
-    const link = document.createElement("a");
-    link.href = imageSource;
-    link.download = downloadName;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
   };
 
   const handleDeleteConfirm = async () => {
@@ -278,31 +182,16 @@ export function PressProvider({ children }) {
         publicacionesRows,
         publicacionesColumns,
         publicacionesLoading,
-        fetchPublicaciones,
         openCreatePublicacion,
         openEditPublicacion,
-        openDeletePublicacion,
 
-        loading: publicacionesLoading,
-        handleCardClick,
         selectedPub,
         handleClose,
         loadingDocs,
         documentos,
-        getDocumentId,
-        handleOpenPreview,
-        previewOpen,
-        handleClosePreview,
-        previewDoc,
-        previewDocName,
-        previewLoading,
-        previewError,
-        handleDownloadPreview,
-        getImageSource,
-        getDocumentName,
-        getDocumentExtension,
+        handleOpenPreview: documentPreview.openPreview,
+        documentPreviewDialogProps: documentPreview.dialogProps,
         ...publication,
-        rows: publicacionesRows,
 
         handleDeleteConfirm,
       }}

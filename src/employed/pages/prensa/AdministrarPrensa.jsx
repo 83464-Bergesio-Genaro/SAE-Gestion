@@ -63,15 +63,7 @@ function AdministrarPrensaContent() {
     loadingDocs,
     documentos,
     handleOpenPreview,
-    previewOpen,
-    handleClosePreview,
-    previewDoc,
-    previewDocName,
-    previewLoading,
-    previewError,
-    getImageSource,
-    getDocumentName,
-    getDocumentExtension,
+    documentPreviewDialogProps,
   } = usePress();
 
   const activeSection = "publicaciones";
@@ -122,15 +114,7 @@ function AdministrarPrensaContent() {
         onPreviewDocument={handleOpenPreview}
       />
 
-      <DocumentPreviewDialog
-        open={previewOpen}
-        onClose={handleClosePreview}
-        title={getDocumentName(previewDoc, previewDocName)}
-        imageSrc={previewDoc ? getImageSource(previewDoc) : ""}
-        isPdf={getDocumentExtension(previewDoc) === "pdf"}
-        loading={previewLoading}
-        error={previewError}
-      />
+      <DocumentPreviewDialog {...documentPreviewDialogProps} />
 
       <DialogPress />
     </SAEPage>

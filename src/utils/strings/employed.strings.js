@@ -123,6 +123,13 @@ export const PRENSA_STRINGS = {
   errorLoadPublicaciones: "Error al cargar las publicaciones",
   errorLoadDocumentos: "Error al cargar los documentos de la publicación",
 
+  documentPreview: {
+    fallbackTitle: "Vista previa",
+    fallbackName: "archivo",
+    noId: "No se encontro el id del documento para previsualizar.",
+    notSupported: "Solo se permite vista previa para imagenes o PDF.",
+    loadError: "No se pudo cargar la imagen.",
+  },
   snackCreated: "Publicación creada correctamente.",
   snackSaved: "Publicación modificada correctamente.",
   snackDeleted: "Publicación eliminada correctamente.",

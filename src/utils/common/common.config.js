@@ -140,6 +140,10 @@ export const EMPTY_PUBLICACION = {
   visualizaciones: 0,
 };
 
+
+
+
+
 // ------------------------ REQUERIDOS ------------------------ //
 export const PROFILE_REQUIRED_FIELDS = [
   ["legajo", "Legajo"],
@@ -510,3 +514,12 @@ export const QUICK_CONSULTATION_FAQS = [
       "Verificá que tu sesión siga activa y recargá la página. Si el problema continúa, enviá una consulta detallando la sección y el error.",
   },
 ];
+
+
+export const INITIAL_PREVIEW = {
+  open: false,
+  loading: false,
+  doc: null,
+  title: "",
+  error: "",
+};

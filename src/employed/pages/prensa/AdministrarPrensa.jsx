@@ -45,14 +45,11 @@ import SAEPage from "../../../assets/components/page/SAEPage";
 import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
 import { PRENSA_STRINGS } from "../../../utils/strings/employed.strings";
 import { getTipoDocumento } from "../../../utils/documents.utils";
+import { getPrioridadOptions } from "../../../utils/datagrid.utils.jsx";
 
 const PSN = PRENSA_STRINGS.nueva;
 const C = PRENSA_STRINGS;
-const PRIORIDAD_OPTIONS = [
-  { value: 0, label: C.priorityNormal, chipColor: "success" },
-  { value: 1, label: C.priorityMedium, chipColor: "warning" },
-  { value: 2, label: C.priorityHigh, chipColor: "error" },
-];
+const PRIORIDAD_OPTIONS = getPrioridadOptions(C);
 
 function AdministrarPrensaContent() {
   const {

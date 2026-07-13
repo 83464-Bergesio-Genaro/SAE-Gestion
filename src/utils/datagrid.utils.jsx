@@ -151,6 +151,24 @@ const PRIORIDAD_CONFIG = {
   2: { label: "Alta", color: "error" },
 };
 
+export const getPrioridadOptions = (strings = {}) => [
+  {
+    value: 0,
+    label: strings.priorityNormal ?? PRIORIDAD_CONFIG[0].label,
+    chipColor: "success",
+  },
+  {
+    value: 1,
+    label: strings.priorityMedium ?? PRIORIDAD_CONFIG[1].label,
+    chipColor: "warning",
+  },
+  {
+    value: 2,
+    label: strings.priorityHigh ?? PRIORIDAD_CONFIG[2].label,
+    chipColor: "error",
+  },
+];
+
 export function prioridadChip(prioridad) {
   const config = PRIORIDAD_CONFIG[Number(prioridad)] ?? PRIORIDAD_CONFIG[0];
 

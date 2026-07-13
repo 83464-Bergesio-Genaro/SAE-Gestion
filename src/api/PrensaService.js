@@ -88,7 +88,7 @@ export async function ObtenerNoticiasPublicas() {
         message: "No hay publicaciones a listar",
       };
     }
-    console.log("Respuesta de la API:", response); // Agrega este console.log para verificar la respuesta de la API
+    //console.log("Respuesta de la API:", response); // Agrega este console.log para verificar la respuesta de la API
     const publications = response.data
       .map(mapPublicacionPublica)
       .sort((a, b) => b.prioridad - a.prioridad);

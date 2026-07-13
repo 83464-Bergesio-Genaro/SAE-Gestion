@@ -7,13 +7,13 @@ import {
   Typography,
   Divider,
 } from "@mui/material";
-import SAEButton from "../../components/buttons/SAEButton";
-import SAETextField from "../../components/inputs/SAETextField";
-import SAESpinner from "../../components/spinner/SAESpinner";
-import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
 import utnLogo from "../../../assets/utn.png";
-import { SAETypography } from "../../components/typography/SAETypography";
-import SAEPage from "../../components/page/SAEPage";
+import { SAETypography } from "../../../assets/components/typography/SAETypography";
+import SAEPage from "../../../assets/components/page/SAEPage";
 
 export default function ComponentLab() {
   const [viewerMode, setViewerMode] = useState(null);

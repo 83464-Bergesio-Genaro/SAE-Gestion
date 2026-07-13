@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Dialog,
@@ -14,130 +13,67 @@ import {
   Stack,
 } from "@mui/material";
 import { Close, AddCircleOutline } from "@mui/icons-material";
-import { useNotification } from "../../../shared/context/sharedContext";
+import { useMyProfile, useNotification } from "../../../shared/context/sharedContext";
 
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import DocumentCard from "../../../shared/components/documents/DocumentCard";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import DocumentCard from "../../../assets/components/documents/DocumentCard";
 
-import { SCHOLARSHIP_STRINGS } from "../../../utils/gena/student.string"; 
-import { PERSONAL_FIELDS } from "../../../utils/gena/common.config";
-import {
-  SCHOLARSHIP_TYPE,
+import { SCHOLARSHIP_STRINGS } from "../../../utils/strings/student.strings";
+import { PERSONAL_FIELDS } from "../../../utils/common/common.config";
+import { SCHOLARSHIP_TYPE,
   MAX_FILE_SIZE_MB,
   MAX_FILE_SIZE_BYTES,
-  DEFAULT_ACCEPTED_EXTENSIONS} from "../../../utils/gena/constants";
-import { construirNombre } from "../../../utils/util";
-import { firstNonEmptyText,getDocumentDisplayName,getErrorMessage,hasDocumentFile } from "../../../utils/gena/util";
+  DEFAULT_ACCEPTED_EXTENSIONS } from "../../../utils/common/constants";
+
+import { getDocumentKey, hasDocumentFile } from "../../../utils/documents.utils";
 import { useScholarships } from "../../context/studentContext";
+import { ProfileContextProvider } from "../../../shared/context/providers/profileProvider";
 
 const C = SCHOLARSHIP_STRINGS;
 
-const getDocumentKey = (documento) =>
-  documento.id ?? documento.id_tipo_documento ?? documento.nombre;
-
 const isEconomicOptionalDocument = (documento) => documento.required === false;
 
-// Une la configuracion local con tipos/archivos de la API y conserva el estado
-// previo para no perder archivos elegidos ni opcionales ya visibles.
-const buildDocumentsFromConfig = (
-  documentsConfig,
-  tiposDocumento = [],
-  previousDocuments = [],
-  documentos = [],
-) => {
-  return documentsConfig.map((documentConfig) => {
-    const previousDocument = previousDocuments.find(
-      (document) => getDocumentKey(document) === getDocumentKey(documentConfig),
-    );
-    const documentType = tiposDocumento.find(
-      (tipoDocumento) =>
-        normalizeText(tipoDocumento.nombre) ===
-        normalizeText(documentConfig.nombre),
-    );
-    const uploadedDocument = documentos.find(
-      (documento) =>
-        documento.subido &&
-        Number(documento.id_tipo_documento) ===
-          Number(documentType?.id ?? documentType?.id_tipo_documento),
-    );
+export default function ScholarshipsForm(){
+  return (
+    <ProfileContextProvider>
+      <ScholarshipsContent />
+    </ProfileContextProvider>
+  );
+}
 
-    return {
-      ...documentConfig,
-      archivo: previousDocument?.archivo ?? documentConfig.archivo ?? null,
-      archivoNombre: firstNonEmptyText(
-        previousDocument?.archivoNombre,
-        documentConfig.archivoNombre,
-        documentConfig.nombre_documento,
-        uploadedDocument?.nombre_documento,
-      ),
-      subido: Boolean(
-        previousDocument?.archivo ||
-        documentConfig.subido ||
-        documentConfig.archivoNombre ||
-        uploadedDocument,
-      ),
-      id_archivo:
-        uploadedDocument?.id ??
-        previousDocument?.id_archivo ??
-        documentConfig.id_archivo ??
-        null,
-      id_tipo_documento:
-        documentType?.id ??
-        documentType?.id_tipo_documento ??
-        documentConfig.id_tipo_documento,
-      visible: Boolean(
-        documentConfig.required ||
-        previousDocument?.visible ||
-        previousDocument?.archivoNombre ||
-        documentConfig.archivoNombre ||
-        uploadedDocument,
-      ),
-      extension:
-        documentType?.extension ??
-        uploadedDocument?.extension ??
-        documentConfig.extension ??
-        DEFAULT_ACCEPTED_EXTENSIONS,
-    };
-  });
-};
-
-export default function ScholarshipsForm({
-  open,
-  onClose,
-  user,
-  becarioActual,
-  setBecarioActual,
-  cargarMisBecas,
-  cargarTiposDocumento,
-  subirDocumentoEstudiante,
-  documentos = [],
-  documentosEconomica,
-  handlePreview,
-  handleDeleteDocument,
-  perfilCompleto,
-  camposPerfilFaltantes = [],
-}) {
-  const {showNotification} = useNotification();
+export function ScholarshipsContent() {
   const {
-    handleClose,
-    saving,
-    datosPerfil,
+    dialogOpen,
+    dialogSaving,
+    closeDialog
+  } = useNotification();
+  const {datosPerfil} = useMyProfile();
+  const {
+    handleChange,
+    handlePreview,
+    documentosEconomica,
+    handleDocumentoChange,
     formBeca,
+    setFormBeca,
+    setDocumentoAEliminar,
+    proyectosRows,serviciosRows,
     documentosRequeridos,
     setDocumentosRequeridos,
     documentosEconomicaVisibles,
-    handleDialogSave,
-
+    documentosEconomicosOpcionalesDisponibles,
     handleDocumentoEconomicoDelete,
+    documentoEconomicoOpcionalId, setDocumentoEconomicoOpcionalId,
+    handleAgregarDocumentoEconomico,
     uploadingDocumentoId,
+    setDocumentosEconomica,
+    handleDialogSave
     
   } = useScholarships(); //Esto en teoria lo llamamos desde dentro del provider de becas
 
-
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
+    <Dialog open={dialogOpen} onClose={closeDialog} fullWidth maxWidth="lg">
       <DialogTitle
         sx={{
           display: "flex",
@@ -148,7 +84,7 @@ export default function ScholarshipsForm({
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
           {C.cardSolicitarTitle}
         </Typography>
-        <IconButton onClick={handleClose} size="small" disabled={saving}>
+        <IconButton onClick={closeDialog} size="small" disabled={dialogSaving}>
           <Close />
         </IconButton>
       </DialogTitle>
@@ -162,7 +98,7 @@ export default function ScholarshipsForm({
           pt: "16px !important",
         }}
       >
-        {saving && (
+        {dialogSaving && (
           <Box
             sx={{
               position: "absolute",
@@ -220,7 +156,7 @@ export default function ScholarshipsForm({
 
         <Autocomplete
           fullWidth
-          disabled={saving}
+          disabled={dialogSaving}
           options={C.listaTiposBecas}
           value={
             C.listaTiposBecas.find(
@@ -246,7 +182,7 @@ export default function ScholarshipsForm({
         {formBeca?.tipoBeca === SCHOLARSHIP_TYPE.INVESTIGACION && (
           <Autocomplete
             fullWidth
-            disabled={saving}
+            disabled={dialogSaving}
             options={proyectosRows}
             value={formBeca?.beca ?? null}
             getOptionLabel={(option) =>
@@ -265,7 +201,7 @@ export default function ScholarshipsForm({
         {formBeca?.tipoBeca === SCHOLARSHIP_TYPE.SERVICIO && (
           <Autocomplete
             fullWidth
-            disabled={saving}
+            disabled={dialogSaving}
             options={serviciosRows}
             value={formBeca?.beca ?? null}
             getOptionLabel={(option) => option.nombre ?? ""}
@@ -288,7 +224,7 @@ export default function ScholarshipsForm({
             name="descripcionSituacion"
             value={formBeca?.descripcionSituacion}
             onChange={handleChange}
-            disabled={saving}
+            disabled={dialogSaving}
           />
         )}
 
@@ -305,7 +241,7 @@ export default function ScholarshipsForm({
         {documentosRequeridos?.length > 0 && (
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {documentosRequeridos?.map((item) => (
-              <Grid size={{ xs: 12 }}key={getDocumentKey(item)}>
+              <Grid size={{ xs: 12,md:4 }}key={getDocumentKey(item)}>
                 <DocumentCard
                   documento={item}
                   notUploadedLabel={C.docStateNotUploaded}
@@ -320,7 +256,7 @@ export default function ScholarshipsForm({
                     )
                   }
                   onDelete={(documento) =>
-                    handleDocumentoDelete(documento, setDocumentosRequeridos)
+                    setDocumentoAEliminar(documento)
                   }
                   uploadDisabled={
                     item.subido || uploadingDocumentoId === getDocumentKey(item)
@@ -348,7 +284,7 @@ export default function ScholarshipsForm({
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
               <Autocomplete
                 fullWidth
-                disabled={saving}
+                disabled={dialogSaving}
                 options={documentosEconomicosOpcionalesDisponibles}
                 value={
                   documentosEconomicosOpcionalesDisponibles.find(
@@ -376,7 +312,7 @@ export default function ScholarshipsForm({
               <SAEButton
                 variant="contained"
                 onClick={handleAgregarDocumentoEconomico}
-                disabled={!documentoEconomicoOpcionalId || saving}
+                disabled={!documentoEconomicoOpcionalId || dialogSaving}
                 startIcon={<AddCircleOutline />}
                 sx={{ minWidth: { sm: 150 } }}
               >
@@ -388,7 +324,7 @@ export default function ScholarshipsForm({
         {documentosEconomicaVisibles?.length > 0 && (
           <Grid container spacing={2.5} sx={{ mt: 1 }}>
             {documentosEconomicaVisibles?.map((item) => (
-              <Grid size={{ xs: 12}} key={getDocumentKey(item)}>
+              <Grid size={{ xs: 12,md:4}} key={getDocumentKey(item)}>
                 <DocumentCard
                   documento={item}
                   notUploadedLabel={C.docStateNotUploaded}
@@ -418,15 +354,15 @@ export default function ScholarshipsForm({
       </DialogContent>
 
       <DialogActions>
-        <SAEButton onClick={handleClose} disabled={saving}>
+        <SAEButton onClick={closeDialog} disabled={dialogSaving}>
           {C.cancelButton}
         </SAEButton>
         <SAEButton
           variant="contained"
           onClick={handleDialogSave}
-          disabled={saving}
+          disabled={dialogSaving}
         >
-          {saving ? C.savingButton : C.saveButton}
+          {dialogSaving ? C.savingButton : C.saveButton}
         </SAEButton>
       </DialogActions>
     </Dialog>

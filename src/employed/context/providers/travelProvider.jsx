@@ -21,7 +21,7 @@ import {
   formatDateForDisplay,
   formatHeader,
   generateRows,
-} from "../../../utils/util.jsx";
+} from "../../../utils/datagrid.utils.jsx";
 import {
   formatCurrency,
   normalizeCurrencyValue,

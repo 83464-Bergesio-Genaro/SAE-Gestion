@@ -1,8 +1,14 @@
 import { useState, useEffect, useCallback,useMemo } from "react";
 import { ScholarshipsContext } from "../studentContext";
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import {
+  AddCircleOutline,
+  AttachMoney,
+  Diversity3,
+  School,
+} from "@mui/icons-material";
 
-import DocumentCard from "../../../shared/components/documents/DocumentCard";
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
+import DocumentCard from "../../../assets/components/documents/DocumentCard";
 
 import {
   ObtenerBecariosXLegajo,
@@ -26,30 +32,17 @@ import { ObtenerPerfilXLegajo } from "../../../api/EstudianteService";
 import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
 import { useAuth, useNotification } from "../../../shared/context/sharedContext";
 
-import { SCHOLARSHIPS_REQUERID_DOCUMENTS,ECONOMIC_DOCUMENTS,ECONOMIC_OPTIONAL_DOCUMENTS } from "../../../utils/gena/common.config.js";
-import { SCHOLARSHIP_STRINGS } from "../../../utils/gena/student.string.js"; 
-import {SCHOLARSHIPS_STATES , SCHOLARSHIP_TYPE,MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB} from "../../../utils/gena/constants.js";
-
-import {
-  INITIAL_PREVIEW,
-  isPdfDocument,
-  construirNombre
-} from "../../../utils/util.jsx";
-
-import { 
-  asignarArchivosADocumentos,
+import { SCHOLARSHIPS_REQUERID_DOCUMENTS,ECONOMIC_DOCUMENTS,ECONOMIC_OPTIONAL_DOCUMENTS } from "../../../utils/common/common.config.js";
+import { SCHOLARSHIP_STRINGS } from "../../../utils/strings/student.strings"; 
+import { SCHOLARSHIPS_STATES , SCHOLARSHIP_TYPE,MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB, DEFAULT_ACCEPTED_EXTENSIONS} from "../../../utils/common/constants.js";
+import { createPreviewState,isPdfDocument, buildDocumentName,
+    asignarArchivosADocumentos,
   asignarTiposADocumentos,
-  getErrorMessage,
-  obtenerLegajoDesdeEmail,
- getDocumentDisplayName } from "../../../utils/gena/util.jsx";
-
-import {
-  AddCircleOutline,
-  AttachMoney,
-  Diversity3,
-  School,
-} from "@mui/icons-material";
-
+  getDocumentDisplayName,
+  buildDocumentsFromConfig,
+  getDocumentKey
+} from "../../../utils/documents.utils.js";
+import { getErrorMessage,obtenerLegajoDesdeEmail } from "../../../utils/util.jsx";
 
 const isValidObjectResponse = (value) =>
   Boolean(value && typeof value === "object" && value.id);
@@ -84,7 +77,7 @@ function getEstadoBecaDesdeBecario(becario = {}) {
 }
 
 export function ScholarshipsProvider({ children }) {
-
+  const {setDialogOpen} = useNotification();
     const isEconomicOptionalDocument = (documento) => documento.required === false;
     const { showNotification} =useNotification();
     const C = SCHOLARSHIP_STRINGS;
@@ -138,13 +131,11 @@ const REQUIRED_PROFILE_FIELDS = [
           return value === null || value === undefined || !isValid(value);
       }).map(([, label]) => label);
 
-  function closePreview() {
-      closePreviewState(setPreview);
-  }
+
   const { user } = useAuth();
   const [perfilEstudiante, setPerfilEstudiante] = useState(null);
   const camposPerfilFaltantes = getMissingProfileFields(perfilEstudiante);
-  const perfilIncompleto = camposPerfilFaltantes.length > 0;
+  const perfilIncompleto = camposPerfilFaltantes?.length > 0;
 
   // Becario base del sistema SAE. Es distinto de la beca específica.
   // Primero se necesita este registro para después crear económica/servicio/investigación.
@@ -153,13 +144,13 @@ const REQUIRED_PROFILE_FIELDS = [
   const [loadingDocuments, setLoadingDocuments] = useState(true);
   // Lista normalizada de becas para pintar las cards.
   const [misBecas, setMisBecas] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
+
   const [documentos, setDocumentos] = useState(SCHOLARSHIPS_REQUERID_DOCUMENTS); // lista general de documentos cargados
   const [documentosEconomica, setDocumentosEconomica] = useState(
     ECONOMIC_DOCUMENTS.concat(ECONOMIC_OPTIONAL_DOCUMENTS),
   ); // documentos específicos para beca económica
 
-  const [preview, setPreview] = useState(INITIAL_PREVIEW);
+  const [preview, setPreview] = useState(createPreviewState());
 
   const [cbu, setCbu] = useState("");
   const [cbuGuardado, setCbuGuardado] = useState(false);
@@ -178,8 +169,7 @@ const REQUIRED_PROFILE_FIELDS = [
     try {
       const perfil = await ObtenerPerfilXLegajo(legajo);
       setPerfilEstudiante(mapEstudiante(perfil));
-    } catch (error) {
-
+    } catch {
       setPerfilEstudiante(null);
     }
   }, [user?.email, user?.legajo]);
@@ -337,7 +327,7 @@ const REQUIRED_PROFILE_FIELDS = [
       return;
     }
 
-    const nuevoNombre = construirNombre(
+    const nuevoNombre = buildDocumentName(
       item.formatoNombre,
       {
         legajo: obtenerLegajoDesdeEmail(user.legajo ?? user.email),
@@ -424,7 +414,7 @@ const REQUIRED_PROFILE_FIELDS = [
       return;
     }
 
-    setOpenDialog(true);
+    setDialogOpen(true);
   };
 
   // Borra despues de confirmar en el dialog. Si la API responde bien, limpia el
@@ -472,6 +462,13 @@ const REQUIRED_PROFILE_FIELDS = [
       setLoadingDocuments(false);
     }
   }
+  const closePreview = () => {
+      setPreview((previous) => ({
+        ...previous,
+        open: false,
+        imageSrc: null, // Limpieza para liberar memoria
+      }));
+  };
 
   // Descarga el archivo por id y delega la visualizacion al dialog compartido.
   async function handlePreview(id, nombre) {
@@ -593,7 +590,7 @@ const REQUIRED_PROFILE_FIELDS = [
     ObtenerDocumentosEstudiante,
   ]);
 
- const datosPerfil = user?.datosPerfil ?? {};
+  const datosPerfil = user?.datosPerfil ?? {};
   const userLegajo = datosPerfil.legajo;
   const userNombreCompleto = datosPerfil.nombres;
   const userApellido = datosPerfil.apellidos;
@@ -716,7 +713,6 @@ const REQUIRED_PROFILE_FIELDS = [
     cargarServiciosInternos();
     cargarTiposDocumentoFormulario();
   }, [
-    open,
     initialFormBeca,
     cargarProyectosInvestigacion,
     cargarServiciosInternos,
@@ -728,22 +724,26 @@ const REQUIRED_PROFILE_FIELDS = [
   useEffect(() => {
     if (!open) return;
     setDocumentosRequeridos(documentos);
-  }, [documentos, open]);
+  }, [documentos]);
 
   // Los documentos economicos dependen del tipo seleccionado. Se reconstruyen
   // mezclando configuracion, tipos de documento y archivos ya subidos.
 useEffect(() => {
+  // Condición de salida para evitar ejecuciones innecesarias
+  if (!formBeca?.tipoBeca || !tiposDocumento) return;
+
   setDocumentosEconomica((prev) =>
     formBeca.tipoBeca === SCHOLARSHIP_TYPE.ECONOMICA
       ? buildDocumentsFromConfig(
-          documentosEconomica, // Nota: Aquí usas la variable del closure, no el estado actualizado
+          prev, // <-- Pasamos 'prev' en lugar de 'documentosEconomica'
           tiposDocumento,
           prev,
           documentos,
         )
       : [],
   );
-}, [formBeca.tipoBeca, tiposDocumento, documentos]);
+  // Eliminamos 'documentosEconomica' de las dependencias
+}, [formBeca.tipoBeca, tiposDocumento, documentos]); 
 
   const documentosEconomicaVisibles = documentosEconomica.filter(
     (documento) =>
@@ -828,7 +828,7 @@ useEffect(() => {
     }
 
     const nombreArchivo = selectedDocument.formatoNombre
-      ? construirNombre(
+      ? buildDocumentName(
           selectedDocument.formatoNombre,
           {
             legajo: obtenerLegajoDesdeEmail(
@@ -906,7 +906,7 @@ useEffect(() => {
   // base; si no, limpia el estado local.
   const handleDocumentoDelete = (item, setDocumentos) => {
     if (item.id_archivo) {
-      handleDeleteDocument?.(item);
+      documentoAEliminar?.(item);
       return;
     }
 
@@ -915,7 +915,7 @@ useEffect(() => {
 
   const handleDocumentoEconomicoDelete = (item) => {
     if (item.id_archivo) {
-      handleDeleteDocument?.(item);
+      documentoAEliminar?.(item);
       return;
     }
 
@@ -1001,7 +1001,9 @@ useEffect(() => {
       }),
     );
   };
-
+  const isSelectedFile = (archivo) => {
+    return archivo instanceof File || archivo instanceof Blob;
+  };
   // La beca especifica necesita un becario SAE. Si existe se reutiliza; si no,
   // se crea antes de avanzar.
   const crearBecarioSiNoExiste = async () => {
@@ -1047,7 +1049,7 @@ useEffect(() => {
   // Flujo completo del boton Guardar: valida, crea/reutiliza becario, crea la
   // beca, sube pendientes, refresca Scholarships y cierra el dialog.
   const handleDialogSave = async () => {
-    if (!perfilCompleto) {
+    if (!camposPerfilFaltantes?.length > 0) {
       showNotification(
         `Completá tu perfil antes de solicitar una beca. Faltan: ${camposPerfilFaltantes.join(", ")}.`,
         "warning",
@@ -1078,14 +1080,18 @@ useEffect(() => {
     <ScholarshipsContext.Provider
       value={{
     closePreview,perfilEstudiante,camposPerfilFaltantes,perfilIncompleto,
-    becarioActual,loadingScholarships,loadingDocuments,misBecas
-    
-    ,openDialog,documentos,documentosEconomica,preview,cbu,cbuGuardado,openPopup,documentoAEliminar,
+    becarioActual,loadingScholarships,loadingDocuments,misBecas,documentos,documentosEconomica,preview,cbu,cbuGuardado,openPopup,documentoAEliminar,
     cargarPerfilEstudiante,cargarTiposDocumento,subirDocumentoEstudiante,normalizarBecas,
     getBecaIcon,cargarMisBecas,handleArchivoChange,setDocumentos,setDocumentosEconomica,handleCbuChange,handleGuardarCbu,
-    hasEconomica,handleAgregarBeca,handleDelete,handlePreview,DeleteDocument,ObtenerTipoDocumentos,ObtenerDocumentosEstudiante,
-    setOpenDialog,setBecarioActual,setOpenPopup,
-  
+    hasEconomica,handleAgregarBeca,handleDelete,handlePreview,DeleteDocument,ObtenerTipoDocumentos,ObtenerDocumentosEstudiante
+    ,setBecarioActual,setOpenPopup,
+
+    documentosEconomicosOpcionalesDisponibles,
+    handleAgregarDocumentoEconomico,handleChange,handleDocumentoChange,
+    handleDocumentoDelete,setDocumentoAEliminar,
+    proyectosRows,serviciosRows,
+
+    setFormBeca,
       handleClose,
       saving,
       datosPerfil,

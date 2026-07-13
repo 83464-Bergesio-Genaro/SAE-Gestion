@@ -2,8 +2,9 @@ import { createContext, useContext } from 'react';
 
 export const AuthContext = createContext(null);
 export const NotificationContext = createContext(null);
-export const PressContext = createContext(null);
 export const JPAContext = createContext(null);
+export const PressContext = createContext(null);
+export const ProfileContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -33,6 +34,14 @@ export const useJPA = () => {
   const context = useContext(JPAContext);
   if (!context) {
     throw new Error('useJPA debe usarse dentro de un JPAProvider');
+  }
+  return context;
+};
+
+export const useMyProfile = () => {
+  const context = useContext(ProfileContext);
+  if (!context) {
+    throw new Error("useMyProfile debe usarse dentro de un ProfileProvider");
   }
   return context;
 };

@@ -29,9 +29,9 @@ import SAEButton from "../../../shared/components/buttons/SAEButton";
 import SAETextField from "../../../shared/components/inputs/SAETextField";
 import SAEPage from "../../../shared/components/page/SAEPage";
 
-import GestionarHorariosDialog from "./HorariosDialog";
+import GestionarHorariosDialog from "./horariosDialog";
 
-import { EmployedCalendar } from "./EmployedCalendar";
+import { EmployedCalendar } from "./employedCalendar";
 import { useEmploy } from "../../context/employedContext";
 import { AdminUsersProvider } from "../../context/providers/employProvider";
 import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";

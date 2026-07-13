@@ -1,11 +1,10 @@
+//#region Importaciones
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Box, IconButton, Chip } from "@mui/material";
-
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditNoteIcon from "@mui/icons-material/EditNote";
-import { formatHeader, generateRows } from "../../../utils/util.jsx";
-
+import {  generateColumns, generateRows } from "../../../utils/datagrid.utils.jsx";
 import {
   CrearCurso,
   CrearEspecialidad,
@@ -42,183 +41,27 @@ import {
 import { ObtenerUsuariosXLegajo } from "../../../api/EmpleadoService";
 import { HealthContext } from "../employedContext";
 import { useNotification } from "../../../shared/context/sharedContext";
+import { EMPTY_CURSO, EMPTY_ESPECIALIDAD, EMPTY_FALTA, EMPTY_HORARIO, EMPTY_PERSONAL, EMPTY_TURNO } from "../../../utils/common/common.config.js";
 
-// FORMULARIOS VACIOS
-const EMPTY_ESPECIALIDAD = {
-  id: 0,
-  nombre: "",
-  descripcion: "",
-  activo: true,
-};
-const EMPTY_PERSONAL = {
-  cuil: "",
-  nombre: "",
-  apellido: "",
-  id_especialidad: null,
-  especialidad: "",
-  activo: true,
-};
-const EMPTY_FALTA = {
-  id: 0,
-  observacion: "",
-  fecha_alta: true,
-};
-const EMPTY_CURSO = {
-  id: 0,
-  nombre_curso: "",
-  nombre_docente: "",
-  fecha_inicio: "",
-  fecha_fin: "",
-  cupo_maximo: 0,
-  activo: true,
-};
-const EMPTY_HORARIO = {
-  id: null,
-  hora_inicio: "",
-  hora_fin: "",
-  dia: null,
-  cuil_especialista: "",
-  especialista: "",
-  activo: null,
-  id_especialidad: null,
-  nombre_especialidad: "",
-};
-const EMPTY_TURNO = {
-  id: 0,
-  cuil_medico: "",
-  especialista: "",
-  legajo: "",
-  paciente: "",
-  fecha_solicitud: "",
-  fecha_atencion: "",
-  hora_atencion: "",
-  asunto: "",
-  id_estado_turno: 0,
-  estado: "",
-};
-// FUNCIONES PARA LA GRILLA (SE PODRIA PONER TODO EN UN SOLO ARCHIVO)
-const buildColumns = (
-  data,
-  editAction = null,
-  deleteAction = null,
-  registAction = null,
-) => {
-  if (!data || Object.keys(data).length === 0) return [];
-
-  const columns = Object.keys(data).map((key) => {
-    const normalizedKey = key.toLowerCase();
-    const isId = normalizedKey === "id" || normalizedKey.startsWith("id_");
-    const isShort = [
-      "estado",
-      "cupo",
-      "cupo_maximo",
-      "duracion",
-      "horario_inicio",
-      "horario_fin",
-    ].includes(normalizedKey);
-
-    if (key.toLowerCase() === "activo") {
-      return {
-        field: "activo",
-        headerName: "Estado",
-        align: "center",
-        headerAlign: "center",
-        width: 100,
-        renderCell: (params) => (
-          <Chip
-            size="small"
-            label={params.value ? "Activo" : "Inactivo"}
-            color={params.value ? "success" : "default"}
-          />
-        ),
-      };
-    } else {
-      return {
-        field: key,
-        headerName: formatHeader(key),
-        flex: isId ? 0.3 : 1,
-        minWidth: isId || isShort ? 50 : 120,
-        maxWidth: isId ? 70 : isShort ? 110 : undefined,
-        align: isId || isShort ? "center" : "left",
-        headerAlign: isId || isShort ? "center" : "left",
-      };
-    }
-  });
-  //Puseah la columna de acciones si alguna de estas acciones existe.
-  if (editAction || deleteAction || registAction) {
-    columns.push({
-      field: "actions",
-      headerName: "Acciones",
-      sortable: false,
-      filterable: false,
-      disableColumnMenu: true,
-      width: registAction ? 120 : 100,
-      renderCell: (params) => (
-        <Box>
-          {editAction && (
-            <IconButton
-              size="small"
-              sx={{ color: "var(--primary)" }}
-              title="Ver / Editar"
-              aria-label="Ver o editar"
-              onClick={() => editAction(params.row)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          )}
-          {deleteAction && (
-            <IconButton
-              size="small"
-              sx={{ color: "var(--primary)" }}
-              title="Eliminar"
-              aria-label="Eliminar"
-              onClick={() => deleteAction(params.row)}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          )}
-          {registAction && (
-            <IconButton
-              size="small"
-              sx={{ color: "var(--primary)" }}
-              title="Registrar Falta"
-              aria-label="Registrar falta"
-              onClick={() => registAction(params.row)}
-            >
-              <EditNoteIcon fontSize="small" />
-            </IconButton>
-          )}
-        </Box>
-      ),
-    });
-  }
-  return columns;
-};
+// #endregion
 
 export const HealthUsersProvider = ({ children }) => {
+  
+  //#region Importaciones Notificacion
+
   const {
     showNotification,
-    dialogOpen,
+    openDialog,
     dialogData,
-    dialogType,
     dialogMode,
-    dialogError,
-    dialogSaving,
     setDialogOpen,
     setDialogData,
-    setDialogType,
-    setDialogMode,
     setDialogError,
     setDialogSaving,
   } = useNotification();
 
-  const DAYS = [
-    { label: "Lunes", value: 1 },
-    { label: "Martes", value: 2 },
-    { label: "Miércoles", value: 3 },
-    { label: "Jueves", value: 4 },
-    { label: "Viernes", value: 5 },
-  ];
+  //#endregion
+  
   // Estados globales de Diálogo compartidos por ambas secciones
   const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
   // Estados de Notificación
@@ -252,26 +95,16 @@ export const HealthUsersProvider = ({ children }) => {
   //Para visuaizar los turnos pasados
   const [loadingNoActivos, setLoadingNoActivos] = useState(false);
   const [noActivosRows, setNoActivosRows] = useState([]);
-  const noActivosColumns = useMemo(
-    () => buildColumns(EMPTY_TURNO, null, null),
-    [],
-  );
 
   const openCreateTurnos = useCallback(() => {
     setUsuarioSelected(null);
-    setDialogMode("create");
-    setDialogType("turnos");
-    setDialogData(EMPTY_TURNO);
-    setDialogError("");
-    setTimeout(() => setDialogOpen(true), 0);
-  }, []);
+    openDialog("turnos","create",EMPTY_TURNO);
+  }, [openDialog]);
+
   const openEditTurnos = useCallback((row) => {
-    setDialogMode("edit");
-    setDialogType("turnos");
-    setDialogData(row);
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("turnos","edit",row);
+
+  }, [openDialog]);
 
   const fetchTurnosFinalizados = useCallback(async () => {
     setLoadingNoActivos(true);
@@ -347,14 +180,13 @@ export const HealthUsersProvider = ({ children }) => {
             break; // Por si llega un ID desconocido
         }
       });
-      console.log("Pendientes:", pendientes);
-
       setPendienteTurnos(pendientes);
       setAsignadosTurnos(asignados);
       setEnCursoTurnos(enCurso);
       setFinalizadoTurnos(finalizados);
       setCanceladoTurnos(cancelados);
       setReprogramadoTurnos(reprogramados);
+
     } catch {
       setPendienteTurnos([]);
       setAsignadosTurnos([]);
@@ -392,7 +224,7 @@ export const HealthUsersProvider = ({ children }) => {
     } finally {
       setLoadingUsuario(false);
     }
-  }, []);
+  }, [setDialogError]);
 
   useEffect(() => {
     fetchUsuariosXlegajo();
@@ -540,6 +372,7 @@ export const HealthUsersProvider = ({ children }) => {
     [
       allTurnos,
       estadosTurno,
+      setDialogError,
       setPendienteTurnos,
       setAsignadosTurnos,
       setEnCursoTurnos,
@@ -725,6 +558,8 @@ export const HealthUsersProvider = ({ children }) => {
     setAllTurnos,
     setDialogOpen,
     setDialogData,
+      setDialogError,
+    setDialogSaving,
     showNotification,
   ]);
 
@@ -753,23 +588,13 @@ export const HealthUsersProvider = ({ children }) => {
   }, [fetchEspecialidades]);
 
   const openCreateEspecialidades = useCallback(() => {
-    setDialogType("especialidades");
-    setDialogMode("create");
-    setDialogData(EMPTY_ESPECIALIDAD);
-    setDialogError("");
-    setTimeout(() => setDialogOpen(true), 0);
-  }, []);
+    openDialog("especialidades","create",EMPTY_ESPECIALIDAD);
+  }, [openDialog]);
+
   const openEditEspecialidades = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("especialidades");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
-  const especialidadesColumns = useMemo(
-    () => buildColumns(EMPTY_ESPECIALIDAD, openEditEspecialidades),
-    [openEditEspecialidades],
-  );
+    openDialog("especialidades","edit",row);
+  }, [openDialog]);
+
 
   const handleEspecialidadesSave = async () => {
     setDialogSaving(true);
@@ -852,40 +677,23 @@ export const HealthUsersProvider = ({ children }) => {
   }, [fetchFaltas]);
 
   const openCreatePersonal = useCallback(() => {
-    setDialogType("personal");
-    setDialogMode("create");
-    setDialogData({ ...EMPTY_PERSONAL });
-    setDialogError("");
-    setTimeout(() => setDialogOpen(true), 0);
-  }, []);
+    openDialog("personal","create",EMPTY_PERSONAL);
+  }, [openDialog]);
+
   const openEditPersonal = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("personal");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("personal","edit",row);
+  }, [openDialog]);
+
   const openEditRegist = useCallback(
     (row) => {
-      setDialogData({ cuil: row.cuil, fecha_alta: null, observacion: "" });
+      openDialog("personal","faltas",{ cuil: row.cuil, fecha_alta: null, observacion: "" });
       SetCuilFaltas(row.cuil);
       fetchFaltas();
-      setDialogType("personal");
-      setDialogMode("faltas");
-      setDialogError("");
-      setDialogOpen(true);
+
     },
-    [fetchFaltas],
+    [fetchFaltas,openDialog],
   );
 
-  const faltasColumns = useMemo(
-    () => buildColumns(EMPTY_FALTA, null, null, null),
-    [],
-  ); //Es una grilla sin acciones
-  const personalColumns = useMemo(
-    () => buildColumns(EMPTY_PERSONAL, openEditPersonal, null, openEditRegist),
-    [openEditPersonal, openEditRegist],
-  );
 
   const handlePersonalSave = async () => {
     setDialogSaving(true);
@@ -955,30 +763,16 @@ export const HealthUsersProvider = ({ children }) => {
   }, [fetchCursos]);
 
   const openCreateCurso = useCallback(() => {
-    setDialogType("cursos");
-    setDialogMode("create");
-    setDialogData(EMPTY_CURSO);
-    setDialogError("");
-    setTimeout(() => setDialogOpen(true), 0);
-  }, []);
+    openDialog("cursos","create",EMPTY_CURSO);
+  }, [openDialog]);
+
   const openEditCurso = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("cursos");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("cursos","edit",row);
+  }, [openDialog]);
   const openDeleteCurso = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("cursos");
-    setDialogMode("delete");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
-  const cursosColumns = useMemo(
-    () => buildColumns(EMPTY_CURSO, openEditCurso, openDeleteCurso),
-    [openEditCurso, openDeleteCurso],
-  );
+    openDialog("cursos","delete",row);
+  }, [openDialog]);
+
 
   const handleCursoSave = async () => {
     setDialogSaving(true);
@@ -1055,7 +849,7 @@ export const HealthUsersProvider = ({ children }) => {
     } finally {
       setLoadingHorarios(false);
     }
-  }, []);
+  }, [setDialogError]);
   useEffect(() => {
     fetchHorarios();
   }, [fetchHorarios]);
@@ -1081,7 +875,7 @@ export const HealthUsersProvider = ({ children }) => {
     } finally {
       setSelectedHorariosLoading(false);
     }
-  }, [selectedEmploy, setSelectedHorarios]);
+  }, [selectedEmploy, setSelectedHorarios,setDialogError]);
 
   useEffect(() => {
     fetchHorariosXEmpleado();
@@ -1196,11 +990,90 @@ export const HealthUsersProvider = ({ children }) => {
     setErrorHorario("");
   };
 
-  // ---------
+  // ------------ COLUMNAS ----------- //
+
+  const noActivosColumns = useMemo(() => {
+    return generateColumns(EMPTY_TURNO,[]);
+  }, []); 
+
+  //Especialidad//
+  const handleEditEspecialidades = useCallback((row) => {
+        openEditEspecialidades(row);
+    }, [openEditEspecialidades]);
+
+  const especialidadesActions = useMemo(() => [{
+      icon: EditIcon,
+      color: "primary",
+      title: "Editar Especialidad",
+      onClick: handleEditEspecialidades, 
+  }
+  ], [handleEditEspecialidades]);
+
+  const especialidadesColumns = useMemo(() => {
+    return generateColumns(EMPTY_ESPECIALIDAD,especialidadesActions);
+  }, [especialidadesActions]); 
+
+  //Faltas//
+  const faltasColumns = useMemo(() => {
+    return generateColumns(EMPTY_FALTA,[]);
+  }, []); 
+
+  //Personal//
+
+  const handleEditPersonal= useCallback((row) => {
+      openEditPersonal(row);
+  }, [openEditPersonal]);
+
+  const handleEditRegist = useCallback((row) => {
+      openEditRegist(row);
+  }, [openEditRegist]);
+
+  const personalActions = useMemo(() => [{
+      icon: EditIcon,
+      color: "primary",
+      title: "Editar Personal",
+      onClick: handleEditPersonal, 
+  },{
+      icon: EditNoteIcon,
+      color: "primary",
+      title: "Registrar Falta",
+      onClick: handleEditRegist, 
+  }
+  ], [handleEditPersonal,handleEditRegist]);
+
+  const personalColumns = useMemo(() => {
+    return generateColumns(EMPTY_PERSONAL,personalActions);
+  }, [personalActions]);
+
+  //Cursos//
+  const handleEditCurso = useCallback((row) => {
+      openEditCurso(row);
+  }, [openEditCurso]);
+
+  const handleDeleteCurso = useCallback((row) => {
+      openDeleteCurso(row);
+  }, [openDeleteCurso]);
+
+  const cursosActions = useMemo(() => [{
+      icon: EditIcon,
+      color: "primary",
+      title: "Editar Curso",
+      onClick: handleEditCurso, 
+  },{
+      icon: DeleteIcon,
+      color: "primary",
+      title: "Eliminar Curso",
+      onClick: handleDeleteCurso, 
+  }
+  ], [handleEditCurso,handleDeleteCurso]);
+
+  const cursosColumns = useMemo(() => {
+    return generateColumns(EMPTY_CURSO,cursosActions);
+  }, [cursosActions]);
+
   return (
     <HealthContext.Provider
       value={{
-        DAYS,
         //Faltas
         cuilFaltas,
         SetCuilFaltas,
@@ -1288,13 +1161,6 @@ export const HealthUsersProvider = ({ children }) => {
         handleDeleteHorario,
         handleCancelHorario, //Acciones en el dialog
         //Valores de error, mostrar mensajes, etc.
-        setDialogError,
-        dialogOpen,
-        dialogData,
-        dialogType,
-        dialogMode,
-        dialogError,
-        dialogSaving,
       }}
     >
       {children}

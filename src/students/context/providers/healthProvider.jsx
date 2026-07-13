@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Box, IconButton, Chip } from "@mui/material";
-import { HealthContext } from "../studentContext";
+
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import EditNoteIcon from "@mui/icons-material/EditNote";
@@ -39,32 +39,16 @@ import {
   mapPersonalMedico,
   mapEstado,
   mapTurnosPaciente,
+  mapTurnos,
 } from "../../../api/formatters/SaludFormatters";
 
 import { ObtenerUsuariosXLegajo } from "../../../api/EmpleadoService";
-import {
-  generateColumns,
-  generateRows,
-} from "../../../utils/util";
+import { generateColumns,generateRows} from "../../../utils/datagrid.utils.jsx";
 import { useNotification } from "../../../shared/context/sharedContext";
-import { calendarDays, EMPTY_TURNO_PACIENTE } from "../../../utils/constants";
-
-const toApiDateTime = (value, fallback = null) => {
-  if (!value) return fallback;
-  if (value instanceof Date) return value.toISOString();
-
-  const text = String(value).trim();
-  const datePart = text.split("T")[0].split(" ")[0];
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
-    return `${datePart}T00:00:00`;
-  }
-
-  const parsedDate = new Date(text);
-  return Number.isNaN(parsedDate.getTime())
-    ? fallback
-    : parsedDate.toISOString();
-};
+import { calendarDays} from "../../../utils/common/constants";
+import { EMPTY_TURNO_PACIENTE } from "../../../utils/common/common.config.js";
+import { toApiDateTime } from "../../../utils/date.utils.js";
+import { HealthContext } from "../studentContext";
 
 export const HealthUsersProvider = ({ children }) => {
   const {
@@ -158,7 +142,7 @@ export const HealthUsersProvider = ({ children }) => {
         [0, 1, 3, 5].includes(item.estadosTurno.id),
       );
 
-      setEstudianteTurnos(activeTurnos);
+      setEstudianteTurnos(activeTurnos.map(mapTurnos));
       setTurnsRows(generateRows(finishTurns.map(mapTurnosPaciente)));
     } catch {
       setEstudianteTurnos([]);
@@ -350,7 +334,7 @@ export const HealthUsersProvider = ({ children }) => {
     } finally {
       setLoadingHorarios(false);
     }
-  }, []);
+  }, [setDialogError]);
   useEffect(() => {
     fetchHorarios();
   }, [fetchHorarios]);

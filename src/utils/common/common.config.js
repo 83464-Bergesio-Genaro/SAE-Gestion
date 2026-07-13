@@ -1,0 +1,507 @@
+export const EMPTY_TOURNAMENT = {
+  nombre_torneo: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  fecha_limite_inscripcion:"",
+  activo:"",
+  nombre_deporte:"",
+  docente_responsable:"",
+  cupo_jugadores:""
+}
+// --------------------------- SALUD --------------------------- //
+export const EMPTY_TURNO =
+{
+    id: 0,
+    cuil_medico: "",
+    especialista: "",
+    legajo: "",
+    paciente: "",
+    fecha_solicitud: "",
+    fecha_atencion: "",
+    hora_atencion: "",
+    asunto: "",
+    id_estado_turno: 0,
+    estado: ""
+}
+//DEBE SER IGUAL LAS COLUMNAS QUE LAS FILAS
+export const EMPTY_TURNO_PACIENTE =
+{
+    id: 0,
+    especialista: "",
+    fecha_solicitud: "",
+    fecha_atencion: "",
+    hora_atencion: "",
+    asunto: "",
+    estado: ""
+}
+
+export const EMPTY_ESPECIALIDAD = {
+  id: 0,
+  nombre: "",
+  descripcion: "",
+  activo: true,
+};
+export const EMPTY_PERSONAL = {
+  cuil: "",
+  nombre: "",
+  apellido: "",
+  id_especialidad: null,
+  especialidad: "",
+  activo: true,
+};
+export const EMPTY_FALTA = {
+  id: 0,
+  observacion: "",
+  fecha_alta: true,
+};
+export const EMPTY_CURSO = {
+  id: 0,
+  nombre_curso: "",
+  nombre_docente: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  cupo_maximo: 0,
+  activo: true,
+};
+export const EMPTY_HORARIO = {
+  id: null,
+  hora_inicio: "",
+  hora_fin: "",
+  dia: null,
+  cuil_especialista: "",
+  especialista: "",
+  activo: null,
+  id_especialidad: null,
+  nombre_especialidad: "",
+};
+// ------------------------- EMPLEADO ------------------------- //
+export const EMPTY_FORM = {
+    dia: 1,
+    hora_inicio: "",
+    hora_fin: "",
+    activo: true
+};
+export const EMPTY_EMPLEADO =    
+{
+    id: "",
+    legajo: "",
+    nombre_empleado: "",
+    id_perfil: 5,
+    nombre_perfil: "",
+    activo: true
+}
+export const EMPTY_USUARIO = 
+{
+    id: "",
+    legajo: "",
+    nombre_usuario:"",
+    id_perfil: "",
+    activo: false 
+}
+// ------------------------- CONSULTAS ------------------------ //
+export const EMPTY_LINKFRECUENTE = {
+  id: 0,
+  titulo: "",
+  hipervinculo: "",
+  contador: 0,
+};
+
+// ---------------------------- JPA -------------------------- //
+
+export const EMPTY_EVENTO_PUBLICO = {
+  id: "",
+  encargado: "",
+  nombre_evento: "",
+  lugar: "",
+  fecha_evento: "",
+  horario_inicio: "",
+  horario_fin: "",
+  duracion: "",
+};
+export const EMPTY_STANDS = {
+  id: "",
+  nombre_stand: "",
+  expositor: "",
+  ubicacion: "",
+  horario_inicio: "",
+  horario_fin: "",
+};
+export const EMPTY_INTERESADOS = {
+  id: "",
+  nombre_interesado: "",
+  contacto: "",
+  email: "",
+};
+// ------------------------ REQUERIDOS ------------------------ //
+export const PROFILE_REQUIRED_FIELDS = [
+  ["legajo", "Legajo"],
+  ["nombres", "Nombres"],
+  ["apellidos", "Apellidos"],
+  ["dni", "DNI"],
+  ["cuil", "CUIL"],
+  ["fecha_nacimiento", "Fecha de nacimiento"],
+  ["email", "Correo electrónico"],
+  ["telefono", "Teléfono"],
+  ["direccion", "Dirección"],
+];
+
+
+export const PERSONAL_FIELDS = [
+  { name: "nombres", label: "Nombres", type: "text", md: 6 },
+  { name: "apellidos", label: "Apellidos", type: "text", md: 6 },
+  { name: "dni", label: "DNI", type: "text", md: 3 },
+  { name: "cuil", label: "CUIL", type: "text", md: 3 },
+  {
+    name: "fecha_nacimiento",
+    label: "Fecha de nacimiento",
+    type: "date",
+    md: 3,
+    InputLabelProps: { shrink: true },
+  },
+  { name: "telefono", label: "Telefono", type: "text", md: 3 },
+  { name: "email", label: "Mail", type: "email", md: 6 },
+  { name: "legajo", label: "Legajo", type: "text", md: 6 },
+  { name: "direccion", label: "Domicilio", type: "text", md: 12 },
+];
+
+export const SPORTS_REQUIRED_DOCUMENTS = [
+  { 
+    id_tipo_documento: null,
+    nombre: "Certificado de Alumno Regular",
+    descripcion:
+      "Certificado vigente que acredita tu condición de estudiante regular.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_AlumnoRegular",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+  {
+    id_tipo_documento: null,
+    nombre: "Fotocopia Documento",
+    descripcion:
+      "Copia legible del frente y dorso de tu DNI en un único archivo.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_DNI",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+  {
+    id_tipo_documento: null,
+    nombre: "Ficha Medica o E.M.M.A.C",
+    descripcion:
+      "Certificado médico vigente que indica que estás apto para realizar actividad física.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_FichaMedica",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+];
+
+
+// Documentos comunes a cualquier solicitud de beca.
+export const SCHOLARSHIPS_REQUERID_DOCUMENTS = [
+  {
+    id_tipo_documento: null,
+    nombre: "Comprobante de CBU",
+    descripcion: "Constancia bancaria donde figure tu CBU para pagos.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_CBU",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+  {
+    id_tipo_documento: null,
+    nombre: "Declaracion Jurada",
+    descripcion: "Descarga, completa, firma y adjunta la declaracion jurada.",
+    externalUrl:
+      "https://docs.google.com/document/d/1wbuUbySrYoNTnyOcojTkkMGHOleb0Afq/edit?usp=drivesdk&ouid=116947469098280320832&rtpof=true&sd=true",
+    externalUrlLabel: "Ejemplo",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_DDJJ",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+];
+
+// Documentos especificos para la beca economica. Los opcionales se muestran
+// solo cuando el usuario los agrega o cuando ya tienen un archivo cargado.
+export const ECONOMIC_DOCUMENTS = [
+  {
+    nombre: "DNI Grupo Familiar",
+    descripcion: "DNI de las personas que integran tu grupo familiar.",
+    required: true,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_DNI_FAMILIAR",
+    id_archivo: null,
+  },
+  {
+    nombre: "Comprobante Ingresos Mensuales",
+    descripcion:
+      "Recibos de sueldo, monotributo, jubilacion u otros ingresos del hogar.",
+    required: true,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_INGRESOS_MENSUALES",
+    id_archivo: null,
+  },
+  {
+    nombre: "Factura Servicio",
+    descripcion:
+      "Factura reciente de luz, gas, agua, internet u otro servicio del domicilio.",
+    required: true,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_FACTURAS_SERVICIOS",
+    id_archivo: null,
+  },
+  {
+    nombre: "Impuesto Inmobiliario",
+    descripcion:
+      "Comprobante del impuesto inmobiliario de la vivienda familiar.",
+    required: true,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_IMPUESTO_INMOBILIARIO",
+    id_archivo: null,
+  },
+];
+
+export const ECONOMIC_OPTIONAL_DOCUMENTS = [
+  {
+    nombre: "Constancia de Desocupado",
+    descripcion:
+      "Constancia emitida por ANSES si algun integrante no tiene empleo.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_CONSTANCIA_DESOCUPADO",
+    id_archivo: null,
+  },
+  {
+    nombre: "Libreta Casamiento o Partida Hermanos",
+    descripcion:
+      "Documentacion que acredite hermanos menores a cargo del grupo familiar.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_HERMANOS_MENORES",
+    id_archivo: null,
+  },
+  {
+    nombre: "Libreta Casamiento y Partida Hijos",
+    descripcion: "Documentacion que acredite conyuge o hijos a cargo.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_FAMILIA_CASADO_HIJOS",
+    id_archivo: null,
+  },
+  {
+    nombre: "Contrato Alquiler y Pago",
+    descripcion:
+      "Contrato de alquiler y comprobante del ultimo pago realizado.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_CONTRATO_ALQUILER",
+    id_archivo: null,
+  },
+  {
+    nombre: "Pago Credito Hipotecario",
+    descripcion: "Comprobante del pago mensual del credito hipotecario.",
+    required: false,
+    extension: null,
+    id_tipo_documento: null,
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_CREDITO_HIPOTECARIO",
+    id_archivo: null,
+  },
+];
+export const TRAVEL_REQUIRED_DOCUMENTS = [
+    {
+        id_tipo_documento: null,
+        nombre: "Certificado de Alumno Regular",
+        descripcion:
+        "Certificado vigente que acredita tu condición de estudiante regular.",
+        subido: false,
+        archivo: null,
+        archivoNombre: "",
+        formatoNombre: "{legajo}_AlumnoRegular",
+        id_archivo: null,
+        extension: null,
+        required: true,
+    },
+    {
+        id_tipo_documento: null,
+        nombre: "Fotocopia Documento",
+        descripcion:
+        "Copia legible del frente y dorso de tu DNI en un único archivo.",
+        subido: false,
+        archivo: null,
+        archivoNombre: "",
+        formatoNombre: "{legajo}_DNI",
+        id_archivo: null,
+        extension: null,
+        required: true,
+    },
+    {
+        id_tipo_documento: null,
+        nombre: "Declaracion Jurada",
+        descripcion:
+        "Certificadofirmado en el cual establece un heredero a tu fortuna.",
+        subido: false,
+        archivo: null,
+        archivoNombre: "",
+        formatoNombre: "{idViaje}_{legajo}_DDJJ",
+        id_archivo: null,
+        extension: null,
+        required: true,
+    },
+];
+
+export const SAE_EMAIL =
+  import.meta.env.VITE_SAE_EMAIL || "sae@frc.utn.edu.ar";
+
+export const CONSULTATION_FAQS = [
+  {
+    id: "becas",
+    category: "Becas",
+    question: "¿Cómo solicito una beca?",
+    answer:
+      "Completá todos los datos de tu perfil, cargá la documentación requerida y elegí el tipo de beca desde Mis Becas.",
+    link: "/Mis-Becas",
+    linkLabel: "Ir a Mis Becas",
+    image: "images/infoSection/becasFRC.jpg",
+  },
+  {
+    id: "deportes",
+    category: "Deportes",
+    question: "¿Dónde consulto deportes e inscripciones?",
+    answer:
+      "En Mis Deportes podés consultar las disciplinas disponibles, horarios e inscripciones activas.",
+    link: "/Mis-Deportes",
+    linkLabel: "Ir a Mis Deportes",
+    image: "images/infoSection/deportesFRC.webp",
+  },
+  {
+    id: "salud",
+    category: "Salud",
+    question: "¿Cómo solicito un turno médico?",
+    answer:
+      "Ingresá a Mi Salud para consultar especialidades, profesionales, horarios y gestionar tus turnos.",
+    link: "/Mi-Salud",
+    linkLabel: "Ir a Mi Salud",
+    image: "images/infoSection/saludFRC.jpg",
+  },
+  {
+    id: "perfil",
+    category: "Perfil",
+    question: "¿Por qué debo completar mi perfil?",
+    answer:
+      "Los datos completos y actualizados son necesarios para solicitar becas y utilizar otros servicios de SAE.",
+    link: "/Mi-Perfil",
+    linkLabel: "Completar mi perfil",
+    image: "images/infoSection/tramitesFRC.jpg",
+  },
+];
+
+export const QUICK_CONSULTATION_FAQS = [
+  {
+    id: "documentacion-formatos",
+    category: "Documentación",
+    question: "¿Qué formatos de archivo puedo subir?",
+    answer:
+      "Cada documento indica los formatos permitidos antes de cargarlo. Generalmente se aceptan PDF, JPG, JPEG y PNG.",
+  },
+  {
+    id: "documentacion-reemplazar",
+    category: "Documentación",
+    question: "¿Puedo reemplazar un documento cargado?",
+    answer:
+      "Sí. Mientras el trámite lo permita, eliminá el archivo actual y cargá la versión corregida.",
+  },
+  {
+    id: "beca-estado",
+    category: "Becas",
+    question: "¿Dónde consulto el estado de mi beca?",
+    answer:
+      "Ingresá a Mis Becas. Allí vas a encontrar las solicitudes realizadas y el estado actualizado de cada una.",
+  },
+  {
+    id: "beca-varias",
+    category: "Becas",
+    question: "¿Puedo solicitar más de un tipo de beca?",
+    answer:
+      "Podés consultar y solicitar las opciones habilitadas. La aprobación depende de los requisitos y criterios definidos por SAE.",
+  },
+  {
+    id: "salud-cancelar",
+    category: "Salud",
+    question: "¿Qué hago si no puedo asistir a un turno?",
+    answer:
+      "Ingresá a Mi Salud y revisá las opciones disponibles para cancelar o gestionar el turno con anticipación.",
+  },
+  {
+    id: "perfil-actualizar",
+    category: "Perfil",
+    question: "¿Cómo actualizo mis datos personales?",
+    answer:
+      "Ingresá a Mi Perfil, modificá los datos necesarios y presioná Guardar Cambios. Todos los campos deben quedar completos.",
+  },
+  {
+    id: "respuesta-consulta",
+    category: "Contacto",
+    question: "¿Cuánto demora la respuesta a una consulta?",
+    answer:
+      "El tiempo puede variar según el tema y la cantidad de solicitudes. Incluí todos los datos necesarios para agilizar la respuesta.",
+  },
+  {
+    id: "problema-acceso",
+    category: "Acceso",
+    question: "¿Qué hago si no puedo acceder a una sección?",
+    answer:
+      "Verificá que tu sesión siga activa y recargá la página. Si el problema continúa, enviá una consulta detallando la sección y el error.",
+  },
+];

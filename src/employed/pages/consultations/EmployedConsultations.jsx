@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   Alert,
   Box,
@@ -6,7 +7,7 @@ import {
   Chip,
   Grid,
   Stack,
-  Typography,
+  Typography, 
   Dialog,
   DialogTitle,
   DialogContent,
@@ -20,32 +21,27 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  getDialogTitle,
-  isValidHyperlink,
-} from "../../../utils/juan/util";
-
-import { useMemo } from "react";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
 import LinkIcon from "@mui/icons-material/Link";
+
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
+import SAEPage from "../../../assets/components/page/SAEPage";
 
 import { useConsultations } from "../../context/employedContext";
 import { ConsultationProvider } from "../../context/providers/consultationsProvider";
 import { useNotification } from "../../../shared/context/sharedContext";
 
-import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
-import {
-  CONSULTATION_FAQS,
-  QUICK_CONSULTATION_FAQS,
-  SAE_EMAIL,
-} from "../../../shared/pages/consultations/consultations.config";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import DataGridPanel from "../../../shared/components/dataGrid/DataGridPanel";
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
-import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import { CONSULTATION_FAQS,QUICK_CONSULTATION_FAQS,SAE_EMAIL } from "../../../utils/common/common.config";
+import { CONSULTATIONS_STRINGS } from "../../../utils/strings/employed.strings";
+import { getDialogTitle } from "../../../utils/util";
+import { isValidHyperlink } from "../../../utils/validation.utils";
+
+
+const C = CONSULTATIONS_STRINGS;
 
 function EmployedContent() {
   const {
@@ -85,9 +81,9 @@ function EmployedContent() {
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header="Módulo de Consultas"
-        title="Gestión de Consultas"
-        description="Revisá el contenido visible para estudiantes y planificá su administración."
+        header={C.headerTitle}
+        title={C.headerSubtitle}
+        description={C.headerDescription}
       />
 
       <SAEDataGrid
@@ -96,12 +92,10 @@ function EmployedContent() {
       />
 
       <Alert severity="info" sx={{ mt: 2 }}>
-        Actualmente las preguntas son contenido versionado. Sin una API o CMS,
-        los cambios desde una interfaz no podrían publicarse para todos los
-        estudiantes.
+        {C.aclarationFAQS}
       </Alert>
       <Typography variant="h5" fontWeight={800} sx={{ mt: 4 }}>
-        Preguntas publicadas
+        {C.faqsTitle}
       </Typography>
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {CONSULTATION_FAQS.map((faq) => (
@@ -116,7 +110,7 @@ function EmployedContent() {
                   {faq.answer}
                 </Typography>
                 <Typography variant="caption" display="block" sx={{ mt: 2 }}>
-                  Enlace: {faq.link}
+                  {C.link} {faq.link}
                 </Typography>
               </CardContent>
             </Card>
@@ -124,7 +118,7 @@ function EmployedContent() {
         ))}
       </Grid>
       <Typography variant="h5" fontWeight={800} sx={{ mt: 5 }}>
-        Respuestas rápidas publicadas
+        {C.quickFaqsTitle}
       </Typography>
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {QUICK_CONSULTATION_FAQS.map((faq) => (
@@ -145,7 +139,7 @@ function EmployedContent() {
       </Grid>
 
       <Typography color="text.secondary" sx={{ mt: 4 }}>
-        Las consultas preparadas por estudiantes se dirigen actualmente a:{" "}
+        {C.emailDescription}
         <strong> {SAE_EMAIL}</strong>
       </Typography>
       <DialogConsultation />
@@ -182,11 +176,11 @@ function DialogConsultation() {
   const SelectedDialogIcon = selectedDialogIcon.icon;
   const hyperlinkError =
     Boolean(dialogData.hipervinculo) && !isValidHyperlink(dialogData.hipervinculo)
-      ? "Ingresa un hipervinculo valido con http:// o https://"
+      ? C.errorLink
       : "";
   const handleSaveLinkFrecuente = () => {
     if (hyperlinkError) {
-      setDialogError("Revisa los campos marcados antes de guardar.");
+      setDialogError(C.errorSaving);
       return;
     }
 
@@ -250,9 +244,10 @@ function DialogConsultation() {
                 </Alert>
               )}
               <Grid container spacing={1}>
+                {dialogMode !== "create" && (
                     <Grid size={{ xs: 12, md: 6 }} m={0}>
                       <SAETextField
-                        label="ID"
+                        label={C.formID}
                         type="number"
                         fullWidth
                         value={dialogData.id}
@@ -260,14 +255,37 @@ function DialogConsultation() {
                         disabled={true}
                       />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }} m={0}>
+                )}
+                    <Grid size={{ xs: 12 }} m={0}>
+                      <SAETextField
+                        label={C.formTitle}
+                        value={dialogData.titulo}
+                        onChange={(e) =>
+                          handleDataChange("titulo", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12 }} m={0}>
+                      <SAETextField
+                        label={C.formLink}
+                        value={dialogData.hipervinculo}
+                        onChange={(e) =>
+                          handleDataChange("hipervinculo", e.target.value)
+                        }
+                        error={Boolean(hyperlinkError)}
+                        helperText={hyperlinkError}
+                        fullWidth
+                      />
+                    </Grid>                    
+                    <Grid size={{ xs: 12}} m={0}>
                       <FormControl fullWidth>
                         <InputLabel id="link-frecuente-icon-label">
-                          Icono
+                          {C.formIcon}
                         </InputLabel>
                         <Select
                           labelId="link-frecuente-icon-label"
-                          label="Icono"
+                          label={C.formIcon}
                           value={Number(dialogData.id_index_ico) || 0}
                           onChange={(e) =>
                             handleDataChange("id_index_ico", e.target.value)
@@ -305,30 +323,7 @@ function DialogConsultation() {
                           })}
                         </Select>
                       </FormControl>
-                    </Grid>
-                    <Grid size={{ xs: 12 }} m={0}>
-                      <SAETextField
-                        label="Titulo"
-                        value={dialogData.titulo}
-                        onChange={(e) =>
-                          handleDataChange("titulo", e.target.value)
-                        }
-                        fullWidth
-                      />
-                    </Grid>
-
-                    <Grid size={{ xs: 12 }} m={0}>
-                      <SAETextField
-                        label="Hipervinculo"
-                        value={dialogData.hipervinculo}
-                        onChange={(e) =>
-                          handleDataChange("hipervinculo", e.target.value)
-                        }
-                        error={Boolean(hyperlinkError)}
-                        helperText={hyperlinkError}
-                        fullWidth
-                      />
-                    </Grid>
+                    </Grid>  
                     <Grid size={{ xs: 12 }} m={0}>
                       <Box
                         component={dialogData.hipervinculo ? "a" : "div"}
@@ -397,7 +392,7 @@ function DialogConsultation() {
               onClick={closeDialog}
               disabled={dialogSaving}
             >
-              Cancelar
+              {C.cancel}
             </SAEButton>
             <SAEButton
               variant="contained"
@@ -411,8 +406,8 @@ function DialogConsultation() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
-                : "Guardar"}
+                ? C.create
+                : C.save}
             </SAEButton>
           </DialogActions>
         </Dialog>

@@ -4,24 +4,25 @@ import { DescargarDocumentacionXId, ObtenerViajesXLegajo } from "../../../api/Tr
 import { mapViajes } from "../../../api/formatters/ViajeFormatter";
 import { useAuth, useNotification } from "../../../shared/context/sharedContext";
 import { crearDocumentoEstudiante } from "../../../api/DeporteService";
-import {
-  closePreview as closePreviewState,
-  construirNombre,
-  INITIAL_PREVIEW,
-  isPdfDocument,
-} from "../../../utils/util.jsx";
 
-import { MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB } from "../../../utils/gena/constants.js";
-import { TRIPS_STRINGS } from "../../../utils/gena/student.string.js";
-import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/gena/common.config.js";
+import { MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB } from "../../../utils/common/constants.js";
+import { TRIPS_STRINGS } from "../../../utils/strings/student.strings.js";
+import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/common/common.config.js";
+
+import { buildDocumentName, createPreviewState,isPdfDocument} from "../../../utils/documents.utils.js";
 const C = TRIPS_STRINGS;
 
 export const TravelProvider = ({ children }) => {
     const { user } = useAuth();
     const {showNotification} = useNotification();
 
-    const closePreview = () =>
-        closePreviewState(setPreview);
+  const closePreview = () => {
+      setPreview((previous) => ({
+        ...previous,
+        open: false,
+        imageSrc: null, // Limpieza para liberar memoria
+      }));
+  };
 
     const closeDeleteDialog = () => setOpenPopup(false);
 
@@ -45,7 +46,7 @@ export const TravelProvider = ({ children }) => {
     useEffect(() => {
         fetchTravelsLegajo();
     }, [fetchTravelsLegajo]);
-    const [preview, setPreview] = useState(INITIAL_PREVIEW);
+    const [preview, setPreview] = useState(createPreviewState);
     const [openPopup, setOpenPopup] = useState(false);
     const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
 
@@ -107,7 +108,7 @@ export const TravelProvider = ({ children }) => {
        return;
      }
  
-     const fileName = construirNombre(
+     const fileName = buildDocumentName(
        item.formatoNombre,
        { legajo: user.legajo },
        extension,

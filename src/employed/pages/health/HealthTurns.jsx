@@ -1,7 +1,4 @@
 import { useCallback, useState, useMemo } from "react";
-import { HealthUsersProvider } from "../../context/providers/healthProvider";
-import { useHealth } from "../../context/employedContext";
-
 import {
   Autocomplete,
   Alert,
@@ -37,15 +34,18 @@ import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAETimeField from "../../../shared/components/inputs/SAETimeField";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import HeaderPageEmployed from "../../../shared/components/HeaderPageEmployed";
-import { useNotification } from "../../../shared/context/sharedContext";
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAETimeField from "../../../assets/components/inputs/SAETimeField";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
 
+import { HealthUsersProvider } from "../../context/providers/healthProvider";
+import { useNotification } from "../../../shared/context/sharedContext";
+import { useHealth } from "../../context/employedContext";
+import { formatDate } from "../../../utils/date.utils";
 const PALETTE = [
   "#a0a0a0", //Pendiente
   "#1538B8", //Asignado
@@ -865,7 +865,7 @@ function TurnList({
                         noWrap
                         sx={{ maxWidth: "140px" }}
                       >
-                        {turno.fecha_solicitud || "Fecha Solicitud"}
+                        {formatDate(turno.fecha_solicitud,"short") || "Fecha Solicitud"}
                       </Typography>
                       <Chip
                         label={turno.estado || "Sin Definir"}

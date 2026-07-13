@@ -1,10 +1,10 @@
 import { Box, Container, Typography, Stack, Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import NovedadesEstudiantiles from "../../components/StudentNews/studentNews";
-import SAEButton from "../../components/buttons/SAEButton";
-import SAEPage from "../../components/page/SAEPage";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import NovedadesEstudiantiles from "../../../assets/components/studentNews/studentNews";
+import SAEButton from "../../../assets/components/buttons/SAEButton"; 
+import SAEPage from "../../../assets/components/page/SAEPage";
 const baseUrl = import.meta.env.BASE_URL;
 
 export default function Main() {
@@ -29,9 +29,9 @@ function SAEHero() {
     <Box
       sx={{
         mt: "-90px",
-        pt: { xs: "114px", md: "100px" },
-        pb: 4,
-        minHeight: "calc(100vh - 90px)",
+        pt: { xs: "50px", md: "100px" },
+        pb: {xs:0,md:4},
+        minHeight: {xs:"none",md:"calc(100vh - 90px)"},
         background: "var(--gradient)",
         overflow: "hidden",
         position: "relative",
@@ -53,6 +53,7 @@ function SAEHero() {
             display={{ xs: "block", md: "none" }}
             sx={{
               mb: 3,
+              textAlign:"center"
             }}
           >
             <MotionImg
@@ -70,7 +71,7 @@ function SAEHero() {
                 duration: 1,
               }}
               style={{
-                width: "100%",
+                width: "80%",
                 maxWidth: "520px",
               }}
             />
@@ -163,17 +164,17 @@ function SAEHero() {
           </Stack>
 
           {/* ---------------- DESCRIPCIÓN ---------------- */}
-
+          
           <Typography
-            variant="subtitle2"
+            variant="caption"
+            
             sx={{
-              mt: 5,
-              mb: 4,
-              maxWidth: "60vw",
+              my:{xs:2,md:5},
+              maxWidth: {xs:"100%", md:"60vw"},
+              fontSize:{xs:"inherit",md:"1rem"},
               textAlign: "center",
               color: "var(--textWhite)",
               opacity: 0.9,
-              px: 2,
             }}
           >
             Deportes, becas, salud, viajes, congresos, actividades recreativas y

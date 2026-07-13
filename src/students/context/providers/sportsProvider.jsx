@@ -13,18 +13,15 @@ import {
   crearDeportista,
 } from "../../../api/DeporteService";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
-import { SPORTS_STRINGS } from "../../../utils/gena/student.string.js";
-import {
-  INITIAL_PREVIEW,
-  isPdfDocument,
-  construirNombre,
-  generateColumns
-} from "../../../utils/util.jsx";
+import { SPORTS_STRINGS } from "../../../utils/strings/student.strings.js"; 
+import { buildDocumentName, createPreviewState, isPdfDocument } from "../../../utils/documents.utils.js";
 
-import { filterTournaments} from "../../../utils/gena/util.jsx";
+import { generateColumns } from "../../../utils/datagrid.utils.jsx";
 
-import {SCHOLARSHIPS_STATES , SCHOLARSHIP_TYPE,MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB} from "../../../utils/gena/constants.js";
-import { EMPTY_TOURNAMENT, SPORTS_REQUIRED_DOCUMENTS } from "../../../utils/gena/common.config.js";
+import { filterTournaments, obtenerLegajoDesdeEmail } from "../../../utils/util.jsx"; 
+
+import {SCHOLARSHIPS_STATES , SCHOLARSHIP_TYPE,MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB} from "../../../utils/common/constants.js";
+import { EMPTY_TOURNAMENT, SPORTS_REQUIRED_DOCUMENTS } from "../../../utils/common/common.config.js";
 
 import { SportsContext } from "../studentContext";
 
@@ -43,11 +40,17 @@ export function SportsProvider({ children }) {
   const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingTournaments, setLoadingTournaments] = useState(true);
-  const [preview, setPreview] = useState(INITIAL_PREVIEW);
+  const [preview, setPreview] = useState(createPreviewState());
   const [openPopup, setOpenPopup] = useState(false);
   const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
 
-  const closePreview = () => closePreviewState(setPreview);
+  const closePreview = () => {
+      setPreview((previous) => ({
+        ...previous,
+        open: false,
+        imageSrc: null, // Limpieza para liberar memoria
+      }));
+  };
 
   const closeDeleteDialog = () => setOpenPopup(false);
 
@@ -104,9 +107,9 @@ export function SportsProvider({ children }) {
       return;
     }
 
-    const fileName = construirNombre(
+    const fileName = buildDocumentName(
       item.formatoNombre,
-      { legajo: user.legajo },
+      { legajo: obtenerLegajoDesdeEmail(user.legajo) },
       extension,
     );
     const renamedFile = new File([file], fileName, {

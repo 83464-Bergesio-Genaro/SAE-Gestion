@@ -2,25 +2,13 @@ import React, { useState,useCallback,useEffect } from "react";
 import { ObtenerPerfilXLegajo,ModificarPerfilEstudiante } from "../../../api/EstudianteService";
 import { listarDocumentacionXLegajo } from "../../../api/BecasService";
 import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
-import { ProfileContext } from "../../../students/context/studentContext";
-import { useAuth, useNotification } from "../sharedContext";
-import {
-  cleanField,
-  cleanNumericField,
-  formatCuil,
-  formatDni,
-  formatPhone,
-  getInitials,
-  isEmpty,
-  isValidAddress,
-  isValidEmail,
-  isValidPhone,
-  onlyDigits,
-  parseAddress,
-  sanitizeAddressPart,
-} from "../../../utils/util.jsx";
-import { PROFILE_REQUIRED_FIELDS } from "../../../utils/gena/common.config.js";
-import { PROFILE_STRINGS } from "../../../utils/gena/student.string.js";
+import {  useAuth, useNotification,ProfileContext } from "../sharedContext"; 
+
+import { cleanField,cleanNumericField,isEmpty,onlyDigits,sanitizeAddressPart,getInitials } from "../../../utils/text.utils.js";
+import {formatCuil,formatDni,formatPhone,parseAddress} from "../../../utils/formatters.utils.js"
+import { isValidAddress,isValidEmail,isValidPhone } from "../../../utils/validation.utils.js";
+import { PROFILE_REQUIRED_FIELDS } from "../../../utils/common/common.config.js"; 
+import { PROFILE_STRINGS } from "../../../utils/strings/student.strings.js"; 
 
 const C = PROFILE_STRINGS;
 export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
@@ -99,7 +87,7 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
     setSaveAttempted(true);
     setFormError("");
 
-    const camposFaltantes = REQUIRED_FIELDS.filter(
+    const camposFaltantes = PROFILE_REQUIRED_FIELDS.filter(
       ([field]) => !cleanField(datosPerfil[field]),
     ).map(([, label]) => label);
 
@@ -155,7 +143,7 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
       await ModificarPerfilEstudiante(datosPerfil.legajo, body);
       showNotification(C.savedProfile,"success")
 
-    } catch (err) {
+    } catch {
       showNotification(C.errorProfile,"error")
       //setFormError(err.message || "Ocurrió un error al guardar");
     } finally {

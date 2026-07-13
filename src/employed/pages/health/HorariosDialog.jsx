@@ -28,9 +28,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAETimeField from "../../../shared/components/inputs/SAETimeField";
+
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAETimeField from "../../../assets/components/inputs/SAETimeField";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useHealth } from "../../context/employedContext";
 

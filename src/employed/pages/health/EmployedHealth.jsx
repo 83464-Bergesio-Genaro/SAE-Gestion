@@ -1,22 +1,6 @@
 //FUNCIONES
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { HealthUsersProvider } from "../../context/providers/healthProvider";
-import { useHealth } from "../../context/employedContext";
-//ICONS
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-import SchoolIcon from "@mui/icons-material/School";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import CloseIcon from "@mui/icons-material/Close";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-//COMPONENTES
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
-import { DataGrid } from "@mui/x-data-grid";
 import {
   Autocomplete,
   Box,
@@ -39,16 +23,35 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { EmployedCalendar } from "./HealthCalendar";
-import GestionarHorariosDialog from "./HorariosDialog";
-import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
+//ICONS
+import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import SchoolIcon from "@mui/icons-material/School";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import CloseIcon from "@mui/icons-material/Close";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+//COMPONENTES
+import { HealthUsersProvider } from "../../context/providers/healthProvider";
+import { useHealth } from "../../context/employedContext";
 import { useNotification } from "../../../shared/context/sharedContext";
 
-import SAEPage from "../../../shared/components/page/SAEPage";
-import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
 
+import GestionarHorariosDialog from "./horariosDialog";
+import { EmployedCalendar } from "./healthCalendar";
+import { DataGrid } from "@mui/x-data-grid";
+import { HEALTH_STRING } from "../../../utils/strings/employed.strings";
+
+const C = HEALTH_STRING;
 function EmployedAdminContent() {
   const navigate = useNavigate();
 
@@ -130,9 +133,9 @@ function EmployedAdminContent() {
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header=" Módulo de Salud"
-        title="Gestión de las capacidades medicas de nuestra area"
-        description="Permite cargar especialidades, personal, cursos, horarios para el personal y gestionar los turnos de los estudiantes"
+        header={C.headerMainTitle}
+        title={C.headerMainSubtitle}
+        description={C.headerMainDescription}
       />
 
       <Card
@@ -162,7 +165,7 @@ function EmployedAdminContent() {
               <DashboardIcon sx={{ fontSize: 32 }} />
               <Box>
                 <Typography variant="h4" fontWeight={700}>
-                  Gestion de Turnos
+                 {C.healthTurnsTitle}
                 </Typography>
               </Box>
             </Stack>
@@ -178,7 +181,7 @@ function EmployedAdminContent() {
                 "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
               }}
             >
-              Ingresar al Turnero
+              {C.healthTurnsButton}
             </SAEButton>
           </Stack>
         </Box>
@@ -215,10 +218,10 @@ function EmployedAdminContent() {
               <ScheduleIcon sx={{ fontSize: 32 }} />
               <Box>
                 <Typography variant="h6" fontWeight={700}>
-                  Horarios Empleados
+                  {C.ourScheduleTitle}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.85 }}>
-                  Nuestros Horarios
+                  {C.ourScheduleDescription}
                 </Typography>
               </Box>
             </Stack>
@@ -234,7 +237,7 @@ function EmployedAdminContent() {
                 "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
               }}
             >
-              Gestionar Horarios
+              {C.ourScheduleButton}
             </SAEButton>
           </Stack>
         </Box>
@@ -302,6 +305,7 @@ function DialogHealth() {
     <>
       {dialogOpen && dialogType === "especialidades" && (
         <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
+
           <DialogTitle
             sx={{
               display: "flex",
@@ -314,7 +318,7 @@ function DialogHealth() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogMode === "create" ? "Nuevo Especialidad" : "Editar Especialidad"}
+              {dialogMode === "create" ? C.specialityCreate : C.specialityUpdate}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -331,7 +335,7 @@ function DialogHealth() {
                 <Grid container spacing={1}>
                   <Grid size={{ xs: 12, md: 3 }} m={0}>
                     <SAETextField
-                      label="ID"
+                      label={C.formId}
                       type="number"
                       fullWidth
                       value={dialogData.id}
@@ -341,7 +345,7 @@ function DialogHealth() {
                   </Grid>
                   <Grid size={{ xs: 12, md: 9 }} m={0}>
                     <SAETextField
-                      label="Nombre Completo"
+                      label={C.formCompleteName}
                       value={dialogData.nombre}
                       onChange={(e) =>
                         handleDataChange("nombre", e.target.value)
@@ -351,7 +355,7 @@ function DialogHealth() {
                   </Grid>
                   <Grid size={{ xs: 12 }} m={0}>
                     <SAETextField
-                      label="Descripción"
+                      label={C.formDescription}
                       value={dialogData.descripcion}
                       onChange={(e) =>
                         handleDataChange("descripcion", e.target.value)
@@ -374,8 +378,8 @@ function DialogHealth() {
                       }
                       label={
                         dialogData.activo
-                          ? "Especialidad Activa"
-                          : "Especialidad NO activa"
+                          ? C.formActiveSpecialist
+                          : C.formNoActiveSpecialist
                       }
                     />
                   )}
@@ -390,7 +394,7 @@ function DialogHealth() {
               disabled={dialogSaving}
               startIcon={<CloseIcon />}
             >
-              Cancelar
+              {C.cancel}
             </SAEButton>
             <SAEButton
               variant="contained"
@@ -407,10 +411,10 @@ function DialogHealth() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
+                ? C.create
                 : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                  ? C.delete
+                  : C.save}
             </SAEButton>
           </DialogActions>
         </Dialog>
@@ -432,10 +436,10 @@ function DialogHealth() {
               sx={{ fontWeight: "bold" }}
             >
               {dialogMode === "create"
-                ? "Nuevo Empleado" //Primera condicion
+                ? C.employCreate //Primera condicion
                 : dialogMode === "edit"
-                  ? "Editar Empleado" //Segunda condicion
-                  : "Registrar Falta"}
+                  ? C.employEdit //Segunda condicion
+                  : C.employFault}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -458,7 +462,7 @@ function DialogHealth() {
                         fontWeight={600}
                         gutterBottom
                       >
-                        Faltas Previas
+                        {C.employHistoryFault}
                       </Typography>
                       <Grid size={{ xs: 12 }} my={1}>
                         <Box sx={{ width: "100%" }}>
@@ -483,11 +487,11 @@ function DialogHealth() {
                         fontWeight={600}
                         gutterBottom
                       >
-                        Registrar Nueva Falta
+                        {C.employCreateFault}
                       </Typography>
                       <Grid size={{ xs: 12 }} my={1}>
                         <SAETextField
-                          label="Observacion de la Falta"
+                          label={C.faultObservation}
                           value={dialogData.observacion}
                           onChange={(e) =>
                             handleDataChange("observacion", e.target.value)
@@ -499,7 +503,7 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12 }} my={1}>
                         <SAETextField
-                          label="Fecha de la Falta"
+                          label={C.faultDate}
                           type="date"
                           value={dialogData.fecha_alta}
                           onChange={(e) =>
@@ -527,13 +531,10 @@ function DialogHealth() {
                             fontWeight={600}
                             gutterBottom
                           >
-                            ¡ATENCION!
+                            {C.employSubtitle}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
-                            Al crear el personal medico se le solicitara el
-                            CUIL, el mismo NO podra ser modificado despues, es
-                            decir, que despues de la carga de esta persona solo
-                            el equipo de sistemas podra eliminar dicho registro.
+                            {C.employAclaration}
                           </Typography>
                         </CardContent>
                       </Card>
@@ -541,7 +542,7 @@ function DialogHealth() {
                     <Grid container spacing={1}>
                       <Grid size={{ xs: 12 }} m={0}>
                         <SAETextField
-                          label="CUIL"
+                          label={C.employCUIL}
                           type="number"
                           fullWidth
                           value={dialogData.cuil}
@@ -553,7 +554,7 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
                         <SAETextField
-                          label="Nombre"
+                          label={C.employName}
                           value={dialogData.nombre}
                           onChange={(e) =>
                             handleDataChange("nombre", e.target.value)
@@ -563,7 +564,7 @@ function DialogHealth() {
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
                         <SAETextField
-                          label="Apellido"
+                          label={C.employLastName}
                           value={dialogData.apellido}
                           onChange={(e) =>
                             handleDataChange("apellido", e.target.value)
@@ -597,7 +598,7 @@ function DialogHealth() {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Especialidad"
+                              label={C.employSpeciality}
                               inputProps={{
                                 ...params.inputProps,
                                 readOnly: true, // Esto evita la escritura
@@ -621,11 +622,10 @@ function DialogHealth() {
                                 fontWeight={600}
                                 gutterBottom
                               >
-                                IMPORTANTE!
+                                {C.employUpdateSubtitle}
                               </Typography>
                               <Typography variant="body2" color="textSecondary">
-                                Si la especialidad no se encuentra activa
-                                aparecera como dato pero no sera seleccionable.
+                                {C.employUpdateAclaration}
                               </Typography>
                             </CardContent>
                           </Card>
@@ -641,8 +641,8 @@ function DialogHealth() {
                             }
                             label={
                               dialogData.activo
-                                ? "Personal Activo"
-                                : "Personal NO activo"
+                                ? C.employActive
+                                : C.employNoActive
                             }
                           />
                         </>
@@ -660,7 +660,7 @@ function DialogHealth() {
               disabled={dialogSaving}
               startIcon={<CloseIcon />}
             >
-              Cancelar
+              {C.cancel}
             </SAEButton>
             <SAEButton
               variant="contained"
@@ -677,10 +677,10 @@ function DialogHealth() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
+                ? C.create
                 : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                  ? C.delete
+                  : C.save}
             </SAEButton>
           </DialogActions>
         </Dialog>
@@ -700,7 +700,7 @@ function DialogHealth() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogMode === "create" ? "Nuevo Curso" : "Editar Curso"}
+              {dialogMode === "create" ? C.courseCreate : C.courseEdit}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -716,7 +716,7 @@ function DialogHealth() {
               <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 3 }} m={0}>
                       <SAETextField
-                        label="ID"
+                        label={C.courseId}
                         type="number"
                         fullWidth
                         value={dialogData.id}
@@ -726,7 +726,7 @@ function DialogHealth() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 3 }} m={0}>
                       <SAETextField
-                        label="Cupo Maximo"
+                        label={C.courseCapacity}
                         type="number"
                         fullWidth
                         value={dialogData.cupo_maximo}
@@ -737,7 +737,7 @@ function DialogHealth() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }} m={0}>
                       <SAETextField
-                        label="Nombre Curso"
+                        label={C.courseName}
                         value={dialogData.nombre_curso}
                         onChange={(e) =>
                           handleDataChange("nombre_curso", e.target.value)
@@ -747,7 +747,7 @@ function DialogHealth() {
                     </Grid>
                     <Grid size={{ xs: 12 }} m={0}>
                       <SAETextField
-                        label="Nombre del Docente"
+                        label={C.courseTeacher}
                         value={dialogData.nombre_docente}
                         onChange={(e) =>
                           handleDataChange("nombre_docente", e.target.value)
@@ -757,7 +757,7 @@ function DialogHealth() {
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }} m={0}>
                       <SAETextField
-                        label="Fecha de Inicio"
+                        label={C.courseStart}
                         type="date"
                         value={dialogData.fecha_inicio}
                         onChange={(e) =>
@@ -769,7 +769,7 @@ function DialogHealth() {
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }} m={0}>
                       <SAETextField
-                        label="Fecha de Finalizacion"
+                        label={C.courseEnd}
                         type="date"
                         value={dialogData.fecha_fin}
                         onChange={(e) =>
@@ -791,7 +791,7 @@ function DialogHealth() {
                           />
                         }
                         label={
-                          dialogData.activo ? "Curso Activo" : "Curso NO activo"
+                          dialogData.activo ? C.courseActive : C.courseNoActive
                         }
                       />
                     )}
@@ -805,7 +805,7 @@ function DialogHealth() {
               disabled={dialogSaving}
               startIcon={<CloseIcon />}
             >
-              Cancelar
+              {C.cancel}
             </SAEButton>
             <SAEButton
               variant="contained"
@@ -822,8 +822,8 @@ function DialogHealth() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
-                : "Guardar"}
+                ? C.create
+                : C.save}
             </SAEButton>
           </DialogActions>
         </Dialog>

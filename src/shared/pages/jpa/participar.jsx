@@ -19,20 +19,24 @@ import {
   Typography,
   Tab,
 } from "@mui/material";
+import { useState } from "react";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 
-import { useState } from "react";
-import SAEButton from "../../components/buttons/SAEButton";
-import { sendJPAEmailForm } from "../../../api/EmailService";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import DirectionsBusOutlinedIcon from "@mui/icons-material/DirectionsBusOutlined";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 
+import { sendJPAEmailForm } from "../../../api/EmailService";
+import { JPA_STRINGS } from "../../../utils/strings/shared.strings";
+
+const C = JPA_STRINGS;
 const checkImage = `${import.meta.env.BASE_URL}images/logos/comprobado.png`;
 
 export default function SharedJPAParticipar() {
@@ -217,14 +221,13 @@ export default function SharedJPAParticipar() {
                 fontWeight={900}
                 fontSize={{ xs: "2rem", md: "3.5rem" }}
               >
-                Participá de JPA
+                {C.participateTitle}
               </Typography>
               <Typography
                 variant="h6"
-                sx={{ opacity: 0.9, mt: 0.5, maxWidth: 680 }}
+                sx={{ opacity: 0.9, mt: 0.5, maxWidth:{ xs:680,md:1000} }}
               >
-                Sumate a la experiencia universitaria desde tu institución,
-                empresa o como estudiante.
+                {C.participateDescription}
               </Typography>
             </Box>
           </Stack>
@@ -254,17 +257,16 @@ export default function SharedJPAParticipar() {
                   </Avatar>
                   <Box>
                     <Typography variant="h5" fontWeight={800}>
-                      Encontranos en la UTN
+                      {C.findUsTitle}
                     </Typography>
                     <Typography color="text.secondary">
-                      Secretaría de Asuntos Estudiantiles · Facultad Regional
-                      Córdoba
+                      {C.findUsDescription}
                     </Typography>
                   </Box>
                 </Stack>
               </Box>
               <iframe
-                title="Ubicación de la Secretaría de Asuntos Estudiantiles"
+                title={C.whereFindUs}
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1063.1657514756466!2d-64.19445682694611!3d-31.442516265642624!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9432a2f66864ac1d%3A0x353cb4569b42a5bb!2sSecretar%C3%ADa%20de%20Asuntos%20Estudiantiles%20(S.A.E.)%20%7C%20U.T.N.%20%E2%80%93%20F.R.C.!5e0!3m2!1ses-419!2sar!4v1725738818372!5m2!1ses-419!2sar"
                 loading="lazy"
                 width="100%"
@@ -299,7 +301,7 @@ export default function SharedJPAParticipar() {
               >
                 <DirectionsBusOutlinedIcon color="primary" />
                 <Typography fontWeight={700} color="#123666">
-                  Líneas que te acercan
+                  {C.findUsBus}
                 </Typography>
               </Stack>
               {colectivos.map((item, index) => (
@@ -349,11 +351,10 @@ export default function SharedJPAParticipar() {
           >
             <Box sx={{ p: { xs: 2.5, md: 4 }, pb: { xs: 1, md: 2 } }}>
               <Typography variant="h4" fontWeight={900} color="var(--primary)">
-                ¿Cómo querés participar?
+                {C.howToTitle}
               </Typography>
               <Typography color="text.secondary" mt={0.5}>
-                Elegí tu perfil y completá el formulario. Nos pondremos en
-                contacto con vos.
+                {C.howToDescription}
               </Typography>
             </Box>
             <TabContext value={value}>
@@ -400,7 +401,7 @@ export default function SharedJPAParticipar() {
                       <TextField
                         fullWidth
                         required
-                        label="Nombre de la organización"
+                        label={C.participateName}
                         name="user_name"
                       />
                     </Grid>
@@ -408,7 +409,7 @@ export default function SharedJPAParticipar() {
                       <TextField
                         fullWidth
                         required
-                        label="Ingrese el email"
+                        label={C.participateEmail}
                         name="user_email"
                         type="email"
                       />
@@ -417,7 +418,7 @@ export default function SharedJPAParticipar() {
                       <TextField
                         fullWidth
                         required
-                        label="Teléfono"
+                        label={C.participatePhone}
                         name="phone"
                       />
                     </Grid>
@@ -425,14 +426,14 @@ export default function SharedJPAParticipar() {
                       <TextField
                         fullWidth
                         required
-                        label="Cantidad"
+                        label={C.participateQuant}
                         name="amount"
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 4 }}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
-                          label="Fecha de visita"
+                          label={C.participateDate}
                           value={visitDate}
                           onChange={setVisitDate}
                           slotProps={{ textField: { fullWidth: true } }}
@@ -459,7 +460,7 @@ export default function SharedJPAParticipar() {
                           py: 1.4,
                         }}
                       >
-                        Enviar solicitud
+                        {C.participateSend}
                       </SAEButton>
                     </Grid>
                   </Grid>
@@ -528,7 +529,7 @@ export default function SharedJPAParticipar() {
                           py: 1.4,
                         }}
                       >
-                        Enviar solicitud
+                        {C.participateSend}
                       </SAEButton>
                     </Grid>
                   </Grid>
@@ -629,7 +630,7 @@ export default function SharedJPAParticipar() {
                           py: 1.4,
                         }}
                       >
-                        Enviar solicitud
+                        {C.participateSend}
                       </SAEButton>
                     </Grid>
                   </Grid>
@@ -652,11 +653,11 @@ export default function SharedJPAParticipar() {
           textAlign="center"
           fontWeight={800}
         >
-          Solicitud enviada
+          {C.emailSended}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description-1">
-            La SAE se pondrá en contacto al correo electrónico proporcionado.
+            {C.emailAclaration}
           </DialogContentText>
           <br />
           <Box display="flex" justifyContent="center">
@@ -674,7 +675,7 @@ export default function SharedJPAParticipar() {
             onClick={closeDialog}
             style={{ color: "white" }}
           >
-            Cerrar
+            {C.close}
           </SAEButton>
         </DialogActions>
       </Dialog>

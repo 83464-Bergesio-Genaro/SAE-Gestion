@@ -19,26 +19,23 @@ import {
   Snackbar,
   CircularProgress,
 } from "@mui/material";
+import { useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-import {
-  useAuth,
-  useNotification,
-} from "../../../shared/context/sharedContext";
+import { useAuth, useNotification} from "../../../shared/context/sharedContext";
 import { useHealth } from "../../context/studentContext";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
-import { useEffect } from "react";
 
-import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import TitleBox from "../../../shared/components/titleBox";
-import { SAETypography } from "../../../shared/components/typography/SAETypography";
-import { formatearFecha,mostrarHorasMinutos,ScaleText} from "../../../utils/util";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import TitleBox from "../../../assets/components/titleBox";
+import HeaderPageStudent from "../../../assets/components/headerPage/headerPageStudent";
+import { SAETypography } from "../../../assets/components/typography/SAETypography";
+import { ScaleText } from "../../../assets/components/scaleText/scaleText";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -57,11 +54,13 @@ import ScienceIcon from "@mui/icons-material/Science";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import BloodtypeIcon from "@mui/icons-material/Bloodtype";
 
-import { calendarDays } from "../../../utils/constants";
-import { HEALTH_STRINGS } from "../../../utils/gena/student.string";
+import { calendarDays } from "../../../utils/common/constants"; 
+import { formatDate, formatTime } from "../../../utils/date.utils"; 
+import { HEALTH_STRINGS } from "../../../utils/strings/student.strings"; 
 import { DataGrid } from "@mui/x-data-grid";
 
 const C = HEALTH_STRINGS;
+
 const PALETTE = [
   "#8A8A8A", //Pendiente
   "#576DDC", //Asignado
@@ -205,7 +204,7 @@ export function EmployedStudentContent() {
 
   return (
     <SAEPage>
-      <StudentHeaderPage
+      <HeaderPageStudent
         title={C.headerTitle}
         description={C.headerDescription }
         backgroundImage="images/varias/campus.jpg"
@@ -396,8 +395,8 @@ export function EmployedStudentContent() {
                                   />
                                   <SAETypography variant="body2">
                                     <strong>{nombreDia}:</strong>{" "}
-                                    {mostrarHorasMinutos(item.hora_inicio)} a{" "}
-                                    {mostrarHorasMinutos(item.hora_fin)}
+                                    {formatTime(item.hora_inicio)} a{" "}
+                                    {formatTime(item.hora_fin)}
                                   </SAETypography>
                                 </Stack>
                               );
@@ -523,7 +522,7 @@ export function EmployedStudentContent() {
                       fontWeight="bold"
                       sx={{ maxWidth: "140px"}}
                     >
-                      {turno.fecha_solicitud || "-"}
+                      {formatDate(turno.fecha_solicitud,"short") || "-"}
                     </SAETypography>
                     <Chip
                       label={turno.estado || "-"}
@@ -772,9 +771,9 @@ export function EmployedStudentContent() {
                             {C.courseStart}
                             <strong>
                               {" "}
-                              {formatearFecha(curso.fecha_inicio)}
+                              {formatDate(curso.fecha_inicio,"short")}
                             </strong>{C.courseEnd}
-                            <strong>{formatearFecha(curso.fecha_fin)}</strong>
+                            <strong>{formatDate(curso.fecha_fin,"short")}</strong>
                           </SAETypography>
                         </Stack>
                       </CardContent>
@@ -1099,11 +1098,6 @@ function DialogHealth() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
-              startIcon={
-                dialogSaving ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : null
-              }
             >
               {dialogMode === "create"
                 ? C.close

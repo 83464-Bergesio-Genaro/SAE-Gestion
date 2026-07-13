@@ -15,24 +15,17 @@ import {
   IconButton,
   InputAdornment,
 } from "@mui/material";
-import SAEButton from "../../components/buttons/SAEButton";
-import SAETextField from "../../components/inputs/SAETextField";
-import SAESpinner from "../../components/spinner/SAESpinner";
 import { Login as LoginIcon, Visibility, VisibilityOff } from "@mui/icons-material";
+
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+
+import { LOGIN_STRINGS } from "../../../utils/strings/shared.strings";
 import { ModificarUsuario } from "../../../api/AuthService";
+import { carreras } from "../../../utils/common/constants";
 
-const carreras = [
-  { value: "sistemas", label: "Sistemas" },
-  { value: "electrica", label: "Eléctrica" },
-  { value: "electronica", label: "Electrónica" },
-  { value: "mecanica", label: "Mecánica" },
-  { value: "metalurgica", label: "Metalúrgica" },
-  { value: "quimica", label: "Química" },
-  { value: "industrial", label: "Industrial" },
-  { value: "civil", label: "Civil" },
-  { value: "frc", label: "frc" },
-];
-
+const C = LOGIN_STRINGS;
 export default function Login() {
   const baseUrl = import.meta.env.BASE_URL;
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +71,7 @@ export default function Login() {
       }
     } else {
       setIsLoading(false);
-      setError("Credenciales no válidas");
+      setError(C.errorCredential);
     }
   };
 
@@ -87,11 +80,11 @@ export default function Login() {
     setNormalizarNombreError("");
     setNormalizarError("");
     if (!normalizarApellido.trim()) {
-      setNormalizarApellidoError("Ingrese el apellido");
+      setNormalizarApellidoError(C.errorLastName);
       return;
     }
     if (!normalizarNombre.trim()) {
-      setNormalizarNombreError("Ingrese el nombre");
+      setNormalizarNombreError(C.errorName);
       return;
     }
     setNormalizarLoading(true);
@@ -108,11 +101,11 @@ export default function Login() {
         },
         pendingSession.token
       );
-      if (!result.success) throw new Error(result.message || "Error al actualizar el usuario");
+      if (!result.success) throw new Error(result.message || C.errorUpdate);
       updateUser({ nombre: nombre_usuario });
       redirectAfterLogin(pendingSession);
     } catch (err) {
-      setNormalizarError(err.message || "Error al guardar");
+      setNormalizarError(err.message || C.errorSaving);
     } finally {
       setNormalizarLoading(false);
     }
@@ -122,17 +115,17 @@ export default function Login() {
     setError("");
     setFieldErrors({ legajo: false, password: false });
     if (!legajo && !password) {
-      setError("Debe ingresar su legajo y contraseña");
+      setError(C.errorCredentials);
       setFieldErrors({ legajo: true, password: true });
       return false;
     }
     if (!legajo) {
-      setError("Debe ingresar su legajo");
+      setError(C.errorID);
       setFieldErrors((f) => ({ ...f, legajo: true }));
       return false;
     }
     if (!password) {
-      setError("Debe ingresar la contraseña");
+      setError(C.errorPassword);
       setFieldErrors((f) => ({ ...f, password: true }));
       return false;
     }
@@ -173,7 +166,7 @@ export default function Login() {
             variant="h5"
             sx={{ mb: 3, fontWeight: "bold", color: "#153b6f" }}
           >
-            Ya hay una sesión activa
+            {C.alreadySession}
           </Typography>
           <SAEButton
             variant="contained"
@@ -256,7 +249,7 @@ export default function Login() {
               mb: 1,
             }}
           >
-            SAE GESTIÓN
+            {C.loginTitle}
           </Typography>
 
           <Typography
@@ -267,7 +260,7 @@ export default function Login() {
               mb: 3,
             }}
           >
-            Inicia sesión para continuar
+           {C.loginSubtitle}
           </Typography>
 
           {error && (
@@ -285,7 +278,7 @@ export default function Login() {
                 alignItems="center"
               >
                 <SAETextField
-                  placeholder="Legajo"
+                  placeholder={C.idPlaceholder}
                   value={legajo}
                   onChange={(e) => {
                     setLegajo(e.target.value);
@@ -326,7 +319,7 @@ export default function Login() {
             {/* Password Field */}
             <SAETextField
               type={showPassword ? "text" : "password"}
-              placeholder="Contraseña"
+              placeholder={C.passPlaceHolder}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -361,7 +354,7 @@ export default function Login() {
               startIcon={<LoginIcon />}
               sx={{ fontWeight: 600 }}
             >
-              Ingresar
+              {C.loginButton}
             </SAEButton>
           </Stack>
 
@@ -374,7 +367,7 @@ export default function Login() {
               color: "#5a6f8f",
             }}
           >
-            © 2026 SAE Gestión - UTN FRC
+            {C.copyright}
           </Typography>
         </Paper>
       </Container>
@@ -395,7 +388,7 @@ export default function Login() {
         >
           <SAESpinner size="M" />
           <Typography sx={{ color: "#5a6f8f", fontWeight: 500 }}>
-            Ingresando...
+            {C.loadingMessage}
           </Typography>
         </DialogContent>
       </Dialog>
@@ -409,10 +402,10 @@ export default function Login() {
       >
         <DialogContent sx={{ px: 4, py: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, color: "#153b6f", mb: 1 }}>
-            Completar datos de usuario
+            {C.completeMsg}
           </Typography>
           <Typography variant="body2" sx={{ color: "#5a6f8f", mb: 3 }}>
-            Tu nombre de usuario necesita ser normalizado. Ingresá tu apellido y nombre.
+            {C.completeDescription}
           </Typography>
           <Stack spacing={2}>
             <SAETextField
@@ -451,7 +444,7 @@ export default function Login() {
               disabled={normalizarLoading}
               sx={{ fontWeight: 600, mt: 1 }}
             >
-              {normalizarLoading ? "Guardando..." : "Confirmar"}
+              {normalizarLoading ? C.completeSaving : C.completeSaveButton}
             </SAEButton>
           </Stack>
         </DialogContent>

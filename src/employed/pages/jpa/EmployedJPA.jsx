@@ -19,21 +19,20 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAETimeField from "../../../shared/components/inputs/SAETimeField";
-import { useNotification } from "../../../shared/context/sharedContext";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx"; 
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAETimeField from "../../../assets/components/inputs/SAETimeField";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
 
-import { getDialogTitle } from "../../../utils/juan/util";
+import { JPAProvider } from "../../context/providers/jpaProvider.jsx";
+import { useJPA } from "../../context/employedContext.js";
+import { useNotification } from "../../../shared/context/sharedContext.js";
 
-import { DataGrid } from "@mui/x-data-grid";
-import { JPAProvider } from "../../context/providers/jpaProvider";
-import { useJPA } from "../../context/employedContext";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
-import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
-import { isValidEmail } from "../../../utils/util.jsx";
+import { getDialogTitle } from "../../../utils/util.jsx";
+import { isValidEmail } from "../../../utils/validation.utils.js"; 
 
 function CopyURLButton() {
   const ubicacionesComunes = [

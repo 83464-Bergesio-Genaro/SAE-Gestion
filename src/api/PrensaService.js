@@ -8,8 +8,13 @@ import {
   resolveApiUrl,
 } from "./apiClient";
 
-export const listarPublicacionesCompleto = () =>
-  RequestAPI("/api/Prensa/ListarPublicacionesCompleto", "GET");
+export async function listarPublicacionesCompleto() {
+  const data = await RequestAPI(
+    "/api/Prensa/ListarPublicacionesCompleto",
+    "GET",
+  );
+  return data.map(mapPublicacionPublica);
+}
 
 export const listarPublicacionesActivas = () =>
   RequestAPI("/api/Prensa/ListarPublicacionesActivas", "GET");

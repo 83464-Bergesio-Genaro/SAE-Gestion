@@ -1,12 +1,11 @@
 export const calendarDays = [
-    { label: "Lunes",     value: 1 },
-    { label: "Martes",    value: 2 },
-    { label: "Miércoles", value: 3 },
-    { label: "Jueves",    value: 4 },
-    { label: "Viernes",   value: 5 }
+  { label: "Lunes", value: 1 },
+  { label: "Martes", value: 2 },
+  { label: "Miércoles", value: 3 },
+  { label: "Jueves", value: 4 },
+  { label: "Viernes", value: 5 },
 ];
-export const completeWeekDays =
-[
+export const completeWeekDays = [
   "Lunes",
   "Martes",
   "Miércoles",
@@ -32,6 +31,7 @@ export const SCHOLARSHIP_TYPE = {
 export const MAX_FILE_SIZE_MB = 5;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 export const DEFAULT_ACCEPTED_EXTENSIONS = ".pdf,.jpg,.jpeg,.png";
+export const PRESS_DOCS_PER_PAGE = 5;
 export const PREVIEW_EXTENSIONS = new Set([
   "jpg",
   "jpeg",
@@ -57,4 +57,7 @@ export const CAREERS = [
 
 export const carreras = CAREERS;
 
-export const PLACEHOLDER_IMAGE = "images/principal/newsGeneric.webp"
+export const PLACEHOLDER_IMAGE = "images/principal/newsGeneric.webp";
+
+export const DOCS_PER_PAGE = 5;
+

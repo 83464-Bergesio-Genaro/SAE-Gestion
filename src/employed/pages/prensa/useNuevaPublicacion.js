@@ -12,12 +12,12 @@ import {
   listarDocumentosSinData,
 } from "../../../api/PrensaService";
 import {
-  toIsoWithFixedTime,
-  toDateInputValue,
-  isPdfDocument,
-  emptyPublicacion,
-  DOCS_PER_PAGE,
-} from "./prensa.utils";
+  normalizeDateInput,
+  toApiDateTimeWithFixedTime,
+} from "../../../utils/date.utils";
+import { isPdfDocument } from "../../../utils/documents.utils";
+import { EMPTY_PUBLICACION } from "../../../utils/common/common.config";
+import { DOCS_PER_PAGE } from "../../../utils/common/constants";
 import { PRENSA_STRINGS as PS } from "./prensa.strings";
 
 const INITIAL_PREVIEW = {
@@ -103,7 +103,7 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
   // Actions
   // ---------------------------------------------------------------------------
   function openDialog() {
-    openGlobalDialog("pressPublication", "create", emptyPublicacion());
+    openGlobalDialog("pressPublication", "create", { ...EMPTY_PUBLICACION });
   }
 
   function openEdit(pub) {
@@ -111,8 +111,8 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
       id: pub.id,
       titulo_publicacion: pub.titulo_publicacion || "",
       descripcion: pub.descripcion || "",
-      fecha_inicio: toDateInputValue(pub.fecha_inicio),
-      fecha_vigencia: toDateInputValue(pub.fecha_vigencia),
+      fecha_inicio: normalizeDateInput(pub.fecha_inicio),
+      fecha_vigencia: normalizeDateInput(pub.fecha_vigencia),
       prioridad: pub.prioridad ?? 0,
       no_dar_baja: pub.no_dar_baja ?? false,
       visualizaciones: pub.visualizaciones ?? 0,
@@ -163,8 +163,8 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
     try {
       const body = {
         ...nuevaData,
-        fecha_inicio: toIsoWithFixedTime(nuevaData.fecha_inicio, false),
-        fecha_vigencia: toIsoWithFixedTime(nuevaData.fecha_vigencia, true),
+        fecha_inicio: toApiDateTimeWithFixedTime(nuevaData.fecha_inicio),
+        fecha_vigencia: toApiDateTimeWithFixedTime(nuevaData.fecha_vigencia, true),
       };
 
       let pubId;

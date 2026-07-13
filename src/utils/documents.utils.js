@@ -308,3 +308,8 @@ export function asignarArchivosADocumentos(
     };
   });
 }
+
+export function getDocumentName(doc, fallback = "Archivo") {
+  const candidate = doc?.nombre_documento;
+  return hasRealDocumentName(candidate) ? candidate : fallback;
+}

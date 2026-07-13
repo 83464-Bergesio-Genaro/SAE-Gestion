@@ -29,6 +29,35 @@ export function toApiDateTime(value, fallback = null) {
 
   return parsed.toISOString();
 }
+
+/**
+ * Convierte una fecha yyyy-MM-dd a ISO usando una hora fija local.
+ * Inicio del dia -> 00:00:00
+ * Fin del dia    -> 23:59:00
+ */
+export function toApiDateTimeWithFixedTime(
+  value,
+  isEndOfDay = false,
+  fallback = null,
+) {
+  if (!value) return fallback;
+
+  const normalizedDate = normalizeDateInput(value);
+  if (!normalizedDate) return fallback;
+
+  const [year, month, day] = normalizedDate.split("-").map(Number);
+  const date = new Date(
+    year,
+    month - 1,
+    day,
+    isEndOfDay ? 23 : 0,
+    isEndOfDay ? 59 : 0,
+    0,
+    0,
+  );
+
+  return date.toISOString();
+}
 /**
  * Formatea una fecha en diferentes formatos.
  *

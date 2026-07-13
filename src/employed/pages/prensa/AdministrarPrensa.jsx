@@ -26,42 +26,38 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAESwitch from "../../../shared/components/buttons/SAESwitch";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAESwitch from "../../../assets/components/buttons/SAESwitch";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { PRENSA_STRINGS } from "./prensa.strings";
 import { PRIORIDAD_OPTIONS, getTipoDocumento } from "./prensa.utils";
-import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import NewsPreviewDialog from "../../../shared/components/StudentNews/NewsPreviewDialog";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
+import NewsPreviewDialog from "../../../assets/components/StudentNews/NewsPreviewDialog";
 import SchoolIcon from "@mui/icons-material/School";
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
-import { useNotification } from "../../../shared/context/sharedContext";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import { useNotification } from "../../../shared/context/sharedContext.js";
 import { usePress } from "../../context/employedContext";
 import { PressProvider } from "../../context/providers/pressProvider";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
+import { PRENSA_STRINGS } from "../../../utils/strings/employed.strings";
 
 const PSN = PRENSA_STRINGS.nueva;
-
-export default function AdministrarPrensa() {
-  return (
-    <PressProvider>
-      <AdministrarPrensaContent />
-    </PressProvider>
-  );
-}
+const C = PRENSA_STRINGS;
 
 function AdministrarPrensaContent() {
   const {
-    openCreatePublication,
-    rows,
-    columns,
-    loading,
+    //DataGrid
+    publicacionesRows,
+    publicacionesColumns,
+    publicacionesLoading,
+    openCreatePublicacion,
+
+    //Preview de la noticia
     selectedPub,
     handleClose,
     loadingDocs,
@@ -84,15 +80,15 @@ function AdministrarPrensaContent() {
       publicaciones: {
         key: "publicaciones",
         title: "Publicaciones",
+        dialog: openCreatePublicacion,
         addButton: "Nueva Publicacion",
         icon: SchoolIcon,
-        rows,
-        columns,
-        loading,
-        dialog: openCreatePublication,
+        rows: publicacionesRows,
+        columns: publicacionesColumns,
+        loading: publicacionesLoading,
       },
     }),
-    [columns, loading, openCreatePublication, rows],
+    [publicacionesRows, publicacionesColumns, publicacionesLoading,openCreatePublicacion],
   );
   const currentSection = useMemo(
     () => sectionConfig[activeSection],
@@ -101,9 +97,9 @@ function AdministrarPrensaContent() {
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header=" Módulo de Prensa"
-        title="Gestión de Publicaciones"
-        description="Permite gestionar las publicaciones en el módulo de prensa"
+        header={C.headerTitle}
+        title={C.headerSubtitle}
+        description={C.headerDescription}
       />
       <SAEDataGrid
         sectionConfig={sectionConfig}
@@ -382,9 +378,7 @@ function NuevaPublicacionDialog() {
                               key={document.id}
                               hover
                               selected={docSeleccionado === document.id}
-                              onClick={() =>
-                                setDocSeleccionado(document.id)
-                              }
+                              onClick={() => setDocSeleccionado(document.id)}
                               sx={{ cursor: "pointer" }}
                             >
                               <TableCell padding="checkbox">
@@ -393,9 +387,7 @@ function NuevaPublicacionDialog() {
                                   size="small"
                                 />
                               </TableCell>
-                              <TableCell>
-                                {document.nombre_documento}
-                              </TableCell>
+                              <TableCell>{document.nombre_documento}</TableCell>
                               <TableCell>
                                 {getTipoDocumento(document)}
                               </TableCell>
@@ -501,19 +493,26 @@ function DialogPress() {
     const config = deleteDialogConfig[dialogType];
 
     return config ? (
-    <SAEDeleteDialog
-      open={dialogOpen}
-      entityLabel={config.entityLabel}
-      itemName={config.itemName}
-      itemId={dialogData?.id}
-      onConfirm={config.onConfirm}
-      onClose={closeDialog}
-      loading={dialogSaving}
-      error={dialogError}
-      onClearError={() => setDialogError("")}
-    />
+      <SAEDeleteDialog
+        open={dialogOpen}
+        entityLabel={config.entityLabel}
+        itemName={config.itemName}
+        itemId={dialogData?.id}
+        onConfirm={config.onConfirm}
+        onClose={closeDialog}
+        loading={dialogSaving}
+        error={dialogError}
+        onClearError={() => setDialogError("")}
+      />
     ) : null;
   }
 
   return null;
+}
+export default function AdministrarPrensa() {
+  return (
+    <PressProvider>
+      <AdministrarPrensaContent />
+    </PressProvider>
+  );
 }

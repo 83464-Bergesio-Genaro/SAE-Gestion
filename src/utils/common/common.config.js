@@ -2,38 +2,36 @@ export const EMPTY_TOURNAMENT = {
   nombre_torneo: "",
   fecha_inicio: "",
   fecha_fin: "",
-  fecha_limite_inscripcion:"",
-  activo:"",
-  nombre_deporte:"",
-  docente_responsable:"",
-  cupo_jugadores:""
-}
+  fecha_limite_inscripcion: "",
+  activo: "",
+  nombre_deporte: "",
+  docente_responsable: "",
+  cupo_jugadores: "",
+};
 // --------------------------- SALUD --------------------------- //
-export const EMPTY_TURNO =
-{
-    id: 0,
-    cuil_medico: "",
-    especialista: "",
-    legajo: "",
-    paciente: "",
-    fecha_solicitud: "",
-    fecha_atencion: "",
-    hora_atencion: "",
-    asunto: "",
-    id_estado_turno: 0,
-    estado: ""
-}
+export const EMPTY_TURNO = {
+  id: 0,
+  cuil_medico: "",
+  especialista: "",
+  legajo: "",
+  paciente: "",
+  fecha_solicitud: "",
+  fecha_atencion: "",
+  hora_atencion: "",
+  asunto: "",
+  id_estado_turno: 0,
+  estado: "",
+};
 //DEBE SER IGUAL LAS COLUMNAS QUE LAS FILAS
-export const EMPTY_TURNO_PACIENTE =
-{
-    id: 0,
-    especialista: "",
-    fecha_solicitud: "",
-    fecha_atencion: "",
-    hora_atencion: "",
-    asunto: "",
-    estado: ""
-}
+export const EMPTY_TURNO_PACIENTE = {
+  id: 0,
+  especialista: "",
+  fecha_solicitud: "",
+  fecha_atencion: "",
+  hora_atencion: "",
+  asunto: "",
+  estado: "",
+};
 
 export const EMPTY_ESPECIALIDAD = {
   id: 0,
@@ -76,28 +74,26 @@ export const EMPTY_HORARIO = {
 };
 // ------------------------- EMPLEADO ------------------------- //
 export const EMPTY_FORM = {
-    dia: 1,
-    hora_inicio: "",
-    hora_fin: "",
-    activo: true
+  dia: 1,
+  hora_inicio: "",
+  hora_fin: "",
+  activo: true,
 };
-export const EMPTY_EMPLEADO =    
-{
-    id: "",
-    legajo: "",
-    nombre_empleado: "",
-    id_perfil: 5,
-    nombre_perfil: "",
-    activo: true
-}
-export const EMPTY_USUARIO = 
-{
-    id: "",
-    legajo: "",
-    nombre_usuario:"",
-    id_perfil: "",
-    activo: false 
-}
+export const EMPTY_EMPLEADO = {
+  id: "",
+  legajo: "",
+  nombre_empleado: "",
+  id_perfil: 5,
+  nombre_perfil: "",
+  activo: true,
+};
+export const EMPTY_USUARIO = {
+  id: "",
+  legajo: "",
+  nombre_usuario: "",
+  id_perfil: "",
+  activo: false,
+};
 // ------------------------- CONSULTAS ------------------------ //
 export const EMPTY_LINKFRECUENTE = {
   id: 0,
@@ -132,6 +128,18 @@ export const EMPTY_INTERESADOS = {
   contacto: "",
   email: "",
 };
+
+// ---------------------------- PRENSA -------------------------- //
+export const EMPTY_PUBLICACION = {
+  titulo_publicacion: "",
+  descripcion: "",
+  fecha_inicio: "",
+  fecha_vigencia: "",
+  prioridad: 0,
+  no_dar_baja: false,
+  visualizaciones: 0,
+};
+
 // ------------------------ REQUERIDOS ------------------------ //
 export const PROFILE_REQUIRED_FIELDS = [
   ["legajo", "Legajo"],
@@ -144,7 +152,6 @@ export const PROFILE_REQUIRED_FIELDS = [
   ["telefono", "Teléfono"],
   ["direccion", "Dirección"],
 ];
-
 
 export const PERSONAL_FIELDS = [
   { name: "nombres", label: "Nombres", type: "text", md: 6 },
@@ -165,7 +172,7 @@ export const PERSONAL_FIELDS = [
 ];
 
 export const SPORTS_REQUIRED_DOCUMENTS = [
-  { 
+  {
     id_tipo_documento: null,
     nombre: "Certificado de Alumno Regular",
     descripcion:
@@ -205,7 +212,6 @@ export const SPORTS_REQUIRED_DOCUMENTS = [
     required: true,
   },
 ];
-
 
 // Documentos comunes a cualquier solicitud de beca.
 export const SCHOLARSHIPS_REQUERID_DOCUMENTS = [
@@ -360,49 +366,48 @@ export const ECONOMIC_OPTIONAL_DOCUMENTS = [
   },
 ];
 export const TRAVEL_REQUIRED_DOCUMENTS = [
-    {
-        id_tipo_documento: null,
-        nombre: "Certificado de Alumno Regular",
-        descripcion:
-        "Certificado vigente que acredita tu condición de estudiante regular.",
-        subido: false,
-        archivo: null,
-        archivoNombre: "",
-        formatoNombre: "{legajo}_AlumnoRegular",
-        id_archivo: null,
-        extension: null,
-        required: true,
-    },
-    {
-        id_tipo_documento: null,
-        nombre: "Fotocopia Documento",
-        descripcion:
-        "Copia legible del frente y dorso de tu DNI en un único archivo.",
-        subido: false,
-        archivo: null,
-        archivoNombre: "",
-        formatoNombre: "{legajo}_DNI",
-        id_archivo: null,
-        extension: null,
-        required: true,
-    },
-    {
-        id_tipo_documento: null,
-        nombre: "Declaracion Jurada",
-        descripcion:
-        "Certificadofirmado en el cual establece un heredero a tu fortuna.",
-        subido: false,
-        archivo: null,
-        archivoNombre: "",
-        formatoNombre: "{idViaje}_{legajo}_DDJJ",
-        id_archivo: null,
-        extension: null,
-        required: true,
-    },
+  {
+    id_tipo_documento: null,
+    nombre: "Certificado de Alumno Regular",
+    descripcion:
+      "Certificado vigente que acredita tu condición de estudiante regular.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_AlumnoRegular",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+  {
+    id_tipo_documento: null,
+    nombre: "Fotocopia Documento",
+    descripcion:
+      "Copia legible del frente y dorso de tu DNI en un único archivo.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{legajo}_DNI",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
+  {
+    id_tipo_documento: null,
+    nombre: "Declaracion Jurada",
+    descripcion:
+      "Certificadofirmado en el cual establece un heredero a tu fortuna.",
+    subido: false,
+    archivo: null,
+    archivoNombre: "",
+    formatoNombre: "{idViaje}_{legajo}_DDJJ",
+    id_archivo: null,
+    extension: null,
+    required: true,
+  },
 ];
 
-export const SAE_EMAIL =
-  import.meta.env.VITE_SAE_EMAIL || "sae@frc.utn.edu.ar";
+export const SAE_EMAIL = import.meta.env.VITE_SAE_EMAIL || "sae@frc.utn.edu.ar";
 
 export const CONSULTATION_FAQS = [
   {

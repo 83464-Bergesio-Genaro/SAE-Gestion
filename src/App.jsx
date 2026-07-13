@@ -36,6 +36,7 @@ import EmployedConsultations from "./employed/pages/consultations/employedConsul
 import EmployedHealth from "./employed/pages/health/employedHealth";
 import TurnBoardHealth from "./employed/pages/health/healthTurns";
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
+import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 /*
 
 import { SportsProvider } from "./employed/context/providers/sportsProvider";
@@ -45,7 +46,6 @@ import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
 import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 
 
-import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 
 import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
 import EmployedTravels from "./employed/pages/travels/employedTravels";
@@ -101,7 +101,7 @@ export default function App() {
             handle: { title: "Iniciar sesión" },
             element: <Login />,
           },
-          
+
           {
             path: "JPA",
             handle: { title: "Jornada De Puertas Abiertas" },
@@ -206,7 +206,16 @@ export default function App() {
                 <EmployedJPA />
               </ProtectedRoute>
             ),
-          },          
+          },
+          {
+            path: "Gestion-Prensa",
+            handle: { title: "Gestión de prensa" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <AdministrarPrensa />
+              </ProtectedRoute>
+            ),
+          },
           /*
           {
             path: "Gestion-Deportes",
@@ -265,15 +274,7 @@ export default function App() {
             ),
           },
 
-          {
-            path: "Gestion-Prensa",
-            handle: { title: "Gestión de prensa" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <AdministrarPrensa />
-              </ProtectedRoute>
-            ),
-          },
+   
           {
             path: "Gestion-Prensa/Administrar",
             handle: { title: "Administrar prensa" },
@@ -304,7 +305,7 @@ export default function App() {
           },
           */
           /* === STUDENT ROUTES === */
-          
+
           {
             path: "Principal",
             handle: { title: "Panel de SAE Alumnos" },
@@ -349,7 +350,7 @@ export default function App() {
                 <StudentSports />
               </ProtectedRoute>
             ),
-          },          
+          },
           {
             path: "Mis-Viajes",
             handle: { title: "Mis viajes" },

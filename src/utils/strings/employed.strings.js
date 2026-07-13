@@ -123,6 +123,15 @@ export const PRENSA_STRINGS = {
   errorLoadPublicaciones: "Error al cargar las publicaciones",
   errorLoadDocumentos: "Error al cargar los documentos de la publicación",
 
+  priorityNormal: "Normal",
+  priorityMedium: "Media",
+  priorityHigh: "Alta",
+
+  documentTypeLabels: {
+    image: "Imagen",
+    document: "Documento",
+  },
+
   documentPreview: {
     fallbackTitle: "Vista previa",
     fallbackName: "archivo",
@@ -135,6 +144,11 @@ export const PRENSA_STRINGS = {
   snackDeleted: "Publicación eliminada correctamente.",
 
   snackErrorDelete: "No se pudo eliminar la publicación.",
+  snackWarnDocLink: "La publicación se guardó, pero no se pudo vincular el documento.",
+  snackWarnDocUpload: "La publicación se guardó, pero no se pudo subir el documento.",
+  snackErrorSave: "No se pudo modificar la publicación.",
+  snackErrorCreate: "No se pudo crear la publicación.",
+
   nueva: {
     title: "Nueva publicación",
     editTitle: "Editar publicación",

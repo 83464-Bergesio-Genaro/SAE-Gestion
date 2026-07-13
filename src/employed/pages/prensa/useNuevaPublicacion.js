@@ -18,7 +18,7 @@ import {
 import { isPdfDocument } from "../../../utils/documents.utils";
 import { EMPTY_PUBLICACION } from "../../../utils/common/common.config";
 import { DOCS_PER_PAGE } from "../../../utils/common/constants";
-import { PRENSA_STRINGS as PS } from "./prensa.strings";
+import { PRENSA_STRINGS as PS } from "../../../utils/strings/employed.strings";
 
 const INITIAL_PREVIEW = {
   open: false,

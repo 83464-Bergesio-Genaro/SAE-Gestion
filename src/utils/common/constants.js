@@ -43,6 +43,16 @@ export const PREVIEW_EXTENSIONS = new Set([
   "pdf",
 ]);
 
+export const IMAGE_EXTENSIONS = new Set([
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "bmp",
+  "svg",
+]);
+
 export const DOCUMENT_PREVIEW_DEFAULT_MESSAGES = {
   fallbackTitle: "Vista previa",
   fallbackName: "archivo",

@@ -33,7 +33,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { PRIORIDAD_OPTIONS, getTipoDocumento } from "./prensa.utils";
 import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
 import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
 import NewsPreviewDialog from "../../../assets/components/StudentNews/NewsPreviewDialog";
@@ -45,9 +44,15 @@ import { PressProvider } from "../../context/providers/pressProvider";
 import SAEPage from "../../../assets/components/page/SAEPage";
 import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
 import { PRENSA_STRINGS } from "../../../utils/strings/employed.strings";
+import { getTipoDocumento } from "../../../utils/documents.utils";
 
 const PSN = PRENSA_STRINGS.nueva;
 const C = PRENSA_STRINGS;
+const PRIORIDAD_OPTIONS = [
+  { value: 0, label: C.priorityNormal, chipColor: "success" },
+  { value: 1, label: C.priorityMedium, chipColor: "warning" },
+  { value: 2, label: C.priorityHigh, chipColor: "error" },
+];
 
 function AdministrarPrensaContent() {
   const {
@@ -373,7 +378,10 @@ function NuevaPublicacionDialog() {
                               </TableCell>
                               <TableCell>{document.nombre_documento}</TableCell>
                               <TableCell>
-                                {getTipoDocumento(document)}
+                                {getTipoDocumento(
+                                  document,
+                                  C.documentTypeLabels,
+                                )}
                               </TableCell>
                               <TableCell align="center">
                                 <IconButton

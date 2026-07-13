@@ -1,6 +1,6 @@
 import { hasRealDocumentName } from "./validation.utils";
 import { firstNonEmptyText, normalizeText } from "./text.utils";
-import { PREVIEW_EXTENSIONS } from "./common/constants"; 
+import { PREVIEW_EXTENSIONS, IMAGE_EXTENSIONS } from "./common/constants";
 import { DEFAULT_ACCEPTED_EXTENSIONS } from "./common/constants";
 
 // Une la configuracion local con tipos/archivos de la API y conserva el estado
@@ -82,7 +82,6 @@ export const createPreviewState = () => ({
   error: null,
 });
 
-
 /* ==========================================================
  * DOCUMENT
  * ========================================================== */
@@ -94,23 +93,20 @@ export const getDocumentId = (document = {}) =>
   document?.id ??
   null;
 
-export const getDocumentDisplayName = (
-  document = {},
-  fallback = "Archivo"
-) =>
+export const getDocumentDisplayName = (document = {}, fallback = "Archivo") =>
   firstNonEmptyText(
     document?.archivoNombre,
     hasRealDocumentName(document?.nombre_documento)
       ? document.nombre_documento
-      : fallback
+      : fallback,
   );
 
 export const hasDocumentFile = (document = {}) =>
   Boolean(
     document?.subido ||
-      document?.archivo ||
-      document?.archivoNombre ||
-      document?.id_archivo
+    document?.archivo ||
+    document?.archivoNombre ||
+    document?.id_archivo,
   );
 
 /* ==========================================================
@@ -126,23 +122,16 @@ export const renameFile = (file, fileName) =>
 export const isFile = (value) =>
   typeof File !== "undefined" && value instanceof File;
 
-export const sanitizeFileNamePart = (
-  value,
-  fallback = "archivo"
-) =>
+export const sanitizeFileNamePart = (value, fallback = "archivo") =>
   String(value || fallback)
     .trim()
     .replace(/\s+/g, "_")
     .replace(/[^a-zA-Z0-9_-]/g, "") || fallback;
 
-export const getFileName = (
-  file,
-  fallback = "Ningún archivo seleccionado"
-) => {
+export const getFileName = (file, fallback = "Ningún archivo seleccionado") => {
   if (typeof file === "string") return file;
 
-  return file?.name ??
-    getDocumentDisplayName(file, fallback);
+  return file?.name ?? getDocumentDisplayName(file, fallback);
 };
 
 /* ==========================================================
@@ -152,15 +141,11 @@ export const getFileName = (
 export const normalizeExtension = (value) => {
   if (!value) return "";
 
-  let normalized = String(value)
-    .trim()
-    .toLowerCase();
+  let normalized = String(value).trim().toLowerCase();
 
-  if (normalized.includes("/"))
-    normalized = normalized.split("/").pop();
+  if (normalized.includes("/")) normalized = normalized.split("/").pop();
 
-  if (normalized.includes(";"))
-    normalized = normalized.split(";")[0];
+  if (normalized.includes(";")) normalized = normalized.split(";")[0];
 
   return normalized.replace(/^\./, "");
 };
@@ -170,25 +155,27 @@ export const getDocumentExtension = (document = {}) => {
 
   if (extension) return extension;
 
-  const parts = String(
-    document?.nombre_documento || ""
-  ).split(".");
+  const parts = String(document?.nombre_documento || "").split(".");
 
   if (parts.length < 2) return "";
 
   return normalizeExtension(parts.pop());
 };
 
+export const getTipoDocumento = (
+  document = {},
+  labels = { image: "Imagen", document: "Documento" },
+) =>
+  IMAGE_EXTENSIONS.has(getDocumentExtension(document))
+    ? labels.image
+    : labels.document;
+
 /* ==========================================================
  * PREVIEW HELPERS
  * ========================================================== */
 
 export const isPdfDocument = (document = {}) => {
-  if (
-    document?.datos_documento?.startsWith(
-      "data:application/pdf"
-    )
-  ) {
+  if (document?.datos_documento?.startsWith("data:application/pdf")) {
     return true;
   }
 
@@ -196,9 +183,7 @@ export const isPdfDocument = (document = {}) => {
 };
 
 export const isPreviewableDocument = (document = {}) =>
-  PREVIEW_EXTENSIONS.has(
-    getDocumentExtension(document)
-  );
+  PREVIEW_EXTENSIONS.has(getDocumentExtension(document));
 
 export const getImageSource = (document = {}) => {
   if (!document?.datos_documento) return "";
@@ -217,9 +202,7 @@ export const getImageSource = (document = {}) => {
     svg: "image/svg+xml",
   };
 
-  const mime =
-    mimeByExtension[getDocumentExtension(document)] ||
-    "image/jpeg";
+  const mime = mimeByExtension[getDocumentExtension(document)] || "image/jpeg";
 
   return `data:${mime};base64,${document.datos_documento}`;
 };
@@ -231,30 +214,20 @@ export const getImageSource = (document = {}) => {
 export const formatDocumentSize = (size) => {
   const bytes = Number(size);
 
-  if (!Number.isFinite(bytes) || bytes <= 0)
-    return null;
+  if (!Number.isFinite(bytes) || bytes <= 0) return null;
 
-  if (bytes < 1024)
-    return `${bytes} B`;
+  if (bytes < 1024) return `${bytes} B`;
 
-  if (bytes < 1024 * 1024)
-    return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-export const buildDocumentName = (
-  format = "",
-  data = {},
-  extension = ""
-) => {
+export const buildDocumentName = (format = "", data = {}, extension = "") => {
   const name = Object.entries(data).reduce(
     (result, [key, value]) =>
-      result.replace(
-        new RegExp(`\\{${key}\\}`, "gi"),
-        value ?? ""
-      ),
-    format
+      result.replace(new RegExp(`\\{${key}\\}`, "gi"), value ?? ""),
+    format,
   );
 
   return `${name}${extension}`;
@@ -264,15 +237,10 @@ export const buildDocumentName = (
  * DOCUMENT MAPPING
  * ========================================================== */
 
-export function asignarTiposADocumentos(
-  documentosBase,
-  tipos
-) {
+export function asignarTiposADocumentos(documentosBase, tipos) {
   return documentosBase.map((doc) => {
     const match = tipos.find(
-      (tipo) =>
-        normalizeText(tipo.nombre) ===
-        normalizeText(doc.nombre)
+      (tipo) => normalizeText(tipo.nombre) === normalizeText(doc.nombre),
     );
 
     if (!match) return doc;
@@ -285,15 +253,11 @@ export function asignarTiposADocumentos(
   });
 }
 
-export function asignarArchivosADocumentos(
-  documentosBase,
-  documentosSubidos
-) {
+export function asignarArchivosADocumentos(documentosBase, documentosSubidos) {
   return documentosBase.map((doc) => {
     const archivo = documentosSubidos.find(
       (item) =>
-        Number(item.id_tipo_documento) ===
-        Number(doc.id_tipo_documento)
+        Number(item.id_tipo_documento) === Number(doc.id_tipo_documento),
     );
 
     if (!archivo) return doc;

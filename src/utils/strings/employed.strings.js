@@ -113,6 +113,85 @@ export const HEALTH_STRING = {
 
 export const JPA_STRINGS = {};
 
+export const COMPRAS_STRINGS = {
+  headerTitle: "Módulo de Compras",
+  headerSubtitle: "Gestion de las Compras",
+  headerDescription:
+    "En este módulo se registran todas las compras que hace la secretaria.",
+
+  sectionTitle: "Compras",
+  addButton: "Registrar Compra",
+
+  filterDateFrom: "Fecha Desde",
+  filterDateTo: "Fecha Hasta",
+
+  deleteEntityLabel: "Compra",
+
+  dialogDocumentsTitle: "Documentos de la compra",
+  dialogCreateTitle: "Registrar Compra",
+
+  sectionPurchaseData: "Datos de la compra",
+  sectionTechnicalReport: "Informe técnico",
+  sectionDocumentation: "Documentación",
+
+  fieldEmployee: "Empleado que hizo la compra",
+  fieldPurchaseName: "Nombre de la compra",
+  fieldSuggestedPrice: "Precio sugerido",
+  fieldReason: "Motivo",
+  fieldPurchaseDate: "Fecha compra",
+  fieldFileNumber: "Nro expediente",
+  fieldRealPrice: "Precio real",
+  fieldRequesterName: "Nombre solicitante",
+  fieldWinnerName: "Nombre ganador",
+  fieldTenderDate: "Fecha licitacion",
+  fieldReportDate: "Fecha informe",
+
+  currencyPlaceholder: "99.999,99",
+
+  documentationInfo:
+    "Completá primero los datos de la compra para adjuntar documentación. El informe técnico puede quedar vacío.",
+  notUploadedLabel: "No adjunto",
+  uploadedLabel: "Adjunto",
+  documentValidation: {
+    incompletePurchaseData:
+      "Completá los datos de la compra antes de adjuntar documentación.",
+    invalidType: (extensions) => `Solo se permiten archivos: ${extensions}`,
+    maxSize: (maxSizeMb) => `El archivo no puede superar los ${maxSizeMb} MB.`,
+    deleteInvoiceError: "No se pudo eliminar la factura",
+  },
+
+  cancel: "Cancelar",
+  save: "Guardar",
+
+  deleteSuccess: "Compra eliminada!",
+  deleteError: "No se pudo eliminar la compra",
+  deleteMissingId: "No se pudo identificar la compra a eliminar.",
+  deleteDocumentError: "No se pudo eliminar el documento",
+  saveSuccessCreate: "Compra creada!",
+  saveSuccessDocs: "Documentos actualizados!",
+  saveSuccessUpdate: "Cambios guardados!",
+  saveError: "Ocurrió un error al guardar",
+  saveMissingPurchaseId: "No se pudo obtener el id de la compra.",
+  saveMissingInvoiceType: "No se encontró el tipo de documento Facturas.",
+  saveMissingReportType:
+    "No se encontró el tipo de documento Informe tecnico.",
+  saveRequiredPurchaseData:
+    "Completá empleado, nombre de la compra, precio sugerido, motivo y fecha de compra.",
+  saveRequiredInvoice: "Adjuntá al menos una factura para crear la compra.",
+  saveRequiredReport:
+    "Completá todos los campos del informe: nro expediente, precio real, fecha licitación, fecha informe, solicitante y ganador.",
+  loadDocumentTypesError: "No se pudieron cargar los tipos de documento.",
+  attachedInvoices: (count) => `${count} facturas adjuntas`,
+  actionViewDocuments: "Ver documentos",
+  actionDeletePurchase: "Eliminar compra",
+
+  incompleteReportTitle: "Informe técnico incompleto",
+  incompleteReportMessage:
+    "Estás por crear una compra sin informe técnico. ¿Querés continuar?",
+  back: "Volver",
+  createWithoutReport: "Crear sin informe",
+};
+
 export const PRENSA_STRINGS = {
   headerTitle: "Módulo de Prensa",
   headerSubtitle: "Gestión de Publicaciones",

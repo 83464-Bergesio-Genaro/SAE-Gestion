@@ -140,6 +140,28 @@ export const EMPTY_PUBLICACION = {
   visualizaciones: 0,
 };
 
+// ---------------------------- COMRPRAS -------------------------- //
+
+export const EMPTY_PURCHASES = {
+  id: null,
+  nombre_compra: "",
+  precio_sugerido: "",
+  motivo: "",
+  fecha_compra: "",
+  id_usuario: null,
+  nombre_usuario: "",
+  facturas_documentos: [],
+  informe: {
+    nro_expediente: null,
+    id_compra: null,
+    precio_real: "",
+    fecha_licitacion: null,
+    fecha_informe: null,
+    nombre_solicitante: "",
+    nombre_ganador: "",
+    documento_pdf: null,
+  },
+};
 
 
 
@@ -408,6 +430,29 @@ export const TRAVEL_REQUIRED_DOCUMENTS = [
     id_archivo: null,
     extension: null,
     required: true,
+  },
+];
+
+export const PURCHASE_DOCUMENTS = [
+  {
+    key: "facturas",
+    id_tipo_documento: null,
+    nombre: "Facturas",
+    descripcion: "Comprobantes de la compra.",
+    formatoNombre: "{nombreCompra}_factura_{nro}",
+    extension: ".pdf,.jpg,.jpeg,.png",
+    multiple: true,
+    required: true,
+  },
+  {
+    key: "informe",
+    id_tipo_documento: null,
+    nombre: "Informe tecnico",
+    descripcion: "Informe tecnico de la compra en PDF.",
+    formatoNombre: "{nombreCompra}_InformeTecnico",
+    extension: ".pdf",
+    multiple: false,
+    required: false,
   },
 ];
 

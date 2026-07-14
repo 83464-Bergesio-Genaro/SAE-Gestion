@@ -4,7 +4,10 @@ import {
   getDocumentExtension,
   getDocumentId,
   getDocumentName,
+  getFileExtension,
+  getFileName,
   getImageSource,
+  isFile,
   isPreviewableDocument,
 } from "../../utils/documents.utils";
 import { DOCUMENT_PREVIEW_DEFAULT_MESSAGES } from "../../utils/common/constants";
@@ -23,9 +26,56 @@ export function useDocumentPreview({ downloadById, messages = {} }) {
   }, []);
 
   const openPreview = useCallback(
-    async (document) => {
+    async (document, titleOverride = "") => {
+      if (isFile(document)) {
+        const title = titleOverride || getFileName(document, text.fallbackTitle);
+        const previewDocument = {
+          nombre_documento: getFileName(document, text.fallbackName),
+          extension: getFileExtension(document),
+        };
+
+        setPreview({
+          open: true,
+          loading: true,
+          doc: null,
+          title,
+          error: "",
+        });
+
+        if (!isPreviewableDocument(previewDocument)) {
+          setPreview((currentPreview) => ({
+            ...currentPreview,
+            loading: false,
+            error: text.notSupported,
+          }));
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () =>
+          setPreview({
+            open: true,
+            loading: false,
+            doc: {
+              ...previewDocument,
+              datos_documento: reader.result,
+            },
+            title,
+            error: "",
+          });
+        reader.onerror = () =>
+          setPreview((currentPreview) => ({
+            ...currentPreview,
+            loading: false,
+            error: text.loadError,
+          }));
+        reader.readAsDataURL(document);
+        return;
+      }
+
       const documentId = getDocumentId(document);
-      const title = getDocumentName(document, text.fallbackTitle);
+      const title =
+        titleOverride || getDocumentName(document, text.fallbackTitle);
 
       setPreview({
         open: true,

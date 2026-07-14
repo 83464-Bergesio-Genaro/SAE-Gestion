@@ -16,18 +16,12 @@ import {
   toApiDateTimeWithFixedTime,
 } from "../../../utils/date.utils";
 import { isPdfDocument } from "../../../utils/documents.utils";
-import { EMPTY_PUBLICACION } from "../../../utils/common/common.config";
+import {
+  EMPTY_PUBLICACION,
+  INITIAL_PREVIEW,
+} from "../../../utils/common/common.config";
 import { DOCS_PER_PAGE } from "../../../utils/common/constants";
 import { PRENSA_STRINGS as PS } from "../../../utils/strings/employed.strings";
-
-const INITIAL_PREVIEW = {
-  open: false,
-  loading: false,
-  title: "",
-  imageSrc: null,
-  isPdf: false,
-  error: null,
-};
 
 /**
  * @param {object} opts
@@ -71,7 +65,9 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
     setLoadingDocs(true);
     listarDocumentosSinData()
       .then((data) => setDocumentosExistentes(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Error al cargar documentos existentes:", err))
+      .catch((err) =>
+        console.error("Error al cargar documentos existentes:", err),
+      )
       .finally(() => setLoadingDocs(false));
   }, [open]);
 
@@ -84,19 +80,18 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
     return documentosExistentes.filter(
       (d) =>
         d.nombre_documento?.toLowerCase().includes(t) ||
-        d.extension?.toLowerCase().includes(t)
+        d.extension?.toLowerCase().includes(t),
     );
   }, [documentosExistentes, busquedaDoc]);
 
-  const totalPages = Math.max(1, Math.ceil(docsFiltrados.length / DOCS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(docsFiltrados.length / DOCS_PER_PAGE),
+  );
 
   const docsPaginados = useMemo(
-    () =>
-      docsFiltrados.slice(
-        (page - 1) * DOCS_PER_PAGE,
-        page * DOCS_PER_PAGE
-      ),
-    [docsFiltrados, page]
+    () => docsFiltrados.slice((page - 1) * DOCS_PER_PAGE, page * DOCS_PER_PAGE),
+    [docsFiltrados, page],
   );
 
   // ---------------------------------------------------------------------------
@@ -136,7 +131,14 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
   }
 
   async function handlePreview(id, nombre) {
-    setPreview({ open: true, loading: true, title: nombre, imageSrc: null, isPdf: false, error: null });
+    setPreview({
+      open: true,
+      loading: true,
+      title: nombre,
+      imageSrc: null,
+      isPdf: false,
+      error: null,
+    });
     try {
       const data = await descargarDocumentoPorId(id);
       setPreview({
@@ -148,7 +150,11 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
         error: null,
       });
     } catch {
-      setPreview((prev) => ({ ...prev, loading: false, error: "No se pudo cargar el documento" }));
+      setPreview((prev) => ({
+        ...prev,
+        loading: false,
+        error: "No se pudo cargar el documento",
+      }));
     }
   }
 
@@ -164,7 +170,10 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
       const body = {
         ...nuevaData,
         fecha_inicio: toApiDateTimeWithFixedTime(nuevaData.fecha_inicio),
-        fecha_vigencia: toApiDateTimeWithFixedTime(nuevaData.fecha_vigencia, true),
+        fecha_vigencia: toApiDateTimeWithFixedTime(
+          nuevaData.fecha_vigencia,
+          true,
+        ),
       };
 
       let pubId;
@@ -218,10 +227,11 @@ export function useNuevaPublicacion({ onSuccess, onWarning, onError }) {
       closeDialog();
       onSuccess?.(isEdit);
     } catch (err) {
-      console.error(isEdit ? "Error al guardar:" : "Error al crear publicación:", err);
-      const fallbackMessage = isEdit
-        ? PS.snackErrorSave
-        : PS.snackErrorCreate;
+      console.error(
+        isEdit ? "Error al guardar:" : "Error al crear publicación:",
+        err,
+      );
+      const fallbackMessage = isEdit ? PS.snackErrorSave : PS.snackErrorCreate;
       const errorMessage = err?.message || fallbackMessage;
       setDialogError(errorMessage);
       onError?.(errorMessage);

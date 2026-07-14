@@ -1,7 +1,12 @@
 import { hasRealDocumentName } from "./validation.utils";
 import { firstNonEmptyText, normalizeText } from "./text.utils";
-import { PREVIEW_EXTENSIONS, IMAGE_EXTENSIONS } from "./common/constants";
-import { DEFAULT_ACCEPTED_EXTENSIONS } from "./common/constants";
+import {
+  DEFAULT_ACCEPTED_EXTENSIONS,
+  IMAGE_EXTENSIONS,
+  MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_MB,
+  PREVIEW_EXTENSIONS,
+} from "./common/constants";
 
 // Une la configuracion local con tipos/archivos de la API y conserva el estado
 // previo para no perder archivos elegidos ni opcionales ya visibles.
@@ -132,6 +137,47 @@ export const getFileName = (file, fallback = "Ningún archivo seleccionado") => 
   if (typeof file === "string") return file;
 
   return file?.name ?? getDocumentDisplayName(file, fallback);
+};
+
+export const getFileExtension = (file = {}) => {
+  const extension =
+    getDocumentExtension({
+      nombre_documento: file?.name ?? file?.nombre_documento,
+      extension: file?.extension,
+    }) || normalizeExtension(file?.type);
+
+  return extension ? `.${extension}` : "";
+};
+
+export const validateDocumentFile = (
+  file,
+  documentType = {},
+  messages = {},
+  options = {},
+) => {
+  const extension = getFileExtension(file);
+  const acceptedExtensions =
+    documentType.extension ?? options.acceptedExtensions ?? DEFAULT_ACCEPTED_EXTENSIONS;
+  const allowedExtensions = String(acceptedExtensions)
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+  const maxSizeBytes = options.maxSizeBytes ?? MAX_FILE_SIZE_BYTES;
+  const maxSizeMb = options.maxSizeMb ?? MAX_FILE_SIZE_MB;
+
+  if (allowedExtensions.length > 0 && !allowedExtensions.includes(extension)) {
+    return typeof messages.invalidType === "function"
+      ? messages.invalidType(acceptedExtensions)
+      : `Solo se permiten archivos: ${acceptedExtensions}`;
+  }
+
+  if (file?.size > maxSizeBytes) {
+    return typeof messages.maxSize === "function"
+      ? messages.maxSize(maxSizeMb)
+      : `El archivo no puede superar los ${maxSizeMb} MB.`;
+  }
+
+  return "";
 };
 
 /* ==========================================================

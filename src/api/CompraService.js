@@ -3,26 +3,48 @@ import {
   apiDownloadDocument,
   apiUploadFile,
   RequestAPI,
-} from './apiClient';
+} from "./apiClient";
+import {
+  mapCompraConDetalle,
+  mapCompras,
+} from "./formatters/CompraFormatter.js";
 
 // Se reexporta para conservar el contrato que ya utilizan otros servicios.
 export { RequestAPI };
 
-export function ObtenerComprasXFecha(fechaInicio, fechaFin) {
-  return RequestAPI(
+export async function ObtenerComprasXFecha(fechaInicio, fechaFin, documentTypes) {
+  const data = await RequestAPI(
     `/api/Compra/ObtenerComprasXFecha/${encodeURIComponent(fechaInicio)}/${encodeURIComponent(fechaFin)}`,
-    'GET',
+    "GET",
+  );
+  const purchases = Array.isArray(data) ? data.map(mapCompras) : [];
+
+  return Promise.all(
+    purchases.map(async (purchase) => {
+      const idCompra = purchase.id;
+
+      if (!idCompra) {
+        return mapCompraConDetalle(purchase, null, [], documentTypes);
+      }
+
+      const [informe, documentos] = await Promise.all([
+        ObtenerInformeXCompra(idCompra).catch(() => null),
+        ListarDocumentacionXCompra(idCompra).catch(() => []),
+      ]);
+
+      return mapCompraConDetalle(purchase, informe, documentos, documentTypes);
+    }),
   );
 }
 
 export function CrearCompra(body) {
-  return RequestAPI('/api/Compra/CrearCompra/', 'POST', body);
+  return RequestAPI("/api/Compra/CrearCompra/", "POST", body);
 }
 
 export function ModificarCompra(idCompra, body) {
   return RequestAPI(
     `/api/Compra/ModificarCompra/${encodeURIComponent(idCompra)}`,
-    'PUT',
+    "PUT",
     body,
   );
 }
@@ -30,21 +52,21 @@ export function ModificarCompra(idCompra, body) {
 export function EliminarCompra(idCompra) {
   return RequestAPI(
     `/api/Compra/EliminarCompra/${encodeURIComponent(idCompra)}`,
-    'DELETE',
+    "DELETE",
   );
 }
 
 export function ObtenerInformeXExpediente(nroExpediente) {
   return RequestAPI(
     `/api/Compra/ObtenerInformeXExpediente/${encodeURIComponent(nroExpediente)}`,
-    'GET',
+    "GET",
   );
 }
 
 export function ModificarInforme(nroExpediente, body) {
   return RequestAPI(
     `/api/Compra/ModificarInforme/${encodeURIComponent(nroExpediente)}`,
-    'PUT',
+    "PUT",
     body,
   );
 }
@@ -52,18 +74,18 @@ export function ModificarInforme(nroExpediente, body) {
 export function ObtenerInformeXCompra(idCompra) {
   return RequestAPI(
     `/api/Compra/ObtenerInformeXCompra/${encodeURIComponent(idCompra)}`,
-    'GET',
+    "GET",
   );
 }
 
 export function CrearInforme(body) {
-  return RequestAPI('/api/Compra/CrearInforme/', 'POST', body);
+  return RequestAPI("/api/Compra/CrearInforme/", "POST", body);
 }
 
 export function ListarDocumentacionXCompra(idCompra) {
   return RequestAPI(
     `/api/Compra/ListarDocumentacionXCompra/${encodeURIComponent(idCompra)}`,
-    'GET',
+    "GET",
   );
 }
 

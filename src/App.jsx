@@ -37,6 +37,7 @@ import EmployedHealth from "./employed/pages/health/employedHealth";
 import TurnBoardHealth from "./employed/pages/health/healthTurns";
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
+import EmployedPurchases from "./employed/pages/purchases/employedPurchases";
 /*
 
 import { SportsProvider } from "./employed/context/providers/sportsProvider";
@@ -49,7 +50,6 @@ import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 
 import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
 import EmployedTravels from "./employed/pages/travels/employedTravels";
-import EmployedPurchases from "./employed/pages/purchases/employedPurchases";
 import EmployedTravelInscripts from "./employed/pages/travels/employedInscripts";
 import AdminReport from "./employed/pages/reports/adminReports";
 
@@ -216,6 +216,15 @@ export default function App() {
               </ProtectedRoute>
             ),
           },
+          {
+            path: "Gestion-Compras",
+            handle: { title: "Gestión de compras" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedPurchases />
+              </ProtectedRoute>
+            ),
+          },
           /*
           {
             path: "Gestion-Deportes",
@@ -246,15 +255,7 @@ export default function App() {
               </ProtectedRoute>
             ),
           },
-          {
-            path: "Gestion-Compras",
-            handle: { title: "Gestión de compras" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <EmployedPurchases />
-              </ProtectedRoute>
-            ),
-          },
+       
           {
             path: "Gestion-Viajes",
             handle: { title: "Gestión de viajes" },

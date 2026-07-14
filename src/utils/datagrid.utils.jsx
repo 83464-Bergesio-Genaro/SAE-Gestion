@@ -50,6 +50,16 @@ const SHORT_COLUMNS = [
   "horario_fin",
 ];
 
+const isIdColumn = (key = "") => {
+  const normalizedKey = String(key).toLowerCase();
+
+  return (
+    normalizedKey === "id" ||
+    normalizedKey.startsWith("id_") ||
+    normalizedKey.endsWith("_id")
+  );
+};
+
 export const generateColumns = (
   data,
   actionsConfig = [],
@@ -61,11 +71,10 @@ export const generateColumns = (
 
   const columns = Object.keys(sample).map((key) => {
     // Nota: Se asume que data es un array, por eso data[0] para las keys
-    const isId = key.toLowerCase().includes("id");
+    const isId = isIdColumn(key);
     const isShort = SHORT_COLUMNS.includes(key.toLowerCase());
 
     const customColumnConfig = columnConfig[key] || {};
-
     if (key.toLowerCase() === "activo") {
       return {
         field: "activo",

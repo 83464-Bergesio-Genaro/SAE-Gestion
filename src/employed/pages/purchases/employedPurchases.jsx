@@ -23,11 +23,11 @@ import { PurchaseProvider } from "../../context/providers/purchaseProvider";
 import { AdminUsersProvider } from "../../context/providers/employProvider";
 import { useEmploy, usePurchase } from "../../context/employedContext";
 import { DataGrid } from "@mui/x-data-grid";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import HeaderPageEmployed from "../../../shared/components/HeaderPageEmployed";
-import DocumentCard from "../../../shared/components/documents/DocumentCard";
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import HeaderPageEmployed from "../../../assets/components/headerPage/HeaderPageEmployed";
+import DocumentCard from "../../../assets/components/documents/DocumentCard";
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
 import { useNotification } from "../../../shared/context/sharedContext";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -36,9 +36,16 @@ import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
-import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
+import { COMPRAS_STRINGS } from "../../../utils/strings/employed.strings";
+import { getFileName } from "../../../utils/documents.utils";
+import {
+  getCurrencyValue,
+  handleCurrencyBlur,
+  handleCurrencyInputChange,
+} from "../../../utils/formatters.utils";
 
 export default function EmployedPurchases() {
   return (
@@ -65,9 +72,9 @@ function EmployedPurchasesContent() {
   const sectionConfig = useMemo(
     () => ({
       compras: {
-        title: "Compras",
+        title: COMPRAS_STRINGS.sectionTitle,
         dialog: openCreatePurchases,
-        addButton: "Registrar Compra",
+        addButton: COMPRAS_STRINGS.addButton,
         icon: ShoppingCartIcon,
         rows: purchasesRows,
         columns: purchasesColumns,
@@ -110,9 +117,9 @@ function EmployedPurchasesContent() {
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header="Módulo de Compras"
-        title="Gestion de las Compras"
-        description="En este módulo se registran todas las compras que hace la secretaria."
+        header={COMPRAS_STRINGS.headerTitle}
+        title={COMPRAS_STRINGS.headerSubtitle}
+        description={COMPRAS_STRINGS.headerDescription}
       />
       
 
@@ -123,7 +130,7 @@ function EmployedPurchasesContent() {
           <>
             <SAETextField
               size="small"
-              label="Fecha Desde"
+              label={COMPRAS_STRINGS.filterDateFrom}
               type="date"
               value={dateRange.fechaDesde}
               onChange={handleFechaDesdeChange}
@@ -152,7 +159,7 @@ function EmployedPurchasesContent() {
             />
             <SAETextField
               size="small"
-              label="Fecha Hasta"
+              label={COMPRAS_STRINGS.filterDateTo}
               type="date"
               value={dateRange.fechaHasta}
               onChange={handleFechaHastaChange}
@@ -194,6 +201,7 @@ function EmployedPurchasesContent() {
         isPdf={preview.isPdf}
         loading={preview.loading}
         error={preview.error}
+        onDownload={preview.onDownload}
       />
       <DialogPurchase dateRange={dateRange} />
     </SAEPage>
@@ -219,17 +227,14 @@ function DialogPurchase({ dateRange }) {
 
   const {
     isPurchaseDataComplete,
-    handleCurrencyInputChange,
-    getCurrencyValue,
+    focusedCurrencyField,
     setFocusedCurrencyField,
-    handleCurrencyBlur,
     handleInformeTecnicoChange,
     handleEmpleadoChange,
     handleFacturaChange,
     handleInformePdfChange,
     handleDeletePurchaseDocument,
     handleRemoveFactura,
-    getFileName,
     handlePreview,
     purchaseDocuments,
     handleSavePurchase,
@@ -249,9 +254,10 @@ function DialogPurchase({ dateRange }) {
 
   const deleteDialogConfig = {
     purchaseDelete: {
-      entityLabel: "Compra",
+      entityLabel: COMPRAS_STRINGS.deleteEntityLabel,
       itemName: dialogData?.nombre_compra,
-      onConfirm: handleDeletePurchase,
+      onConfirm: () =>
+        handleDeletePurchase(dateRange.fechaDesde, dateRange.fechaHasta),
     },
   };
 
@@ -288,7 +294,9 @@ function DialogPurchase({ dateRange }) {
             alignItems: "center",
           }}
         >
-          {isDocsDialog ? "Documentos de la compra" : "Registrar Compra"}
+          {isDocsDialog
+            ? COMPRAS_STRINGS.dialogDocumentsTitle
+            : COMPRAS_STRINGS.dialogCreateTitle}
           <IconButton onClick={closeDialog} size="small">
             <CloseIcon />
           </IconButton>
@@ -309,7 +317,10 @@ function DialogPurchase({ dateRange }) {
             {showPurchaseForm && (
               <Box>
                 <Divider sx={{ mb: 2 }}>
-                  <Chip label="Datos de la compra" size="small" />
+                  <Chip
+                    label={COMPRAS_STRINGS.sectionPurchaseData}
+                    size="small"
+                  />
                 </Divider>
                 <Box
                   sx={{
@@ -330,7 +341,7 @@ function DialogPurchase({ dateRange }) {
                     renderInput={(params) => (
                       <SAETextField
                         {...params}
-                        label="Empleado que hizo la compra"
+                        label={COMPRAS_STRINGS.fieldEmployee}
                         required
                         fullWidth
                       />
@@ -338,7 +349,7 @@ function DialogPurchase({ dateRange }) {
                     sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
                   />
                   <SAETextField
-                    label="Nombre de la compra"
+                    label={COMPRAS_STRINGS.fieldPurchaseName}
                     required
                     value={dialogData.nombre_compra ?? ""}
                     onChange={(e) =>
@@ -347,11 +358,12 @@ function DialogPurchase({ dateRange }) {
                     fullWidth
                   />
                   <SAETextField
-                    label="Precio sugerido"
+                    label={COMPRAS_STRINGS.fieldSuggestedPrice}
                     required
                     value={getCurrencyValue(
                       "precio_sugerido",
                       dialogData.precio_sugerido,
+                      focusedCurrencyField,
                     )}
                     onFocus={() => setFocusedCurrencyField("precio_sugerido")}
                     onBlur={() =>
@@ -359,6 +371,7 @@ function DialogPurchase({ dateRange }) {
                         "precio_sugerido",
                         dialogData.precio_sugerido,
                         handleDataChange,
+                        setFocusedCurrencyField,
                       )
                     }
                     onChange={(e) =>
@@ -377,12 +390,12 @@ function DialogPurchase({ dateRange }) {
                       },
                       htmlInput: {
                         inputMode: "decimal",
-                        placeholder: "99.999,99",
+                        placeholder: COMPRAS_STRINGS.currencyPlaceholder,
                       },
                     }}
                   />
                   <SAETextField
-                    label="Motivo"
+                    label={COMPRAS_STRINGS.fieldReason}
                     required
                     value={dialogData.motivo ?? ""}
                     onChange={(e) => handleDataChange("motivo", e.target.value)}
@@ -392,7 +405,7 @@ function DialogPurchase({ dateRange }) {
                     sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
                   />
                   <SAETextField
-                    label="Fecha compra"
+                    label={COMPRAS_STRINGS.fieldPurchaseDate}
                     required
                     type="date"
                     value={dialogData.fecha_compra ?? ""}
@@ -410,7 +423,10 @@ function DialogPurchase({ dateRange }) {
             {showPurchaseForm && (
               <Box>
                 <Divider sx={{ mb: 2 }}>
-                  <Chip label="Informe técnico" size="small" />
+                  <Chip
+                    label={COMPRAS_STRINGS.sectionTechnicalReport}
+                    size="small"
+                  />
                 </Divider>
                 <Box
                   sx={{
@@ -420,7 +436,7 @@ function DialogPurchase({ dateRange }) {
                   }}
                 >
                   <SAETextField
-                    label="Nro expediente"
+                    label={COMPRAS_STRINGS.fieldFileNumber}
                     value={dialogData.informe?.nro_expediente ?? ""}
                     onChange={(e) =>
                       handleInformeTecnicoChange(
@@ -431,10 +447,11 @@ function DialogPurchase({ dateRange }) {
                     fullWidth
                   />
                   <SAETextField
-                    label="Precio real"
+                    label={COMPRAS_STRINGS.fieldRealPrice}
                     value={getCurrencyValue(
                       "precio_real",
                       dialogData.informe?.precio_real,
+                      focusedCurrencyField,
                     )}
                     onFocus={() => setFocusedCurrencyField("precio_real")}
                     onBlur={() =>
@@ -442,6 +459,7 @@ function DialogPurchase({ dateRange }) {
                         "precio_real",
                         dialogData.informe?.precio_real,
                         handleInformeTecnicoChange,
+                        setFocusedCurrencyField,
                       )
                     }
                     onChange={(e) =>
@@ -460,12 +478,12 @@ function DialogPurchase({ dateRange }) {
                       },
                       htmlInput: {
                         inputMode: "decimal",
-                        placeholder: "99.999,99",
+                        placeholder: COMPRAS_STRINGS.currencyPlaceholder,
                       },
                     }}
                   />
                   <SAETextField
-                    label="Nombre solicitante"
+                    label={COMPRAS_STRINGS.fieldRequesterName}
                     value={dialogData.informe?.nombre_solicitante ?? ""}
                     onChange={(e) =>
                       handleInformeTecnicoChange(
@@ -476,7 +494,7 @@ function DialogPurchase({ dateRange }) {
                     fullWidth
                   />
                   <SAETextField
-                    label="Nombre ganador"
+                    label={COMPRAS_STRINGS.fieldWinnerName}
                     value={dialogData.informe?.nombre_ganador ?? ""}
                     onChange={(e) =>
                       handleInformeTecnicoChange(
@@ -487,7 +505,7 @@ function DialogPurchase({ dateRange }) {
                     fullWidth
                   />
                   <SAETextField
-                    label="Fecha licitacion"
+                    label={COMPRAS_STRINGS.fieldTenderDate}
                     type="date"
                     value={dialogData.informe?.fecha_licitacion ?? ""}
                     onChange={(e) =>
@@ -500,7 +518,7 @@ function DialogPurchase({ dateRange }) {
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
                   <SAETextField
-                    label="Fecha informe"
+                    label={COMPRAS_STRINGS.fieldReportDate}
                     type="date"
                     value={dialogData.informe?.fecha_informe ?? ""}
                     onChange={(e) =>
@@ -519,12 +537,14 @@ function DialogPurchase({ dateRange }) {
             {showDocumentsForm && (
               <Box>
                 <Divider sx={{ mb: 2 }}>
-                  <Chip label="Documentación" size="small" />
+                  <Chip
+                    label={COMPRAS_STRINGS.sectionDocumentation}
+                    size="small"
+                  />
                 </Divider>
                 {!isDocsDialog && !isPurchaseDataComplete && (
                   <Alert severity="info" sx={{ mb: 2 }}>
-                    Completá primero los datos de la compra para adjuntar
-                    documentación. El informe técnico puede quedar vacío.
+                    {COMPRAS_STRINGS.documentationInfo}
                   </Alert>
                 )}
                 <Grid container spacing={2}>
@@ -554,8 +574,8 @@ function DialogPurchase({ dateRange }) {
                         deleteDisabled={!documentType.subido}
                         showRequirement
                         showActions={!isDocsDialog}
-                        notUploadedLabel="No adjunto"
-                        uploadedLabel="Adjunto"
+                        notUploadedLabel={COMPRAS_STRINGS.notUploadedLabel}
+                        uploadedLabel={COMPRAS_STRINGS.uploadedLabel}
                       />
                     </Grid>
                   ))}
@@ -572,7 +592,7 @@ function DialogPurchase({ dateRange }) {
             disabled={dialogSaving}
             startIcon={<CloseIcon />}
           >
-            Cancelar
+            {COMPRAS_STRINGS.cancel}
           </SAEButton>
           {!isDocsDialog && (
             <SAEButton
@@ -589,22 +609,22 @@ function DialogPurchase({ dateRange }) {
                 )
               }
             >
-              Guardar
+              {COMPRAS_STRINGS.save}
             </SAEButton>
           )}
         </DialogActions>
       </Dialog>
 
       <Dialog open={warningOpen} onClose={() => setWarningOpen(false)}>
-        <DialogTitle>Informe técnico incompleto</DialogTitle>
+        <DialogTitle>{COMPRAS_STRINGS.incompleteReportTitle}</DialogTitle>
         <DialogContent>
           <Alert severity="warning">
-            Estás por crear una compra sin informe técnico. ¿Querés continuar?
+            {COMPRAS_STRINGS.incompleteReportMessage}
           </Alert>
         </DialogContent>
         <DialogActions>
           <SAEButton variant="outlined" onClick={() => setWarningOpen(false)}>
-            Volver
+            {COMPRAS_STRINGS.back}
           </SAEButton>
           <SAEButton
             variant="contained"
@@ -615,7 +635,7 @@ function DialogPurchase({ dateRange }) {
               )
             }
           >
-            Crear sin informe
+            {COMPRAS_STRINGS.createWithoutReport}
           </SAEButton>
         </DialogActions>
       </Dialog>

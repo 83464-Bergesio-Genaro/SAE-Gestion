@@ -7,11 +7,7 @@ import { onlyDigits } from "./text.utils";
 const format11DigitDocument = (value = "") => {
   const digits = onlyDigits(value, 11);
 
-  return [
-    digits.slice(0, 2),
-    digits.slice(2, 10),
-    digits.slice(10),
-  ]
+  return [digits.slice(0, 2), digits.slice(2, 10), digits.slice(10)]
     .filter(Boolean)
     .join("-");
 };
@@ -26,20 +22,17 @@ export const formatDni = (value = "") =>
 /**
  * CUIT
  */
-export const formatCuit = (value = "") =>
-  format11DigitDocument(value);
+export const formatCuit = (value = "") => format11DigitDocument(value);
 
 /**
  * CUIL
  */
-export const formatCuil = (value = "") =>
-  format11DigitDocument(value);
+export const formatCuil = (value = "") => format11DigitDocument(value);
 
 /**
  * CBU
  */
-export const formatCbu = (value = "") =>
-  onlyDigits(value, 22);
+export const formatCbu = (value = "") => onlyDigits(value, 22);
 
 /* ==========================================================
  * TELEFONO
@@ -86,11 +79,7 @@ export const parseAddress = (value = "") => {
  * ========================================================== */
 
 export const formatBoolean = (value) =>
-  typeof value === "boolean"
-    ? value
-      ? "Sí"
-      : "No"
-    : value;
+  typeof value === "boolean" ? (value ? "Sí" : "No") : value;
 
 /* ==========================================================
  * CURRENCY
@@ -107,27 +96,22 @@ const currencyFormatter = new Intl.NumberFormat("es-AR", {
  * $ 12.500,00
  */
 export const formatCurrency = (value) => {
-  if (value === null || value === undefined || value === "")
-    return "";
+  if (value === null || value === undefined || value === "") return "";
 
   const number = Number(value);
 
-  return Number.isNaN(number)
-    ? ""
-    : currencyFormatter.format(number);
+  return Number.isNaN(number) ? "" : currencyFormatter.format(number);
 };
 
 /**
  * 12500 -> 12.500,00
  */
 export const formatCurrencyInput = (value) => {
-  if (value === null || value === undefined || value === "")
-    return "";
+  if (value === null || value === undefined || value === "") return "";
 
   const number = Number(value);
 
-  if (Number.isNaN(number))
-    return "";
+  if (Number.isNaN(number)) return "";
 
   return number.toLocaleString("es-AR", {
     minimumFractionDigits: 2,
@@ -144,29 +128,49 @@ export const parseCurrencyInput = (value) => {
     .replace(/\./g, "")
     .replace(",", ".");
 
-  if (!normalized)
-    return "";
+  if (!normalized) return "";
 
   const number = Number(normalized);
 
-  return Number.isNaN(number)
-    ? ""
-    : number;
+  return Number.isNaN(number) ? "" : number;
 };
 
 /**
  * Acepta string o number.
  */
 export const normalizeCurrencyValue = (value) =>
-  typeof value === "string"
-    ? parseCurrencyInput(value)
-    : value;
+  typeof value === "string" ? parseCurrencyInput(value) : value;
 
 /**
  * Convierte texto en formato para input.
  */
 export const formatCurrencyInputFromText = (value) =>
   formatCurrencyInput(parseCurrencyInput(value));
+
+export const getCurrencyValue = (field, value, focusedField = "") => {
+  if (focusedField === field) {
+    if (value === null || value === undefined) return "";
+    if (typeof value === "number") return String(value).replace(".", ",");
+
+    return value;
+  }
+
+  return formatCurrencyInput(value);
+};
+
+export const handleCurrencyInputChange = (field, value, onChange) => {
+  onChange(field, sanitizeCurrencyInput(value));
+};
+
+export const handleCurrencyBlur = (
+  field,
+  value,
+  onChange,
+  clearFocusedField = () => {},
+) => {
+  onChange(field, normalizeCurrencyValue(value));
+  clearFocusedField("");
+};
 
 /**
  * Permite únicamente números y una coma decimal.
@@ -176,7 +180,5 @@ export const sanitizeCurrencyInput = (value) => {
 
   const [integer, ...decimals] = clean.split(",");
 
-  return decimals.length === 0
-    ? integer
-    : `${integer},${decimals.join("")}`;
+  return decimals.length === 0 ? integer : `${integer},${decimals.join("")}`;
 };

@@ -73,6 +73,7 @@ export const generateColumns = (
     // Nota: Se asume que data es un array, por eso data[0] para las keys
     const isId = isIdColumn(key);
     const isShort = SHORT_COLUMNS.includes(key.toLowerCase());
+    const isBoolean = typeof sample[key] === "boolean";
 
     const customColumnConfig = columnConfig[key] || {};
     if (key.toLowerCase() === "activo") {
@@ -116,6 +117,11 @@ export const generateColumns = (
         maxWidth: isId ? 70 : isShort ? 100 : NaN,
         align: isId || isShort ? "center" : "left",
         headerAlign: isId || isShort ? "center" : "left",
+        ...(isBoolean && {
+          align: "center",
+          headerAlign: "left",
+          renderCell: (params) => booleanChip(params.value),
+        }),
         ...customColumnConfig,
       };
     }

@@ -1,14 +1,16 @@
-import { useMemo } from "react";
-import PeopleIcon from "@mui/icons-material/People";
-import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
+﻿import { useMemo } from "react";
 import SchoolIcon from "@mui/icons-material/School";
-import { useScholarshipDialogController } from "./becas.utils";
-import { becasGridConfig, createEmptyObject } from "./becas.configs";
-import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
-import SAEDataGrid from "../../../shared/components/dataGrid/SAEDataGrid";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
+import SAEDataGrid from "../../../assets/components/dataGrid/SAEDataGrid";
+import SAEPage from "../../../assets/components/page/SAEPage";
 import { ScholarshipProvider } from "../../context/providers/scholarshipProvider";
 import { useScholarships } from "../../context/employedContext";
-import SAEPage from "../../../shared/components/page/SAEPage";
+import { BECAS_STRINGS } from "../../../utils/strings/employed.strings";
+import DialogBecas from "./DialogBecas";
+import DialogProyecto from "./DialogProyecto";
+import DialogServicios from "./DialogServicios";
+
+const BS = BECAS_STRINGS;
 
 export default function EmployedScholarships() {
   return (
@@ -20,172 +22,102 @@ export default function EmployedScholarships() {
 
 function EmployedScholarshipsContent() {
   const {
-    handleDialogSave,
-    handleBuscarBecario,
-    handleBuscarBecarioPorLegajo,
-
-    proyectosRows,
     proyectosColumns,
+    proyectosRows,
     loadingProyectos,
+    openCreateProyecto,
 
     serviciosRows,
     serviciosColumns,
     loadingServicios,
+    openCreateServicio,
 
     becariosRows,
     becariosColumns,
     loadingBecarios,
+    openCreateBecario,
   } = useScholarships();
 
-  const configuracionCard = useMemo(
+  const sectionConfig = useMemo(
     () => ({
-      title: "Configuracion",
-      sections: {
-        proyectos: {
-          title: "Gestion Proyectos de Investigacion",
-          tabTitle: "Proyectos",
-          icon: SchoolIcon,
-          rows: proyectosRows,
-          columns: proyectosColumns,
-          loading: loadingProyectos,
-          actionButton: {
-            textNew: "Nuevo proyecto",
-            textEdit: "Editar proyecto",
-            textView: "Ver proyecto",
-          },
-          emptyEntity: createEmptyObject(proyectosColumns),
-        },
-        servicios: {
-          title: "Gestion Servicios Internos",
-          tabTitle: "Servicios",
-          icon: PrivacyTipIcon,
-          rows: serviciosRows,
-          columns: serviciosColumns,
-          loading: loadingServicios,
-          actionButton: {
-            textNew: "Nuevo servicio",
-            textEdit: "Editar servicio",
-            textView: "Ver servicio",
-          },
-          emptyEntity: createEmptyObject(serviciosColumns),
-        },
+      proyectos: {
+        key: "proyectos",
+        title: BS.projectDialog.sectionTitle,
+        dialog: openCreateProyecto,
+        addButton: BS.projectDialog.addButton,
+        icon: SchoolIcon,
+        rows: proyectosRows,
+        columns: proyectosColumns,
+        loading: loadingProyectos,
+      },
+      servicios: {
+        key: "servicios",
+        title: "Servicios",
+        dialog: openCreateServicio,
+        addButton: "Nueva Servicio",
+        icon: SchoolIcon,
+        rows: serviciosRows,
+        columns: serviciosColumns,
+        loading: loadingServicios,
       },
     }),
     [
       proyectosRows,
       proyectosColumns,
       loadingProyectos,
+      openCreateProyecto,
       serviciosRows,
       serviciosColumns,
       loadingServicios,
+      openCreateServicio,
     ],
   );
 
-  const becariosCard = useMemo(
+  const becariosConfig = useMemo(
     () => ({
-      title: "Becarios",
-      sections: {
-        becarios: {
-          title: "Gestion Becarios",
-          tabTitle: "Becarios",
-          icon: PeopleIcon,
-          rows: becariosRows,
-          columns: becariosColumns,
-          loading: loadingBecarios,
-          actionButton: {
-            textNew: "Nuevo becario",
-            textEdit: "Editar becario",
-            textView: "Ver becario",
-          },
-          emptyEntity: createEmptyObject(becariosColumns),
-        },
+      becarios: {
+        key: "becarios",
+        title: "Becarios",
+        dialog: openCreateBecario,
+        addButton: "Nueva becario",
+        icon: SchoolIcon,
+        rows: becariosRows,
+        columns: becariosColumns,
+        loading: loadingBecarios,
       },
     }),
-    [becariosRows, becariosColumns, loadingBecarios],
+    [becariosRows, becariosColumns, loadingBecarios, openCreateBecario],
   );
 
-  const commonDialogProps = {
-    onSave: handleDialogSave,
-    onBecario: handleBuscarBecario,
-    onBuscarBecario: handleBuscarBecarioPorLegajo,
-    becasGridConfig: becasGridConfig(serviciosRows, proyectosRows),
-  };
+  const currentSection = useMemo(() => sectionConfig.proyectos, [sectionConfig]);
 
-  const configuracionDialog = useScholarshipDialogController({
-    cardKey: "configuracion",
-    card: configuracionCard,
-    ...commonDialogProps,
-  });
-
-  const becariosDialog = useScholarshipDialogController({
-    cardKey: "becarios",
-    card: becariosCard,
-    ...commonDialogProps,
-  });
-
-  const configuracionSections = useMemo(
-    () =>
-      Object.entries(configuracionCard.sections).reduce(
-        (sections, [sectionKey, section]) => ({
-          ...sections,
-          [sectionKey]: {
-            key: sectionKey,
-            title: section.tabTitle,
-            icon: section.icon,
-            rows: section.rows,
-            columns: configuracionDialog.getGridColumns(section, sectionKey),
-            loading: section.loading,
-            dialog: () => configuracionDialog.openCreate(sectionKey),
-            addButton: section.actionButton.textNew,
-          },
-        }),
-        {},
-      ),
-    [configuracionCard, configuracionDialog],
-  );
-
-  const becariosSections = useMemo(
-    () =>
-      Object.entries(becariosCard.sections).reduce(
-        (sections, [sectionKey, section]) => ({
-          ...sections,
-          [sectionKey]: {
-            key: sectionKey,
-            title: section.tabTitle,
-            icon: section.icon,
-            rows: section.rows,
-            columns: becariosDialog.getGridColumns(section, sectionKey),
-            loading: section.loading,
-            dialog: () => becariosDialog.openCreate(sectionKey),
-            addButton: section.actionButton.textNew,
-          },
-        }),
-        {},
-      ),
-    [becariosCard, becariosDialog],
+  const [activeSectionBecario] = "becarios";
+  const currentSectionBecario = useMemo(
+    () => becariosConfig[activeSectionBecario],
+    [activeSectionBecario, becariosConfig],
   );
 
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header=" Modulo de Becas"
-        title="Gestion de Becas"
-        description="Administra becas, proyectos de investigacion y servicios desde un solo lugar."
+        header={BS.headerTitle}
+        title={BS.headerSubtitle}
+        description={BS.headerDescription}
       />
 
       <SAEDataGrid
-        sectionConfig={configuracionSections}
-        currentSection={configuracionDialog.activeSection}
-        onSectionChange={configuracionDialog.setActiveSection}
+        sectionConfig={sectionConfig}
+        currentSection={currentSection}
       />
-      {configuracionDialog.dialogs}
 
       <SAEDataGrid
-        sectionConfig={becariosSections}
-        currentSection={becariosDialog.activeSection}
-        onSectionChange={becariosDialog.setActiveSection}
+        sectionConfig={becariosConfig}
+        currentSection={currentSectionBecario}
       />
-      {becariosDialog.dialogs}
+
+      <DialogProyecto />
+      <DialogServicios />
+      <DialogBecas />
     </SAEPage>
   );
 }

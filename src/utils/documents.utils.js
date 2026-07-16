@@ -30,10 +30,11 @@ export const buildDocumentsFromConfig = (
     );
     const uploadedDocument = documentos.find(
       (documento) =>
-        documento.subido &&
         Number(documento.id_tipo_documento) ===
           Number(documentType?.id ?? documentType?.id_tipo_documento),
     );
+
+    
 
     return {
       ...documentConfig,
@@ -157,7 +158,9 @@ export const validateDocumentFile = (
 ) => {
   const extension = getFileExtension(file);
   const acceptedExtensions =
-    documentType.extension ?? options.acceptedExtensions ?? DEFAULT_ACCEPTED_EXTENSIONS;
+    documentType.extension ??
+    options.acceptedExtensions ??
+    DEFAULT_ACCEPTED_EXTENSIONS;
   const allowedExtensions = String(acceptedExtensions)
     .split(",")
     .map((value) => value.trim().toLowerCase())
@@ -322,4 +325,8 @@ export function asignarArchivosADocumentos(documentosBase, documentosSubidos) {
 export function getDocumentName(doc, fallback = "Archivo") {
   const candidate = doc?.nombre_documento;
   return hasRealDocumentName(candidate) ? candidate : fallback;
+}
+
+export function cloneDocuments(documents) {
+  return documents.map((document) => ({ ...document }));
 }

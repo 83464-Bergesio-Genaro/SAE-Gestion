@@ -173,8 +173,7 @@ export const COMPRAS_STRINGS = {
   saveError: "Ocurrió un error al guardar",
   saveMissingPurchaseId: "No se pudo obtener el id de la compra.",
   saveMissingInvoiceType: "No se encontró el tipo de documento Facturas.",
-  saveMissingReportType:
-    "No se encontró el tipo de documento Informe tecnico.",
+  saveMissingReportType: "No se encontró el tipo de documento Informe tecnico.",
   saveRequiredPurchaseData:
     "Completá empleado, nombre de la compra, precio sugerido, motivo y fecha de compra.",
   saveRequiredInvoice: "Adjuntá al menos una factura para crear la compra.",
@@ -223,8 +222,10 @@ export const PRENSA_STRINGS = {
   snackDeleted: "Publicación eliminada correctamente.",
 
   snackErrorDelete: "No se pudo eliminar la publicación.",
-  snackWarnDocLink: "La publicación se guardó, pero no se pudo vincular el documento.",
-  snackWarnDocUpload: "La publicación se guardó, pero no se pudo subir el documento.",
+  snackWarnDocLink:
+    "La publicación se guardó, pero no se pudo vincular el documento.",
+  snackWarnDocUpload:
+    "La publicación se guardó, pero no se pudo subir el documento.",
   snackErrorSave: "No se pudo modificar la publicación.",
   snackErrorCreate: "No se pudo crear la publicación.",
 
@@ -251,5 +252,125 @@ export const PRENSA_STRINGS = {
     docCount: (count) => `${count} documento${count === 1 ? "" : "s"}`,
     saving: "Guardando...",
     saveButton: "Guardar",
+  },
+};
+
+export const BECAS_STRINGS = {
+  headerTitle: "Módulo de Becas",
+  headerSubtitle: "Gestion de Becas",
+  headerDescription:
+    "EAdministra becas, proyectos de investigacion y servicios desde un solo lugar.",
+
+  scholarshipTypeEconomica: "Beca económica",
+  scholarshipTypeServicio: "Servicio interno",
+  scholarshipTypeInvestigacion: "Investigación",
+
+  loadResearchProjectsError: "Error al cargar proyectos de investigación:",
+  loadInternalServicesError: "Error al cargar servicios internos:",
+  loadScholarshipHoldersError: "Error al cargar becarios completos:",
+
+  saveDefaultSuccess: "La accion se realizo exitosamente",
+  saveGenericSuccess: "Se guardó con éxito",
+  saveResearchProjectCreated: "Proyecto de investigación creado exitosamente",
+  saveResearchProjectUpdated: "Proyecto de investigación editado exitosamente",
+  saveInternalServiceCreated: "Servicio interno creado exitosamente",
+  saveInternalServiceUpdated: "Servicio interno editado exitosamente",
+  saveScholarshipHolderCreated: "Becario creado exitosamente",
+  saveScholarshipHolderUpdated: "Becario editado exitosamente",
+  saveNoChanges: "No se detectaron cambios para guardar",
+  saveMissingCardLogic: "No hay logica de guardado definida para esta card:",
+  saveError: "Ocurrio un error al guardar",
+  missingScholarshipId: (name) => `No se encontro el id de la beca ${name}`,
+
+  becarioDialog: {
+    entityTitle: "Becarios",
+    loadScholarshipsError: "No se pudieron recuperar las becas del alumno",
+
+    validationYear: "Ingresá un año válido",
+    validationFutureDate: "La fecha no puede ser mayor a hoy",
+    validationScholarshipType: "Seleccioná un tipo de beca",
+    validationDuplicateScholarship: "El becario ya tiene ese tipo de beca",
+    validationModules: "Los módulos deben ser un número de 0 a 3",
+    validationResearchProject: "Seleccioná un proyecto de investigación",
+    validationInternalService: "Seleccioná un servicio",
+
+    fieldId: "ID",
+    fieldPreviousScholarshipHolderId: "ID Becario Previo",
+    fieldStudentId: "Legajo",
+    fieldScholarshipHolderName: "Nombre Becario",
+    fieldRent: "Alquila",
+    fieldActive: "Activo",
+    fieldAcceptedStart: "Aceptado Inicio",
+    fieldCanPay: "Puede Pagarle",
+    fieldScholarshipYear: "Año Beca",
+    fieldRequestDate: "Fecha Solicitud",
+    fieldProjectName: "Nombre del proyecto",
+    fieldServiceName: "Nombre del servicio",
+    fieldModules: "Módulos",
+    fieldAssignedModules: "Módulos asignados",
+    fieldScholarshipType: "Tipo de beca",
+
+    clear: "Limpiar",
+    cancel: "Cancelar",
+    save: "Guardar",
+    saving: "Guardando",
+    scholarshipData: "Datos de becas",
+    searchingScholarships: "Buscando becas...",
+    noScholarships: "No tiene becas registradas.",
+    addScholarship: "Agregar nueva beca",
+    requiredDocumentation: "Documentación requerida",
+    loadingDocumentation: "Controlando documentación...",
+    commonDocumentation: "Documentación general",
+    economicDocumentation: "Documentación económica",
+    uploadedDocument: "Subido",
+    missingDocument: "Falta",
+    viewDocument: "Ver documento",
+    documentationLoadError: "No se pudo controlar la documentación del alumno",
+    previewLoadError: "No se pudo cargar el documento",
+  },
+
+  serviceDialog: {
+    entityTitle: "Servicio",
+    fieldId: "ID",
+    fieldName: "Nombre",
+    fieldPhone: "Nro Teléfono",
+    fieldInternalPhone: "Nro Teléfono Interno",
+    fieldInstitutionalEmail: "Email Institucional",
+    fieldOpeningTime: "Horario Atención",
+    fieldClosingTime: "Horario Atención Final",
+
+    validationName: "Ingresá el nombre del servicio",
+    validationPhoneRequired: "Ingresá el teléfono",
+    validationPhoneFormat: "Ingresá un teléfono válido de 12 dígitos",
+    validationInternalPhone: "Ingresá un interno válido",
+    validationEmailRequired: "Ingresá el email institucional",
+    validationEmailFormat:
+      "Ingresá un email válido. Ejemplo: servicio@frc.utn.edu.ar",
+    validationOpeningTime: "Ingresá el horario de atención",
+    validationClosingTime: "Ingresá el horario de cierre",
+    validationClosingTimeAfterOpening:
+      "El horario final no puede ser anterior al inicial",
+
+    cancel: "Cancelar",
+    save: "Guardar",
+    saving: "Guardando",
+  },
+
+  projectDialog: {
+    entityTitle: "Proyecto",
+    sectionTitle: "Proyectos",
+    addButton: "Nuevo proyecto",
+    editAction: "Editar Proyecto",
+    fieldId: "ID",
+    fieldActive: "Activo",
+    fieldName: "Nombre Proyecto Investigación",
+    fieldResearchCenter: "Centro de Investigación",
+
+    validationName: "Ingresá el nombre del proyecto",
+    validationResearchCenter: "Ingresá el centro de investigación",
+
+    cancel: "Cancelar",
+    save: "Guardar",
+    saving: "Guardando",
   },
 };

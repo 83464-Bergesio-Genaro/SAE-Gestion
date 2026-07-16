@@ -26,6 +26,7 @@ export default function SAETimeField({
   disabled = false,
   error = false,
   helperText = "",
+  timeStepsMinutes = 15, //Minutos
 }) {
   const textFieldSize = size === "big" ? "medium" : size;
 
@@ -43,7 +44,7 @@ export default function SAETimeField({
               : "";
           onChange?.(horaFormateada);
         }}
-        timeSteps={{ minutes: 15 }}
+        timeSteps={{ minutes: timeStepsMinutes }}
         minTime={parseTime(minTime)}
         maxTime={parseTime(maxTime)}
         disabled={disabled}

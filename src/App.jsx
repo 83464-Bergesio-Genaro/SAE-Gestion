@@ -38,12 +38,12 @@ import TurnBoardHealth from "./employed/pages/health/healthTurns";
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 import EmployedPurchases from "./employed/pages/purchases/employedPurchases";
+import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
 /*
 
 import { SportsProvider } from "./employed/context/providers/sportsProvider";
 
 import EmployedSports from "./employed/pages/sports/EmployedSports";
-import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
 import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 
 
@@ -225,6 +225,16 @@ export default function App() {
               </ProtectedRoute>
             ),
           },
+
+          {
+            path: "Gestion-Becas",
+            handle: { title: "Gestión de becas" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedScholarships />
+              </ProtectedRoute>
+            ),
+          },
           /*
           {
             path: "Gestion-Deportes",
@@ -235,15 +245,7 @@ export default function App() {
               </ProtectedRoute>
             ),
           },
-          {
-            path: "Gestion-Becas",
-            handle: { title: "Gestión de becas" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <EmployedScholarships />
-              </ProtectedRoute>
-            ),
-          },
+      
           {
             path: "Gestion-Torneos/:id",
             handle: { title: "Detalle del torneo" },

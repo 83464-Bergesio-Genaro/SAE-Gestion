@@ -28,6 +28,26 @@ export const SCHOLARSHIP_TYPE = {
   INVESTIGACION: "Beca de Investigacion",
 };
 
+export const SCHOLARSHIP_TYPES = {
+  ECONOMICA: "economica",
+  SERVICIO: "servicio",
+  INVESTIGACION: "investigacion",
+};
+
+export const SCHOLARSHIP_TYPE_OPTIONS = [
+  { tipo: SCHOLARSHIP_TYPES.ECONOMICA, nombre: SCHOLARSHIP_TYPE.ECONOMICA },
+  { tipo: SCHOLARSHIP_TYPES.SERVICIO, nombre: SCHOLARSHIP_TYPE.SERVICIO },
+  {
+    tipo: SCHOLARSHIP_TYPES.INVESTIGACION,
+    nombre: SCHOLARSHIP_TYPE.INVESTIGACION,
+  },
+];
+
+export const EMPTY_SCHOLARSHIP_DOCUMENTATION_STATUS = {
+  common: [],
+  economic: [],
+};
+
 export const MAX_FILE_SIZE_MB = 5;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 export const DEFAULT_ACCEPTED_EXTENSIONS = ".pdf,.jpg,.jpeg,.png";

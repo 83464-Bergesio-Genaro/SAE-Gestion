@@ -102,6 +102,10 @@ export function formatDate(value, format = "display") {
   }
 }
 
+export function getTodayInputDate() {
+  return formatDate(new Date(), "input");
+}
+
 /**
  * Normaliza cualquier formato de fecha
  * y devuelve yyyy-MM-dd
@@ -135,15 +139,15 @@ export function normalizeDateInput(value) {
 /**
  * Formatea una hora.
  *
- * 08:00     -> 08:00hs
- * 08:00:00  -> 08:00hs
+ * 08:00     -> 08:00 hs
+ * 08:00:00  -> 08:00 hs
  */
 export function formatTime(time) {
   if (!time) return "";
 
   const normalized = String(time).substring(0, 5);
 
-  return `${normalized}hs`;
+  return `${normalized} hs`;
 }
 
 /**
@@ -155,7 +159,12 @@ export function formatTime(time) {
 export function toApiTime(time) {
   if (!time) return "";
 
-  return time.length === 5 ? `${time}:00` : time;
+  const normalized = String(time).replace(/hs/gi, "").trim();
+
+  if (/^\d{2}:\d{2}$/.test(normalized)) return `${normalized}:00`;
+  if (/^\d{2}:\d{2}:\d{2}$/.test(normalized)) return normalized;
+
+  return normalized;
 }
 
 /**
@@ -167,5 +176,5 @@ export function toApiTime(time) {
 export function toTimeInput(time) {
   if (!time) return "";
 
-  return String(time).substring(0, 5);
+  return String(time).replace(/hs/gi, "").trim().substring(0, 5);
 }

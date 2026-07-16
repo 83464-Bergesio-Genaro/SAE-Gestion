@@ -163,8 +163,35 @@ export const EMPTY_PURCHASES = {
   },
 };
 
+// ---------------------------- BECAS -------------------------- //
+export const EMPTY_PROYECTS = {
+  id: 0,
+  activo: false,
+  nombre_proyecto_investigacion: "",
+  centro_investigacion: "",
+};
 
-
+export const EMPTY_SERVICES = {
+  id: 0,
+  nombre: "",
+  nro_telefono: "",
+  nro_telefono_interno: "",
+  email_institucional: "",
+  horario_atencion: "",
+  horario_atencion_final: "",
+};
+export const EMPTY_BECARIO = {
+  id: 0,
+  id_becario_previo: 0,
+  activo: false,
+  aceptado_inicio: false,
+  puede_pagarle: false,
+  legajo: "",
+  nombre_becario: "",
+  alquila: false,
+  anio_beca: "",
+  fecha_solicitud: "",
+};
 
 // ------------------------ REQUERIDOS ------------------------ //
 export const PROFILE_REQUIRED_FIELDS = [
@@ -559,7 +586,6 @@ export const QUICK_CONSULTATION_FAQS = [
       "Verificá que tu sesión siga activa y recargá la página. Si el problema continúa, enviá una consulta detallando la sección y el error.",
   },
 ];
-
 
 export const INITIAL_PREVIEW = {
   open: false,

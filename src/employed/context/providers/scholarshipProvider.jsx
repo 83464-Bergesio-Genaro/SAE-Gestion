@@ -1,6 +1,7 @@
-import {useState, useEffect,useCallback} from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ScholarshipContext } from "../employedContext";
 import { useNotification } from "../../../shared/context/sharedContext";
+import EditIcon from "@mui/icons-material/Edit";
 
 import {
   ObtenerProyectosInvestigacion,
@@ -13,7 +14,6 @@ import {
   ObtenerBecariosEconomicaXLegajo,
   ObtenerBecariosServiciosXLegajo,
   ObtenerBecariosInvestigacionXLegajo,
-  ObtenerBecariosXLegajo,
   ObtenerUsuariosXLegajo,
   CrearBecarioSAE,
   CrearBecarioEconomica,
@@ -23,62 +23,103 @@ import {
   EditarBecarioEconomica,
   EditarBecarioInvestigacion,
   EditarBecarioServicio,
+  descargarDocumentacionXId,
+  listarDocumentacionXLegajo,
 } from "../../../api/BecasService";
-import {
-  getFirstRecord as getFirstRecordUtil,
-  valuesAreEqual as valuesAreEqualUtil,
-} from "../../../utils/util.jsx";;
-import {
-  becariosColumns,
-  proyectosColumns,
-  serviciosColumns,
-} from "../../pages/scholarships/becas.configs";
+import { obtenerTiposDocumento } from "../../../api/HerramientasService";
+import { getFirstRecord, valuesAreEqual } from "../../../utils/util.jsx";
+import { BECAS_STRINGS } from "../../../utils/strings/employed.strings";
 
+import {
+  ECONOMIC_DOCUMENTS,
+  EMPTY_BECARIO,
+  EMPTY_PROYECTS,
+  EMPTY_SERVICES,
+  SCHOLARSHIPS_REQUERID_DOCUMENTS,
+} from "../../../utils/common/common.config";
+import { SCHOLARSHIP_TYPES } from "../../../utils/common/constants";
+import { buildDocumentsFromConfig } from "../../../utils/documents.utils";
+import { generateColumns } from "../../../utils/datagrid.utils.jsx";
+
+const BS = BECAS_STRINGS;
 
 export function ScholarshipProvider({ children }) {
-  const { showNotification } = useNotification();
+  const {
+    showNotification,
+    openDialog,
+    closeDialog,
+    dialogData,
+    dialogMode,
+    setDialogError,
+    setDialogSaving,
+  } = useNotification();
 
-    const getFirstRecord = (value) => {
-    // Los endpoints pueden devolver un objeto, una lista o una respuesta vacía.
-    // El editor necesita siempre un objeto para poder pintar correctamente los campos.
-    return getFirstRecordUtil(value);
-    };
+  //#region Helpers de becarios
 
-    async function handleBuscarBecario(legajo) {
-    // Para el dialog de Becarios buscamos cada tipo de beca por separado y luego
-    // devolvemos una lista uniforme para mostrarla en tabs.
+  // Busca las becas especificas de un alumno y las normaliza para mostrarlas en tabs.
+  async function handleBuscarBecario(legajo) {
     const [becasEconomicas, becasServicios, becasInvestigacion] =
-    await Promise.all([
-      ObtenerBecariosEconomicaXLegajo(legajo),
-      ObtenerBecariosServiciosXLegajo(legajo),
-      ObtenerBecariosInvestigacionXLegajo(legajo),
-    ]);
+      await Promise.all([
+        ObtenerBecariosEconomicaXLegajo(legajo),
+        ObtenerBecariosServiciosXLegajo(legajo),
+        ObtenerBecariosInvestigacionXLegajo(legajo),
+      ]);
 
     return [
-        {
-        tipo: "economica",
-        nombre: "Beca económica",
+      {
+        tipo: SCHOLARSHIP_TYPES.ECONOMICA,
+        nombre: BS.scholarshipTypeEconomica,
         datos: getFirstRecord(becasEconomicas),
-        },
-        {
-        tipo: "servicio",
-        nombre: "Servicio interno",
+      },
+      {
+        tipo: SCHOLARSHIP_TYPES.SERVICIO,
+        nombre: BS.scholarshipTypeServicio,
         datos: getFirstRecord(becasServicios),
-        },
-        {
-        tipo: "investigacion",
-        nombre: "Investigación",
+      },
+      {
+        tipo: SCHOLARSHIP_TYPES.INVESTIGACION,
+        nombre: BS.scholarshipTypeInvestigacion,
         datos: getFirstRecord(becasInvestigacion),
-        },
+      },
     ].filter((beca) => Boolean(beca.datos));
-    }
+  }
 
-    async function handleBuscarBecarioPorLegajo(legajo) {
+  // Busca un usuario por legajo antes de crear o asignar una beca.
+  async function handleBuscarBecarioPorLegajo(legajo) {
     const becario = await ObtenerUsuariosXLegajo(String(legajo).trim());
     return getFirstRecord(becario);
-    }
+  }
 
-    const getNombreBecario = (data = {}) =>
+  // Cruza documentos requeridos de becas con tipos de documento y archivos subidos.
+  async function handleBuscarDocumentacionBecario(legajo) {
+    const [tiposDocumento, documentosSubidos] = await Promise.all([
+      obtenerTiposDocumento(),
+      listarDocumentacionXLegajo(legajo),
+    ]);
+
+    return {
+      common: buildDocumentsFromConfig(
+        SCHOLARSHIPS_REQUERID_DOCUMENTS,
+        tiposDocumento,
+        [],
+        documentosSubidos ?? [],
+      ),
+      economic: buildDocumentsFromConfig(
+        ECONOMIC_DOCUMENTS,
+        tiposDocumento,
+        [],
+        documentosSubidos ?? [],
+      ),
+    };
+  }
+
+  // Descarga un documento del alumno para que el dialog pueda previsualizarlo.
+  async function handleDescargarDocumentacionBecario(id) {
+    return descargarDocumentacionXId(id);
+  }
+
+  // La API puede devolver nombres con distintas propiedades segun el endpoint.
+  const getNombreBecario = (data = {}) =>
     data.nombre_becario ??
     data.nombre_usuario ??
     data.nombre ??
@@ -86,9 +127,8 @@ export function ScholarshipProvider({ children }) {
     data.legajo ??
     "";
 
-    // Payload base del becario SAE. La fecha de solicitud se conserva si vino de la
-    // API; si no existe, queda en null para que no se actualice desde el front.
-    const buildBecarioPayload = (data = {}) => ({
+  // Arma el payload del registro base SAE, separado de las becas especificas.
+  const buildBecarioPayload = (data = {}) => ({
     id: data.id ?? 0,
     legajo: data.legajo,
     nombre_becario: getNombreBecario(data),
@@ -99,44 +139,82 @@ export function ScholarshipProvider({ children }) {
     activo: data.activo ?? true,
     anio_beca: data.anio_beca || new Date().getFullYear(),
     id_becario_previo: data.id_becario_previo || null,
-    });
+  });
 
-    const buildBecarioComparablePayload = (data = {}) => ({
+  // Version estable para comparar contra el snapshot original del dialog.
+  const buildBecarioComparablePayload = (data = {}) => ({
     ...buildBecarioPayload(data),
     fecha_solicitud: data.fecha_solicitud ?? null,
-    });
+  });
 
-    const valuesAreEqual = (current, original) =>
-    valuesAreEqualUtil(current, original);
+  const getBecaId = (beca = {}) => beca.datos?.id ?? beca.id;
 
-    const getBecaId = (beca = {}) => beca.datos?.id ?? beca.id;
+  // Payload comun al crear una beca economica, de servicio o investigacion.
+  const buildBecaPayload = (beca = {}) => ({
+    modulos_asignados: Number(beca.modulos_asignados ?? 0),
+  });
 
-    async function crearBecaParaBecario(becarioId, beca = {}) {
+  // Lee ids de relaciones guardadas como objeto o como clave plana del formulario.
+  const getRelationId = (data = {}, relationName) =>
+    data?.[`${relationName}.id`] ?? data?.[relationName]?.id ?? "";
+
+  // Limpia el payload de edicion para que el backend reciba relaciones anidadas.
+  const buildEditableBecaPayload = (beca = {}) => {
+    const payload = { ...(beca.datos ?? {}) };
+
+    if (beca.tipo === SCHOLARSHIP_TYPES.SERVICIO) {
+      const servicioId = getRelationId(payload, "servicio");
+      delete payload["servicio.id"];
+
+      if (servicioId) {
+        payload.servicio = { ...(payload.servicio ?? {}), id: servicioId };
+      }
+    }
+
+    if (beca.tipo === SCHOLARSHIP_TYPES.INVESTIGACION) {
+      const proyectoId = getRelationId(payload, "proyecto_investigacion");
+      delete payload["proyecto_investigacion.id"];
+
+      if (proyectoId) {
+        payload.proyecto_investigacion = {
+          ...(payload.proyecto_investigacion ?? {}),
+          id: proyectoId,
+        };
+      }
+    }
+
+    return payload;
+  };
+
+  // Crea la beca especifica asociada al registro base del becario.
+  async function crearBecaParaBecario(becarioId, beca = {}) {
+    const payload = buildBecaPayload(beca);
+
     switch (beca.tipo) {
-        case "economica":
-        await CrearBecarioEconomica(becarioId);
+      case SCHOLARSHIP_TYPES.ECONOMICA:
+        await CrearBecarioEconomica(becarioId, payload);
         return;
-        case "investigacion":
+      case SCHOLARSHIP_TYPES.INVESTIGACION:
         await CrearBecarioInvestigacion(
-            becarioId,
-            beca["proyecto_investigacion.id"] ?? beca.proyecto_investigacion?.id,
+          becarioId,
+          beca["proyecto_investigacion.id"] ?? beca.proyecto_investigacion?.id,
+          payload,
         );
         return;
-        case "servicio":
+      case SCHOLARSHIP_TYPES.SERVICIO:
         await CrearBecarioServicio(
-            becarioId,
-            beca["servicio.id"] ?? beca.servicio?.id,
+          becarioId,
+          beca["servicio.id"] ?? beca.servicio?.id,
+          payload,
         );
         return;
-        default:
+      default:
         return;
     }
-    }
+  }
 
-    // Edita el registro base solo si los campos generales cambiaron. Esto evita
-    // llamadas innecesarias y, sobre todo, evita pisar datos del becario al tocar
-    // solamente una beca especifica.
-    async function editarBecarioSiCambio(data = {}, originalData = {}) {
+  // Edita el registro base solo si cambiaron campos generales del becario.
+  async function editarBecarioSiCambio(data = {}, originalData = {}) {
     const payload = buildBecarioPayload(data);
     const currentComparable = buildBecarioComparablePayload(data);
     const originalComparable = buildBecarioComparablePayload(originalData);
@@ -145,52 +223,56 @@ export function ScholarshipProvider({ children }) {
 
     await EditarBecarioSAE(payload.id, payload);
     return true;
-    }
+  }
 
-    // Cada beca activa tiene su endpoint propio. Se compara contra el snapshot
-    // original que tomo el dialog al abrirse y se llama solo al tipo modificado.
-    async function editarBecaSiCambio(beca = {}, originalBeca = {}) {
+  // Edita una beca especifica solo cuando difiere del snapshot original.
+  async function editarBecaSiCambio(beca = {}, originalBeca = {}) {
     if (!beca?.datos || valuesAreEqual(beca.datos, originalBeca?.datos)) {
-        return false;
+      return false;
     }
 
     const becaId = getBecaId(beca);
     if (!becaId) {
-        throw new Error(`No se encontro el id de la beca ${beca.nombre}`);
+      throw new Error(BS.missingScholarshipId(beca.nombre));
     }
 
     switch (beca.tipo) {
-        case "economica":
-        await EditarBecarioEconomica(becaId, beca.datos);
+      case SCHOLARSHIP_TYPES.ECONOMICA:
+        await EditarBecarioEconomica(becaId, buildEditableBecaPayload(beca));
         return true;
-        case "investigacion":
-        await EditarBecarioInvestigacion(becaId, beca.datos);
+      case SCHOLARSHIP_TYPES.INVESTIGACION:
+        await EditarBecarioInvestigacion(
+          becaId,
+          buildEditableBecaPayload(beca),
+        );
         return true;
-        case "servicio":
-        await EditarBecarioServicio(becaId, beca.datos);
+      case SCHOLARSHIP_TYPES.SERVICIO:
+        await EditarBecarioServicio(becaId, buildEditableBecaPayload(beca));
         return true;
-        default:
+      default:
         return false;
     }
-    }
+  }
 
-    // Recorre todas las becas visibles del becario y acumula si alguna realmente se
-    // guardo, para decidir despues si refrescar la grilla y que mensaje mostrar.
-    async function editarBecasSiCambiaron(becas = [], originalBecas = []) {
+  // Recorre todas las becas visibles y devuelve si hubo al menos una edicion.
+  async function editarBecasSiCambiaron(becas = [], originalBecas = []) {
     let huboCambios = false;
 
     for (const beca of becas) {
-        const originalBeca = originalBecas.find(
-        (item) => item.tipo === beca.tipo && getBecaId(item) === getBecaId(beca),
-        );
-        const cambioBeca = await editarBecaSiCambio(beca, originalBeca);
+      const originalBeca = originalBecas.find(
+        (item) =>
+          item.tipo === beca.tipo && getBecaId(item) === getBecaId(beca),
+      );
+      const cambioBeca = await editarBecaSiCambio(beca, originalBeca);
 
-        huboCambios = huboCambios || cambioBeca;
+      huboCambios = huboCambios || cambioBeca;
     }
 
     return huboCambios;
-    }
-        
+  }
+
+  //#endregion
+
   // Cargas iniciales de los tres bloques principales de la pantalla:
   // proyectos, servicios y becarios.
   const fetchProyectosInvetigacion = useCallback(async () => {
@@ -200,7 +282,7 @@ export function ScholarshipProvider({ children }) {
       setProyectosRows(data);
     } catch (err) {
       setProyectosRows([]);
-      console.error("Error al cargar proyectos de investigación:", err);
+      console.error(BS.loadResearchProjectsError, err);
     } finally {
       setLoadingProyectos(false);
     }
@@ -213,7 +295,7 @@ export function ScholarshipProvider({ children }) {
       setServiciosRows(data);
     } catch (err) {
       setServiciosRows([]);
-      console.error("Error al cargar servicios internos:", err);
+      console.error(BS.loadInternalServicesError, err);
     } finally {
       setLoadingServicios(false);
     }
@@ -226,7 +308,7 @@ export function ScholarshipProvider({ children }) {
       setBecariosRows(data);
     } catch (err) {
       setBecariosRows([]);
-      console.error("Error al cargar becarios completos:", err);
+      console.error(BS.loadScholarshipHoldersError, err);
     } finally {
       setLoadingBecarios(false);
     }
@@ -242,114 +324,247 @@ export function ScholarshipProvider({ children }) {
     fetchBecariosCompleto,
   ]);
 
-  const [proyectosRows, setProyectosRows] = useState([]);
-  const [loadingProyectos, setLoadingProyectos] = useState(true);
-
-  const [serviciosRows, setServiciosRows] = useState([]);
-  const [loadingServicios, setLoadingServicios] = useState(true);
-
+  //#region Becarios
   const [becariosRows, setBecariosRows] = useState([]);
   const [loadingBecarios, setLoadingBecarios] = useState(true);
 
-  // Punto unico de guardado para los dialogs genericos. Segun la seccion activa
-  // decide que endpoint usar y que grilla refrescar.
-  const handleDialogSave = async ({
-    cardKey,
-    sectionKey,
-    mode,
-    data,
-    originalData,
-    becas,
-    originalBecas,
-  }) => {
-    let mensajeSnackbar = "La accion se realizo exitosamente";
+  const openEditbecario = useCallback(
+    (row) => {
+      openDialog("becario", "edit", {
+        ...row,
+        originalData: JSON.parse(JSON.stringify(row)),
+      });
+    },
+    [openDialog],
+  );
+
+  const handleEditBecario = useCallback(
+    (row) => {
+      openEditbecario(row);
+    },
+    [openEditbecario],
+  );
+
+  const becarioActions = useMemo(
+    () => [
+      {
+        icon: EditIcon,
+        color: "primary",
+        title: "Editar Becario",
+        onClick: handleEditBecario,
+      },
+    ],
+    [handleEditBecario],
+  );
+
+  const becariosColumns = useMemo(
+    () => generateColumns(EMPTY_BECARIO, becarioActions),
+    [becarioActions],
+  );
+
+  const openCreateBecario = useCallback(() => {
+    openDialog("becario", "create", EMPTY_BECARIO);
+  }, [openDialog]);
+
+  const handleSaveBecario = async () => {
+    setDialogSaving(true);
+    setDialogError("");
+    let mensajeSnackbar = BS.saveDefaultSuccess;
     try {
-      switch (sectionKey) {
-        case "proyectos":
-          if (mode === "create") {
-            await CrearProyectoInvestigacion(data);
-            await fetchProyectosInvetigacion();
-            mensajeSnackbar = "Proyecto de investigación creado exitosamente";
-          }
-          if (mode === "edit") {
-            // Aquí iría la lógica para editar un proyecto de investigación
-            await EditarProyectoInvestigacion(data.id, data);
-            await fetchProyectosInvetigacion();
-            mensajeSnackbar = "Proyecto de investigación editado exitosamente";
-          }
-          break;
-        case "servicios":
-          if (mode === "create") {
-            await CrearServicioInterno(data);
-            await fetchServiciosInternos();
-            mensajeSnackbar = "Servicio interno creado exitosamente";
-          }
-          if (mode === "edit") {
-            await EditarServicioInterno(data.id, data);
-            await fetchServiciosInternos();
-            mensajeSnackbar = "Servicio interno editado exitosamente";
-          }
-          break;
-        case "becarios":
-          if (mode === "create") {
-            const nuevoBecario = await CrearBecarioSAE(
-              buildBecarioPayload(data),
-            );
+      if (dialogMode === "create") {
+        const nuevoBecario = await CrearBecarioSAE(
+          buildBecarioPayload(dialogData),
+        );
+        await crearBecaParaBecario(nuevoBecario.id, dialogData.beca);
+        await fetchBecariosCompleto();
+      }
+      if (dialogMode === "edit") {
+        const cambioBecario = await editarBecarioSiCambio(
+          dialogData,
+          dialogData.originalData ?? dialogData,
+        );
+        const cambioBeca = await editarBecasSiCambiaron(
+          dialogData.becas ?? [],
+          dialogData.originalBecas ?? [],
+        );
+        const nuevaBeca = Boolean(dialogData.beca?.tipo);
 
-            await crearBecaParaBecario(nuevoBecario.id, data.beca);
-            await fetchBecariosCompleto();
-            mensajeSnackbar = "Becario creado exitosamente";
-          }
-          if (mode === "edit") {
-            const cambioBecario = await editarBecarioSiCambio(
-              data,
-              originalData,
-            );
-            const cambioBeca = await editarBecasSiCambiaron(
-              becas,
-              originalBecas,
-            );
+        if (nuevaBeca) {
+          await crearBecaParaBecario(dialogData.id, dialogData.beca);
+        }
 
-            if (cambioBecario || cambioBeca) {
-              await fetchBecariosCompleto();
-              mensajeSnackbar = "Becario editado exitosamente";
-            } else {
-              mensajeSnackbar = "No se detectaron cambios para guardar";
-            }
-          }
-          break;
-        default:
-          console.warn(
-            "No hay logica de guardado definida para esta card:",
-            cardKey,
-          );
+        if (cambioBecario || cambioBeca || nuevaBeca) {
+          await fetchBecariosCompleto();
+          mensajeSnackbar = BS.saveScholarshipHolderUpdated;
+        } else {
+          mensajeSnackbar = BS.saveNoChanges;
+        }
       }
 
       showNotification(mensajeSnackbar, "success");
     } catch (err) {
-      showNotification(err.message || "Ocurrio un error al guardar", "error");
+      showNotification(err.message || BS.saveError, "error");
       throw err;
+    } finally {
+      setDialogSaving(false);
+      closeDialog();
     }
   };
-      return (
-        <ScholarshipContext.Provider
-          value={{
-            handleDialogSave,
-            handleBuscarBecario,
-            handleBuscarBecarioPorLegajo,
 
-            proyectosRows,
-            proyectosColumns,
-            loadingProyectos,
-            serviciosRows,
-            serviciosColumns,
-            loadingServicios,
-            becariosRows,
-            becariosColumns,
-            loadingBecarios
-          }}
-        >
-          {children}
-        </ScholarshipContext.Provider>
-      );
+  //#endregion
+
+  //#region Proyecto
+  const [proyectosRows, setProyectosRows] = useState([]);
+  const [loadingProyectos, setLoadingProyectos] = useState(true);
+
+  const openEditProyecto = useCallback(
+    (row) => {
+      openDialog("proyectos", "edit", row);
+    },
+    [openDialog],
+  );
+
+  const handleEditProyecto = useCallback(
+    (row) => {
+      openEditProyecto(row);
+    },
+    [openEditProyecto],
+  );
+
+  const proyectoActions = useMemo(
+    () => [
+      {
+        icon: EditIcon,
+        color: "primary",
+        title: BS.projectDialog.editAction,
+        onClick: handleEditProyecto,
+      },
+    ],
+    [handleEditProyecto],
+  );
+
+  const proyectosColumns = useMemo(
+    () => generateColumns(EMPTY_PROYECTS, proyectoActions),
+    [proyectoActions],
+  );
+
+  const openCreateProyecto = useCallback(() => {
+    openDialog("proyectos", "create", EMPTY_PROYECTS);
+  }, [openDialog]);
+
+  const handleSaveProyecto = async () => {
+    setDialogSaving(true);
+    setDialogError("");
+    try {
+      if (dialogMode === "edit") {
+        await EditarProyectoInvestigacion(dialogData.id, dialogData);
+      }
+      if (dialogMode === "create") {
+        await CrearProyectoInvestigacion(dialogData);
+      }
+      await fetchProyectosInvetigacion();
+      showNotification(BS.saveGenericSuccess, "success");
+    } catch (err) {
+      showNotification(err.message || BS.saveError, "error");
+      throw err;
+    } finally {
+      setDialogSaving(false);
+      closeDialog();
+    }
+  };
+
+  //#endregion
+
+  //#region Servicio
+  const [serviciosRows, setServiciosRows] = useState([]);
+  const [loadingServicios, setLoadingServicios] = useState(true);
+
+  const openEditServicio = useCallback(
+    (row) => {
+      openDialog("servicio", "edit", row);
+    },
+    [openDialog],
+  );
+
+  const openCreateServicio = useCallback(() => {
+    openDialog("servicio", "create", EMPTY_SERVICES);
+  }, [openDialog]);
+
+  const handleEditServicio = useCallback(
+    (row) => {
+      openEditServicio(row);
+    },
+    [openEditServicio],
+  );
+
+  const servicioActions = useMemo(
+    () => [
+      {
+        icon: EditIcon,
+        color: "primary",
+        title: "Editar Servicio",
+        onClick: handleEditServicio,
+      },
+    ],
+    [handleEditServicio],
+  );
+
+  const serviciosColumns = useMemo(
+    () => generateColumns(EMPTY_SERVICES, servicioActions),
+    [servicioActions],
+  );
+
+  const handleSaveServicios = async () => {
+    setDialogSaving(true);
+    setDialogError("");
+    try {
+      if (dialogMode === "edit") {
+        await EditarServicioInterno(dialogData.id, dialogData);
+      }
+      if (dialogMode === "create") {
+        await CrearServicioInterno(dialogData);
+      }
+      await fetchServiciosInternos();
+      showNotification(BS.saveGenericSuccess, "success");
+    } catch (err) {
+      showNotification(err.message || BS.saveError, "error");
+      throw err;
+    } finally {
+      setDialogSaving(false);
+      closeDialog();
+    }
+  };
+
+  //#endregion
+
+  return (
+    <ScholarshipContext.Provider
+      value={{
+        handleBuscarBecario,
+        handleBuscarBecarioPorLegajo,
+        handleBuscarDocumentacionBecario,
+        handleDescargarDocumentacionBecario,
+
+        proyectosRows,
+        proyectosColumns,
+        loadingProyectos,
+        openCreateProyecto,
+        handleSaveProyecto,
+
+        serviciosRows,
+        serviciosColumns,
+        loadingServicios,
+        openCreateServicio,
+        handleSaveServicios,
+
+        becariosRows,
+        becariosColumns,
+        loadingBecarios,
+        openCreateBecario,
+        handleSaveBecario,
+      }}
+    >
+      {children}
+    </ScholarshipContext.Provider>
+  );
 }

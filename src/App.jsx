@@ -36,21 +36,25 @@ import EmployedConsultations from "./employed/pages/consultations/employedConsul
 import EmployedHealth from "./employed/pages/health/employedHealth";
 import TurnBoardHealth from "./employed/pages/health/healthTurns";
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
-/*
 
-import { SportsProvider } from "./employed/context/providers/sportsProvider";
+import EmployedTravels from "./employed/pages/travels/employedTravels";
+import EmployedTravelInscripts from "./employed/pages/travels/employedInscripts";
 
 import EmployedSports from "./employed/pages/sports/EmployedSports";
-import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
 import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 
+import AdminEmployed from "./employed/pages/users/EmployedAdmin";
+/*
+
+
+
+import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
 
 import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
 
-import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
-import EmployedTravels from "./employed/pages/travels/employedTravels";
+
+
 import EmployedPurchases from "./employed/pages/purchases/employedPurchases";
-import EmployedTravelInscripts from "./employed/pages/travels/employedInscripts";
 import AdminReport from "./employed/pages/reports/adminReports";
 
 */
@@ -206,43 +210,13 @@ export default function App() {
                 <EmployedJPA />
               </ProtectedRoute>
             ),
-          },          
-          /*
-          {
-            path: "Gestion-Deportes",
-            handle: { title: "Gestión de deportes" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <EmployedSports />
-              </ProtectedRoute>
-            ),
           },
           {
-            path: "Gestion-Becas",
-            handle: { title: "Gestión de becas" },
+            path: "Gestion-Usuarios",
+            handle: { title: "Gestión de usuarios" },
             element: (
-              <ProtectedRoute role={[2, 5]}>
-                <EmployedScholarships />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: "Gestion-Torneos/:id",
-            handle: { title: "Detalle del torneo" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <SportsProvider autoLoad={false}>
-                  <TorneoDetalle />
-                </SportsProvider>
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: "Gestion-Compras",
-            handle: { title: "Gestión de compras" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <EmployedPurchases />
+              <ProtectedRoute role={5}>
+                <AdminEmployed />
               </ProtectedRoute>
             ),
           },
@@ -264,7 +238,45 @@ export default function App() {
               </ProtectedRoute>
             ),
           },
+          {
+            path: "Gestion-Deportes",
+            handle: { title: "Gestión de deportes" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedSports />
+              </ProtectedRoute>
+            ),
+          },          
+          {
+            path: "Gestion-Torneos/:id",
+            handle: { title: "Detalle del torneo" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <TorneoDetalle />
+              </ProtectedRoute>
+            ),
+          },
+          /*
 
+          {
+            path: "Gestion-Becas",
+            handle: { title: "Gestión de becas" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedScholarships />
+              </ProtectedRoute>
+            ),
+          },
+
+          {
+            path: "Gestion-Compras",
+            handle: { title: "Gestión de compras" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedPurchases />
+              </ProtectedRoute>
+            ),
+          },
           {
             path: "Gestion-Prensa",
             handle: { title: "Gestión de prensa" },
@@ -280,15 +292,6 @@ export default function App() {
             element: (
               <ProtectedRoute role={[2, 5]}>
                 <AdministrarPrensa />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: "Gestion-Usuarios",
-            handle: { title: "Gestión de usuarios" },
-            element: (
-              <ProtectedRoute role={5}>
-                <UsuariosAdmin />
               </ProtectedRoute>
             ),
           },

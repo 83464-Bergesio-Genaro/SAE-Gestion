@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import {
   Autocomplete,
   Box,
@@ -20,59 +21,32 @@ import {
   Tooltip,
 } from "@mui/material";
 
-import { useState, useMemo } from "react";
-import { TravelProvider } from "../../context/providers/travelProvider";
-import { useTravel } from "../../context/employedContext";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import HeaderPageEmployed from "../../../shared/components/HeaderPageEmployed";
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
-import { useNotification } from "../../../shared/context/sharedContext";
-
 import CloseIcon from "@mui/icons-material/Close";
 import BusinessIcon from "@mui/icons-material/Business";
 import LocalAirportIcon from "@mui/icons-material/LocalAirport";
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import {
-  digitsOnly,
-  formatCbu,
-  formatCuit,
-  formatCurrencyInputFromText,
-  isValidCbu,
-  isValidCuit,
-  isValidEmail,
-  parseCurrencyInput,
-  sanitizeCurrencyInput,
-} from "../../../utils/juan/util";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
+import SAEPage from "../../../assets/components/page/SAEPage";
 
-const TRAVELS_REQUIRED_DOCUMENTS = [
-  {
-    id: 3,
-    nombre: "Listado de Estudiantes Viajantes",
-    extension: ".xlsx",
-  },
-  {
-    id: 4,
-    nombre: "Nota de Viaje Plantilla",
-    extension: ".docx",
-  },
-  {
-    id: 5,
-    nombre: "Nota de Viaje Cargada",
-    extension: ".pdf",
-  },
-  {
-    id: 6,
-    nombre: "Informe Tecnico Viaje",
-    extension: ".pdf",
-  },
-];
+import { digitsOnly } from "../../../utils/text.utils";
+import { formatCbu,formatCuit,formatCurrencyInputFromText,parseCurrencyInput,sanitizeCurrencyInput} from "../../../utils/formatters.utils";
+import { isValidCbu,isValidCuit, isValidEmail,} from "../../../utils/validation.utils";
 
+import { TravelProvider } from "../../context/providers/travelProvider";
+import { useTravel } from "../../context/employedContext";
+import { useNotification } from "../../../shared/context/sharedContext";
+
+import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/common/common.config";
+import { TRAVEL_STRINGS } from "../../../utils/strings/employed.strings";
+
+const C = TRAVEL_STRINGS;
 export default function EmployedTravels() {
   return (
     <TravelProvider>
@@ -135,9 +109,9 @@ function EmployedTravelsContent() {
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header=" Módulo de Viajes"
-        title="Gestión de los viajes"
-        description="En este módulo podrás gestionar los viajes de la empresa, incluyendo la creación, edición de las empresa como la gestión de los inscriptos y la documentación relacionada."
+        header={C.headerTitle}
+        title={C.headerMainSubtitle}
+        description={C.headerMainDescription}
       />
       <SAEDataGrid
         sectionConfig={sectionConfig}
@@ -148,6 +122,13 @@ function EmployedTravelsContent() {
       {dialogOpen && dialogType === "travels" && <TravelsDialog />}
       {dialogOpen && dialogType === "documents" && <DocumentsDialog />}
     </SAEPage>
+  );
+}
+function TravelsHistory(){
+  return(
+    <Box>
+      
+    </Box>
   );
 }
 
@@ -171,26 +152,26 @@ function BussinessDialog() {
   const fieldErrors = {
     contacto:
       Boolean(dialogData.contacto) && !/^\d+$/.test(String(dialogData.contacto))
-        ? "El contacto solo puede contener numeros."
+        ? C.errorPhone
         : "",
     email:
       Boolean(dialogData.email) && !isValidEmail(dialogData.email)
-        ? "Ingresá un email válido."
+        ? C.errorEmail
         : "",
     cuit:
       Boolean(dialogData.cuit) && !isValidCuit(dialogData.cuit)
-        ? "Ingresá un CUIT válido de 11 dígitos."
+        ? C.errorCUIT
         : "",
     cbu:
       Boolean(dialogData.cbu) && !isValidCbu(dialogData.cbu)
-        ? "El CBU debe tener 22 dígitos."
+        ? C.errorCBU
         : "",
   };
   const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
 
   const handleSave = () => {
     if (hasFieldErrors) {
-      setDialogError("Revisá los campos marcados antes de guardar.");
+      setDialogError(C.errorForm);
       return;
     }
 
@@ -223,7 +204,7 @@ function BussinessDialog() {
           <Grid container spacing={1}>
             <Grid size={{ xs: 12, md: 3 }} m={0}>
               <SAETextField
-                label="ID"
+                label={C.travelID}
                 type="number"
                 fullWidth
                 value={dialogData.id}
@@ -233,15 +214,15 @@ function BussinessDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 9 }} m={0}>
               <SAETextField
-                label="Nombre Empresa"
+                label={C.businessName}
                 value={dialogData.nombre}
                 onChange={(e) => handleDialogChange("nombre", e.target.value)}
                 fullWidth
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }} m={0}>
+            <Grid size={{ xs: 12}} m={0}>
               <SAETextField
-                label="Telefono"
+                label={C.businessPhone}
                 value={dialogData.contacto}
                 onChange={(e) =>
                   handleDialogChange("contacto", digitsOnly(e.target.value))
@@ -251,9 +232,9 @@ function BussinessDialog() {
                 fullWidth
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }} m={0}>
+            <Grid size={{ xs: 12 }} m={0}>
               <SAETextField
-                label="Email"
+                label={C.businessEmail}
                 value={dialogData.email}
                 onChange={(e) => handleDialogChange("email", e.target.value)}
                 error={Boolean(fieldErrors.email)}
@@ -261,9 +242,9 @@ function BussinessDialog() {
                 fullWidth
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }} m={0}>
+            <Grid size={{ xs: 12 }} m={0}>
               <SAETextField
-                label="Cuit"
+                label={C.businessCUIT}
                 value={dialogData.cuit}
                 onChange={(e) =>
                   handleDialogChange("cuit", formatCuit(e.target.value))
@@ -273,9 +254,9 @@ function BussinessDialog() {
                 fullWidth
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }} m={0}>
+            <Grid size={{ xs: 12 }} m={0}>
               <SAETextField
-                label="CBU"
+                label={C.businessCBU}
                 value={dialogData.cbu}
                 onChange={(e) =>
                   handleDialogChange("cbu", formatCbu(e.target.value))
@@ -297,7 +278,7 @@ function BussinessDialog() {
                   />
                 }
                 label={
-                  dialogData.activo ? "Empresa Activa" : "Empresa NO activa"
+                  dialogData.activo ? C.businessActive: C.businessNoActive
                 }
               />
             )}
@@ -310,7 +291,7 @@ function BussinessDialog() {
           onClick={closeDialog}
           disabled={dialogSaving}
         >
-          Cancelar
+          {C.cancel}
         </SAEButton>
         <SAEButton
           variant="contained"
@@ -321,10 +302,10 @@ function BussinessDialog() {
           }
         >
           {dialogMode === "create"
-            ? "Crear"
+            ? C.create
             : dialogMode === "delete"
-              ? "Eliminar"
-              : "Guardar"}
+              ? C.delete
+              : C.save}
         </SAEButton>
       </DialogActions>
     </Dialog>
@@ -378,7 +359,7 @@ function TravelsDialog() {
         }}
       >
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          {dialogMode === "create" ? "Nuevo Viaje" : "Editar Viaje"}
+          {dialogMode === "create" ? C.travelCreate : C.travelUpdate}
         </Typography>
         <IconButton onClick={closeDialog} size="small">
           <CloseIcon />
@@ -394,7 +375,7 @@ function TravelsDialog() {
           <Grid container spacing={1}>
             <Grid size={{ xs: 12, md: 2 }} m={0}>
               <SAETextField
-                label="ID"
+                label={C.travelID}
                 type="number"
                 fullWidth
                 value={dialogData.id}
@@ -404,7 +385,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 8 }} m={0}>
               <SAETextField
-                label="Nombre del Viaje"
+                label={C.travelName}
                 value={dialogData.nombre}
                 onChange={(e) => handleDialogChange("nombre", e.target.value)}
                 fullWidth
@@ -412,7 +393,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 2 }} m={0}>
               <SAETextField
-                label="Cupo"
+                label={C.travelCapacity}
                 type="number"
                 fullWidth
                 value={dialogData.cantidad_personas}
@@ -423,7 +404,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 6 }} my={1}>
               <SAETextField
-                label="Fecha de Inicio"
+                label={C.travelStartDate}
                 type="date"
                 value={dialogData.fecha_inicio}
                 onChange={(e) =>
@@ -435,7 +416,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 6 }} my={1}>
               <SAETextField
-                label="Fecha Vuelta"
+                label={C.travelEndDate}
                 type="date"
                 value={dialogData.fecha_fin}
                 onChange={(e) =>
@@ -447,12 +428,12 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12 }}>
               <Divider variant="middle" sx={{ my: 2 }}>
-                <Chip label="Origen" size="small" sx={{ fontWeight: 700 }} />
+                <Chip label={C.travelOrigin} size="small" sx={{ fontWeight: 700 }} />
               </Divider>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }} sx={{ my: 1 }}>
               <SAETextField
-                label="Pais/Provincia"
+                label={C.travelProvince}
                 fullWidth
                 value={addressPartsOrigin[0]}
                 onChange={(e) =>
@@ -464,7 +445,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 4 }} sx={{ my: 1 }}>
               <SAETextField
-                label="Ciudad / Localidad"
+                label={C.travelCity}
                 fullWidth
                 value={addressPartsOrigin[1]}
                 onChange={(e) =>
@@ -476,7 +457,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 4 }} sx={{ my: 1 }}>
               <SAETextField
-                label="Complejo / Ubicacion"
+                label={C.travelPlace}
                 fullWidth
                 value={addressPartsOrigin[2]}
                 onChange={(e) =>
@@ -488,12 +469,12 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12 }}>
               <Divider variant="middle" sx={{ my: 2 }}>
-                <Chip label="Destino" size="small" sx={{ fontWeight: 700 }} />
+                <Chip label={C.travelDestiny} size="small" sx={{ fontWeight: 700 }} />
               </Divider>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }} sx={{ my: 1 }}>
               <SAETextField
-                label="Pais/Provincia"
+                label={C.travelProvince}
                 fullWidth
                 value={addressPartsDestiny[0]}
                 onChange={(e) =>
@@ -505,7 +486,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 4 }} sx={{ my: 1 }}>
               <SAETextField
-                label="Ciudad / Localidad"
+                label={C.travelCity}
                 fullWidth
                 value={addressPartsDestiny[1]}
                 onChange={(e) =>
@@ -517,7 +498,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 4 }} sx={{ my: 1 }}>
               <SAETextField
-                label="Complejo / Ubicacion"
+                label={C.travelPlace}
                 fullWidth
                 value={addressPartsDestiny[2]}
                 onChange={(e) =>
@@ -530,7 +511,7 @@ function TravelsDialog() {
             <Grid size={{ xs: 12 }}>
               <Divider variant="middle" sx={{ my: 2 }}>
                 <Chip
-                  label="Datos del Viaje"
+                  label={C.travelData}
                   size="small"
                   sx={{ fontWeight: 700 }}
                 />
@@ -556,7 +537,7 @@ function TravelsDialog() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Empresa"
+                    label={C.travelBusiness}
                     inputProps={{
                       ...params.inputProps,
                       readOnly: true,
@@ -567,7 +548,7 @@ function TravelsDialog() {
             </Grid>
             <Grid size={{ xs: 12, md: 4 }} m={0}>
               <SAETextField
-                label="Presupuesto"
+                label={C.travelBudget}
                 fullWidth
                 value={
                   typeof dialogData.costo_aproximado === "number"
@@ -594,7 +575,7 @@ function TravelsDialog() {
                   },
                   htmlInput: {
                     inputMode: "decimal",
-                    placeholder: "99.999,99",
+                    placeholder: "9.999.999,99",
                   },
                 }}
               />
@@ -610,12 +591,12 @@ function TravelsDialog() {
                     color="primary"
                   />
                 }
-                label={dialogData.seguro ? "Tiene Seguro" : "Sin Seguro"}
+                label={dialogData.seguro ? C.travelInsurence : C.travelNoInsurence}
               />
             </Grid>
             <Grid size={{ xs: 12 }} m={0}>
               <SAETextField
-                label="Motivo"
+                label={C.travelMotive}
                 value={dialogData.motivo}
                 onChange={(e) => handleDialogChange("motivo", e.target.value)}
                 fullWidth
@@ -632,7 +613,7 @@ function TravelsDialog() {
           onClick={closeDialog}
           disabled={dialogSaving}
         >
-          Cancelar
+          {C.cancel}
         </SAEButton>
         <SAEButton
           variant="contained"
@@ -643,10 +624,10 @@ function TravelsDialog() {
           }
         >
           {dialogMode === "create"
-            ? "Crear"
+            ? C.create
             : dialogMode === "delete"
-              ? "Eliminar"
-              : "Guardar"}
+              ? C.delete
+              : C.save}
         </SAEButton>
       </DialogActions>
     </Dialog>
@@ -718,7 +699,7 @@ function DocumentsDialog() {
           }}
         >
           <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-            Documentación — {docsViaje.nombre}
+           {C.travelDocs} {docsViaje.nombre}
           </Typography>
           <IconButton onClick={closeDialog} size="small">
             <CloseIcon />
@@ -728,7 +709,7 @@ function DocumentsDialog() {
           <Stack spacing={1} sx={{ pt: 1 }}>
             <Autocomplete
               disablePortal
-              options={TRAVELS_REQUIRED_DOCUMENTS}
+              options={TRAVEL_REQUIRED_DOCUMENTS}
               getOptionLabel={(option) => option.nombre}
               onChange={(event, newValue) => {
                 // 'newValue' es el objeto completo del perfil seleccionado (o null)
@@ -742,14 +723,14 @@ function DocumentsDialog() {
               // Asegura que la comparación se haga por id
               isOptionEqualToValue={(option, value) => option.id === value.id}
               value={
-                TRAVELS_REQUIRED_DOCUMENTS.find(
+                TRAVEL_REQUIRED_DOCUMENTS.find(
                   (doc) => doc.id === selectedTypeDoc?.id,
                 ) || null
               }
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Documento a Cargar"
+                  label={C.travelRequiredDocs}
                   inputProps={{
                     ...params.inputProps,
                     readOnly: true, // Esto evita la escritura
@@ -772,7 +753,7 @@ function DocumentsDialog() {
                     variant="contained"
                     onClick={handleButtonClick}
                   >
-                    Cambiar archivo
+                    {C.travelChangeDocs}
                   </SAEButton>
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
@@ -782,7 +763,7 @@ function DocumentsDialog() {
                     variant="contained"
                     onClick={() => handleArchivoChange(selectedTypeDoc)}
                   >
-                    Agregar Archivo
+                    {C.travelAddDocs}
                   </SAEButton>
                 </Grid>
               </Grid>
@@ -802,7 +783,7 @@ function DocumentsDialog() {
               color="text.secondary"
               sx={{ py: 2, textAlign: "center" }}
             >
-              No hay documentación disponible de este viaje.
+              {C.travelNoDocs}
             </Typography>
           )}
           {!loadingViajeDocs && docsViajeList.length > 0 && (
@@ -830,7 +811,7 @@ function DocumentsDialog() {
                     </Typography>
                   </Box>
                   <Stack direction="row" spacing={0.5}>
-                    <Tooltip title="Ver Documentos">
+                    <Tooltip title={C.travelShowDocs}>
                       <IconButton
                         size="small"
                         onClick={() => handlePreviewDoc(doc)}
@@ -839,7 +820,7 @@ function DocumentsDialog() {
                       </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Descargar">
+                    <Tooltip title={C.travelDownloadDocs}>
                       <IconButton
                         size="small"
                         onClick={() =>
@@ -859,7 +840,7 @@ function DocumentsDialog() {
                       </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Eliminar">
+                    <Tooltip title={C.travelDeleteDocs}>
                       <IconButton
                         size="small"
                         onClick={() => requestDeleteDocument(doc)}
@@ -875,18 +856,18 @@ function DocumentsDialog() {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <SAEButton variant="outlined" onClick={closeDialog}>
-            Cerrar
+            {C.travelClose}
           </SAEButton>
         </DialogActions>
       </Dialog>
       <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600, p: 4 }}>
-          EliminarDocumento
+          {C.travelDeleteDocs}
         </Typography>
 
         <DialogContent>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            "Esta seguro que quiere eliminar el documento: "{" "}
+            {C.travelWarningMsg}
             {documentoAEliminar?.nombre_documento}
           </Typography>
         </DialogContent>
@@ -897,14 +878,14 @@ function DocumentsDialog() {
             autoFocus
             color="outlined"
           >
-            Cancelar
+            {C.cancel}
           </SAEButton>
           <SAEButton
             onClick={() => handleDelete(documentoAEliminar)}
             autoFocus
             color="error"
           >
-            Eliminar
+            {C.delete}
           </SAEButton>
         </DialogActions>
       </Dialog>
@@ -969,7 +950,7 @@ function FileDropZone() {
       {travelNewFile ? (
         <div>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            ✅Cargado: <strong>{travelNewFile.name}</strong>
+            {C.travelLoadDocs} <strong>{travelNewFile.name}</strong>
           </Typography>
         </div>
       ) : (
@@ -978,7 +959,7 @@ function FileDropZone() {
             variant="body2"
             sx={{ fontWeight: 600, paddingBottom: "2px" }}
           >
-            Arrastra tu archivo aquí 📄
+            {C.travelDrop}
             <br />o
           </Typography>
           <SAEButton
@@ -991,7 +972,7 @@ function FileDropZone() {
               cursor: "pointer",
             }}
           >
-            Buscar Archivo
+            {C.travelSearch}
           </SAEButton>
         </div>
       )}

@@ -12,10 +12,13 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import { useSports } from "../../context/employedContext";
 
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import { useSports } from "../../context/employedContext";
+import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
+
+const C = SPORTS_STRINGS;
 const getDialogTitle = (type, mode) => {
   const action = mode === "create" ? "Nuevo" : "Editar";
 
@@ -72,7 +75,7 @@ export default function SportsEntityDialog() {
           {dialogType === "docente" ? (
             <>
               <SAETextField
-                label="CUIL"
+                label={C.cuil}
                 value={dialogData.cuil ?? ""}
                 onChange={(e) => handleDialogChange("cuil", e.target.value)}
                 disabled={dialogMode === "edit"}
@@ -81,7 +84,7 @@ export default function SportsEntityDialog() {
                 helperText={dialogFieldErrors.cuil}
               />
               <SAETextField
-                label="Nombres"
+                label={C.names}
                 value={dialogData.nombres ?? ""}
                 onChange={(e) => handleDialogChange("nombres", e.target.value)}
                 fullWidth
@@ -89,7 +92,7 @@ export default function SportsEntityDialog() {
                 helperText={dialogFieldErrors.nombres}
               />
               <SAETextField
-                label="Apellidos"
+                label={C.lastNames}
                 value={dialogData.apellidos ?? ""}
                 onChange={(e) =>
                   handleDialogChange("apellidos", e.target.value)
@@ -99,7 +102,7 @@ export default function SportsEntityDialog() {
                 helperText={dialogFieldErrors.apellidos}
               />
               <SAETextField
-                label="Fecha de nacimiento"
+                label={C.birthDay}
                 type="date"
                 value={dialogData.fecha_nacimiento ?? ""}
                 onChange={(e) =>
@@ -120,13 +123,13 @@ export default function SportsEntityDialog() {
                     color="primary"
                   />
                 }
-                label="Activo"
+                label={C.active}
               />
             </>
           ) : dialogType === "espacio" ? (
             <>
               <SAETextField
-                label="Nombre"
+                label={C.sportPlaceName}
                 value={dialogData.nombre ?? ""}
                 onChange={(e) => handleDialogChange("nombre", e.target.value)}
                 fullWidth
@@ -134,7 +137,7 @@ export default function SportsEntityDialog() {
                 helperText={dialogFieldErrors.nombre}
               />
               <SAETextField
-                label="Domicilio"
+                label={C.sportPlaceAddress}
                 value={dialogData.domicilio ?? ""}
                 onChange={(e) =>
                   handleDialogChange("domicilio", e.target.value)
@@ -144,7 +147,7 @@ export default function SportsEntityDialog() {
                 helperText={dialogFieldErrors.domicilio}
               />
               <SAETextField
-                label="URL Google Maps"
+                label={C.sportsMaps}
                 value={dialogData.url_maps ?? ""}
                 onChange={(e) =>
                   handleDialogChange("url_maps", e.target.value)
@@ -163,13 +166,13 @@ export default function SportsEntityDialog() {
                     color="primary"
                   />
                 }
-                label="Activo"
+                label={C.active}
               />
             </>
           ) : dialogType === "deportista" ? (
             <>
               <SAETextField
-                label="Legajo"
+                label={C.studentID}
                 value={dialogData.legajo ?? ""}
                 onChange={(e) => handleDialogChange("legajo", e.target.value)}
                 disabled={dialogMode === "edit"}
@@ -178,7 +181,7 @@ export default function SportsEntityDialog() {
                 helperText={dialogFieldErrors.legajo}
               />
               <SAETextField
-                label="Vencimiento ficha"
+                label={C.studentExpireLicence}
                 type="date"
                 value={dialogData.vencimiento_ficha ?? ""}
                 onChange={(e) =>
@@ -202,7 +205,7 @@ export default function SportsEntityDialog() {
                     color="primary"
                   />
                 }
-                label="Habilitado"
+                label={C.studentAuthorized}
               />
               <FormControlLabel
                 control={
@@ -214,13 +217,13 @@ export default function SportsEntityDialog() {
                     color="primary"
                   />
                 }
-                label="Habilitado deporte"
+                label={C.studentSportAuth}
               />
             </>
           ) : (
             <>
               <SAETextField
-                label="Nombre"
+                label={C.name}
                 value={dialogData.nombre ?? ""}
                 onChange={(e) => handleDialogChange("nombre", e.target.value)}
                 fullWidth
@@ -237,7 +240,7 @@ export default function SportsEntityDialog() {
                     color="primary"
                   />
                 }
-                label="Activo"
+                label={C.active}
               />
             </>
           )}
@@ -245,7 +248,7 @@ export default function SportsEntityDialog() {
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <SAEButton variant="outlined" onClick={closeDialog} disabled={dialogSaving}>
-          Cancelar
+          {C.cancel}
         </SAEButton>
         <SAEButton
           variant="contained"
@@ -255,7 +258,7 @@ export default function SportsEntityDialog() {
             dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
           }
         >
-          {dialogMode === "create" ? "Crear" : "Guardar"}
+          {dialogMode === "create" ? C.create : C.save}
         </SAEButton>
       </DialogActions>
     </Dialog>

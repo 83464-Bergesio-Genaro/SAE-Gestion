@@ -22,48 +22,25 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAETimeField from "../../../shared/components/inputs/SAETimeField";
+
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAETimeField from "../../../assets/components/inputs/SAETimeField";
 
 import { useSports } from "../../context/employedContext";
+import { calendarDays } from "../../../utils/common/constants";
+import { toApiTime, toTimeInput } from "../../../utils/date.utils";
+import { EMPTY_SCHEDULE } from "../../../utils/common/common.config";
+import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
 
-import { toTimeInput, toApiTime } from "../../../utils/util.jsx";;
-
-const DIAS_LABEL = {
-  0: "Domingo",
-  1: "Lunes",
-  2: "Martes",
-  3: "Miércoles",
-  4: "Jueves",
-  5: "Viernes",
-  6: "Sábado",
-};
-
-const DIAS_OPTIONS = [
-  { value: 1, label: "Lunes" },
-  { value: 2, label: "Martes" },
-  { value: 3, label: "Miércoles" },
-  { value: 4, label: "Jueves" },
-  { value: 5, label: "Viernes" },
-  { value: 6, label: "Sábado" },
-  { value: 0, label: "Domingo" },
-];
-
-const EMPTY_FORM = {
-  dia: 1,
-  hora_inicio: "",
-  hora_fin: "",
-  id_espacio_deportivo: "",
-  cuil_docente: "",
-  activo: true,
-};
+const C = SPORTS_STRINGS;
 
 function HorarioFormFields({ form, onChange, espacios, docentes }) {
   return (
@@ -76,7 +53,7 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
             label="Día"
             onChange={(e) => onChange("dia", e.target.value)}
           >
-            {DIAS_OPTIONS.map((d) => (
+            {calendarDays.map((d) => (
               <MenuItem key={d.value} value={d.value}>
                 {d.label}
               </MenuItem>
@@ -84,14 +61,14 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
           </Select>
         </FormControl>
         <SAETimeField
-          label="Hora inicio"
+          label={C.scheduleStartTime}
           value={form.hora_inicio}
           onChange={(v) => onChange("hora_inicio", v)}
           minTime="12:00"
           maxTime="22:00"
         />
         <SAETimeField
-          label="Hora fin"
+          label={C.scheduleEndTime}
           value={form.hora_fin}
           onChange={(v) => onChange("hora_fin", v)}
           minTime="12:00"
@@ -106,7 +83,7 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
               color="primary"
             />
           }
-          label="Activo"
+          label={C.active}
           sx={{ ml: 0.5 }}
         />
       </Stack>
@@ -115,11 +92,11 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
           <InputLabel>Espacio deportivo</InputLabel>
           <Select
             value={form.id_espacio_deportivo}
-            label="Espacio deportivo"
+            label={C.schedulePlace}
             onChange={(e) => onChange("id_espacio_deportivo", e.target.value)}
           >
             <MenuItem value="">
-              <em>Sin asignar</em>
+              <em>{C.noAssigned}</em>
             </MenuItem>
             {espacios.map((e) => (
               <MenuItem key={e.id} value={e.id}>
@@ -129,14 +106,14 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
           </Select>
         </FormControl>
         <FormControl size="small" fullWidth>
-          <InputLabel>Docente</InputLabel>
+          <InputLabel>{C.scheduleTeacher}</InputLabel>
           <Select
             value={form.cuil_docente}
             label="Docente"
             onChange={(e) => onChange("cuil_docente", e.target.value)}
           >
             <MenuItem value="">
-              <em>Sin asignar</em>
+              <em>{C.noAssigned}</em>
             </MenuItem>
             {docentes.map((d) => (
               <MenuItem key={d.cuil} value={d.cuil}>
@@ -252,11 +229,11 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
               variant="subtitle2"
               sx={{ color: "white", fontWeight: 700, flex: 1 }}
             >
-              Eliminar horario
+              {C.scheduleDelete}
             </Typography>
             <Chip
               size="small"
-              label={DIAS_LABEL[horario.dia]}
+              label={calendarDays.find(d => d.value === horario.dia)?.label || "Día no encontrado"}
               sx={{
                 bgcolor: "rgba(255,255,255,0.22)",
                 color: "white",
@@ -279,8 +256,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
             sx={{ py: 1.5, bgcolor: "#fff5f5", "&:last-child": { pb: 1.5 } }}
           >
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-              ¿Estás seguro que querés eliminar este horario? Esta acción no se
-              puede deshacer.
+              {C.scheduleDeleteWarning}
             </Typography>
             <Stack direction="row" spacing={1} justifyContent="flex-end">
               <SAEButton
@@ -288,7 +264,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
                 onClick={() => setConfirmDelete(false)}
                 disabled={deleting}
               >
-                Cancelar
+                {C.cancel}
               </SAEButton>
               <SAEButton
                 variant="contained"
@@ -303,7 +279,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
                   )
                 }
               >
-                Eliminar
+                {C.delete}
               </SAEButton>
             </Stack>
           </CardContent>
@@ -334,7 +310,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
                   variant="subtitle2"
                   sx={{ fontWeight: 700, color: "#153b6f" }}
                 >
-                  {DIAS_LABEL[horario.dia]}
+                  {calendarDays.find(d => d.value === horario.dia)?.label || "Día no encontrado"}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
                   {toTimeInput(horario.hora_inicio)} –{" "}
@@ -342,7 +318,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
                 </Typography>
                 <Chip
                   size="small"
-                  label={horario.activo ? "Activo" : "Inactivo"}
+                  label={horario.activo ? C.active : C.inactive}
                   color={horario.activo ? "success" : "default"}
                 />
               </Stack>
@@ -401,11 +377,11 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
         variant="subtitle2"
         sx={{ color: "white", fontWeight: 700, flex: 1 }}
       >
-        Editando horario
+        {C.scheduleEditing}
       </Typography>
       <Chip
         size="small"
-        label={DIAS_LABEL[horario.dia]}
+        label={calendarDays.find(d => d.value === horario.dia)?.label || "Día no encontrado"}
         sx={{
           bgcolor: "rgba(255,255,255,0.22)",
           color: "white",
@@ -461,7 +437,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
             onClick={handleCancel}
             disabled={saving}
           >
-            Cancelar
+            {C.cancel}
           </SAEButton>
           <SAEButton
             variant="contained"
@@ -475,7 +451,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
               )
             }
           >
-            Guardar cambios
+            {C.saveChanges}
           </SAEButton>
         </Stack>
       </CardContent>
@@ -492,7 +468,7 @@ function NuevoHorarioCard({
   onCancel,
 }) {
   const { crearHorarioDeportivo } = useSports();
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState(EMPTY_SCHEDULE);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -545,7 +521,7 @@ function NuevoHorarioCard({
     >
       <AccessTimeIcon sx={{ color: "white", fontSize: 16 }} />
       <Typography variant="subtitle2" sx={{ color: "white", fontWeight: 700 }}>
-        Nuevo horario
+        {C.scheduleCreating}
       </Typography>
     </Box>
   );
@@ -581,7 +557,7 @@ function NuevoHorarioCard({
           sx={{ mt: 1 }}
         >
           <SAEButton variant="outlined" onClick={onCancel} disabled={saving}>
-            Cancelar
+            {C.cancel}
           </SAEButton>
           <SAEButton
             variant="contained"
@@ -595,7 +571,7 @@ function NuevoHorarioCard({
               )
             }
           >
-            Crear
+            {C.create}
           </SAEButton>
         </Stack>
       </CardContent>
@@ -643,7 +619,7 @@ export default function GestionarHorariosDialog({ open, onClose }) {
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open,obtenerDeportesActivos,obtenerDocentesDeportivos,obtenerEspaciosDeportivos]);
 
   const fetchHorarios = useCallback(async (idDeporte) => {
     setLoadingHorarios(true);
@@ -652,11 +628,11 @@ export default function GestionarHorariosDialog({ open, onClose }) {
       const data = await obtenerHorariosXDeporte(idDeporte);
       setHorarios(data);
     } catch (err) {
-      setHorariosError(err.message || "Error al cargar horarios");
+      setHorariosError(err.message || C.errorScheduleLoad);
     } finally {
       setLoadingHorarios(false);
     }
-  }, []);
+  }, [obtenerHorariosXDeporte]);
 
   const handleDeporteChange = useCallback(
     (_e, value) => {
@@ -701,7 +677,7 @@ export default function GestionarHorariosDialog({ open, onClose }) {
         }}
       >
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          Gestionar Horarios Deportivos
+          {C.scheduleManager}
         </Typography>
         <IconButton onClick={handleClose} size="small">
           <CloseIcon />
@@ -723,13 +699,13 @@ export default function GestionarHorariosDialog({ open, onClose }) {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Seleccionar deporte"
+                  label={C.scheduleSportSelection}
                   size="small"
-                  placeholder="Escribí para filtrar..."
+                  placeholder={C.scheduleSportPH}
                 />
               )}
               isOptionEqualToValue={(opt, val) => opt.id === val.id}
-              noOptionsText="Sin resultados"
+              noOptionsText={C.noResults}
             />
 
             {!selectedDeporte && (
@@ -737,7 +713,7 @@ export default function GestionarHorariosDialog({ open, onClose }) {
                 color="text.secondary"
                 sx={{ textAlign: "center", py: 3 }}
               >
-                Seleccioná un deporte para ver y gestionar sus horarios.
+                {C.scheduleSportsSelect}
               </Typography>
             )}
 
@@ -752,7 +728,7 @@ export default function GestionarHorariosDialog({ open, onClose }) {
                     variant="subtitle2"
                     sx={{ color: "#5a6f8f", fontWeight: 600 }}
                   >
-                    Horarios registrados — {selectedDeporte.nombre}
+                    {C.scheduleAlreadyOn} {selectedDeporte.nombre}
                   </Typography>
                   <IconButton
                     onClick={() => setShowNuevoForm(true)}
@@ -804,7 +780,7 @@ export default function GestionarHorariosDialog({ open, onClose }) {
                       color="text.secondary"
                       sx={{ textAlign: "center", py: 2 }}
                     >
-                      No hay horarios registrados para este deporte.
+                      {C.noSchedule}
                     </Typography>
                   )}
 
@@ -828,7 +804,7 @@ export default function GestionarHorariosDialog({ open, onClose }) {
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <SAEButton variant="outlined" onClick={handleClose}>
-          Cerrar
+          {C.close}
         </SAEButton>
       </DialogActions>
     </Dialog>

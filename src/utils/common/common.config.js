@@ -1,3 +1,52 @@
+export const EMPTY_BUSSINESS = {
+    id: "-1",
+    nombre: "",
+    contacto: "",
+    email: "",
+    cuit:"",
+    cbu:"",
+    activo:true
+}
+export const EMPTY_VIAJES ={
+    id: "-1",
+    nombre: "",
+    fecha_inicio: "",
+    fecha_fin: "",
+    seguro: false,
+    origen: "",
+    destino: "",
+    cantidad_personas: 0,
+    nombre_empresa:"",
+    costo_aproximado: 0,
+}
+export const EMPTY_VIAJES_FORM ={
+    id: "-1",
+    nombre: "",
+    fecha_inicio: "",
+    fecha_fin: "",
+    seguro: false,
+    origen: "",
+    destino: "",
+    cantidad_personas: 0,
+    id_empresa_viaje:-1,
+    nombre_empresa:"",
+    costo_aproximado: 0,
+    motivo:""
+}
+export const EMPTY_DOCUMENTACION_VIAJE = {
+    id: "-1",
+    nombre: "",
+    datos:"",
+    ruta:"",
+}
+
+export const EMPTY_DOCUMENTACION_ESTUDIANTE = {
+    id: "-1",
+    nombre: "",
+    datos:"",
+    ruta:"",
+}
+// ------------------------- DEPORTES -------------------------- //
 export const EMPTY_TOURNAMENT = {
   nombre_torneo: "",
   fecha_inicio: "",
@@ -8,6 +57,45 @@ export const EMPTY_TOURNAMENT = {
   docente_responsable:"",
   cupo_jugadores:""
 }
+export const EMPTY_TOURNAMENT_FORM = {
+  id: 0,
+  nombre_torneo: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  fecha_limite_inscripcion: "",
+  activo: true,
+  id_deporte: 0,
+  nombre_deporte: "",
+  cuil_responsable: "",
+  docente_responsable: "",
+  cupo_jugadores: 0,
+};
+export const EMPTY_SCHEDULE = {
+  dia: 1,
+  hora_inicio: "",
+  hora_fin: "",
+  id_espacio_deportivo: "",
+  cuil_docente: "",
+  activo: true,
+};
+export const EMPTY_COMPLETE_SCHEDULE = {
+  docente: {
+    cuil: "",
+    nombres: "",
+    apellidos: "",
+    activo: true,
+    fecha_nacimiento: "",
+  },
+  espacio: { id: 0, nombre: "", domicilio: "", activo: true, url_maps: "" },
+  deportista: {
+    id: 0,
+    legajo: "",
+    habilitado_deportado: true,
+    vencimiento_ficha: "",
+    habilitado_deporte: true,
+  },
+  deporte: { id: 0, nombre: "", activo: true },
+};
 // --------------------------- SALUD --------------------------- //
 export const EMPTY_TURNO =
 {
@@ -73,6 +161,18 @@ export const EMPTY_HORARIO = {
   activo: null,
   id_especialidad: null,
   nombre_especialidad: "",
+};
+
+export const EMPTY_HORARIO_SALUD = {
+  id: "",
+  hora_inicio: "",
+  hora_fin: "",
+  dia: 1,
+  cuil_especialista: null,
+  especialista: "",
+  activo: true,
+  id_especialidad: null,
+  nombre_especialidad: null,
 };
 // ------------------------- EMPLEADO ------------------------- //
 export const EMPTY_FORM = {
@@ -145,7 +245,6 @@ export const PROFILE_REQUIRED_FIELDS = [
   ["direccion", "Dirección"],
 ];
 
-
 export const PERSONAL_FIELDS = [
   { name: "nombres", label: "Nombres", type: "text", md: 6 },
   { name: "apellidos", label: "Apellidos", type: "text", md: 6 },
@@ -162,6 +261,29 @@ export const PERSONAL_FIELDS = [
   { name: "email", label: "Mail", type: "email", md: 6 },
   { name: "legajo", label: "Legajo", type: "text", md: 6 },
   { name: "direccion", label: "Domicilio", type: "text", md: 12 },
+];
+
+const TRAVELS_REQUIRED_DOCUMENTS = [
+  {
+    id: 3,
+    nombre: "Listado de Estudiantes Viajantes",
+    extension: ".xlsx",
+  },
+  {
+    id: 4,
+    nombre: "Nota de Viaje Plantilla",
+    extension: ".docx",
+  },
+  {
+    id: 5,
+    nombre: "Nota de Viaje Cargada",
+    extension: ".pdf",
+  },
+  {
+    id: 6,
+    nombre: "Informe Tecnico Viaje",
+    extension: ".pdf",
+  },
 ];
 
 export const SPORTS_REQUIRED_DOCUMENTS = [

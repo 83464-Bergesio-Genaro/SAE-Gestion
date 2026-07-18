@@ -21,12 +21,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { generateRows,generateColumns } from "../../../utils/datagrid.utils.jsx";
-import { formatTime, toApiDateTime } from "../../../utils/date.utils.js";
+import { formatDate, formatTime, toApiDateTime } from "../../../utils/date.utils.js";
+import { EMPTY_EVENTO_PUBLICO, EMPTY_INTERESADOS, EMPTY_STANDS } from "../../../utils/common/common.config.js";
+import { JPA_STRINGS } from "../../../utils/strings/employed.strings.js";
 
 import { useNotification } from "../../../shared/context/sharedContext";
 import { JPAContext } from "../employedContext";
-import { EMPTY_EVENTO_PUBLICO, EMPTY_INTERESADOS, EMPTY_STANDS } from "../../../utils/common/common.config.js";
- 
+
+const C = JPA_STRINGS;
 export function JPAProvider({ children }) {
   const {
     showNotification,
@@ -34,10 +36,6 @@ export function JPAProvider({ children }) {
     closeDialog,
     dialogData,
     dialogMode,
-    setDialogOpen,
-    setDialogData,
-    setDialogType,
-    setDialogMode,
     setDialogError,
     setDialogSaving,
   } = useNotification();
@@ -74,14 +72,12 @@ export function JPAProvider({ children }) {
 
   const handleEventoPublicoSave = async () => {
     setDialogSaving(true);
-    setDialogError("");
     try {
       if (dialogMode === "delete") {
         await eliminarEvento(dialogData.id);
-        setDialogOpen(false);
-        setDialogData(EMPTY_EVENTO_PUBLICO);
+        closeDialog();
         await fetchEventosPublicos();
-        showNotification("Se elimino el evento correctamente","success");
+        showNotification(C.eventDeleteMsg,"success");
         return;
       }
 
@@ -105,18 +101,18 @@ export function JPAProvider({ children }) {
       } else {
         await modificarEvento(dialogData.id, body);
       }
-      closeDialog();
       await fetchEventosPublicos();
+      closeDialog();
       showNotification(
         dialogMode === "create"
-          ? "Evento creado!"
+          ? C.eventCreateMsg
           : dialogMode === "edit"
-            ? "Evento modificado correctamente"
-            : "Se elimino el evento correctamente","success"
+            ? C.eventEditMsg
+            : C.eventDeleteMsg,"success"
       );
     } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-      showNotification("Ocurrió un error al guardar", "error", 2000);
+      setDialogError(err.message || C.eventError);
+      //showNotification(C.eventError, "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -149,37 +145,23 @@ export function JPAProvider({ children }) {
   }, [fetchEventosSAE]);
 
   const openCreateEventoSAE = () => {
-    setDialogData(EMPTY_EVENTO_PUBLICO);
-    setDialogType("eventosInternos");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogOpen(true);
+    openDialog("eventosInternos","create",EMPTY_EVENTO_PUBLICO);
   };
   const openEditEventoSAE = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("eventosInternos");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("eventosInternos","edit",row);
+  }, [openDialog]);
   const openDeleteEventoSAE = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("eventosInternos");
-    setDialogMode("delete");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("eventosInternos","delete",row);
+  }, [openDialog]);
 
   const handleEventoSAESave = async () => {
     setDialogSaving(true);
-    setDialogError("");
     try {
       if (dialogMode === "delete") {
         await eliminarEvento(dialogData.id);
-        setDialogOpen(false);
-        setDialogData(EMPTY_EVENTO_PUBLICO);
+        closeDialog();
         await fetchEventosSAE();
-        showNotification("Se elimino el evento correctamente","success");
+        showNotification(C.eventDeleteMsg,"success");
         return;
       }
 
@@ -191,9 +173,7 @@ export function JPAProvider({ children }) {
           : id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
       const body = {
         ...rest,
-        fecha_evento: dialogData.fecha_evento
-          ? `${dialogData.fecha_evento}T00:00:00`
-          : new Date(),
+        fecha_evento: formatDate(dialogData.fecha_evento),
         id: id_nuevo,
         ubicacion: lugar,
         horario_inicio: formatTime(dialogData.horario_inicio),
@@ -205,19 +185,18 @@ export function JPAProvider({ children }) {
       } else {
         await modificarEvento(dialogData.id, body);
       }
-      setDialogOpen(false);
-      setDialogData(EMPTY_EVENTO_PUBLICO);
       await fetchEventosSAE();
+      closeDialog();
       showNotification(
         dialogMode === "create"
-          ? "Evento creado!"
+          ? C.eventCreateMsg
           : dialogMode === "edit"
-            ? "Evento modificado correctamente"
-            : "Se elimino el evento correctamente","success"
+            ? C.eventEditMsg
+            : C.eventDeleteMsg,"success"
       );
     } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-      showNotification("Ocurrió un error al guardar", "error", 2000);
+      setDialogError(err.message || C.eventError);
+      //showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -250,30 +229,17 @@ export function JPAProvider({ children }) {
   }, [fetchStands]);
 
   const openCreateStands = () => {
-    setDialogData(EMPTY_STANDS);
-    setDialogType("stands");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogOpen(true);
+    openDialog("stands","create",EMPTY_STANDS);
   };
   const openEditStands = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("stands");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("stands","edit",row);
+  }, [openDialog]);
   const openDeleteStands = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("stands");
-    setDialogMode("delete");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("stands","delete",row);
+  }, [openDialog]);
 
   const handleStandSave = async () => {
     setDialogSaving(true);
-    setDialogError("");
     try {
       const { id, ...rest } = dialogData;
       let id_nuevo =
@@ -293,20 +259,19 @@ export function JPAProvider({ children }) {
       } else {
         await eliminarStand(dialogData.id);
       }
-      setDialogOpen(false);
-      setDialogData(EMPTY_STANDS);
       fetchStands();
+      closeDialog();
       showNotification(
         dialogMode === "create"
-          ? "Puesto creado!"
+          ? C.standCreateMsg
           : dialogMode === "edit"
-            ? "Puesto modificado correctamente"
-            : "Se elimino el puesto correctamente",
+            ? C.standEditMsg
+            : C.eventDeleteMsg,
         "success"
       );
     } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-      showNotification("Ocurrió un error al guardar", "error", 2000);
+      setDialogError(err.message || C.eventError);
+      //showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -336,34 +301,17 @@ export function JPAProvider({ children }) {
   }, [fetchInteresados]);
 
   const openCreateInteresados = () => {
-    setDialogType("interesados");
-    setDialogMode("create");
-    setDialogData({ ...EMPTY_INTERESADOS }); // 👈 copia limpia
-    setDialogError("");
-
-    // 👇 asegurar que abre después
-    setTimeout(() => {
-      setDialogOpen(true);
-    }, 0);
+    openDialog("interesados","create",EMPTY_INTERESADOS);
   };
   const openEditInteresados = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("interesados");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("interesados","edit",row);
+  }, [openDialog]);
   const openDeleteInteresados = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("interesados");
-    setDialogMode("delete");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("interesados","delete",row);
+  }, [openDialog]);
 
   const handleInteresadoSave = async () => {
     setDialogSaving(true);
-    setDialogError("");
     try {
       const { id, ...rest } = dialogData;
       let id_nuevo =
@@ -382,20 +330,19 @@ export function JPAProvider({ children }) {
         let res = await eliminarInteresado(dialogData.id);
         console.log("res:", res);
       }
-      setDialogOpen(false);
-      setDialogData(EMPTY_INTERESADOS);
       fetchInteresados();
+      closeDialog();
       showNotification(
         dialogMode === "create"
-          ? "Interesado creado!"
+          ? C.interestCreateMsg
           : dialogMode === "edit"
-            ? "Interesado modificado correctamente"
-            : "Se elimino el interesado correctamente",
+            ? C.interestEditMsg
+            : C.interestDeleteMsg,
         "success"
       );
     } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-      showNotification("Ocurrió un error al guardar", "error", 2000);
+      setDialogError(err.message || C.eventError);
+      //showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }

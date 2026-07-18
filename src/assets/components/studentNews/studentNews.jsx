@@ -13,7 +13,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { PressProvider } from "../../../shared/context/providers/pressProvider"
+import { PressProvider } from "../../../shared/context/providers/pressProvider";
 import { usePress } from "../../../shared/context/sharedContext";
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -25,7 +25,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
 import NewsPreviewDialog from "./newsPreviewDialog";
-import SAESpinner from "../spinner/SAESpinner"
+import SAESpinner from "../spinner/SAESpinner";
 import TitleBox from "../titleBox";
 
 import { SAETypography } from "../typography/SAETypography";
@@ -37,18 +37,10 @@ const C = NEWS_STRINGS;
 const baseUrl = import.meta.env.BASE_URL;
 const MAX_DESCRIPTION_PREVIEW_LENGTH = 440;
 
-function ItemNovedad({
-  item,
-  invertida,
-}) {
+function ItemNovedad({ item, invertida }) {
   const { handleCardClick } = usePress();
-  const {
-    titulo,
-    descripcion,
-    fecha_inicio,
-    portada,
-    documentos,
-  } = item;
+  const { titulo_publicacion, descripcion, fecha_inicio, portada, documentos } =
+    item;
   const fullDescription = String(descripcion ?? "").trim();
   const isDescriptionTruncated =
     fullDescription.length > MAX_DESCRIPTION_PREVIEW_LENGTH;
@@ -56,9 +48,7 @@ function ItemNovedad({
     ? fullDescription.slice(0, MAX_DESCRIPTION_PREVIEW_LENGTH).trimEnd()
     : fullDescription;
   // Estado para la imagen. Empieza con la foto genérica por defecto
-  const [imagenUrl, setImagenUrl] = useState(
-    `${baseUrl}${PLACEHOLDER_IMAGE}`,
-  );
+  const [imagenUrl, setImagenUrl] = useState(`${baseUrl}${PLACEHOLDER_IMAGE}`);
 
   useEffect(() => {
     // Si no hay portada o no tiene ID, dejamos la imagen genérica
@@ -118,9 +108,7 @@ function ItemNovedad({
             objectFit: "cover",
           }}
           component="img"
-          image={
-            imagenUrl ?? `url('${baseUrl}${PLACEHOLDER_IMAGE}')`
-          }
+          image={imagenUrl ?? `url('${baseUrl}${PLACEHOLDER_IMAGE}')`}
           alt={portada?.name ?? "UTN"}
         />
 
@@ -157,7 +145,7 @@ function ItemNovedad({
           </Box>
           <CardContent>
             <SAETypography variant="h6" sx={{ color: "var(--secondary)" }}>
-              {titulo}
+              {titulo_publicacion}
             </SAETypography>
             <SAETypography variant="body2">{fecha_inicio}</SAETypography>
             <SAETypography
@@ -214,19 +202,15 @@ export function NovedadesContent() {
   };
 
   return (
-    <Box
-    sx={{pb:4}}>
-      <TitleBox
-        title={C.title}
-        description={C.description}
-      />
+    <Box sx={{ pb: 4 }}>
+      <TitleBox title={C.title} description={C.description} />
       <Box sx={{ mt: 1 }}>
         {isLoading && (
           <Stack alignItems="center" width={"100%"} gap={1}>
             <SAESpinner size="S" />
           </Stack>
         )}
-        {!isLoading && novedadesPaginadas.length > 0 &&(
+        {!isLoading && novedadesPaginadas.length > 0 && (
           <>
             <Stack>
               {novedadesPaginadas.map((item, i) => (
@@ -268,26 +252,24 @@ export function NovedadesContent() {
           </>
         )}
         {!isLoading && novedadesPaginadas.length === 0 && (
-            <Box
-              sx={{
-                mt: 2,
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                gap: 0.5,
-              }}
-            >
-              <SAETypography variant="h6">
-                {C.noData} 
-              </SAETypography>
-            </Box>
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              gap: 0.5,
+            }}
+          >
+            <SAETypography variant="h6">{C.noData}</SAETypography>
+          </Box>
         )}
       </Box>
 
       <NewsPreviewDialog
         open={!!selectedPub}
         onClose={handleClose}
-        title={selectedPub?.titulo}
+        title={selectedPub?.titulo_publicacion}
         date={selectedPub?.fecha_inicio}
         description={selectedPub?.descripcion}
         imageSrc={selectedPub?.imageSrc}
@@ -348,7 +330,7 @@ export function DocumentList(listadoDocumentos) {
                     primary={
                       doc.name ||
                       doc.nombre_documento ||
-                      doc.titulo ||
+                      doc.titulo_publicacion ||
                       `Documento ${i + 1}`
                     }
                   />

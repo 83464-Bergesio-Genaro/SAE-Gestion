@@ -22,12 +22,12 @@ import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 
 import DashboardMenu from "../../assets/components/dashboardMenu/DashboardMenu";
 import TitleBox from "../../assets/components/titleBox";
-import HeaderPageEmployed from "../../assets/components/headerPage/headerPageEmployed";
+import HeaderPageEmployed from "../../assets/components/headerPage/headerPageEmployed.jsx";
 import SAESpinner from "../../assets/components/spinner/SAESpinner";
 
 import { useAuth } from "../../shared/context/sharedContext";
 import { CalendarEvent } from "../../assets/components/calendarEvent/calendarEvent";
-import { EmployedCalendar } from "./users/employedCalendar";
+import { EmployedCalendar } from "./users/employedCalendar.jsx";
 import { AdminUsersProvider } from "../context/providers/employProvider";
 
 import { JPAProvider } from "../context/providers/jpaProvider";

@@ -25,7 +25,7 @@ import { useEmploy, usePurchase } from "../../context/employedContext";
 import { DataGrid } from "@mui/x-data-grid";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
-import HeaderPageEmployed from "../../../assets/components/headerPage/HeaderPageEmployed";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
 import DocumentCard from "../../../assets/components/documents/DocumentCard";
 import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
 import { useNotification } from "../../../shared/context/sharedContext";

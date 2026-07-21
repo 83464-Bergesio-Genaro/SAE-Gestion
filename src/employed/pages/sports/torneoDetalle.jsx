@@ -44,7 +44,7 @@ import FolderZipIcon from "@mui/icons-material/FolderZip";
 import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
-import TorneoFormDialog from "./TorneoFormDialog";
+import TorneoFormDialog from "./torneoFormDialog.jsx";
 
 import { useSports } from "../../context/employedContext";
 import { formatDate } from "../../../utils/date.utils";

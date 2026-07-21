@@ -38,7 +38,7 @@ import SAESpinner from "../../../assets/components/spinner/SAESpinner";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import DocumentCard from "../../../assets/components/documents/DocumentCard";
 import TitleBox from "../../../assets/components/titleBox";
-import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent";
+import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent.jsx";
 
 import { TRIPS_STRINGS } from "../../../utils/strings/student.strings"; 
 import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/common/common.config"; 

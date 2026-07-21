@@ -9,15 +9,15 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 
 import SAEButton from "../../../assets/components/buttons/SAEButton";
-import SAEDataGrid from "../../../assets/components/dataGrid/SAEDataGrid";
-import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
 import SAEPage from "../../../assets/components/page/SAEPage";
 
-import SportsCalendar from "./SportsCalendar";
-import GestionarHorariosDialog from "./GestionarHorariosDialog";
-import TorneoFormDialog from "./TorneoFormDialog";
-import SportsEntityDialog from "./SportsEntityDialog";
-import SportsDocsDialog from "./SportsDocsDialog";
+import SportsCalendar from "./sportsCalendar.jsx";
+import GestionarHorariosDialog from "./gestionarHorariosDialog.jsx";
+import TorneoFormDialog from "./torneoFormDialog.jsx";
+import SportsEntityDialog from "./sportsEntityDialog.jsx";
+import SportsDocsDialog from "./sportsDocsDialog.jsx";
 
 import { SportsProvider } from "../../context/providers/sportsProvider";
 import { useSports } from "../../context/employedContext";

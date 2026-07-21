@@ -24,7 +24,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 
 import DocumentPreviewDialog from "../../components/documents/DocumentPreviewDialog";
-import NewsPreviewDialog from "./newsPreviewDialog";
+import NewsPreviewDialog from "./newsPreviewDialog.jsx";
 import SAESpinner from "../spinner/SAESpinner";
 import TitleBox from "../titleBox";
 

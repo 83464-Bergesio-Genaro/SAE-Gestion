@@ -42,12 +42,12 @@ import { useNotification } from "../../../shared/context/sharedContext";
 import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
-import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
 import SAEPage from "../../../assets/components/page/SAEPage";
 import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
 
-import GestionarHorariosDialog from "./horariosDialog";
-import { EmployedCalendar } from "./healthCalendar";
+import GestionarHorariosDialog from "./horariosDialog.jsx";
+import { EmployedCalendar } from "./healthCalendar.jsx";
 import { DataGrid } from "@mui/x-data-grid";
 import { HEALTH_STRING } from "../../../utils/strings/employed.strings";
 

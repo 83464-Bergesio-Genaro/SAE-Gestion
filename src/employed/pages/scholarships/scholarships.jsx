@@ -1,14 +1,14 @@
 ﻿import { useMemo } from "react";
 import SchoolIcon from "@mui/icons-material/School";
-import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
-import SAEDataGrid from "../../../assets/components/dataGrid/SAEDataGrid";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
 import SAEPage from "../../../assets/components/page/SAEPage";
 import { ScholarshipProvider } from "../../context/providers/scholarshipProvider";
 import { useScholarships } from "../../context/employedContext";
 import { BECAS_STRINGS } from "../../../utils/strings/employed.strings";
-import DialogBecas from "./DialogBecas";
-import DialogProyecto from "./DialogProyecto";
-import DialogServicios from "./DialogServicios";
+import DialogBecas from "./dialogBecas.jsx";
+import DialogProyecto from "./dialogProyecto.jsx";
+import DialogServicios from "./dialogServicios.jsx";
 
 const BS = BECAS_STRINGS;
 

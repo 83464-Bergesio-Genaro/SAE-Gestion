@@ -10,7 +10,7 @@ import ComponentLab from "./shared/pages/lab/ComponentLab";
 import MainLayout from "./shared/pages/layout/MainLayout";
 import SharedMain from "./shared/pages/home/main";
 import Login from "./shared/pages/login/login";
-import MyProfile from "./shared/pages/profile/Profile"; //Pero necesita que estes registrado
+import MyProfile from "./shared/pages/profile/profile";
 import SharedJPA from "./shared/pages/jpa/jpaShared";
 import SharedJPASistemas from "./shared/pages/jpa/degrees/systems";
 import SharedJPAQuimica from "./shared/pages/jpa/degrees/chemical";
@@ -24,29 +24,29 @@ import SharedJPAParticipar from "./shared/pages/jpa/participar";
 
 // --------------------------- PAGINAS ESTUDIANTE ---------------------------------- //
 import StudentMain from "./students/pages/main";
-import StudentConsultations from "./students/pages/consultations/StudentConsultations";
+import StudentConsultations from "./students/pages/consultations/studentConsultations.jsx";
 import StudentHealth from "./students/pages/health/healthStudent";
-import StudentScholarships from "./students/pages/scholarships/scholarships";
-import StudentSports from "./students/pages/sports/studentSports";
+import StudentScholarships from "./students/pages/scholarships/scholarships.jsx";
+import StudentSports from "./students/pages/sports/studentSports.jsx";
 import StudentTravels from "./students/pages/trips/studentTravels";
 
 // --------------------------- PAGINAS EMPLEADO ---------------------------------- //
 import EmployedMain from "./employed/pages/main";
-import EmployedConsultations from "./employed/pages/consultations/employedConsultations";
-import EmployedHealth from "./employed/pages/health/employedHealth";
-import TurnBoardHealth from "./employed/pages/health/healthTurns";
-import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
+import EmployedConsultations from "./employed/pages/consultations/employedConsultations.jsx";
+import EmployedHealth from "./employed/pages/health/employedHealth.jsx";
+import TurnBoardHealth from "./employed/pages/health/healthTurns.jsx";
+import EmployedJPA from "./employed/pages/jpa/employedJPA.jsx";
 
 import EmployedTravels from "./employed/pages/travels/employedTravels";
 import EmployedTravelInscripts from "./employed/pages/travels/employedInscripts";
 
-import EmployedSports from "./employed/pages/sports/EmployedSports";
-import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
+import EmployedSports from "./employed/pages/sports/employedSports.jsx";
+import TorneoDetalle from "./employed/pages/sports/torneoDetalle.jsx";
 
-import AdminEmployed from "./employed/pages/users/EmployedAdmin";
-import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
+import AdminEmployed from "./employed/pages/users/employedAdmin.jsx";
+import AdministrarPrensa from "./employed/pages/prensa/administrarPrensa.jsx";
 import EmployedPurchases from "./employed/pages/purchases/employedPurchases";
-import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
+import EmployedScholarships from "./employed/pages/scholarships/scholarships.jsx";
 import AdminReport from "./employed/pages/reports/adminReports";
 import { appConfig } from "./config/appConfig";
 import "./index.css";

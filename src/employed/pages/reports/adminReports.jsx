@@ -3,7 +3,7 @@ import { PieChart } from "@mui/x-charts/PieChart";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { BarChart } from "@mui/x-charts/BarChart";
 
-import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
 import SAEPage from "../../../assets/components/page/SAEPage";
 import TitleBox from "../../../assets/components/titleBox";
 

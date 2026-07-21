@@ -33,7 +33,7 @@ import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAESpinner from "../../../assets/components/spinner/SAESpinner";
 import TitleBox from "../../../assets/components/titleBox";
-import HeaderPageStudent from "../../../assets/components/headerPage/headerPageStudent";
+import HeaderPageStudent from "../../../assets/components/headerPage/headerPageStudent.jsx";
 import { SAETypography } from "../../../assets/components/typography/SAETypography";
 import { ScaleText } from "../../../assets/components/scaleText/scaleText";
 

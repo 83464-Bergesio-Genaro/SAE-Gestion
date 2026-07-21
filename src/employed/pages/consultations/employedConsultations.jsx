@@ -34,7 +34,7 @@ import { useConsultations } from "../../context/employedContext";
 import { ConsultationProvider } from "../../context/providers/consultationsProvider";
 import { useNotification } from "../../../shared/context/sharedContext";
 
-import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
 import { CONSULTATION_FAQS,QUICK_CONSULTATION_FAQS,SAE_EMAIL } from "../../../utils/common/common.config";
 import { CONSULTATIONS_STRINGS } from "../../../utils/strings/employed.strings";
 import { getDialogTitle } from "../../../utils/util";

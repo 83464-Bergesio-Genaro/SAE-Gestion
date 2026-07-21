@@ -28,11 +28,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAEPage from "../../../assets/components/page/SAEPage";
-import SAEDataGrid from "../../../assets/components/dataGrid/SAEDataGrid";
-import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
 
-import GestionarHorariosDialog from "./horariosDialog";
-import { EmployedCalendar } from "./employedCalendar";
+import GestionarHorariosDialog from "./horariosDialog.jsx";
+import { EmployedCalendar } from "./employedCalendar.jsx";
 
 import { useEmploy } from "../../context/employedContext";
 import { AdminUsersProvider } from "../../context/providers/employProvider";

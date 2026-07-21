@@ -30,7 +30,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAESpinner from "../../../assets/components/spinner/SAESpinner";
-import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
 import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
 import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
 import SAEPage from "../../../assets/components/page/SAEPage";

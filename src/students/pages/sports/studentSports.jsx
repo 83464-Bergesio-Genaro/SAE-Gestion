@@ -25,7 +25,7 @@ import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAESpinner from "../../../assets/components/spinner/SAESpinner";
 import SAEPage from "../../../assets/components/page/SAEPage";
-import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent"
+import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent.jsx"
 import TitleBox from "../../../assets/components/titleBox";
 
 //import { SportsProvider as EmployedSportsProvider } from "../../../employed/context/providers/sportsProvider";

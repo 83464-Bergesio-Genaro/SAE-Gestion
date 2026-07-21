@@ -39,7 +39,7 @@ import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAETimeField from "../../../assets/components/inputs/SAETimeField";
 import SAEPage from "../../../assets/components/page/SAEPage";
-import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
 import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
 
 import { HealthUsersProvider } from "../../context/providers/healthProvider";

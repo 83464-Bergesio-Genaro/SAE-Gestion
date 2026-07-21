@@ -3,10 +3,10 @@ import { useAuth } from "../../shared/context/sharedContext";
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 
 import DashboardMenu from "../../assets/components/dashboardMenu/DashboardMenu";
-import NovedadesEstudiantiles from "../../assets/components/StudentNews/studentNews";
-import TitleBox from "../../assets/components/titleBox"
-import SAEPage from "../../assets/components/page/SAEPage"
-import HeaderPageStudent from "../../assets/components/headerPage/headerPageStudent";
+import NovedadesEstudiantiles from "../../assets/components/studentNews/studentNews";
+import TitleBox from "../../assets/components/titleBox";
+import SAEPage from "../../assets/components/page/SAEPage";
+import HeaderPageStudent from "../../assets/components/headerPage/headerPageStudent.jsx";
 import { MAIN_STRINGS } from "../../utils/strings/student.strings";
 
 const C = MAIN_STRINGS;

@@ -30,7 +30,7 @@ import SAEPage from "../../../assets/components/page/SAEPage";
 import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
 import DocumentCard from "../../../assets/components/documents/DocumentCard";
 import TitleBox from "../../../assets/components/titleBox";
-import HeaderPageStudent from "../../../assets/components/headerPage/headerPageStudent";
+import HeaderPageStudent from "../../../assets/components/headerPage/headerPageStudent.jsx";
 
 import ScholarshipsForm from "./scholarshipsForm";
 

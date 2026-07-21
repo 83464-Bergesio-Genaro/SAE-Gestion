@@ -17,7 +17,6 @@ import {
   Paper,
   Autocomplete,
   Divider,
-  Snackbar,
   List,
   ListItem,
   ListItemButton,
@@ -41,23 +40,37 @@ import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import FolderZipIcon from "@mui/icons-material/FolderZip";
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
+
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
 import TorneoFormDialog from "./TorneoFormDialog";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
+
 import { useSports } from "../../context/employedContext";
+import { formatDate } from "../../../utils/date.utils";
+import { SportsProvider } from "../../context/providers/sportsProvider";
+import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
+import { useNotification } from "../../../shared/context/sharedContext";
+import SAEPage from "../../../assets/components/page/SAEPage";
 
-import { formatDate, isoToInputDate } from "../../../utils/util.jsx";;
-
+const C = SPORTS_STRINGS;
 const baseUrl = import.meta.env.BASE_URL;
+
+export default function TorneoDetalle(){
+  return(
+    <SportsProvider>
+      <TorneoContent/>
+    </SportsProvider>
+  );
+}
 
 function buildFormData(t) {
   return {
     id: t.id,
     nombre_torneo: t.nombre_torneo ?? "",
-    fecha_inicio: isoToInputDate(t.fecha_inicio),
-    fecha_fin: isoToInputDate(t.fecha_fin),
-    fecha_limite_inscripcion: isoToInputDate(t.fecha_limite_inscripcion),
+    fecha_inicio: formatDate(t.fecha_inicio,"input"),
+    fecha_fin: formatDate(t.fecha_fin,"input"),
+    fecha_limite_inscripcion: formatDate(t.fecha_limite_inscripcion,"input"),
     activo: t.activo ?? true,
     id_deporte: t.id_deporte ?? 0,
     nombre_deporte: t.nombre_deporte ?? "",
@@ -67,7 +80,7 @@ function buildFormData(t) {
   };
 }
 
-export default function TorneoDetalle() {
+ function TorneoContent() {
   const {
     obtenerTorneoXId,
     obtenerDeportistasXTorneo,
@@ -76,6 +89,7 @@ export default function TorneoDetalle() {
     eliminarInscripcionTorneo,
     obtenerDeportistas,
   } = useSports();
+  const {showNotification} = useNotification();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -105,9 +119,7 @@ export default function TorneoDetalle() {
   const [draggingId, setDraggingId] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [inscribirMasivo, setInscribirMasivo] = useState(false);
-  const [snackOpen, setSnackOpen] = useState(false);
-  const [snackMsg, setSnackMsg] = useState("");
-  const [snackSeverity, setSnackSeverity] = useState("success");
+
   const [deletingId, setDeletingId] = useState(null);
   const [busquedaInscriptos, setBusquedaInscriptos] = useState("");
   const [selectedInscriptos, setSelectedInscriptos] = useState(new Set());
@@ -122,9 +134,9 @@ export default function TorneoDetalle() {
       .then((data) => {
         setTorneo(data);
       })
-      .catch(() => setTorneoError("Error al cargar el torneo."))
+      .catch(() => setTorneoError(C.errorTournamentLoad))
       .finally(() => setLoadingTorneo(false));
-  }, [id]);
+  }, [id,obtenerTorneoXId]);
 
   const fetchDeportistas = useCallback(async (torneoId) => {
     setLoadingDeportistas(true);
@@ -136,7 +148,7 @@ export default function TorneoDetalle() {
     } finally {
       setLoadingDeportistas(false);
     }
-  }, []);
+  }, [obtenerDeportistasXTorneo]);
 
   useEffect(() => {
     if (id) fetchDeportistas(id);
@@ -148,7 +160,7 @@ export default function TorneoDetalle() {
       .then(setAllDeportistas)
       .catch(() => setAllDeportistas([]))
       .finally(() => setLoadingAll(false));
-  }, []);
+  }, [obtenerDeportistas]);
 
   const handleGenerarPdf = useCallback(async () => {
     const { jsPDF } = await import("jspdf");
@@ -283,12 +295,12 @@ export default function TorneoDetalle() {
       };
       await crearInscripcionTorneo(torneo.id, selectedDeportista.id, body);
       setInscribirSuccess(
-        `${selectedDeportista.nombre_deportista || selectedDeportista.legajo} inscripto correctamente.`,
+        `${selectedDeportista.nombre_deportista || selectedDeportista.legajo} ${C.inscriptsCorrect}`,
       );
       setSelectedDeportista(null);
       fetchDeportistas(id);
     } catch (err) {
-      setInscribirError(err.message || "Error al inscribir deportista.");
+      setInscribirError(err.message || C.errorInscriptsSaving);
     } finally {
       setInscribirSaving(false);
     }
@@ -355,15 +367,14 @@ export default function TorneoDetalle() {
         const first = lista[0];
         const msg =
           ok === 1
-            ? `${first.nombre_deportista || first.legajo} (${first.legajo}) inscripto correctamente`
-            : `${ok} deportistas inscriptos correctamente`;
-        setSnackMsg(msg);
-        setSnackSeverity("success");
-        setSnackOpen(true);
+            ? `${first.nombre_deportista || first.legajo} (${first.legajo}) ${C.inscriptsCorrect}`
+            : `${ok} ${C.multipleInscriptsCorrect}`;
+
+        showNotification(msg,"success");
       }
       setInscribirMasivo(false);
     },
-    [torneo, id, fetchDeportistas],
+    [torneo, id, fetchDeportistas,crearInscripcionTorneo,showNotification],
   );
 
   const handleMoveSelected = async () => {
@@ -399,20 +410,14 @@ export default function TorneoDetalle() {
       try {
         await eliminarInscripcionTorneo(dep.id);
         await fetchDeportistas(id);
-        setSnackMsg(
-          `${dep.nombre_deportista || dep.legajo} eliminado de la inscripción`,
-        );
-        setSnackSeverity("success");
-        setSnackOpen(true);
+        showNotification(`${dep.nombre_deportista || dep.legajo} ${C.inscriptsDelete}`,"success")
       } catch (err) {
-        setSnackMsg(err?.message || "Error al eliminar la inscripción.");
-        setSnackSeverity("error");
-        setSnackOpen(true);
+        showNotification(err?.message || C.errorInscriptsDelete,"error")
       } finally {
         setDeletingId(null);
       }
     },
-    [id, fetchDeportistas],
+    [id, fetchDeportistas,eliminarInscripcionTorneo,showNotification],
   );
 
   const handleSelectAll = () =>
@@ -453,14 +458,12 @@ export default function TorneoDetalle() {
       const first = toDelete[0];
       const msg =
         ok === 1
-          ? `${first.nombre_deportista || first.legajo} eliminado de la inscripción`
-          : `${ok} deportistas eliminados de la inscripción`;
-      setSnackMsg(msg);
-      setSnackSeverity("success");
-      setSnackOpen(true);
+          ? `${first.nombre_deportista || first.legajo} ${C.inscriptsDelete}`
+          : `${ok} ${C.multipleInscriptsDelete}`;
+      showNotification(msg,"success");
     }
     setDeletingMultiple(false);
-  }, [deportistas, selectedInscriptos, id, fetchDeportistas]);
+  }, [deportistas, selectedInscriptos, id, fetchDeportistas,eliminarInscripcionTorneo,showNotification]);
 
   let disponiblesContent;
   if (loadingAll) {
@@ -473,7 +476,7 @@ export default function TorneoDetalle() {
     disponiblesContent = (
       <Box sx={{ p: 2 }}>
         <Typography variant="body2" color="text.secondary" textAlign="center">
-          No hay deportistas disponibles
+          {C.noSportsman}
         </Typography>
       </Box>
     );
@@ -540,8 +543,8 @@ export default function TorneoDetalle() {
       <Box sx={{ p: 2 }}>
         <Typography variant="body2" color="text.secondary" textAlign="center">
           {deportistas.length === 0
-            ? "Ningún deportista inscripto"
-            : "Sin resultados"}
+            ? C.noSportsmanInscript
+            :  C.noResults}
         </Typography>
       </Box>
     );
@@ -557,7 +560,7 @@ export default function TorneoDetalle() {
                 edge="end"
                 size="small"
                 color="error"
-                title="Eliminar inscripción"
+                title={C.deleteInscription}
                 disabled={deletingId === d.id || deletingMultiple}
                 onClick={() => handleEliminar(d)}
               >
@@ -631,7 +634,7 @@ export default function TorneoDetalle() {
           sx={{ mt: 2 }}
           onClick={() => navigate("/Gestion-Deportes")}
         >
-          Volver
+          {C.goBack}
         </SAEButton>
       </Container>
     );
@@ -640,16 +643,7 @@ export default function TorneoDetalle() {
   if (!torneo) return null;
 
   return (
-    <Box
-      sx={{
-        pb: 8,
-        mt: "-90px",
-        pt: "90px",
-        minHeight: "100%",
-        bgcolor: "#f4f8fc",
-      }}
-    >
-      <Container maxWidth="lg">
+    <SAEPage>
         <Box
           sx={{
             overflow: "hidden",
@@ -687,13 +681,13 @@ export default function TorneoDetalle() {
                 variant="overline"
                 sx={{ letterSpacing: 1.8, opacity: 0.85, fontWeight: 700 }}
               >
-                Torneo Deportivo
+                {C.inscriptTournament}
               </Typography>
             </Stack>
             <IconButton
               size="small"
               onClick={() => setEditOpen(true)}
-              title="Editar torneo"
+              title={C.tournamentEdit}
               sx={{
                 color: "white",
                 bgcolor: "rgba(255,255,255,0.15)",
@@ -724,7 +718,7 @@ export default function TorneoDetalle() {
             </Typography>
             <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 2.5 }}>
               <Chip
-                label={torneo.activo ? "Activo" : "Inactivo"}
+                label={torneo.activo ? C.active : C.inactive}
                 size="small"
                 sx={{
                   bgcolor: torneo.activo
@@ -750,7 +744,7 @@ export default function TorneoDetalle() {
               />
               {torneo.fecha_inicio && (
                 <Chip
-                  label={`Inicio: ${formatDate(torneo.fecha_inicio)}`}
+                  label={`Inicio: ${formatDate(torneo.fecha_inicio,"short")}`}
                   size="small"
                   sx={{
                     bgcolor: "rgba(255,255,255,0.18)",
@@ -762,7 +756,7 @@ export default function TorneoDetalle() {
               )}
               {torneo.fecha_fin && (
                 <Chip
-                  label={`Fin: ${formatDate(torneo.fecha_fin)}`}
+                  label={`Fin: ${formatDate(torneo.fecha_fin,"short")}`}
                   size="small"
                   sx={{
                     bgcolor: "rgba(255,255,255,0.18)",
@@ -786,7 +780,7 @@ export default function TorneoDetalle() {
             >
               <PersonAddIcon color="success" fontSize="small" />
               <Typography variant="subtitle1" fontWeight={700}>
-                Inscribir Alumno
+                {C.inscriptStudent}
               </Typography>
             </Stack>
 
@@ -813,7 +807,7 @@ export default function TorneoDetalle() {
                     <SAETextField
                       {...params}
                       size="small"
-                      label="Buscar deportista por legajo o nombre"
+                      label={C.inscriptSearchMsg}
                       fullWidth
                     />
                   )}
@@ -835,7 +829,7 @@ export default function TorneoDetalle() {
                 disabled={!selectedDeportista || inscribirSaving}
                 sx={{ px: 2.5, whiteSpace: "nowrap", flexShrink: 0 }}
               >
-                Inscribir
+               {C.inscriptStudent}
               </SAEButton>
             </Stack>
 
@@ -863,7 +857,7 @@ export default function TorneoDetalle() {
             >
               <GroupsIcon color="primary" />
               <Typography variant="h6" fontWeight={700}>
-                Gestionar Inscripciones
+                {C.inscriptManager}
               </Typography>
               <Chip
                 size="small"
@@ -896,19 +890,19 @@ export default function TorneoDetalle() {
               >
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="subtitle2" fontWeight={700}>
-                    Disponibles
+                    {C.availables}
                   </Typography>
                   <Chip size="small" label={disponibles.length} />
                 </Stack>
                 <Stack direction="row" spacing={0.5} alignItems="center">
                   <SAETextField
                     size="small"
-                    placeholder="Buscar..."
+                    placeholder={C.searchPH}
                     value={busquedaDisponibles}
                     onChange={(e) => setBusquedaDisponibles(e.target.value)}
                     sx={{ flex: 1 }}
                   />
-                  <Tooltip title="Seleccionar todos">
+                  <Tooltip title={C.selectAll}>
                     <span>
                       <IconButton
                         size="small"
@@ -919,7 +913,7 @@ export default function TorneoDetalle() {
                       </IconButton>
                     </span>
                   </Tooltip>
-                  <Tooltip title="Limpiar selección">
+                  <Tooltip title={C.cleanSelection}>
                     <span>
                       <IconButton
                         size="small"
@@ -985,7 +979,7 @@ export default function TorneoDetalle() {
                   color="text.secondary"
                   textAlign="center"
                 >
-                  o arrastrá
+                  {C.dragMsg}
                 </Typography>
               </Box>
 
@@ -1005,7 +999,7 @@ export default function TorneoDetalle() {
               >
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="subtitle2" fontWeight={700}>
-                    Inscriptos
+                    {C.inscriptsTitle}
                   </Typography>
                   <Chip
                     size="small"
@@ -1016,12 +1010,12 @@ export default function TorneoDetalle() {
                 <Stack direction="row" spacing={0.5} alignItems="center">
                   <SAETextField
                     size="small"
-                    placeholder="Buscar..."
+                    placeholder={C.searchPH}
                     value={busquedaInscriptos}
                     onChange={(e) => setBusquedaInscriptos(e.target.value)}
                     sx={{ flex: 1 }}
                   />
-                  <Tooltip title="Seleccionar todos">
+                  <Tooltip title={C.selectAll}>
                     <span>
                       <IconButton
                         size="small"
@@ -1032,7 +1026,7 @@ export default function TorneoDetalle() {
                       </IconButton>
                     </span>
                   </Tooltip>
-                  <Tooltip title="Limpiar selección">
+                  <Tooltip title={C.cleanSelection}>
                     <span>
                       <IconButton
                         size="small"
@@ -1043,7 +1037,7 @@ export default function TorneoDetalle() {
                       </IconButton>
                     </span>
                   </Tooltip>
-                  <Tooltip title="Eliminar seleccionados">
+                  <Tooltip title={C.deleteSelection}>
                     <span>
                       <IconButton
                         size="small"
@@ -1088,7 +1082,7 @@ export default function TorneoDetalle() {
                       }}
                     >
                       <Typography variant="body2" fontWeight={600}>
-                        Soltar para inscribir
+                        {C.dropMsg}
                       </Typography>
                     </Box>
                   )}
@@ -1110,13 +1104,13 @@ export default function TorneoDetalle() {
             >
               <GroupsIcon color="primary" />
               <Typography variant="h6" fontWeight={700}>
-                Deportistas Inscriptos
+                {C.inscriptsAlready}
               </Typography>
               {!loadingDeportistas && (
                 <Chip size="small" label={deportistas.length} color="primary" />
               )}
               <Box sx={{ flex: 1 }} />
-              <Tooltip title="Generar PDF">
+              <Tooltip title={C.generatePDF}>
                 <span>
                   <IconButton
                     size="small"
@@ -1128,7 +1122,7 @@ export default function TorneoDetalle() {
                   </IconButton>
                 </span>
               </Tooltip>
-              <Tooltip title="Notificar inscriptos">
+              <Tooltip title={C.inscriptsNotify}>
                 <span>
                   <IconButton
                     size="small"
@@ -1140,7 +1134,7 @@ export default function TorneoDetalle() {
                   </IconButton>
                 </span>
               </Tooltip>
-              <Tooltip title="Descargar documentación">
+              <Tooltip title={C.download}>
                 <span>
                   <IconButton
                     size="small"
@@ -1162,7 +1156,7 @@ export default function TorneoDetalle() {
 
             {!loadingDeportistas && deportistas.length === 0 && (
               <Alert severity="info">
-                No hay deportistas inscriptos en este torneo todavía.
+                {C.tournamentNoInscripts}
               </Alert>
             )}
 
@@ -1172,16 +1166,16 @@ export default function TorneoDetalle() {
                   <TableHead sx={{ bgcolor: "#f0f4f8" }}>
                     <TableRow>
                       <TableCell>
-                        <b>Legajo</b>
+                        <b>{C.studentID}</b>
                       </TableCell>
                       <TableCell>
-                        <b>Nombre</b>
+                        <b>{C.name}</b>
                       </TableCell>
                       <TableCell align="center">
-                        <b>Habilitado</b>
+                        <b>{C.studentAuthorized}</b>
                       </TableCell>
                       <TableCell>
-                        <b>Venc. Ficha</b>
+                        <b>{C.studentExpireLicenceShort}</b>
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -1206,8 +1200,7 @@ export default function TorneoDetalle() {
             )}
           </Paper>
         </Stack>
-      </Container>
-      <DocumentPreviewDialog
+        <DocumentPreviewDialog
         open={pdfOpen}
         onClose={() => {
           setPdfOpen(false);
@@ -1233,29 +1226,11 @@ export default function TorneoDetalle() {
           const refreshed = await obtenerTorneoXId(id);
           setTorneo(refreshed);
           setEditOpen(false);
-          setSnackMsg("Torneo guardado correctamente.");
-          setSnackSeverity("success");
-          setSnackOpen(true);
+          showNotification(C.tournamentUpdated,"success");
         }}
         initialData={torneo ? buildFormData(torneo) : null}
         mode="edit"
       />
-
-      <Snackbar
-        open={snackOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackOpen(false)}
-          severity={snackSeverity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackMsg}
-        </Alert>
-      </Snackbar>
-    </Box>
+  </SAEPage>
   );
 }

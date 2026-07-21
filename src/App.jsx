@@ -36,25 +36,18 @@ import EmployedConsultations from "./employed/pages/consultations/employedConsul
 import EmployedHealth from "./employed/pages/health/employedHealth";
 import TurnBoardHealth from "./employed/pages/health/healthTurns";
 import EmployedJPA from "./employed/pages/jpa/EmployedJPA";
-import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
-import EmployedPurchases from "./employed/pages/purchases/employedPurchases";
-import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
-/*
 
-import { SportsProvider } from "./employed/context/providers/sportsProvider";
+import EmployedTravels from "./employed/pages/travels/employedTravels";
+import EmployedTravelInscripts from "./employed/pages/travels/employedInscripts";
 
 import EmployedSports from "./employed/pages/sports/EmployedSports";
 import TorneoDetalle from "./employed/pages/sports/TorneoDetalle";
 
-
-
-import UsuariosAdmin from "./employed/pages/users/EmployedAdmin";
-import EmployedTravels from "./employed/pages/travels/employedTravels";
-import EmployedTravelInscripts from "./employed/pages/travels/employedInscripts";
+import AdminEmployed from "./employed/pages/users/EmployedAdmin";
+import AdministrarPrensa from "./employed/pages/prensa/AdministrarPrensa";
+import EmployedPurchases from "./employed/pages/purchases/employedPurchases";
+import EmployedScholarships from "./employed/pages/scholarships/Scholarships";
 import AdminReport from "./employed/pages/reports/adminReports";
-
-*/
-
 import { appConfig } from "./config/appConfig";
 import "./index.css";
 
@@ -208,56 +201,14 @@ export default function App() {
             ),
           },
           {
-            path: "Gestion-Prensa",
-            handle: { title: "Gestión de prensa" },
+            path: "Gestion-Usuarios",
+            handle: { title: "Gestión de usuarios" },
             element: (
-              <ProtectedRoute role={[2, 5]}>
-                <AdministrarPrensa />
+              <ProtectedRoute role={5}>
+                <AdminEmployed />
               </ProtectedRoute>
             ),
           },
-          {
-            path: "Gestion-Compras",
-            handle: { title: "Gestión de compras" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <EmployedPurchases />
-              </ProtectedRoute>
-            ),
-          },
-
-          {
-            path: "Gestion-Becas",
-            handle: { title: "Gestión de becas" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <EmployedScholarships />
-              </ProtectedRoute>
-            ),
-          },
-          /*
-          {
-            path: "Gestion-Deportes",
-            handle: { title: "Gestión de deportes" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <EmployedSports />
-              </ProtectedRoute>
-            ),
-          },
-      
-          {
-            path: "Gestion-Torneos/:id",
-            handle: { title: "Detalle del torneo" },
-            element: (
-              <ProtectedRoute role={[2, 5]}>
-                <SportsProvider autoLoad={false}>
-                  <TorneoDetalle />
-                </SportsProvider>
-              </ProtectedRoute>
-            ),
-          },
-       
           {
             path: "Gestion-Viajes",
             handle: { title: "Gestión de viajes" },
@@ -276,11 +227,46 @@ export default function App() {
               </ProtectedRoute>
             ),
           },
-
-   
           {
-            path: "Gestion-Prensa/Administrar",
-            handle: { title: "Administrar prensa" },
+            path: "Gestion-Deportes",
+            handle: { title: "Gestión de deportes" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedSports />
+              </ProtectedRoute>
+            ),
+          },          
+          {
+            path: "Gestion-Torneos/:id",
+            handle: { title: "Detalle del torneo" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <TorneoDetalle />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Becas",
+            handle: { title: "Gestión de becas" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedScholarships />
+              </ProtectedRoute>
+            ),
+          },
+
+          {
+            path: "Gestion-Compras",
+            handle: { title: "Gestión de compras" },
+            element: (
+              <ProtectedRoute role={[2, 5]}>
+                <EmployedPurchases />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "Gestion-Prensa",
+            handle: { title: "Gestión de prensa" },
             element: (
               <ProtectedRoute role={[2, 5]}>
                 <AdministrarPrensa />
@@ -288,11 +274,11 @@ export default function App() {
             ),
           },
           {
-            path: "Gestion-Usuarios",
-            handle: { title: "Gestión de usuarios" },
+            path: "Gestion-Prensa/Administrar",
+            handle: { title: "Administrar prensa" },
             element: (
-              <ProtectedRoute role={5}>
-                <UsuariosAdmin />
+              <ProtectedRoute role={[2, 5]}>
+                <AdministrarPrensa />
               </ProtectedRoute>
             ),
           },
@@ -306,7 +292,6 @@ export default function App() {
               </ProtectedRoute>
             ),
           },
-          */
           /* === STUDENT ROUTES === */
 
           {

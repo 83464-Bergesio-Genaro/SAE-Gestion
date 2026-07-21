@@ -15,6 +15,7 @@ import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useHealth } from "../../context/employedContext";
 import { calendarDays } from "../../../utils/common/constants"; 
+import { HEALTH_STRING } from "../../../utils/strings/employed.strings";
 
 const HOUR_HEIGHT = 36; // px per hour
 const START_HOUR = 8; //AM
@@ -22,19 +23,8 @@ const END_HOUR = 22; //PM
 const TOTAL_HOURS = END_HOUR - START_HOUR; // 16
 const TOTAL_HEIGHT = TOTAL_HOURS * HOUR_HEIGHT;
 const TIME_COL_WIDTH = 40; // px
-
-const EMPTY_FORM = {
-  id: "",
-  hora_inicio: "",
-  hora_fin: "",
-  dia: 1,
-  cuil_especialista: null,
-  especialista: "",
-  activo: true,
-  id_especialidad: null,
-  nombre_especialidad: null,
-};
-
+const WEEKEND = new Set([0, 6]); // dia values for Sat/Sun
+const C = HEALTH_STRING;
 const PALETTE = [
   "#1565C0",
   "#2E7D32",
@@ -48,6 +38,7 @@ const PALETTE = [
   "#00695C",
 ];
 
+//#region Cosas que creo que van en utils
 function parseMinutes(timeStr) {
   if (!timeStr) return 0;
   const parts = timeStr.split(":");
@@ -64,6 +55,7 @@ function fmtTime(timeStr) {
   if (!timeStr) return "";
   return timeStr.slice(0, 5);
 }
+//#endregion
 
 function layoutEvents(events) {
   if (events.length === 0) return [];
@@ -93,8 +85,6 @@ function layoutEvents(events) {
     return { ...ev, numCols };
   });
 }
-
-const WEEKEND = new Set([0, 6]); // dia values for Sat/Sun
 
 export function EmployedCalendar() {
   const {
@@ -175,12 +165,12 @@ export function EmployedCalendar() {
               fontSize: "0.75rem",
             }}
           >
-            Filtrar por empleado
+            {C.scheduleFilter}
           </Typography>
           <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
             <Chip
               icon={<MedicalServicesIcon />}
-              label="Todos los empleados"
+              label={C.scheduleAll}
               variant={selectedEmploy === null ? "filled" : "outlined"}
               color={selectedEmploy === null ? "primary" : "default"}
               onClick={() => setSelectedEmploy(null)}

@@ -1,23 +1,30 @@
 import { useMemo } from "react";
 import { Box, Card, Stack, Typography } from "@mui/material";
+
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SchoolIcon from "@mui/icons-material/School";
 import GroupsIcon from "@mui/icons-material/Groups";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAEDataGrid from "../../../shared/components/dataGrid/SAEDataGrid";
-import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
-import SAEPage from "../../../shared/components/page/SAEPage";
+
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAEDataGrid from "../../../assets/components/dataGrid/SAEDataGrid";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
+import SAEPage from "../../../assets/components/page/SAEPage";
+
 import SportsCalendar from "./SportsCalendar";
 import GestionarHorariosDialog from "./GestionarHorariosDialog";
 import TorneoFormDialog from "./TorneoFormDialog";
 import SportsEntityDialog from "./SportsEntityDialog";
 import SportsDocsDialog from "./SportsDocsDialog";
+
 import { SportsProvider } from "../../context/providers/sportsProvider";
 import { useSports } from "../../context/employedContext";
 
+import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
+
+const C = SPORTS_STRINGS;
 export default function EmployedSports() {
   return (
     <SportsProvider>
@@ -132,9 +139,9 @@ function EmployedSportsContent() {
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header="Modulo de Deportes"
-        title="Gestion de Deportes"
-        description="Administra torneos, profesores, espacios y deportistas desde un solo lugar."
+        header={C.headerTitle}
+        title={C.headerMainSubtitle}
+        description={C.headerMainDescription}
       />
 
       <SAEDataGrid
@@ -173,10 +180,10 @@ function EmployedSportsContent() {
               <ScheduleIcon sx={{ fontSize: 32 }} />
               <Box>
                 <Typography variant="h6" fontWeight={700}>
-                  Horarios deportivos
+                  {C.scheduleTitle}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.85 }}>
-                  Calendario de actividades y horarios de cada deporte.
+                  {C.scheduleSubtitle}
                 </Typography>
               </Box>
             </Stack>
@@ -192,7 +199,7 @@ function EmployedSportsContent() {
                 "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
               }}
             >
-              Gestionar Horarios
+              {C.scheduleManageButton}
             </SAEButton>
           </Stack>
         </Box>

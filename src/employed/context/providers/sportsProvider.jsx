@@ -1,39 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Chip, IconButton, Stack } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
 import EditIcon from "@mui/icons-material/Edit";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import { useNavigate } from "react-router-dom";
+
 import * as api from "../../../api/DeporteService";
 import {
   validateDeporte,
   validateDeportista,
   validateDocente,
   validateEspacio,
-} from "../../pages/sports/sports.validations";
+} from "../../../utils/validation.utils.js";
+
 import { SportsContext } from "../employedContext";
-import { formatDateForDisplay, formatHeader } from "../../../utils/util.jsx";
+import { formatHeader } from "../../../utils/datagrid.utils.jsx";
 import { useNotification } from "../../../shared/context/sharedContext";
+import { EMPTY_COMPLETE_SCHEDULE } from "../../../utils/common/common.config.js";
+import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings.js";
+import { formatDate, toApiDateTime } from "../../../utils/date.utils.js";
 
-const EMPTY = {
-  docente: {
-    cuil: "",
-    nombres: "",
-    apellidos: "",
-    activo: true,
-    fecha_nacimiento: "",
-  },
-  espacio: { id: 0, nombre: "", domicilio: "", activo: true, url_maps: "" },
-  deportista: {
-    id: 0,
-    legajo: "",
-    habilitado_deportado: true,
-    vencimiento_ficha: "",
-    habilitado_deporte: true,
-  },
-  deporte: { id: 0, nombre: "", activo: true },
-};
-const inputDate = (value) => (value ? value.split("T")[0] : "");
-
+//Luis me gano, lo voy a dejar asi hasta que nos de ganas de hacerlo de 0
 const generateSportsColumns = (
   data,
   { overrides = {}, actions = null } = {},
@@ -66,6 +53,7 @@ const generateSportsColumns = (
   return columns;
 };
 
+const C = SPORTS_STRINGS;
 export function SportsProvider({ children, autoLoad = true }) {
   const navigate = useNavigate();
   const {
@@ -82,6 +70,7 @@ export function SportsProvider({ children, autoLoad = true }) {
     openDialog,
     closeDialog,
   } = useNotification();
+
   const [torneosRows, setTorneosRows] = useState([]);
   const [profesoresRows, setProfesoresRows] = useState([]);
   const [espaciosRows, setEspaciosRows] = useState([]);
@@ -175,19 +164,19 @@ export function SportsProvider({ children, autoLoad = true }) {
     [openDialog],
   );
   const openCreateDocente = useCallback(
-    () => open("docente", "create", EMPTY.docente),
+    () => open("docente", "create", EMPTY_COMPLETE_SCHEDULE.docente),
     [open],
   );
   const openCreateEspacio = useCallback(
-    () => open("espacio", "create", EMPTY.espacio),
+    () => open("espacio", "create", EMPTY_COMPLETE_SCHEDULE.espacio),
     [open],
   );
   const openCreateDeportista = useCallback(
-    () => open("deportista", "create", EMPTY.deportista),
+    () => open("deportista", "create", EMPTY_COMPLETE_SCHEDULE.deportista),
     [open],
   );
   const openCreateDeporte = useCallback(
-    () => open("deporte", "create", EMPTY.deporte),
+    () => open("deporte", "create", EMPTY_COMPLETE_SCHEDULE.deporte),
     [open],
   );
   const openEditDocente = useCallback(
@@ -197,7 +186,7 @@ export function SportsProvider({ children, autoLoad = true }) {
         nombres: x.nombres,
         apellidos: x.apellidos,
         activo: x.activo,
-        fecha_nacimiento: inputDate(x.fecha_nacimiento),
+        fecha_nacimiento: toApiDateTime(x.fecha_nacimiento),
       }),
     [open],
   );
@@ -218,7 +207,7 @@ export function SportsProvider({ children, autoLoad = true }) {
         id: x.id,
         legajo: x.legajo,
         habilitado_deportado: x.habilitado_deportado,
-        vencimiento_ficha: inputDate(x.vencimiento_ficha),
+        vencimiento_ficha: toApiDateTime(x.vencimiento_ficha),
         habilitado_deporte: x.habilitado_deporte,
       }),
     [open],
@@ -238,7 +227,7 @@ export function SportsProvider({ children, autoLoad = true }) {
     try {
       setDocsList(await api.listarDocumentacionXLegajo(legajo));
     } catch (e) {
-      setDocsError(e.message || "Error al cargar documentación");
+      setDocsError(e.message || C.er);
     } finally {
       setLoadingDocs(false);
     }
@@ -272,7 +261,7 @@ export function SportsProvider({ children, autoLoad = true }) {
       setPreviewSrc(src);
       setPreviewIsPdf(ext === "pdf");
     } catch (e) {
-      setPreviewError(e.message || "Error al cargar el documento");
+      setPreviewError(e.message || C.errorNoDocs);
     } finally {
       setLoadingPreview(false);
     }
@@ -316,9 +305,7 @@ export function SportsProvider({ children, autoLoad = true }) {
       if (dialogType === "docente") {
         const body = {
           ...dialogData,
-          fecha_nacimiento: dialogData.fecha_nacimiento
-            ? `${dialogData.fecha_nacimiento}T00:00:00`
-            : null,
+          fecha_nacimiento: toApiDateTime(dialogData.fecha_nacimiento)
         };
         await (dialogMode === "create"
           ? api.crearDocenteDeportivo(body)
@@ -326,8 +313,8 @@ export function SportsProvider({ children, autoLoad = true }) {
         await fetchProfesores();
         showNotification(
           dialogMode === "create"
-            ? "Docente creado correctamente"
-            : "Docente modificado correctamente","success"
+            ? C.teacherCreated
+            : C.teacherUpdated,"success"
         );
       } else if (dialogType === "espacio") {
         await (dialogMode === "create"
@@ -336,15 +323,13 @@ export function SportsProvider({ children, autoLoad = true }) {
         await fetchEspacios();
         showNotification(
           dialogMode === "create"
-            ? "Espacio creado correctamente"
-            : "Espacio modificado correctamente","success"
+            ? C.placeCreated
+            : C.placeUpdated,"success"
         );
       } else if (dialogType === "deportista") {
         const body = {
           ...dialogData,
-          vencimiento_ficha: dialogData.vencimiento_ficha
-            ? `${dialogData.vencimiento_ficha}T00:00:00`
-            : null,
+          vencimiento_ficha: toApiDateTime(dialogData.vencimiento_ficha)
         };
         await (dialogMode === "create"
           ? api.crearDeportista(body)
@@ -352,8 +337,8 @@ export function SportsProvider({ children, autoLoad = true }) {
         await fetchDeportistas();
         showNotification(
           dialogMode === "create"
-            ? "Deportista creado correctamente"
-            : "Deportista modificado correctamente","success"
+            ? C.sportsmanCreated
+            : C.sportsmanUpdated,"success"
         );
       } else {
         await (dialogMode === "create"
@@ -362,14 +347,14 @@ export function SportsProvider({ children, autoLoad = true }) {
         await fetchDeportes();
         showNotification(
           dialogMode === "create"
-            ? "Deporte creado correctamente"
-            : "Deporte modificado correctamente","success"
+            ? C.sportsCreated
+            : C.sportsUpdated,"success"
         );
       }
       closeDialog();
     } catch (e) {
-      setDialogError(e.message || "Ocurrió un error al guardar");
-      showNotification(e.message || "Ocurrió un error al guardar", "error");
+      setDialogError(e.message || C.errorSave);
+      showNotification(e.message || C.errorSave, "error");
     } finally {
       setDialogSaving(false);
     }
@@ -400,7 +385,7 @@ export function SportsProvider({ children, autoLoad = true }) {
     if (!Object.keys(errors).length) executeSave();
   }, [dialogData, dialogMode, dialogType, executeSave, setDialogError]);
 
-  const booleanColumn = (yes = "Activo", no = "Inactivo") => ({
+  const booleanColumn = (yes =C.active, no = C.inactive) => ({
     width: 120,
     flex: 0,
     renderCell: ({ value }) => (
@@ -443,7 +428,7 @@ export function SportsProvider({ children, autoLoad = true }) {
             headerName: "Fecha de nacimiento",
             width: 170,
             flex: 0,
-            valueFormatter: formatDateForDisplay,
+            valueFormatter: formatDate,
           },
         },
         actions: actionColumn(({ row }) => (
@@ -484,7 +469,7 @@ export function SportsProvider({ children, autoLoad = true }) {
             headerName: "Venc. ficha",
             width: 140,
             flex: 0,
-            valueFormatter: formatDateForDisplay,
+            valueFormatter: formatDate,
           },
         },
         actions: actionColumn(
@@ -540,17 +525,17 @@ export function SportsProvider({ children, autoLoad = true }) {
           fecha_inicio: {
             width: 120,
             flex: 0,
-            valueFormatter: formatDateForDisplay,
+            valueFormatter: formatDate,
           },
           fecha_fin: {
             width: 120,
             flex: 0,
-            valueFormatter: formatDateForDisplay,
+            valueFormatter: formatDate,
           },
           fecha_limite_inscripcion: {
             width: 180,
             flex: 0,
-            valueFormatter: formatDateForDisplay,
+            valueFormatter: formatDate,
           },
           cupo_jugadores: { headerName: "Cupo", width: 80, flex: 0 },
           activo: booleanColumn(),

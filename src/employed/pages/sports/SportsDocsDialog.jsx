@@ -13,10 +13,13 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import { useSports } from "../../context/employedContext";
 
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import { useSports } from "../../context/employedContext";
+import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
+
+const C = SPORTS_STRINGS;
 export default function SportsDocsDialog() {
   const {
     docsDialogOpen,
@@ -72,7 +75,7 @@ export default function SportsDocsDialog() {
           }}
         >
           <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-            Documentacion - legajo {docsLegajo}
+            {C.documentation} {docsLegajo}
           </Typography>
           <IconButton onClick={() => setDocsDialogOpen(false)} size="small">
             <CloseIcon />
@@ -92,7 +95,7 @@ export default function SportsDocsDialog() {
               color="text.secondary"
               sx={{ py: 2, textAlign: "center" }}
             >
-              No hay documentacion disponible para este alumno.
+              {C.errorNoDocs}
             </Typography>
           )}
           {!loadingDocs && !docsError && docsList.length > 0 && (
@@ -130,7 +133,7 @@ export default function SportsDocsDialog() {
                     </IconButton>
                     <IconButton
                       size="small"
-                      title="Descargar"
+                      title={C.download}
                       onClick={() =>
                         handleDownloadDoc(
                           doc.id,
@@ -158,7 +161,7 @@ export default function SportsDocsDialog() {
             variant="outlined"
             onClick={() => setDocsDialogOpen(false)}
           >
-            Cerrar
+            {C.close}
           </SAEButton>
         </DialogActions>
       </Dialog>

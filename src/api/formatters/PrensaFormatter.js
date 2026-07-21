@@ -7,10 +7,9 @@ export const mapPublicacionPublica = (publicacion) => {
 
   // 3. El resto de los archivos van a la lista de documentos
   const documentos = todosLosArchivos.slice(1);
-
   return {
     id: publicacion.id,
-    titulo: publicacion.titulo_publicacion,
+    titulo_publicacion: publicacion.titulo_publicacion,
     descripcion: publicacion.descripcion,
     fecha_inicio: removerHoras(publicacion.fecha_inicio),
     fecha_vigencia: removerHoras(publicacion.fecha_vigencia),

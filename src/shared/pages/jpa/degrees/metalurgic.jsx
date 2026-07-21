@@ -1,4 +1,4 @@
-import DegreePageTemplate from "../../../components/degrees/DegreePageTemplate";
+import DegreePageTemplate from "../../../../assets/components/degrees/DegreePageTemplate";
 
 export default function SharedJPAMetalurgic() {
   const imageDirBanner = `${import.meta.env.BASE_URL}images/degrees/IngMetalurgicaBanner.png`;

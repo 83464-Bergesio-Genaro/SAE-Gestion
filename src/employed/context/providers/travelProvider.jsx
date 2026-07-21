@@ -1,197 +1,32 @@
 import {useState, useEffect,useCallback,useMemo,useRef} from "react";
 import { IconButton, Chip, Stack } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 import EditIcon from "@mui/icons-material/Edit";
 import FolderIcon from '@mui/icons-material/Folder';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 
-import { TravelContext } from "../employedContext";
-
 import { ObtenerUsuariosXLegajo } from "../../../api/EmpleadoService";
+import { obtenerTiposDocumento } from "../../../api/HerramientasService";
 import { ObtenerEmpresas,ObtenerViajesActivos,ObtenerInscriptosViaje, EliminarInscriptosViaje, CrearInscriptoViaje, 
     ModificarInscripto, CrearEmpresa, ModificarEmpresa, CrearViaje, ModificarViaje, ObtenerDocumentacionViaje, 
     DescargarDocumentacionXId, EliminarDocumentoViaje, 
     CrearDocumentoViaje,
     listarDocumentacionXLegajo} from "../../../api/TravelService";
+
 import { mapViajes } from "../../../api/formatters/ViajeFormatter";
-import { useNavigate } from "react-router-dom";
-import { obtenerTiposDocumento } from "../../../api/HerramientasService";
-import {
-  cleanObjectFields,
-  formatDateForDisplay,
-  formatHeader,
-  generateRows,
-} from "../../../utils/util.jsx";
-import {
-  formatCurrency,
-  normalizeCurrencyValue,
-} from "../../../utils/juan/util.js";
+import { generateRows,generateColumns } from "../../../utils/datagrid.utils.jsx";
+import { normalizeCurrencyValue } from "../../../utils/formatters.utils.js";
+
 import { useNotification } from "../../../shared/context/sharedContext";
+import { TravelContext } from "../employedContext";
+import { cleanObjectFields } from "../../../utils/util.jsx";
 
-const EMPTY_BUSSINESS = {
-    id: "-1",
-    nombre: "",
-    contacto: "",
-    email: "",
-    cuit:"",
-    cbu:"",
-    activo:true
-}
-const EMPTY_VIAJES ={
-    id: "-1",
-    nombre: "",
-    fecha_inicio: "",
-    fecha_fin: "",
-    seguro: false,
-    origen: "",
-    destino: "",
-    cantidad_personas: 0,
-    nombre_empresa:"",
-    costo_aproximado: 0,
-}
-const EMPTY_VIAJES_FORM ={
-    id: "-1",
-    nombre: "",
-    fecha_inicio: "",
-    fecha_fin: "",
-    seguro: false,
-    origen: "",
-    destino: "",
-    cantidad_personas: 0,
-    id_empresa_viaje:-1,
-    nombre_empresa:"",
-    costo_aproximado: 0,
-    motivo:""
-}
-const EMPTY_DOCUMENTACION_VIAJE = {
-    id: "-1",
-    nombre: "",
-    datos:"",
-    ruta:"",
-}
+import { TRAVEL_STRINGS } from "../../../utils/strings/employed.strings.js";
+import { EMPTY_DOCUMENTACION_ESTUDIANTE,EMPTY_DOCUMENTACION_VIAJE,EMPTY_VIAJES_FORM,EMPTY_VIAJES,EMPTY_BUSSINESS } from "../../../utils/common/common.config.js";
+import { formatDate } from "../../../utils/date.utils.js";
 
-const EMPTY_DOCUMENTACION_ESTUDIANTE = {
-    id: "-1",
-    nombre: "",
-    datos:"",
-    ruta:"",
-}
-// Definición de tipos sugerida (si usas TypeScript)
-// type ActionConfig = {
-//   icon: React.ElementType;
-//   color: 'primary' | 'secondary' | 'error' | 'inherit' | 'default';
-//   title: string;
-//   onClick: (row: any) => void;
-// };
-
-const generateColumns = (data, actionsConfig = []) => {
- const sample =
-    Array.isArray(data)
-      ? data[0]
-      : data;
-
-  if (!sample) return [];
-
-  const columns = Object.keys(sample).map((key) => {
-    // Nota: Se asume que data es un array, por eso data[0] para las keys
-    const normalizedKey = key.toLowerCase();
-    const isId =
-        normalizedKey === "id" ||
-        normalizedKey.startsWith("id_") ||
-        normalizedKey.endsWith("_id");
-    const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(normalizedKey);
-    const isDate = normalizedKey.startsWith("fecha_");
-    const isAddress = ["origen", "destino"].includes(normalizedKey);
-    const isCurrency = normalizedKey === "costo_aproximado";
-    
-    if (key.toLowerCase() === "activo" ) {
-    return {
-        field: "activo",
-        headerName: "Estado",
-        align: "center",
-        headerAlign: "center",
-        width: 100,
-        renderCell: (params) => (
-            <Chip
-                size="small"
-                label={params.value ? "Activo" : "Inactivo"}
-                color={params.value ? "success" : "default"}
-            />
-        )
-        };
-    } 
-    else if (key.toLowerCase() === "seguro"){
-     return {
-        field: "seguro",
-        headerName: "Seguro",
-        align: "center",
-        headerAlign: "center",
-        width: 100,
-        renderCell: (params) => (
-            <Chip
-                size="small"
-                label={params.value ? "Tiene" : "Falta"}
-                color={params.value ? "success" : "default"}
-            />
-        )
-        };       
-    }
-    else {
-        return {
-            field: key,
-            headerName: formatHeader(key),
-            flex: isId ? 0.4 : isDate ? 0 : isAddress ? 1.4 : 1,
-            minWidth: isId || isShort? 50 : isDate ? 105 : isAddress ? 170 : isCurrency ? 135 : 120,
-            maxWidth: isId ? 70 : isShort ? 100 : isDate ? 115 : undefined,
-            align: isId || isShort || isDate || isCurrency ? "center" : "left",
-            headerAlign: isId || isShort || isDate || isCurrency ? "center" : "left",
-            valueFormatter: isDate
-                ? formatDateForDisplay
-                : isCurrency
-                  ? formatCurrency
-                  : undefined,
-        };
-    }
-  });
-
-  if (actionsConfig !== null && actionsConfig.length > 0) {
-    columns.push({
-      field: "actions",
-      headerName: "Acciones",
-      headerAlign:"center",
-      sortable: false,
-      filterable: false,
-      minWidth: 120,
-      width: 136,
-      renderCell: (params) => (
-        <Stack
-          direction="row"
-          spacing={0.5}
-          justifyContent="center"
-          alignItems="center"
-          sx={{ width: "100%", height: "100%" }}
-        >
-          {actionsConfig.map((action, index) => {
-            const IconComponent = action.icon;
-            return (
-              <IconButton
-                key={index}
-                size="small"
-                sx={{ color: "var(--primary)" }}
-                title={action.title}
-                onClick={() => action.onClick(params.row)}
-              >
-                <IconComponent fontSize="small" />
-              </IconButton>
-            );
-          })}
-        </Stack>
-      ),
-    });
-  }
-
-  return columns;
-};
+const C = TRAVEL_STRINGS;
 const checkAndCleanDialogData = (data) => cleanObjectFields(data);
 
 export function TravelProvider({ children }){
@@ -203,10 +38,10 @@ export function TravelProvider({ children }){
         dialogMode,
         setDialogMode,
         dialogData,
-        setDialogData,
         setDialogSaving,
         setDialogError,
         openDialog,
+        closeDialog
     } = useNotification();
 
     const [travelData, setTravelData] = useState(null);
@@ -222,7 +57,7 @@ export function TravelProvider({ children }){
             setInscriptsTravel(data);
         } catch {
             setInscriptsTravel([]);
-            setDialogError("Inscriptos no encontrados")
+            setDialogError(C.errorNoInscFound)
         }
         finally{
             setLoadingInscripts(false)
@@ -271,7 +106,7 @@ export function TravelProvider({ children }){
 
             // Si el booleano es falso, cortamos la ejecución aquí
             if (!isValid) {
-                setDialogError("Ocurrió un error al guardar la empresa");
+                setDialogError(C.errorSavingBuss);
                 return; 
             }
 
@@ -292,13 +127,12 @@ export function TravelProvider({ children }){
                 await ModificarEmpresa(id_nuevo,body);
             }
             await fetchBussiness();
-            setDialogOpen(false);
-            setDialogData(EMPTY_BUSSINESS);
-            showNotification(dialogMode === "create"? "Empresa creada!":"Empresa modificada!","success");
+            closeDialog();
+            showNotification(dialogMode === "create"? C.businessCreated:C.businessEdited,"success");
         }
         catch (err) {
-            setDialogError(err.message || "Ocurrió un error al guardar");
-            showNotification(err.message || "Ocurrió un error al guardar", "error");
+            setDialogError(err.message || C.errorSavingBuss);
+            //showNotification(err.message || "Ocurrió un error al guardar", "error");
         } finally {
             setDialogSaving(false);
         }
@@ -361,6 +195,7 @@ export function TravelProvider({ children }){
     const [downloadingDocId, setDownloadingDocId] = useState(null);
 
     const openSeeDocTravels = useCallback(async(row) => {
+        //Es personalizado
         setDialogOpen(true);
         setLoadingViajeDocs(true);
         setDocsViaje(row);
@@ -370,7 +205,7 @@ export function TravelProvider({ children }){
             await fetchDocsXTravel(row);
 
         } catch (err) {
-            setDialogError(err.message || "Error al cargar documentación");
+            setDialogError(err.message || C.errorSavingDocs);
         } finally {
             setLoadingViajeDocs(false);
         }
@@ -385,7 +220,7 @@ export function TravelProvider({ children }){
 
             // Si el booleano es falso, cortamos la ejecución aquí
             if (!isValid) {
-                setDialogError("Ocurrió un error al guardar el viaje");
+                setDialogError(C.errorSavingTravel);
                 return; 
             }
 
@@ -397,10 +232,8 @@ export function TravelProvider({ children }){
                     id: id_nuevo,
                     costo_aproximado: normalizeCurrencyValue(rest.costo_aproximado),
                     seguro_confirmado:seguro,
-                    fecha_inicio: cleanedData.fecha_inicio
-                    ? `${cleanedData.fecha_inicio}T00:00:00`:new Date(),
-                    fecha_fin: cleanedData.fecha_fin
-                    ? `${cleanedData.fecha_fin}T00:00:00`:new Date()
+                    fecha_inicio:formatDate(cleanedData.fecha_inicio,"input"),
+                    fecha_fin: formatDate(cleanedData.fecha_fin,"input")
                 };
 
             if (dialogMode === "create")
@@ -411,12 +244,11 @@ export function TravelProvider({ children }){
                 await ModificarViaje(id_nuevo,body);
             }
             await fetchTravels();
-            setDialogOpen(false);
-            setDialogData(EMPTY_VIAJES_FORM);
-            showNotification(dialogMode === "create"? "Viaje creado!":"Viaje modificado!");
+            closeDialog();
+            showNotification(dialogMode === "create"? C.travelCreated:C.travelEdited);
         }
         catch (err) {
-            setDialogError(err.message || "Ocurrió un error al guardar");
+            setDialogError(err.message || C.errorSavingTravel);
         } finally {
             setDialogSaving(false);
         }
@@ -490,11 +322,11 @@ export function TravelProvider({ children }){
             }
             else{
                 setUsuarioSelected(null);
-                setDialogError("Usuario No encontrado");
+                setDialogError(C.errorUserNF);
             }
-        } catch {
+        } catch(error) {
             setUsuarioSelected(null);
-            setDialogError("Usuario No encontrado")
+            setDialogError(error.message||C.errorUserNF)
         }
         finally{
             setLoadingUsuario(false);
@@ -519,11 +351,11 @@ export function TravelProvider({ children }){
                 await CrearInscriptoViaje(body);
                 setUsuarioSelected(null);
                 await fetchInscriptosXTravel(travelData.id);
-                showNotification("Se inscribio esta persona al viaje","success");
+                showNotification(C.inscriptsCreated,"success");
                 setLoadingInscripts(false);
         }
             catch (err) {
-                showNotification(err.message || "Ocurrió un error al guardar", "error");
+                showNotification(err.message || C.errorSavingTravel, "error");
             } finally {
                 setDialogSaving(false);
             }
@@ -533,6 +365,7 @@ export function TravelProvider({ children }){
     const [inscriptToDelete,setInscriptToDelete] = useState(null);
 
     const handleClickRemove  = useCallback((estudiante) =>{
+        //Personalizado
         setInscriptToDelete(estudiante);
         setDialogType("inscript");
         setDialogMode("delete");
@@ -550,22 +383,22 @@ export function TravelProvider({ children }){
                     await fetchInscriptosXTravel(travelData.id);
                     setDialogOpen(false);
                     setUsuarioSelected(null);
-                    showNotification("Se elimino el estudiante","success");
+                    showNotification(C.inscriptsDeleted,"success");
                 }
                 else{
-                    setDialogError("Ocurrio un error al intentar eliminar este inscripto");
+                    setDialogError(C.errorInscDelete);
 
                 }
             }
             catch (err) {
-                setDialogError(err.message || "Ocurrió un error al guardar");
-                showNotification(err.message || "Ocurrió un error al guardar", "error");
+                setDialogError(err.message || C.errorSavingTravel);
+               // showNotification(err.message || "Ocurrió un error al guardar", "error");
             } finally {
                 setDialogSaving(false);
             }
         }
         else{
-            setDialogError("Ocurrio un error no contemplado");
+            setDialogError(C.errorSavingTravel);
         }
     };  
     const handleUpdateInscriptos = async (estudiante) => {
@@ -576,17 +409,17 @@ export function TravelProvider({ children }){
                 await ModificarInscripto(estudiante.id,estudiante);
                 
                 setUsuarioSelected(null);
-                showNotification("Actualizado!","success");
+                showNotification(C.inscriptsUpdated,"success");
             }
             catch (err) {
-                setDialogError(err.message || "Ocurrió un error actualizar");
-                showNotification(err.message || "Ocurrió un error al guardar", "error");
+                setDialogError(err.message || C.errorSavingTravel);
+                //showNotification(err.message || "Ocurrió un error al guardar", "error");
             } finally {
                 setDialogSaving(false);
             }
         }
         else{
-            setDialogError("Ocurrio un error no contemplado");
+            setDialogError(C.errorSavingTravel);
         }
     };
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -627,8 +460,8 @@ export function TravelProvider({ children }){
         setPreviewSrc(src);
         setPreviewIsPdf(ext === "pdf");
         } catch (err) {
-            setDialogError("Ocurrio un error al tratar de descargar el documento");
-        setPreviewError(err.message || "Error al cargar el documento");
+            setDialogError(C.errorInscriptsDoc);
+            setPreviewError(err.message || C.errorInscriptsDoc);
         } finally {
         setLoadingPreview(false);
         }
@@ -663,7 +496,7 @@ export function TravelProvider({ children }){
             URL.revokeObjectURL(url);
         } catch (err) {
             console.error("Error al descargar documento:", err);
-            setDialogError("Ocurrio un error al tratar de descargar el documento");
+            setDialogError(C.errorInscriptsDoc);
         } finally {
             setDownloadingDocId(null);
         }
@@ -686,10 +519,10 @@ export function TravelProvider({ children }){
             setLoadingViajeDocs(true);
             await fetchDocsXTravel(docsViaje);
 
-            showNotification("Documento eliminado","success ");
+            showNotification(C.inscriptsDocsDeleted,"success ");
         } catch  {
 
-            showNotification("Error al eliminar el documento", "error");
+            showNotification(C.errorInscDocDelete, "error");
             
         } finally {
             setLoadingViajeDocs(false);
@@ -724,7 +557,7 @@ export function TravelProvider({ children }){
         .map((value) => value.trim().toLowerCase());
 
         if (!allowedExtensions.includes(extension)) {
-            showNotification(`Solo se permiten archivos: ${documentType.extension}`, "warning");
+            showNotification(`${C.onlyExtensions} ${documentType.extension}`, "warning");
             return;
         }
         const fileName =`${documentType.nombre.replace(/\s/g, "_")}${extension}`
@@ -745,13 +578,13 @@ export function TravelProvider({ children }){
 
             await fetchDocsXTravel(docsViaje);
         
-            showNotification(`Archivo ${savedFile.nombre_documento} subido con exito`,"success");
+            showNotification(`${savedFile.nombre_documento} ${C.inscriptsDocsUpload}`,"success");
             setTravelNewFile(null);
             setTypeDoc(null);
 
         } catch (error) {
             console.error("Error al subir el archivo:", error);
-            showNotification("Error al subir el archivo", "error");
+            showNotification(C.errorInscUpload, "error");
         } finally {
             setLoadingViajeDocs(false);
         }
@@ -776,8 +609,8 @@ export function TravelProvider({ children }){
         }, [fetchDocsXTravel]);
 
     const openSeeDocInscript = useCallback(async(row) => {
+        //Personalizado
         setDialogOpen(true);
-        console.log(row);
         setSeletedInscripts(row);
         setDialogError("");
         setDialogType("documents");
@@ -786,7 +619,7 @@ export function TravelProvider({ children }){
 
         } catch (err) {
             
-            setDialogError(err.message || "Error al cargar documentación");
+            setDialogError(err.message ||C.errorSavingDocs);
         }
     }, [fetchDocsXInscript, setDialogError, setDialogOpen, setDialogType]);
 

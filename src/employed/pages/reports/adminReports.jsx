@@ -1,10 +1,11 @@
 import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
-import HeaderPageEmployed from "../../../shared/components/HeaderPageEmployed";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { BarChart } from "@mui/x-charts/BarChart";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import TitleBox from "../../../shared/components/titleBox";
+
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import SAEPage from "../../../assets/components/page/SAEPage";
+import TitleBox from "../../../assets/components/titleBox";
 
 const reportSections = [
   { id: "becas", title: "Becas" },

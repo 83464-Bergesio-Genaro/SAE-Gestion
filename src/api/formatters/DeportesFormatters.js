@@ -1,14 +1,3 @@
-const formatearFecha = (fecha) => {
-  if (!fecha) return null;
-
-  const date = new Date(fecha);
-
-  return date.toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
 export const mapHorarioAlumno = (HorarioAlumno) => ({
   id: HorarioAlumno.id,
   id_espacio_deportivo: HorarioAlumno.id_espacio_deportivo,
@@ -48,9 +37,9 @@ export const mapInscripcionesXDeportista = (InscripcionesXDeportista) => ({
 export const mapTorneo = (Torneo) => ({
   id: Torneo.id,
   nombre: Torneo.nombre_torneo,
-  fecha_inicio: formatearFecha(Torneo.fecha_inicio),
-  fecha_fin: formatearFecha(Torneo.fecha_fin),
-  fecha_limite_inscripcion: formatearFecha(Torneo.fecha_limite_inscripcion),
+  fecha_inicio: Torneo.fecha_inicio,
+  fecha_fin: Torneo.fecha_fin,
+  fecha_limite_inscripcion: Torneo.fecha_limite_inscripcion,
   activo: Torneo.activo ? "Sí" : "No",
   id_deporte: Torneo.id_deporte,
   deporte: Torneo.nombre_deporte,

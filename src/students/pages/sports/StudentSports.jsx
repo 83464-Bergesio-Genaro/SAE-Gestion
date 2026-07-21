@@ -14,27 +14,25 @@ import {
 
 import { DataGrid } from "@mui/x-data-grid";
 
-import DeportesMasonry from "../../components/deportesMasonery";
-import JsonArrayDataGrid from "../../../shared/components/jsonArrayDataGrid/jsonArrayDataGrid";
-
 import SearchIcon from "@mui/icons-material/Search";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import DocumentCard from "../../../shared/components/documents/DocumentCard";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
-import TitleBox from "../../../shared/components/titleBox";
+import DeportesMasonry from "./deportesMasonery";
+import JsonArrayDataGrid from "../../../assets/components/jsonArrayDataGrid/jsonArrayDataGrid";
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
+import DocumentCard from "../../../assets/components/documents/DocumentCard";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent"
+import TitleBox from "../../../assets/components/titleBox";
 
-import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
-import { SPORTS_STRINGS } from "../../../utils/gena/student.string";
-
-import { SportsProvider as EmployedSportsProvider } from "../../../employed/context/providers/sportsProvider";
+//import { SportsProvider as EmployedSportsProvider } from "../../../employed/context/providers/sportsProvider";
 import { useSportsContext } from "../../context/studentContext";
 import { SportsProvider } from "../../context/providers/sportsProvider";
+//import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
+import { SPORTS_STRINGS } from "../../../utils/strings/student.strings";
 
 const C = SPORTS_STRINGS;
 
@@ -58,7 +56,7 @@ function StudentSportsContent() {
     requestDeleteDocument,
     rowsTorneosFiltradas,
     setBusquedaTorneos,
-    subscribedSportIds,
+    //subscribedSportIds,
     torneoDeportista,
     torneosColumns,
   } = useSportsContext();
@@ -219,6 +217,7 @@ function StudentSportsContent() {
           </CardContent>
         </Card>
       ) : null}
+      {/*  DESPUES HAY QUE HABILITARLO
       {!loadingSports && horariosDeportista.length > 0 && (
         <>
           <TitleBox title={C.horariosTitle} description={C.horariosSubTitle} />
@@ -227,6 +226,7 @@ function StudentSportsContent() {
           </EmployedSportsProvider>
         </>
       )}
+      */}
 
       {/*Dialog para Borrar Documento*/}
       <Dialog open={openPopup} onClose={closeDeleteDialog}>

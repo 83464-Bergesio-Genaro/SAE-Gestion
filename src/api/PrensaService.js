@@ -8,8 +8,13 @@ import {
   resolveApiUrl,
 } from "./apiClient";
 
-export const listarPublicacionesCompleto = () =>
-  RequestAPI("/api/Prensa/ListarPublicacionesCompleto", "GET");
+export async function listarPublicacionesCompleto() {
+  const data = await RequestAPI(
+    "/api/Prensa/ListarPublicacionesCompleto",
+    "GET",
+  );
+  return data.map(mapPublicacionPublica);
+}
 
 export const listarPublicacionesActivas = () =>
   RequestAPI("/api/Prensa/ListarPublicacionesActivas", "GET");
@@ -88,7 +93,7 @@ export async function ObtenerNoticiasPublicas() {
         message: "No hay publicaciones a listar",
       };
     }
-    console.log("Respuesta de la API:", response); // Agrega este console.log para verificar la respuesta de la API
+    //console.log("Respuesta de la API:", response); // Agrega este console.log para verificar la respuesta de la API
     const publications = response.data
       .map(mapPublicacionPublica)
       .sort((a, b) => b.prioridad - a.prioridad);

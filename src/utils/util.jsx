@@ -1,494 +1,43 @@
-import {SAETypography} from "../shared/components/typography/SAETypography";
-import { Chip } from "@mui/material";
-export const mostrarHorasMinutos = (horario) => {
-  const [h1, m1] = horario.split(":").map(Number);
-  if (m1 === 0) return `${h1}:00hs`;
-  return `${h1}:${m1}hs`;
-};
-export const formatearFecha = (fechaString) => {
-  if (!fechaString) return "";
+import ArticleIcon from "@mui/icons-material/Article";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import ContactSupportIcon from "@mui/icons-material/ContactSupport";
+import DescriptionIcon from "@mui/icons-material/Description";
+import EmailIcon from "@mui/icons-material/Email";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import LinkIcon from "@mui/icons-material/Link";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import SchoolIcon from "@mui/icons-material/School";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import WorkIcon from "@mui/icons-material/Work";
 
-  // Convertimos el texto "2026-05-07" a un objeto de fecha real
-  // Usamos el reemplazo de guiones por barras para evitar problemas de zona horaria
-  const fecha = new Date(fechaString.replace(/-/g, "/"));
+export const LINK_FRECUENTE_ICONS = [
+  { id: 0, label: "Link", icon: LinkIcon },
+  { id: 1, label: "Documento", icon: DescriptionIcon },
+  { id: 2, label: "Articulo", icon: ArticleIcon },
+  { id: 3, label: "Formulario", icon: AssignmentIcon },
+  { id: 4, label: "Calendario", icon: CalendarMonthIcon },
+  { id: 5, label: "Turno", icon: EventAvailableIcon },
+  { id: 6, label: "Salud", icon: LocalHospitalIcon },
+  { id: 7, label: "Becas", icon: SchoolIcon },
+  { id: 8, label: "Deportes", icon: SportsSoccerIcon },
+  { id: 9, label: "Trabajo", icon: WorkIcon },
+  { id: 10, label: "Contacto", icon: EmailIcon },
+  { id: 11, label: "Ayuda", icon: ContactSupportIcon },
+  { id: 12, label: "Favorito", icon: FavoriteIcon },
+  { id: 13, label: "Biblioteca", icon: MenuBookIcon },
+];
 
-  // Le pedimos a JavaScript que solo nos devuelva el día y el mes en español
-  return fecha.toLocaleDateString("es-ES", {
-    day: "2-digit", // Fuerza a que el día tenga 2 dígitos (ej: "07")
-    month: "long", // Muestra el nombre completo del mes (ej: "Mayo")
-  });
-};
-export function ScaleText({ text, maxWidth, maxHeight, minFontSize = "8px", maxFontSize = "20px" }) {
-  if (!text) return null;
-
-  // La fórmula mágica depende de tu fuente, pero esta es una base sólida:
-  // Ancho aproximado de un carácter ≈ fontSize * 0.6 (para fuentes estándar)
-  
-  let calculatedSize = maxFontSize;
-
-  // Iteración simple para encontrar el tamaño que cabe (sin medir DOM, solo matemática)
-  // Probamos desde el tamaño máximo hacia abajo hasta que la estimación quepa
-  for (let size = maxFontSize; size >= minFontSize; size -= 0.5) {
-    // Estimación de ancho: caracteres * factor de ancho medio (0.6 es estándar para sans-serif)
-    // Si tu fuente es monoespaciada, usa 1.0. Si es muy estrecha, usa 0.5.
-    const estimatedWidth = text.length * size * 0.6; 
-    const estimatedHeight = size * 1.2; // Line-height aprox
-
-    if (estimatedWidth <= maxWidth && estimatedHeight <= maxHeight) {
-      calculatedSize = size;
-      break; // Encontramos el tamaño más grande que cabe
-    }
-  }
+export const getLinkFrecuenteIconByIndex = (index) => {
+  const normalizedIndex = Number(index);
   return (
-    <SAETypography 
-    variant="body2"
-    sx={{ 
-      fontSize: `${calculatedSize}px`, 
-      lineHeight: 1,
-      width: '100%',
-      height: '100%'
-    }}>
-      {text}
-    </SAETypography>
-  );
-}
-/**
- * Utilidades candidatas para centralizar lógica repetida entre providers.
- *
- * Este archivo todavía no es consumido por los providers. Cada comentario
- * indica dónde existe actualmente una implementación equivalente para poder
- * evaluar la migración de forma gradual.
- */
-
-/**
- * Repetida en:
- * - employed/context/providers/consultationsProvider.jsx
- * - employed/context/providers/travelProvider.jsx
- * - employed/context/providers/purchaseProvider.jsx
- * - employed/context/providers/employProvider.jsx
- * - students/context/providers/healthProvider.jsx
- */
-export const formatHeader = (key = "") =>
-  String(key)
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
-/**
- * Repetida sin transformaciones adicionales en:
- * - employed/context/providers/consultationsProvider.jsx
- * - employed/context/providers/travelProvider.jsx
- * - employed/context/providers/employProvider.jsx
- * - students/context/providers/consultationsProvider.jsx
- *
- * purchaseProvider y healthProvider agregan datos propios, por eso deberían
- * seguir usando sus implementaciones o pasar una función `mapRow`.
- */
-export const generateRows = (data = [], mapRow = (item) => item) =>
-  [...data]
-    .sort((a, b) => Number(a?.id ?? 0) - Number(b?.id ?? 0))
-    .map((item, index) => ({
-      id: item?.id ?? index,
-      ...mapRow(item, index),
-    }));
-
-export const generateRows2 = (data) => {
-    return [...data]
-    .sort((a, b) => a.id - b.id)
-    .map((item, index) => {
-        // 1. Creamos un nuevo objeto limpiando los nulos
-        const cleanedItem = {};
-        
-        for (const key in item) {
-            const value = item[key];
-            // Controla null, undefined o strings vacíos (quitando espacios)
-            if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
-                cleanedItem[key] = "-";
-            } else {
-                cleanedItem[key] = value;
-            }
-        }
-
-        // 2. Retornamos el objeto con su ID correspondiente
-        return {
-            ...cleanedItem,
-            id: item.id || index
-        };
-    });
-};
-
-/**
- * Repetida en:
- * - employed/context/providers/purchaseProvider.jsx
- * - students/context/providers/travelProvider.jsx
- * - students/pages/sports/sports.utils.jsx
- * - students/pages/scholarships/scholarship.utils.jsx
- */
-export const createInitialPreview = () => ({
-  open: false,
-  loading: false,
-  title: "",
-  imageSrc: null,
-  isPdf: false,
-  error: null,
-});
-
-export const INITIAL_PREVIEW = createInitialPreview();
-
-/**
- * Repetida en los mismos módulos de documentos que createInitialPreview.
- */
-export const isPdfDocument = (data = {}) => {
-  if (data.datos_documento?.startsWith("data:application/pdf")) return true;
-
-  return (
-    String(data.extension || "")
-      .replace(/^\./, "")
-      .toLowerCase() === "pdf"
+    LINK_FRECUENTE_ICONS.find((item) => item.id === normalizedIndex) ??
+    LINK_FRECUENTE_ICONS[0]
   );
 };
 
-/**
- * Repetida como `buildDocumentName` o `construirNombre` en:
- * - employed/context/providers/purchaseProvider.jsx
- * - students/context/providers/travelProvider.jsx
- * - students/pages/sports/sports.utils.jsx
- * - students/pages/scholarships/scholarship.utils.jsx
- */
-export const buildDocumentName = (format = "", data = {}, extension = "") => {
-  const name = Object.entries(data).reduce(
-    (result, [key, value]) =>
-      result.replace(new RegExp(`\\{${key}\\}`, "gi"), value ?? ""),
-    format,
-  );
-
-  return `${name}${extension}`;
-};
-
-export const construirNombre = buildDocumentName;
-
-/**
- * Repetida en los handlers de archivos de purchase, travel, sports y
- * scholarships.
- */
-export const getFileExtension = (file) => {
-  const extension = file?.name?.split(".").pop();
-  return extension ? `.${extension.toLowerCase()}` : "";
-};
-
-/**
- * Repetida en los handlers de archivos de purchase, travel, sports y
- * scholarships.
- */
-export const renameFile = (file, fileName) =>
-  new File([file], fileName, {
-    type: file.type,
-    lastModified: file.lastModified,
-  });
-
-/**
- * Repetida con distintas variantes de propiedades en:
- * - employed/context/providers/purchaseProvider.jsx
- * - employed/context/providers/pressProvider.jsx
- */
-export const getDocumentId = (document = {}) =>
-  document?.id_documento ??
-  document?.idDocumento ??
-  document?.id_archivo ??
-  document?.id ??
-  null;
-
-/**
- * Nombre canónico de un documento persistido.
- * El contrato del backend devuelve siempre `nombre_documento`.
- */
-export const getDocumentName = (document = {}, fallback = "") =>
-  document?.nombre_documento ?? fallback;
-
-/**
- * El mismo setState está repetido en:
- * - students/context/providers/consultationsProvider.jsx
- * - students/context/providers/travelProvider.jsx
- * - students/context/providers/sportsProvider.jsx
- * - students/context/providers/scholarshipsProvider.jsx
- */
-export const showSnackbar = (setSnackbar, message, severity = "success") => {
-  setSnackbar({ open: true, message, severity });
-};
-
-/**
- * Repetida en los providers estudiantiles de consultations, travel y sports.
- */
-export const closeSnackbar = (setSnackbar) => {
-  setSnackbar((previous) => ({ ...previous, open: false }));
-};
-
-/**
- * Repetida en providers que previsualizan documentación:
- * - employed/context/providers/purchaseProvider.jsx
- * - students/context/providers/travelProvider.jsx
- * - students/context/providers/sportsProvider.jsx
- * - students/context/providers/scholarshipsProvider.jsx
- */
-export const closePreview = (setPreview) => {
-  setPreview((previous) => ({ ...previous, open: false }));
-};
-
-/**
- * Utilidades puras de texto, máscaras y validación.
- * Extraídas inicialmente de shared/context/providers/profileProvider.jsx.
- */
-export const getInitials = (name = "") =>
-  String(name)
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? "")
-    .join("");
-
-export const onlyDigits = (value = "", maxLength = Infinity) =>
-  String(value).replace(/\D/g, "").slice(0, maxLength);
-
-export const formatDni = (value = "") =>
-  onlyDigits(value, 8).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-export const formatCuil = (value = "") => {
-  const digits = onlyDigits(value, 11);
-  const parts = [digits.slice(0, 2), digits.slice(2, 10), digits.slice(10, 11)];
-
-  return parts.filter(Boolean).join("-");
-};
-
-export const formatPhone = (value = "") => {
-  const digits = onlyDigits(value, 12);
-  if (!digits) return "";
-
-  const parts = [
-    digits.slice(0, 2),
-    digits.slice(2, 5),
-    digits.slice(5, 8),
-    digits.slice(8, 12),
-  ];
-
-  return `+${parts.filter(Boolean).join(" ")}`.replace(
-    /(\+\d{2} \d{3} \d{3}) (\d{1,4})$/,
-    "$1-$2",
-  );
-};
-
-export const parseAddress = (value = "") => {
-  let parts = String(value).split(" - ");
-
-  if (parts.length < 4) {
-    parts = String(value).split(/\s+-\s+/);
-  }
-
-  if (parts.length < 4) return [...parts, "", "", ""].slice(0, 4);
-
-  return [parts[0], parts[1], parts.slice(2, -1).join(" "), parts.at(-1)];
-};
-
-export const sanitizeAddressPart = (value = "") =>
-  String(value)
-    .replace(/\s*-\s*/g, " ")
-    .replace(/\s{2,}/g, " ");
-
-export const isValidEmail = (value = "") =>
-  /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(String(value).trim());
-
-export const digitsOnly = (value = "", maxLength = Infinity) =>
-  onlyDigits(value).slice(0, maxLength);
-
-export const isValidPhone = (value = "") => onlyDigits(value).length === 12;
-
-export const isValidMinLengthPhone = (value = "", minLength = 8) =>
-  onlyDigits(value).length >= minLength;
-
-export const isValidHyperlink = (value = "") => {
-  try {
-    const url = new URL(String(value).trim());
-    return ["http:", "https:"].includes(url.protocol);
-  } catch {
-    return false;
-  }
-};
-
-export const isTimeAfter = (endTime = "", startTime = "") => {
-  if (!startTime || !endTime) return true;
-
-  const toMinutes = (time) => {
-    const [hours, minutes] = String(time).slice(0, 5).split(":").map(Number);
-    if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
-    return hours * 60 + minutes;
-  };
-
-  const startMinutes = toMinutes(startTime);
-  const endMinutes = toMinutes(endTime);
-
-  if (startMinutes === null || endMinutes === null) return true;
-
-  return endMinutes > startMinutes;
-};
-
-export const isValidAddress = (value = "") => {
-  const parts = String(value).split(/\s+-\s+/);
-
-  return (
-    parts.length === 4 &&
-    parts.every((part) => part.trim() !== "") &&
-    /^\d+$/.test(parts[3])
-  );
-};
-
-export const cleanField = (value) => {
-  if (value === null || value === undefined) return null;
-
-  const cleaned = String(value).trim();
-  return cleaned === "" ? null : cleaned;
-};
-
-export const cleanNumericField = (value) => {
-  const cleaned = cleanField(value);
-  return cleaned ? onlyDigits(cleaned) : null;
-};
-
-export const isEmpty = (value) =>
-  value === null || value === undefined || String(value).trim() === "";
-
-/**
- * Formateo de moneda y fechas.
- * Extraído inicialmente de employed/context/providers/purchaseProvider.jsx.
- */
-const currencyFormatter = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-export const formatCurrency = (value) => {
-  if (value === null || value === undefined || value === "") return "";
-
-  const numberValue = Number(value);
-  return Number.isNaN(numberValue) ? "" : currencyFormatter.format(numberValue);
-};
-
-export const formatCurrencyInput = (value) => {
-  if (value === null || value === undefined || value === "") return "";
-
-  const numberValue = Number(value);
-  if (Number.isNaN(numberValue)) return "";
-
-  return numberValue.toLocaleString("es-AR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
-
-export const formatCurrencyInputFromText = (value) =>
-  formatCurrencyInput(parseCurrencyInput(value));
-
-export const parseCurrencyInput = (value) => {
-  const normalized = String(value)
-    .replace(/[^\d,.]/g, "")
-    .replace(/\./g, "")
-    .replace(",", ".");
-
-  if (!normalized) return "";
-
-  const numberValue = Number(normalized);
-  return Number.isNaN(numberValue) ? "" : numberValue;
-};
-
-export const normalizeCurrencyValue = (value) =>
-  typeof value === "string" ? parseCurrencyInput(value) : value;
-
-export const sanitizeCurrencyInput = (value) => {
-  const cleanValue = String(value).replace(/[^\d,.]/g, "");
-  const [integerPart, ...decimalParts] = cleanValue.split(",");
-
-  return decimalParts.length === 0
-    ? integerPart
-    : `${integerPart},${decimalParts.join("").replace(/,/g, "")}`;
-};
-
-export function formatDate(isoString) {
-  if (!isoString) return "";
-  const d = new Date(isoString);
-  if (isNaN(d)) return isoString;
-  return d.toLocaleDateString("es-AR");
-}
-
-export function isoToInputDate(isoString) {
-  if (!isoString) return "";
-  return isoString.split("T")[0];
-}
-
-export function toTimeInput(str) {
-  if (!str) return "";
-  return str.slice(0, 5);
-}
-
-export function toApiTime(str) {
-  if (!str) return "";
-  return str.length === 5 ? `${str}:00` : str;
-}
-
-export const formatDateForInput = (value) => {
-  if (!value) return "";
-
-  if (typeof value === "string") {
-    const isoDate = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (isoDate) return isoDate[0];
-
-    const localDate = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (localDate) return `${localDate[3]}-${localDate[2]}-${localDate[1]}`;
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-export const formatDateForDisplay = (value) => {
-  const inputDate = formatDateForInput(value);
-  if (!inputDate) return "";
-
-  const [year, month, day] = inputDate.split("-");
-  return `${day}/${month}/${year}`;
-};
-
-/**
- * Helpers genéricos para archivos locales y documentos persistidos.
- */
-export const sanitizeFileNamePart = (value, fallback = "archivo") =>
-  String(value || fallback)
-    .trim()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-zA-Z0-9_-]/g, "") || fallback;
-
-export const getFileName = (file, fallback = "Ningún archivo seleccionado") => {
-  if (typeof file === "string") return file;
-
-  return file?.name || getDocumentName(file, fallback);
-};
-
-export const isFile = (value) =>
-  typeof File !== "undefined" && value instanceof File;
-
-export const MAX_FILE_SIZE_MB = 5;
-export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-
-export const formatTime = (time) => {
-  if (!time) return time;
-
-  const normalizedTime = String(time).slice(0, 5);
-  return normalizedTime.endsWith("hs") ? normalizedTime : `${normalizedTime}hs`;
-};
 
 export const getFirstRecord = (value) => {
   if (Array.isArray(value)) return value[0] ?? null;
@@ -513,161 +62,32 @@ export const cleanObjectFields = (data) => {
   };
 };
 
-export const PREVIEW_EXTENSIONS = new Set([
-  "jpg",
-  "jpeg",
-  "png",
-  "gif",
-  "webp",
-  "bmp",
-  "svg",
-  "pdf",
-]);
+export function obtenerLegajoDesdeEmail(email = "") {
+  return email.split("@")[0] ?? "";
+}
 
-export const normalizeExtension = (value) => {
-  if (!value) return "";
+export function getErrorMessage(error, fallback) {
+  return (
+    error?.data?.message ||
+    error?.response?.data?.message ||
+    error?.message ||
+    fallback
+  );
+}
 
-  let normalized = String(value).trim().toLowerCase();
-  if (normalized.includes("/")) normalized = normalized.split("/").pop();
-  if (normalized.includes(";")) normalized = normalized.split(";")[0];
+export function filterTournaments(tournaments, search) {
+  const term = search.trim().toLowerCase();
+  if (!term) return tournaments;
 
-  return normalized.replace(/^\./, "");
-};
+  return tournaments.filter((row) =>
+    [row.nombre_torneo, row.nombre_deporte, row.docente_responsable].some(
+      (value) => String(value ?? "").toLowerCase().includes(term),
+    ),
+  );
+}
 
-export const getDocumentExtension = (document = {}) => {
-  const directExtension = normalizeExtension(document?.extension);
-  if (directExtension) return directExtension;
-
-  const parts = String(document?.nombre_documento || "").split(".");
-  if (parts.length < 2) return "";
-
-  return normalizeExtension(parts.pop());
-};
-
-export const getImageSource = (document = {}) => {
-  if (!document?.datos_documento) return "";
-  if (document.datos_documento.startsWith("data:")) {
-    return document.datos_documento;
-  }
-
-  const mimeByExtension = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-    bmp: "image/bmp",
-    svg: "image/svg+xml",
-  };
-  const mime = mimeByExtension[getDocumentExtension(document)] || "image/jpeg";
-
-  return `data:${mime};base64,${document.datos_documento}`;
-};
-
-export const isPreviewableDocument = (document = {}) =>
-  PREVIEW_EXTENSIONS.has(getDocumentExtension(document));
-
-export const hasRealDocumentName = (value) => {
-  if (!value) return false;
-
-  const normalized = String(value).trim().toLowerCase();
-  if (!normalized) return false;
-
-  return !new Set(["documento", "archivo", "file", "document"]).has(normalized);
-};
-
-export const getDisplayDocumentName = (document = {}, fallback = "Archivo") =>
-  hasRealDocumentName(document?.nombre_documento)
-    ? document.nombre_documento
-    : fallback;
-
-export const generateColumns = (data, actionsConfig = []) => {
- const sample =
-    Array.isArray(data)
-      ? data[0]
-      : data;
-
-  if (!sample) return [];
-
-  const columns = Object.keys(sample).map((key) => {
-    // Nota: Se asume que data es un array, por eso data[0] para las keys
-    const isId = key.toLowerCase().includes("id");
-    const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(key.toLowerCase());
-    
-    if (key.toLowerCase() === "activo" ) {
-    return {
-        field: "activo",
-        headerName: "Estado",
-        align: "center",
-        headerAlign: "center",
-        width: 100,
-        renderCell: (params) => (
-            <Chip
-                size="small"
-                label={params.value ? "Activo" : "Inactivo"}
-                color={params.value ? "success" : "default"}
-            />
-        )
-        };
-    } 
-    else if (key.toLowerCase() === "seguro"){
-     return {
-        field: "seguro",
-        headerName: "Seguro",
-        align: "center",
-        headerAlign: "center",
-        width: 100,
-        renderCell: (params) => (
-            <Chip
-                size="small"
-                label={params.value ? "Tiene" : "Falta"}
-                color={params.value ? "success" : "default"}
-            />
-        )
-        };       
-    }
-    else {
-        return {
-            field: key,
-            headerName: formatHeader(key),
-            flex: isId ? 0.4 : 1,
-            minWidth: isId || isShort? 50 : 120,
-            maxWidth: isId ? 70 : isShort ? 100 : NaN,
-            align: isId || isShort ? "center" : "left",
-            headerAlign: isId || isShort ? "center" : "left",
-        };
-    }
-  });
-
-  if (actionsConfig !== null && actionsConfig.length > 0) {
-    columns.push({
-      field: "actions",
-      headerName: "Acciones",
-      headerAlign:"center",
-      sortable: false,
-      filterable: false,
-      minWidth:60 * actionsConfig.length,
-      maxWidth: 65 * actionsConfig.length,
-      renderCell: (params) => (
-        <Box sx={{display:"block",textAlign:"center"}}>
-          {actionsConfig.map((action, index) => {
-            const IconComponent = action.icon;
-            return (
-              <IconButton
-                key={index}
-                size="small"
-                color={action.color || "primary"}
-                title={action.title}
-                onClick={() => action.onClick(params.row)}
-              >
-                <IconComponent fontSize="small" />
-              </IconButton>
-            );
-          })}
-        </Box>
-      ),
-    });
-  }
-
-  return columns;
+export const getDialogTitle = (entity, dialogMode) => {
+  if (dialogMode === "create") return `Nuevo ${entity}`;
+  if (dialogMode === "delete") return `Eliminar ${entity}`;
+  return `Editar ${entity}`;
 };

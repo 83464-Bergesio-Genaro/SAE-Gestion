@@ -1,99 +1,19 @@
 import React, {  useState, useCallback, useEffect, useMemo } from 'react';
 import { Box, IconButton, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+
 import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario,
         ObtenerEmpleados,ObtenerUsuarios,ObtenerHorarios,
         BuscarHorariosXEmpleado,CrearHorarioEmpleado,
         ModificarHorario,EliminarHorario } from "../../../api/EmpleadoService";
 import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService";
 import {mapEmpleadoSAE,mapHorarioSAE} from "../../../api/formatters/EmpleadoFormatter";
+
 import { EmployContext } from '../employedContext';
-import { formatHeader, generateRows } from "../../../utils/util.jsx";;
+import { generateColumns, generateRows } from "../../../utils/datagrid.utils.jsx";
 import { useNotification } from "../../../shared/context/sharedContext";
-import { calendarDays } from "../../../utils/constants";
-
-const EMPTY_FORM = {
-    dia: 1,
-    hora_inicio: "",
-    hora_fin: "",
-    activo: true
-};
-const buildColumns = (data, editAction) => {
-if (!data || data.length === 0) return [];
-
-const columns = Object.keys(data).map((key) => {
-    const isId = key.toLowerCase().includes("id");
-    const isShort = ["estado", "cupo", "duracion", "horario_inicio", "horario_fin"].includes(key.toLowerCase());
-    
-    if (key.toLowerCase() === "activo") {
-        return {
-            field: "activo",
-            headerName: "Estado",
-            align: "center",
-            headerAlign: "center",
-            width: 100,
-            renderCell: (params) => (
-                <Chip
-                    size="small"
-                    label={params.value ? "Activo" : "Inactivo"}
-                    color={params.value ? "success" : "default"}
-                />
-            )
-        };
-    } else {
-        return {
-            field: key,
-            headerName: formatHeader(key),
-            flex: isId ? 0.3 : 1,
-            minWidth: isId ? 50 : 150,
-            maxWidth: isId ? 70 : isShort ? 100 : NaN,
-            align: isId || isShort ? "center" : "left",
-            headerAlign: isId || isShort ? "center" : "left",
-        };
-    }
-});
-
-columns.push({
-    field: "actions",
-    headerName: "Acciones",
-    sortable: false,
-    filterable: false,
-    width: 100,
-    renderCell: (params) => (
-        <Box>
-            <IconButton
-                size="small"
-                color="primary"
-                title="Ver / Editar"
-                onClick={() => editAction(params.row)}
-            >
-                <EditIcon fontSize="small" />
-            </IconButton>               
-        </Box>  
-    )
-});
-
-return columns;
-};
-
-const EMPTY_EMPLEADO =    
-{
-    id: "",
-    legajo: "",
-    nombre_empleado: "",
-    id_perfil: 5,
-    nombre_perfil: "",
-    activo: true
-}
-const EMPTY_USUARIO = 
-{
-    id: "",
-    legajo: "",
-    nombre_usuario:"",
-    id_perfil: "",
-    activo: false 
-}
-
+import { calendarDays } from '../../../utils/common/constants.js';
+import { EMPTY_FORM,EMPTY_EMPLEADO,EMPTY_USUARIO } from '../../../utils/common/common.config.js';
 
 export const AdminUsersProvider = ({ children }) => {
     // Estados globales de Diálogo compartidos por ambas secciones
@@ -404,10 +324,39 @@ export const AdminUsersProvider = ({ children }) => {
         setEditingId(null);
         setErrorHorario("");
     };
-    // --- COLUMNAS MEMORIZADAS ---
-    const empleadosColumns = useMemo(() => buildColumns(EMPTY_EMPLEADO, openEditEmpleados), [openEditEmpleados]);
-    const usuariosColumns = useMemo(() => buildColumns(EMPTY_USUARIO, openEditUsuarios), [openEditUsuarios]);
+    // --- COLUMNAS MEMORIZADAS --- //
+    /* Se crean los handle con el hook de useCallBack y despues los agregamos a una serie de acciones*/
+    const handleOpenEditEmploy = useCallback((row) => {
+        openEditEmpleados(row);
+    }, [openEditEmpleados]);
 
+    const handleOpenEditUser = useCallback((row) => {
+        openEditUsuarios(row);
+    }, [openEditUsuarios]);
+
+    const employActions = useMemo(() => [{
+        icon: EditIcon,
+        color: "primary",
+        title: "Editar Empleado",
+        onClick: handleOpenEditEmploy, 
+    }], [handleOpenEditEmploy]);
+
+    const userActions = useMemo(() => [{
+    icon: EditIcon,
+    color: "primary",
+    title: "Editar Usuario",
+    onClick: handleOpenEditUser, 
+    }], [handleOpenEditUser]);
+
+
+    const empleadosColumns = useMemo(() => {
+    return generateColumns(EMPTY_EMPLEADO, employActions);
+    }, [ employActions]); 
+
+    const usuariosColumns = useMemo(() => {
+    return generateColumns(EMPTY_USUARIO, userActions);
+    }, [ userActions]); 
+    
     return (
         <EmployContext.Provider value={{
 

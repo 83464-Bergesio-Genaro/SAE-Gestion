@@ -4,27 +4,27 @@ import {
   Card,
   Container,
   Typography,
-  Button,
   Stack,
   Chip,
   Paper,
   Grid,
   useMediaQuery,
+  Divider,
 } from "@mui/material";
-import SAEButton from "../../components/buttons/SAEButton";
-import SAESpinner from "../../components/spinner/SAESpinner";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import { SAETypography } from "../../../assets/components/typography/SAETypography";
+import { CalendarEvent } from "../../../assets/components/calendarEvent/calendarEvent";
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useJPA } from "../../context/sharedContext";
 import { JPAProvider } from "../../context/providers/jpaProvider";
-import { CalendarEvent } from "../../components/calendarEvent/calendarEvent";
 import { HashLink as Link } from "react-router-hash-link";
 
 import Fab from "@mui/material/Fab";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import SchoolIcon from "@mui/icons-material/School";
-import InteractiveGrid from "../../components/galleryZoomGrid/galleryZoomGrid";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -39,8 +39,10 @@ import DocumentScannerIcon from "@mui/icons-material/DocumentScanner";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { SAETypography } from "../../components/typography/SAETypography";
 
+import { JPA_STRINGS } from "../../../utils/strings/shared.strings";
+
+const C = JPA_STRINGS;
 const baseUrl = import.meta.env.BASE_URL;
 const settingsHero = {
   mobileFirst: true,
@@ -103,64 +105,7 @@ const settings = {
     },
   ],
 };
-const information = [
-  {
-    section: "info-deportes",
-    title: "COMPLEMENTA TUS ESTUDIOS",
-    text: "Desde la secretaria de asuntos estudiantiles contamos con un area dedicada a la realización de deportes como actividad recreativa, en nuestra facultad contamos con deportes como:<strong> Futbol, Futbol sala, Voley, Basket, Natación, Arquería</strong> todos estos con sus respectivos entrenamientos para todos los generos. Ademas contamos con convenios con diferentes gimnasios para que puedas entrenar en tu dia a dia, ofreciendo descuentos especiales por ser alumno de nuestra Universidad. Si estas interesado en representar a la facultad dentro de las diferentes disciplinas deportivas podes acercarte a la <strong>S</strong>ecretaria de <strong>A</strong>suntos <strong>E</strong>studiantiles para mas información.",
-    image: `${baseUrl}images/infoSection/deportesFRC.webp`,
-    alt: "Deportes UTN FRC",
-  },
-  {
-    section: "info-bienestar",
-    title: "TU SALUD ES LO PRIMERO",
-    text: "Dentro de la secretaría contamos con un area especialmente dedicada a la salud de los estudiantes, en donde vas a poder tener un seguimiento primario en diferestes aspectos de salud. En la facultad podrás encontrar consultorios para:<strong> Medico clinico, Nutricionista, Fisioterapeuta, Odontlogo, Psicopedagogo y Psicologo. </strong> No dejes de lado tu salud, es importante para poder rendir al 100% en tus estudios y tambien por tu bienestar personal, contamos con profesionales altamente capacitados para ayudarte en lo que necesites. Podés acercarte a la <strong>S</strong>ecretaria de <strong>A</strong>suntos <strong>E</strong>studiantiles para saber mas sobre el area de salud, no dudes en contactarnos.",
-    image: `${baseUrl}images/infoSection/saludFRC.jpg`,
-    alt: "Salud UTN FRC",
-  },
-  {
-    section: "info-becas",
-    title: "BECAS TECNOLOGICAS",
-    text: "En el area de becas de la secretaría se realiza la gestión de becas propias de la universidad y te ayudamos aplicar a becas de caracter nacional. La secretaría ofrece las siguientes becas: <strong>Beca de servicio, beca de ayuda economica y beca de investigación. </strong> Que lo economico no sea un impedimento para que puedas estudiar, desde el area nos interesa que puedas acceder a las mejores oportunidades para finalizar tus estudios de grado. Si estas intersado en aplicar a alguna de nuestras becas o como pedir/mantener otras becas estatales podes acercarte a la <strong>S</strong>ecretaria de <strong>A</strong>suntos <strong>E</strong>studiantiles para obtener mas información.",
-    image: `${baseUrl}images/infoSection/becasFRC.jpg`,
-    alt: "Becas UTN FRC",
-  },
-  {
-    section: "info-biblioteca",
-    title: "NUESTRA BIBLOTECA",
-    text: "Ubicada en el <strong>edificio Gallardo (aulas 500)</strong> nuestra biblioteca es un lugar importante para el estudio y la investigación, contando con una amplia colección de libros, revistas y recursos digitales. La instalacion es de<strong> libre acceso</strong> y es un buen lugar para estudiar, investigar o simplemente para pasar el rato leyendo un buen libro. No dudes en acercarte a la biblioteca para aprovechar todos los recursos que ofrece, es un espacio pensado para vos y tu desarrollo académico.",
-    image: `${baseUrl}images/infoSection/bibliotecaFRC.jpg`,
-    alt: "Biblioteca UTN FRC",
-  },
-  {
-    section: "info-congresos",
-    title: "CONGRESOS",
-    text: "Nuestra facultad organiza y participa en diversos congresos y eventos académicos a lo largo del año, brindando a los estudiantes la oportunidad de <strong>presentar sus trabajos, aprender de expertos en el campo y establecer contactos con profesionales de la industria.</strong> Estos eventos son una excelente oportunidad para ampliar tus conocimientos, compartir tus investigaciones y conectarte con la comunidad académica.  Un ejemplo de esto es el <strong>CNEISI</strong> que se realiza anualmente e incluye otras regionales del pais con eje en la ingeniería en sistemas.",
-    image: `${baseUrl}images/infoSection/congresoFRC.webp`,
-    alt: "Congresos UTN FRC",
-  },
-  {
-    section: "info-tramites",
-    title: "TRAMITES Y CERTIFICADOS",
-    text: "A lo largo de tu carrera universitaria, es posible que necesites realizar diversos trámites administrativos relacionados con tu<strong> inscripción, materias, libreta, certificados, entre otros.</strong> La secretaría de asuntos estudiantiles está aquí para ayudarte a navegar por estos procesos y asegurarte de que puedas completar tus trámites de manera eficiente. Ya sea que necesites ayuda para inscribirte en una materia, solicitar un certificado de alumno regular o resolver cualquier duda relacionada con los trámites académicos, nuestro equipo está disponible para brindarte el apoyo necesario. No dudes en acercarte a la secretaría para obtener asistencia personalizada y asegurarte de que tus trámites se realicen sin contratiempos.",
-    image: `${baseUrl}images/infoSection/tramitesFRC.jpg`,
-    alt: "Tramites UTN FRC",
-  },
-  {
-    section: "info-visitas",
-    title: "VISITAS EMPRESARIALES",
-    text: "Las visitas a empresas son una excelente oportunidad para conocer la realidad del <strong>mundo laboral y establecer contactos con profesionales de la industria.</strong> Durante estas visitas, los estudiantes pueden aprender sobre las prácticas empresariales, las oportunidades de empleo y las tendencias del mercado. La secretaría en conjunto a diferentes catedras de la facultad organiza visitas a empresas de diversos sectores, brindando a los estudiantes la oportunidad de explorar diferentes industrias y <strong>conocer de primera mano las oportunidades laborales disponibles.</strong> Estas visitas son una parte importante de la experiencia universitaria, ya que permiten a los estudiantes conectar su formación académica con el mundo real y prepararse para su futura carrera profesional.",
-    image: `${baseUrl}images/infoSection/visitasFRC.jpg`,
-    alt: "Visitas Empresariales UTN FRC",
-  },
-  {
-    section: "info-redes",
-    title: "SEGUINOS EN NUESTRAS REDES",
-    text: "Seguinos en todas nuestras redes sociales para estar siempre actualizado con novedades, eventos y mucho mas que organiza la secretaria.",
-    image: `${baseUrl}images/navbar/inchaUTN.png`,
-    alt: "Visitas Empresariales UTN FRC",
-  },
-];
+
 const studentJourney = [
   {
     icon: <SchoolIcon />,
@@ -288,7 +233,7 @@ const carreras = [
   },
   {
     title: "Ing. Mecanica",
-    img: `${baseUrl}images/degreesJPA/IngenieriaMecanica.jpg`,
+    img: `${baseUrl}images/degreesJPA/ingenieriaMecanica.jpg`,
     route: "/JPA/mecanica",
     duracion: "5 años",
     intereses: ["Produccion", "Autopartes", "Nuevas Piezas"],
@@ -318,7 +263,7 @@ function ParticipeButton() {
       onClick={() => navigate("/JPA/participar")}
     >
       <HowToRegIcon />
-      <span className="texto"> Quiero participar</span>
+      <span className="texto"> {C.participateButton}</span>
     </Fab>
   );
 }
@@ -343,8 +288,9 @@ function JPAContent() {
       <HeroSection />
       <Container maxWidth="xl">
         <DegreesCarrousel />
-        {/* <InterestSection/> */}
+        <Divider sx={{mb:"-10px"}} />
         <JourneySection />
+        <Divider sx={{mb:"-10px"}} />
         <EventSection />
         <ParticipeButton />
       </Container>
@@ -406,19 +352,20 @@ function HeroSection() {
                   >
                     <Chip
                       icon={<SchoolIcon />}
-                      label="Universidad Tecnológica Nacional - Córdoba"
+                      label={C.universityChip}
                       sx={{
                         width: "fit-content",
-                        bgcolor: "rgba(255,255,255,.15)",
+                        bgcolor: "var(--chipBackground)",
                         color: "white",
                         backdropFilter: "blur(10px)",
                         fontWeight: 600,
                       }}
                     />
-
+                    
                     <SAETypography variant="h1" color="white">
                       Ingeniería
                       <Box
+                      //Despues deberiamos fijarnos un metodo mas limpio
                         component="br"
                         sx={{ display: { xs: "block", md: "none" } }}
                       />
@@ -428,9 +375,7 @@ function HeroSection() {
                     </SAETypography>
 
                     <SAETypography variant="subtitle1" color="white">
-                      Formate en una de las intituciones educativas mas
-                      importantes de la Argentina y descubrí una experiencia
-                      universitaria que va mucho más allá del aula.
+                      {C.heroSubtitle}
                     </SAETypography>
                     <Stack direction="row" spacing={{ xs: 1, md: 2 }}>
                       <Link
@@ -456,7 +401,7 @@ function HeroSection() {
                             },
                           }}
                         >
-                          Explorar Carreras
+                          {C.heroExplore}
                         </SAEButton>
                       </Link>
                       <Link
@@ -481,7 +426,7 @@ function HeroSection() {
                             },
                           }}
                         >
-                          Próximos Eventos
+                          {C.heroNextEvents}
                         </SAEButton>
                       </Link>
                     </Stack>
@@ -508,21 +453,21 @@ function HeroSection() {
             overflow: "hidden",
           }}
         >
-          <Grid container>
+          <Grid container /*Deberiamos hacerlo una lista y luego mapear*/ >
             <Grid size={{ xs: 6, sm: 3 }}>
-              <StatCard value={8} label="Carreras" />
+              <StatCard value={8} label={C.heroCard1} />
             </Grid>
 
             <Grid size={{ xs: 6, sm: 3 }}>
-              <StatCard value={10} suffix="K" label="Estudiantes" />
+              <StatCard value={10} prefix="+" suffix="K" label={C.heroCard2} />
             </Grid>
 
             <Grid size={{ xs: 6, sm: 3 }}>
-              <StatCard value={150} prefix="+" label="Convenios" />
+              <StatCard value={150} prefix="+" label={C.heroCard3} />
             </Grid>
 
             <Grid size={{ xs: 6, sm: 3 }}>
-              <StatCard value={50} prefix="+" label="Años" />
+              <StatCard value={50} prefix="+" label={C.heroCard4} />
             </Grid>
           </Grid>
         </Paper>
@@ -544,19 +489,20 @@ function DegreesCarrousel() {
       id={"carreras"}
       style={{ scrollMarginTop: "120px" }}
     >
+
       <Box
         sx={{
           mt: { xs: 7, md: 10 },
           textAlign: "center",
-          mb: { xs: 3, md: 6 },
+          mb: { xs: 3, md: 4 },
         }}
       >
-        <Typography variant="h2" fontWeight={900}>
-          Conocé nuestras carreras
+        <Typography variant="h2" fontWeight={700}>
+          {C.ourDegreesTitle}
         </Typography>
 
         <Typography variant="h6" color="text.secondary">
-          Elegí el camino para transformar el mundo.
+          {C.ourDegressDescription}
         </Typography>
       </Box>
       <Box
@@ -708,7 +654,7 @@ function DegreesCarrousel() {
                       letterSpacing: 1,
                     }}
                   >
-                    Empeza tu aventura hoy →
+                    {C.ourDegreesCaption}
                   </SAETypography>
                 </Box>
               </Card>
@@ -805,33 +751,7 @@ function StatCard({ value, label, prefix, suffix }) {
     </Box>
   );
 }
-function InterestSection() {
-  return (
-    <Box
-      sx={{
-        py: { xs: 4, md: 12 },
-      }}
-    >
-      <Typography variant="h3" textAlign={{ xs: "left", md: "center" }}>
-        Una carrera te forma.
-        <br />
-        La experiencia universitaria te transforma.
-      </Typography>
-      <Typography
-        variant="h6"
-        fontSize={{ xs: "1rem", md: "1.5rem" }}
-        textAlign={{ xs: "left", md: "center" }}
-        color="text.secondary"
-        sx={{ my: 3 }}
-      >
-        En la UTN no solamente asistís a clases. Participás de deportes,
-        congresos, becas, visitas empresariales y actividades que complementan
-        tu formación profesional.
-      </Typography>
-      <InteractiveGrid items={information} />
-    </Box>
-  );
-}
+
 function EventSection() {
   const { eventosJPA, loadingEventos } = useJPA();
   return (
@@ -841,17 +761,21 @@ function EventSection() {
           mt: { xs: 4, md: 12 },
         }}
       >
-        <Typography variant="h3" textAlign={{ xs: "left", md: "center" }}>
-          Eventos en nuestra Universidad.
+        <Box
+        sx={{
+          mt: { xs: 7, md: 10 },
+          textAlign: "center",
+          mb: { xs: 3, md: 6 },
+        }}
+      >
+        <Typography variant="h2" fontWeight={700}>
+          {C.eventsTitle}
         </Typography>
-        <SAETypography
-          variant="h6"
-          textAlign={{ xs: "left", md: "center" }}
-          color="text.secondary"
-        >
-          La Universidad no es solo para los que ya estan sino para vos tambien,
-          el futuro llego hoy preparate para una experiencia unica!
-        </SAETypography>
+
+        <Typography variant="h6" color="text.secondary">
+          {C.eventsDescription}
+        </Typography>
+      </Box>
 
         {loadingEventos && (
           <Stack alignItems="center" width={"100%"} gap={1}>
@@ -921,24 +845,27 @@ function JourneySection() {
       sx={{
         position: "relative",
         zIndex: 1,
-        mt: { xs: 4, md: 12 },
+        mt: { xs: 4,md:10 },
         px: { xs: 0, md: 4 },
         py: { xs: 2, md: 4 },
       }}
     >
-      <Typography variant="h2" fontSize={{ xs: "2rem", md: "3.75rem" }}>
-        Tu camino en la UTN
-      </Typography>
-
-      <Typography
-        variant="h6"
-        color="text.secondary"
-        fontSize={{ xs: "1rem", md: "1.25rem" }}
-        px={{ xs: 1, md: 0 }}
+      <Box
+        sx={{
+          mt: { xs: 7, md: 10 },
+          textAlign: "center",
+          mb: { xs: 3, md: 6 },
+        }}
       >
-        Descubrí todo lo que podés vivir durante tu formación.
-      </Typography>
-      {/* Mobile: navegación fija y pasos que avanzan con el scroll */}
+        <Typography variant="h2" fontWeight={700}>
+          {C.journeyTitle}
+        </Typography>
+
+        <Typography variant="h6" color="text.secondary">
+          {C.journeyDescription}
+        </Typography>
+      </Box>
+
       <Box
         sx={{
           display: { xs: "block", md: "none" },
@@ -1072,6 +999,7 @@ function JourneySection() {
         <Box
           sx={{
             height: 6,
+            my:3,
             width: `${((selectedStep + 1) / studentJourney.length) * 100}%`,
             bgcolor: "#123666",
             transition: ".4s",
@@ -1158,7 +1086,7 @@ function JourneyDetailCard({ step, mobile = false }) {
               />
             </Box>
             {mobile && (
-              <Button
+              <SAEButton
                 onClick={() => setExpanded((current) => !current)}
                 sx={{
                   mt: 1,
@@ -1170,7 +1098,7 @@ function JourneyDetailCard({ step, mobile = false }) {
                 }}
               >
                 {expanded ? "Ver menos" : "Ver más"}
-              </Button>
+              </SAEButton>
             )}
           </Box>
         </Grid>

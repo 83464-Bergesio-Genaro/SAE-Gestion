@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo } from "react";
 import {
   Autocomplete,
   Avatar,
@@ -20,27 +21,31 @@ import {
   Tooltip,
 } from "@mui/material";
 
-import { useState, useEffect, useMemo } from "react";
-import { TravelProvider } from "../../context/providers/travelProvider";
-import { useTravel } from "../../context/employedContext";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import HeaderPageEmployed from "../../../shared/components/HeaderPageEmployed";
-import { useNotification } from "../../../shared/context/sharedContext";
-
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import FolderIcon from "@mui/icons-material/Folder";
 import DownloadIcon from "@mui/icons-material/Download";
-import { Diversity1 } from "@mui/icons-material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import TitleBox from "../../../shared/components/titleBox";
-import { formatDateForDisplay } from "../../../utils/util.jsx";
-import { CAREERS } from "../../../utils/juan/constants";
+import { Diversity1 } from "@mui/icons-material";
 
+import { TravelProvider } from "../../context/providers/travelProvider";
+import { useTravel } from "../../context/employedContext";
+import { useNotification } from "../../../shared/context/sharedContext";
+
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+
+import SAEPage from "../../../assets/components/page/SAEPage";
+import TitleBox from "../../../assets/components/titleBox";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
+
+import { formatDate } from "../../../utils/date.utils.js";
+import { carreras } from "../../../utils/common/constants.js";
+import { TRAVEL_STRINGS } from "../../../utils/strings/employed.strings.js";
+
+const C = TRAVEL_STRINGS;
 export default function EmployedTravelInscripts() {
   return (
     <TravelProvider>
@@ -79,7 +84,7 @@ function EmployedIncriptsContent() {
 
     return [
       {
-        label: travelData.seguro ? "Tiene Seguro" : "Falta Seguro",
+        label: travelData.seguro ? C.travelInsurence : C.travelNoInsurence,
         bgcolor: travelData.seguro
           ? "rgba(76,175,80,0.28)"
           : "rgba(211,47,47,0.55)",
@@ -100,9 +105,9 @@ function EmployedIncriptsContent() {
       {travelData && (
         <>
           <HeaderPageEmployed
-            header="Gestion de Inscriptos"
+            header={C.inscriptsManagement}
             title={travelData.nombre}
-            description={`Del ${formatDateForDisplay(travelData.fecha_inicio)} hasta ${formatDateForDisplay(travelData.fecha_fin)}`}
+            description={`Del ${formatDate(travelData.fecha_inicio,"short")} hasta ${formatDate(travelData.fecha_fin,"short")}`}
             backgroundImage="images/varias/campus.jpg"
             backTo="/Gestion-Viajes"
             chips={headerChips}
@@ -111,7 +116,7 @@ function EmployedIncriptsContent() {
           <Grid container spacing={1}>
             <Grid size={{ xs: 12 }} mt={2}>
               <StudentSearchCard />
-              <TitleBox title="Planilla de Inscriptos" />
+              <TitleBox title={C.inscriptsList}/>
 
               <Card
                 sx={{
@@ -134,7 +139,7 @@ function EmployedIncriptsContent() {
                     inscriptsTravel.length === 0 && (
                       <Stack alignItems="center" width={"100%"} gap={1}>
                         <Typography variant="body2" noWrap>
-                          Sin Inscriptos
+                          {C.inscriptsNoData}
                         </Typography>
                       </Stack>
                     )}
@@ -175,12 +180,12 @@ function StudentSearchCard() {
 
   const handleSearch = () => {
     if (!normalizedLegajo) {
-      setDialogError("Ingresa un legajo para buscar.");
+      setDialogError(C.errorNoID);
       return;
     }
 
     if (!careerSearch) {
-      setDialogError("Selecciona una carrera para buscar.");
+      setDialogError(C.errorNoDegree);
       return;
     }
 
@@ -220,7 +225,7 @@ function StudentSearchCard() {
             opacity: 0.98,
           }}
         >
-          Buscar estudiante para agregar
+         {C.inscriptsSearch}
         </Typography>
 
         {dialogError && !usuarioSelected && (
@@ -240,7 +245,7 @@ function StudentSearchCard() {
             alignItems={{ md: "flex-start" }}
           >
             <SAETextField
-              label="Legajo"
+              label={C.studentID}
               value={legajoSearch}
               onChange={(event) => {
                 setLegajoSearch(event.target.value.replace(/\D/g, ""));
@@ -251,7 +256,7 @@ function StudentSearchCard() {
               onKeyDown={(event) => {
                 if (event.key === "Enter") handleSearch();
               }}
-              helperText="Sin @ ni dominio."
+              helperText={C.helperID}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -273,9 +278,9 @@ function StudentSearchCard() {
               @
             </Typography>
             <Autocomplete
-              options={CAREERS}
+              options={carreras}
               value={
-                CAREERS.find((career) => career.value === careerSearch) ?? null
+                carreras.find((career) => career.value === careerSearch) ?? null
               }
               onChange={(_event, career) => {
                 setCareerSearch(career?.value ?? "");
@@ -290,8 +295,8 @@ function StudentSearchCard() {
               renderInput={(params) => (
                 <SAETextField
                   {...params}
-                  label="Carrera"
-                  helperText="Selecciona el dominio de la carrera."
+                  label={C.studentDegree}
+                  helperText={C.helperDegree}
                 />
               )}
             />
@@ -312,7 +317,7 @@ function StudentSearchCard() {
               <IconButton
                 onClick={handleSearch}
                 disabled={!canSearch}
-                aria-label="Buscar estudiante"
+                aria-label={C.studentSearch}
               >
                 <SearchIcon />
               </IconButton>
@@ -333,13 +338,13 @@ function StudentSearchCard() {
               color="text.secondary"
               fontWeight={700}
             >
-              Usuario seleccionado
+              {C.studentSelected}
             </Typography>
             <Typography variant="body1" fontWeight={700}>
               {usuarioSelected.nombre_usuario}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Legajo {usuarioSelected.legajo}
+              {C.studentID}: {usuarioSelected.legajo}
             </Typography>
             <Stack direction={{ xs: "column", sm: "row" }} mt={2} spacing={1.5}>
               <SAEButton
@@ -347,7 +352,7 @@ function StudentSearchCard() {
                 size="small"
                 onClick={handleAddStudent}
               >
-                Agregar estudiante
+                {C.studentAdd}
               </SAEButton>
               <SAEButton
                 variant="outlined"
@@ -355,7 +360,7 @@ function StudentSearchCard() {
                 size="small"
                 onClick={handleClear}
               >
-                Volver a buscar
+               {C.studentSearchAgain}
               </SAEButton>
             </Stack>
           </Box>
@@ -386,8 +391,8 @@ function InscriptDeleteDialog() {
       >
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
           {dialogMode === "documentacion"
-            ? "Documentacion del Inscripto"
-            : "Eliminar Inscripcion"}
+            ? C.studentDocs
+            : C.studentsDelete}
         </Typography>
         <IconButton onClick={closeDialog} size="small">
           <CloseIcon />
@@ -407,12 +412,10 @@ function InscriptDeleteDialog() {
                 color="textPrimary"
                 fontWeight={600}
               >
-                ATENCION
+                {C.inscriptsWarningTitle}
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Esta a punto de eliminar este inscripto de la lista del viaje.
-                Si esta persona subio documentacion relacionada, se mantendra a
-                menos que se elimine de manera particular.
+                {C.inscriptsWarningBody}
               </Typography>
               <Typography
                 mt={2}
@@ -421,7 +424,7 @@ function InscriptDeleteDialog() {
                 textAlign="center"
                 fontWeight="bold"
               >
-                ¿Quiere continuar?
+                {C.inscriptsWarningConfirm}
               </Typography>
             </>
           )}
@@ -433,7 +436,7 @@ function InscriptDeleteDialog() {
           onClick={closeDialog}
           disabled={dialogSaving}
         >
-          Cancelar
+          {C.cancel}
         </SAEButton>
         {dialogMode === "delete" && (
           <SAEButton
@@ -447,7 +450,7 @@ function InscriptDeleteDialog() {
               ) : null
             }
           >
-            Eliminar
+            {C.delete}
           </SAEButton>
         )}
       </DialogActions>
@@ -513,7 +516,7 @@ function DocumentsDialog() {
           }}
         >
           <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-            Documentación — {/*seletedInscripts.nombre_estudiante*/}
+            {C.travelDocs} {/*seletedInscripts.nombre_estudiante*/}
           </Typography>
           <IconButton onClick={handleClose} size="small">
             <CloseIcon />
@@ -532,7 +535,7 @@ function DocumentsDialog() {
               color="text.secondary"
               sx={{ py: 2, textAlign: "center" }}
             >
-              No hay documentación disponible de este viaje.
+              {C.travelNoDocs}
             </Typography>
           )}
           {!loadingInscriptDocs && docsInscript.length > 0 && (
@@ -560,7 +563,7 @@ function DocumentsDialog() {
                     </Typography>
                   </Box>
                   <Stack direction="row" spacing={0.5}>
-                    <Tooltip title="Ver Documentos">
+                    <Tooltip title={C.travelShowDocs}>
                       <IconButton
                         size="small"
                         onClick={() => handlePreviewDoc(doc)}
@@ -569,7 +572,7 @@ function DocumentsDialog() {
                       </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Descargar">
+                    <Tooltip title={C.travelDownloadDocs}>
                       <IconButton
                         size="small"
                         onClick={() =>
@@ -589,7 +592,7 @@ function DocumentsDialog() {
                       </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Eliminar">
+                    <Tooltip title={C.delete}>
                       <IconButton
                         size="small"
                         onClick={() => requestDeleteDocument(doc)}
@@ -605,18 +608,18 @@ function DocumentsDialog() {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <SAEButton variant="outlined" onClick={handleClose}>
-            Cerrar
+           {C.travelClose}
           </SAEButton>
         </DialogActions>
       </Dialog>
       <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600, p: 4 }}>
-          EliminarDocumento
+          {C.travelDeleteDocs}
         </Typography>
 
         <DialogContent>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            "Esta seguro que quiere eliminar el documento: "{" "}
+            {C.travelWarningMsg}
             {documentoAEliminar?.nombre_documento}
           </Typography>
         </DialogContent>
@@ -627,14 +630,14 @@ function DocumentsDialog() {
             autoFocus
             color="outlined"
           >
-            Cancelar
+            {C.cancel}
           </SAEButton>
           <SAEButton
             onClick={() => handleDelete(documentoAEliminar)}
             autoFocus
             color="error"
           >
-            Eliminar
+            {C.delete}
           </SAEButton>
         </DialogActions>
       </Dialog>
@@ -712,7 +715,7 @@ function InscriptosCard({ datosEstudiante }) {
               </Typography>
 
               <Typography variant="caption" color="text.secondary">
-                Legajo {estudiante.legajo_estudiante}
+                {C.studentID} {estudiante.legajo_estudiante}
               </Typography>
             </Box>
           </Stack>
@@ -759,18 +762,19 @@ function InscriptosCard({ datosEstudiante }) {
                     sx={{ display: { xs: "none", md: "block" } }}
                   >
                     {estudiante.documentacion_presentada
-                      ? "Documentación Revisada"
-                      : "Documentación no Revisada"}
+                      ? C.inscriptsReviewed
+                      : C.inscriptsNoReviewed
+                    }
                   </Box>
                 </>
               }
             />
-            <Tooltip title="Ver documentación">
+            <Tooltip title={C.travelShowDocs}>
               <IconButton onClick={() => openSeeDocInscript(estudiante)}>
                 <FolderIcon />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Eliminar inscripción">
+            <Tooltip title={C.studentsDelete}>
               <IconButton
                 onClick={() => handleClickRemove(estudiante)}
                 color="error"

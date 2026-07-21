@@ -2,26 +2,28 @@ import { Container, Box, Card} from "@mui/material";
 import { useAuth } from "../../shared/context/sharedContext";
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 
-import DashboardMenu from "../../shared/components/dashboardMenu/DashboardMenu";
-import NovedadesEstudiantiles from "../../shared/components/StudentNews/studentNews";
-import TitleBox from "../../shared/components/titleBox";
-import SAEPage from "../../shared/components/page/SAEPage"
-import StudentHeaderPage from "../components/studentHeaderPage/studentHeaderPage";
+import DashboardMenu from "../../assets/components/dashboardMenu/DashboardMenu";
+import NovedadesEstudiantiles from "../../assets/components/StudentNews/studentNews";
+import TitleBox from "../../assets/components/titleBox"
+import SAEPage from "../../assets/components/page/SAEPage"
+import HeaderPageStudent from "../../assets/components/headerPage/headerPageStudent";
+import { MAIN_STRINGS } from "../../utils/strings/student.strings";
 
+const C = MAIN_STRINGS;
 export default function StudentMain() {
   const { user } = useAuth();
   
   return (
     <SAEPage>
-        <StudentHeaderPage
-          title={"Pantalla Principal"}
-          description={"Bienvenido "+user.nombre+"!"}
+        <HeaderPageStudent
+          title={C.headerTitle}
+          description={C.headerDescription+user.nombre}
           backgroundImage="images/carrousel/EntradaUTN.jpg"
           icon={LightbulbIcon}
         />
         <TitleBox 
-          title=" Tú Gestión"
-          description=" Administra tu vida estudiantil desde un solo lugar"
+          title={C.panelTitle}
+          description={C.panelDescription}
         />
 
         <DashboardMenu idPerfil={user?.id_perfil}></DashboardMenu>

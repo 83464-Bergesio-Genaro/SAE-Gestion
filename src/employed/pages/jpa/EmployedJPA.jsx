@@ -19,22 +19,23 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAETimeField from "../../../shared/components/inputs/SAETimeField";
-import { useNotification } from "../../../shared/context/sharedContext";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx"; 
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAETimeField from "../../../assets/components/inputs/SAETimeField";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
+import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
 
-import { getDialogTitle } from "../../../utils/juan/util";
+import { JPAProvider } from "../../context/providers/jpaProvider.jsx";
+import { useJPA } from "../../context/employedContext.js";
+import { useNotification } from "../../../shared/context/sharedContext.js";
 
-import { DataGrid } from "@mui/x-data-grid";
-import { JPAProvider } from "../../context/providers/jpaProvider";
-import { useJPA } from "../../context/employedContext";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
-import SAEDeleteDialog from "../../../shared/components/popUp/SAEDeleteDialog";
-import { isValidEmail } from "../../../utils/util.jsx";
+import { getDialogTitle } from "../../../utils/util.jsx";
+import { isValidEmail } from "../../../utils/validation.utils.js"; 
+import { JPA_STRINGS } from "../../../utils/strings/employed.strings.js";
 
+const C = JPA_STRINGS;
 function CopyURLButton() {
   const ubicacionesComunes = [
     {
@@ -177,9 +178,9 @@ function EmployedJPAContent() {
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header=" Módulo de JPA"
-        title="Gestión de la Jornada de Puertas Abiertas"
-        description="Administrá los recursos que hacen a la JPA."
+        header={C.headerMainTitle}
+        title={C.headerMainSubtitle}
+        description={C.headerMainDescription}
       />
 
       <SAEDataGrid
@@ -289,11 +290,11 @@ function DialogJpa() {
               {dialogMode === "delete" ? (
                 <>
                   <Typography variant="subtitle2" component="span">
-                    Esta seguro que quiere eliminar el evento:
+                    {C.eventDeleteConfirm}
                   </Typography>
                   <Typography variant="h7" component="span">
-                    ID:{dialogData.id} <br />
-                    Nombre: "{dialogData.nombre_evento}"
+                    {C.eventID}:{dialogData.id} <br />
+                    {C.eventName}: "{dialogData.nombre_evento}"
                   </Typography>
                 </>
               ) : (
@@ -301,7 +302,7 @@ function DialogJpa() {
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 3 }} m={0}>
                       <SAETextField
-                        label="ID"
+                        label={C.eventID}
                         type="number"
                         fullWidth
                         value={dialogData.id}
@@ -311,7 +312,7 @@ function DialogJpa() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 9 }} m={0}>
                       <SAETextField
-                        label="Encargado"
+                        label={C.eventManager}
                         value={dialogData.encargado}
                         onChange={(e) =>
                           handleDataChange("encargado", e.target.value)
@@ -322,7 +323,7 @@ function DialogJpa() {
                   </Grid>
 
                   <SAETextField
-                    label="Nombre del Evento"
+                    label={C.eventName}
                     value={dialogData.nombre_evento}
                     onChange={(e) =>
                       handleDataChange("nombre_evento", e.target.value)
@@ -330,7 +331,7 @@ function DialogJpa() {
                     fullWidth
                   />
                   <SAETextField
-                    label="URL Maps"
+                    label={C.eventURL}
                     value={dialogData.lugar}
                     onChange={(e) => handleDataChange("lugar", e.target.value)}
                     fullWidth
@@ -339,7 +340,7 @@ function DialogJpa() {
                   <CopyURLButton />
 
                   <SAETextField
-                    label="Fecha del Evento"
+                    label={C.eventeDate}
                     type="date"
                     value={dialogData.fecha_evento}
                     onChange={(e) =>
@@ -351,7 +352,7 @@ function DialogJpa() {
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETimeField
-                        label="Hora inicio"
+                        label={C.eventStartTime}
                         value={
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
@@ -366,7 +367,7 @@ function DialogJpa() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETimeField
-                        label="Hora fin"
+                        label={C.eventEndTime}
                         value={
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
@@ -391,7 +392,7 @@ function DialogJpa() {
               disabled={dialogSaving}
               startIcon={<CloseIcon />}
             >
-              Cancelar
+              {C.cancel}
             </SAEButton>
             <SAEButton
               variant="contained"
@@ -408,10 +409,10 @@ function DialogJpa() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
+                ? C.create
                 : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                  ? C.delete
+                  : C.save}
             </SAEButton>
           </DialogActions>
         </Dialog>
@@ -447,11 +448,11 @@ function DialogJpa() {
               {dialogMode === "delete" ? (
                 <>
                   <Typography variant="subtitle2" component="span">
-                    Esta seguro que quiere eliminar el evento:
+                    {C.eventDeleteConfirm}
                   </Typography>
                   <Typography variant="h7" component="span">
-                    ID:{dialogData.id} <br />
-                    Nombre: "{dialogData.nombre_evento}"
+                    {C.eventID}:{dialogData.id} <br />
+                    {C.eventName}: "{dialogData.nombre_evento}"
                   </Typography>
                 </>
               ) : (
@@ -459,7 +460,7 @@ function DialogJpa() {
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 3 }} m={0}>
                       <SAETextField
-                        label="ID"
+                        label={C.eventID}
                         type="number"
                         fullWidth
                         value={dialogData.id}
@@ -469,7 +470,7 @@ function DialogJpa() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 9 }} m={0}>
                       <SAETextField
-                        label="Encargado"
+                        label={C.eventManager}
                         value={dialogData.encargado}
                         onChange={(e) =>
                           handleDataChange("encargado", e.target.value)
@@ -480,7 +481,7 @@ function DialogJpa() {
                   </Grid>
 
                   <SAETextField
-                    label="Nombre del Evento"
+                    label={C.eventName}
                     value={dialogData.nombre_evento}
                     onChange={(e) =>
                       handleDataChange("nombre_evento", e.target.value)
@@ -488,7 +489,7 @@ function DialogJpa() {
                     fullWidth
                   />
                   <SAETextField
-                    label="URL Maps"
+                    label={C.eventURL}
                     value={dialogData.lugar}
                     onChange={(e) => handleDataChange("lugar", e.target.value)}
                     fullWidth
@@ -497,7 +498,7 @@ function DialogJpa() {
                   <CopyURLButton />
 
                   <SAETextField
-                    label="Fecha del Evento"
+                    label={C.eventeDate}
                     type="date"
                     value={dialogData.fecha_evento}
                     onChange={(e) =>
@@ -509,7 +510,7 @@ function DialogJpa() {
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETimeField
-                        label="Hora inicio"
+                        label={C.eventStartTime}
                         value={
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
@@ -524,7 +525,7 @@ function DialogJpa() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETimeField
-                        label="Hora fin"
+                        label={C.eventEndTime}
                         value={
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
@@ -549,7 +550,7 @@ function DialogJpa() {
               disabled={dialogSaving}
               startIcon={<CloseIcon />}
             >
-              Cancelar
+              {C.cancel}
             </SAEButton>
             <SAEButton
               variant="contained"
@@ -566,10 +567,10 @@ function DialogJpa() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
+                ? C.create
                 : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                  ? C.delete
+                  : C.save}
             </SAEButton>
           </DialogActions>
         </Dialog>
@@ -605,12 +606,11 @@ function DialogJpa() {
               {dialogMode === "delete" ? (
                 <>
                   <Typography variant="subtitle2" component="span">
-                    Esta seguro que quiere eliminar el Puesto:
+                    {C.standDeleteConfirm}
                   </Typography>
                   <Typography variant="h7" component="span">
-                    ID:{dialogData.id} <br />
-                    Nombre: "{dialogData.nombre_stand}"
-                    {console.log("dialogData", dialogData)}
+                    {C.eventID}:{dialogData.id} <br />
+                    {C.standName}: "{dialogData.nombre_stand}"
                   </Typography>
                 </>
               ) : (
@@ -618,7 +618,7 @@ function DialogJpa() {
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 3 }} m={0}>
                       <SAETextField
-                        label="ID"
+                        label={C.eventID}
                         type="number"
                         fullWidth
                         value={dialogData.id}
@@ -628,7 +628,7 @@ function DialogJpa() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 9 }} m={0}>
                       <SAETextField
-                        label="Expositor"
+                        label={C.standExpo}
                         value={dialogData.expositor}
                         onChange={(e) =>
                           handleDataChange("expositor", e.target.value)
@@ -639,7 +639,7 @@ function DialogJpa() {
                   </Grid>
 
                   <SAETextField
-                    label="Nombre del Stand"
+                    label={C.standName}
                     value={dialogData.nombre_stand}
                     onChange={(e) =>
                       handleDataChange("nombre_stand", e.target.value)
@@ -647,7 +647,7 @@ function DialogJpa() {
                     fullWidth
                   />
                   <SAETextField
-                    label="Lugar en la Facultad"
+                    label={C.standUbi}
                     value={dialogData.ubicacion}
                     onChange={(e) =>
                       handleDataChange("ubicacion", e.target.value)
@@ -657,7 +657,7 @@ function DialogJpa() {
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETimeField
-                        label="Hora inicio"
+                        label={C.eventStartTime}
                         value={
                           dialogData?.horario_inicio?.split?.("hs")?.[0] || ""
                         }
@@ -672,7 +672,7 @@ function DialogJpa() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETimeField
-                        label="Hora fin"
+                        label={C.eventEndTime}
                         value={
                           dialogData?.horario_fin?.split?.("hs")?.[0] || ""
                         }
@@ -697,7 +697,7 @@ function DialogJpa() {
               disabled={dialogSaving}
               startIcon={<CloseIcon />}
             >
-              Cancelar
+              {C.cancel}
             </SAEButton>
             <SAEButton
               variant="contained"
@@ -714,10 +714,10 @@ function DialogJpa() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
+                ?  C.create
                 : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                  ? C.delete
+                  : C.save}
             </SAEButton>
           </DialogActions>
         </Dialog>
@@ -753,11 +753,11 @@ function DialogJpa() {
               {dialogMode === "delete" ? (
                 <>
                   <Typography variant="subtitle2" component="span">
-                    Esta seguro que quiere eliminar el Interesado:
+                    {C.interestDeleteConfirm}
                   </Typography>
                   <Typography variant="h7" component="span">
-                    ID:{dialogData.id} <br />
-                    Nombre: "{dialogData.nombre_interesado}"
+                    {C.eventID}:{dialogData.id} <br />
+                    {C.interestName}: "{dialogData.nombre_interesado}"
                   </Typography>
                 </>
               ) : (
@@ -765,7 +765,7 @@ function DialogJpa() {
                   <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 3 }} m={0}>
                       <SAETextField
-                        label="ID"
+                        label={C.eventID}
                         type="number"
                         fullWidth
                         value={dialogData.id}
@@ -775,7 +775,7 @@ function DialogJpa() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 9 }} m={0}>
                       <SAETextField
-                        label="Nombre del Interesado"
+                        label={C.interestName}
                         value={dialogData.nombre_interesado}
                         onChange={(e) =>
                           handleDataChange("nombre_interesado", e.target.value)
@@ -785,7 +785,7 @@ function DialogJpa() {
                     </Grid>
                   </Grid>
                   <SAETextField
-                    label="Contacto Telefonico"
+                    label={C.interestPhone}
                     value={dialogData.contacto}
                     onChange={(e) =>
                       handleDataChange("contacto", e.target.value)
@@ -793,7 +793,7 @@ function DialogJpa() {
                     fullWidth
                   />
                   <SAETextField
-                    label="Contacto Electronico"
+                    label={C.interestEmail}
                     value={dialogData.email}
                     onChange={(e) => handleDataChange("email", e.target.value)}
                     error={Boolean(
@@ -801,7 +801,7 @@ function DialogJpa() {
                     )}
                     helperText={
                       dialogData.email && !isValidEmail(dialogData.email)
-                        ? "Ingrese un correo electrónico válido"
+                        ? C.interestEmailHelp
                         : ""
                     }
                     fullWidth
@@ -817,7 +817,7 @@ function DialogJpa() {
               disabled={dialogSaving}
               startIcon={<CloseIcon />}
             >
-              Cancelar
+              C.cancel
             </SAEButton>
             <SAEButton
               variant="contained"
@@ -834,10 +834,10 @@ function DialogJpa() {
               }
             >
               {dialogMode === "create"
-                ? "Crear"
+                ? C.create
                 : dialogMode === "delete"
-                  ? "Eliminar"
-                  : "Guardar"}
+                  ? C.delete
+                  : C.save}
             </SAEButton>
           </DialogActions>
         </Dialog>

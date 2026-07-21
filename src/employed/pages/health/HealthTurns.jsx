@@ -1,7 +1,4 @@
 import { useCallback, useState, useMemo } from "react";
-import { HealthUsersProvider } from "../../context/providers/healthProvider";
-import { useHealth } from "../../context/employedContext";
-
 import {
   Autocomplete,
   Alert,
@@ -37,15 +34,22 @@ import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAETimeField from "../../../shared/components/inputs/SAETimeField";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import HeaderPageEmployed from "../../../shared/components/HeaderPageEmployed";
-import { useNotification } from "../../../shared/context/sharedContext";
-import SAEDataGrid from "../../../shared/components/datagrid/SAEDataGrid";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAETimeField from "../../../assets/components/inputs/SAETimeField";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed"; 
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
 
+import { HealthUsersProvider } from "../../context/providers/healthProvider";
+import { useNotification } from "../../../shared/context/sharedContext";
+import { useHealth } from "../../context/employedContext";
+import { formatDate } from "../../../utils/date.utils";
+import { carreras } from "../../../utils/common/constants";
+import { HEALTH_STRING } from "../../../utils/strings/employed.strings";
+
+const C = HEALTH_STRING;
 const PALETTE = [
   "#a0a0a0", //Pendiente
   "#1538B8", //Asignado
@@ -53,18 +57,6 @@ const PALETTE = [
   "#a8cfff", //En curso
   "#6FA958", //Finalizado
   "#FF8E2C", //Reprogramado
-];
-
-const CAREERS = [
-  { value: "sistemas", label: "Sistemas" },
-  { value: "electrica", label: "Eléctrica" },
-  { value: "electronica", label: "Electrónica" },
-  { value: "mecanica", label: "Mecánica" },
-  { value: "metalurgica", label: "Metalúrgica" },
-  { value: "quimica", label: "Química" },
-  { value: "industrial", label: "Industrial" },
-  { value: "civil", label: "Civil" },
-  { value: "frc", label: "FRC" },
 ];
 
 export function TurnGrid() {
@@ -89,11 +81,7 @@ export function TurnGrid() {
     openShowNoActivos,
     // Personal y estados
     personal,
-    estadosTurno,
-    //Fundamentales para el funcionamiento de los Dialog
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMsg,
+    estadosTurno
   } = useHealth();
 
   const {
@@ -117,8 +105,8 @@ export function TurnGrid() {
         key: "inactiveTurns",
         title:
           inactiveTurnsType === "cancelados"
-            ? "Turnos Cancelados"
-            : "Turnos Finalizados",
+            ? C.turnsCancel
+            : C.turnsFinish,
         icon: CalendarMonthIcon,
         rows: noActivosRows,
         columns: noActivosColumns,
@@ -150,11 +138,11 @@ export function TurnGrid() {
       .split("@")[0];
 
     if (!studentId) {
-      setDialogError("Ingresá un legajo para buscar");
+      setDialogError(C.turnsMissingID);
       return;
     }
     if (!careerSearch) {
-      setDialogError("Seleccioná una carrera para buscar");
+      setDialogError(C.turnsMissingDegree);
       return;
     }
 
@@ -166,8 +154,8 @@ export function TurnGrid() {
     <>
       <SAEPage>
         <HeaderPageEmployed
-          header="Modulo de Salud"
-          title="Turnero"
+          header={C.turnsHeader}
+          title={C.turnsTitle}
           backTo="/Gestion-Salud"
         />
 
@@ -205,7 +193,7 @@ export function TurnGrid() {
                     {/* <DashboardIcon sx={{ fontSize: 32 }} /> */}
                     <Box>
                       <Typography variant="h4" fontWeight={700}>
-                        Creacion de Turnos
+                       {C.turnsCreation}
                       </Typography>
                     </Box>
                   </Stack>
@@ -221,7 +209,8 @@ export function TurnGrid() {
                       "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
                     }}
                   >
-                    Crear Turno
+                    {C.turnsCreationButton}
+                    
                   </SAEButton>
                 </Stack>
               </Box>
@@ -305,7 +294,7 @@ export function TurnGrid() {
                 component="span"
                 sx={{ fontWeight: "bold" }}
               >
-                {dialogMode === "create" ? "Nuevo Turno" : "Editar Turno"}
+                {dialogMode === "create" ? C.turnsCreation: C.turnsEdit}
               </Typography>
               <IconButton onClick={closeDialog} size="small" color="inherit">
                 <CloseIcon />
@@ -336,7 +325,7 @@ export function TurnGrid() {
                             sx={{ mb: 1 }}
                           >
                             <SAETextField
-                              label="Legajo"
+                              label={C.turnsUserId}
                               value={dialogData.legajo}
                               onChange={(e) =>
                                 handleDataChange("legajo", e.target.value)
@@ -357,9 +346,9 @@ export function TurnGrid() {
                               @
                             </Typography>
                             <Autocomplete
-                              options={CAREERS}
+                              options={carreras}
                               value={
-                                CAREERS.find(
+                                carreras.find(
                                   (career) => career.value === careerSearch,
                                 ) ?? null
                               }
@@ -410,7 +399,7 @@ export function TurnGrid() {
                             }}
                           >
                             <Typography variant="subtitle1" fontWeight="bold">
-                              Usuario Seleccionado:
+                             {C.turnsUser}
                             </Typography>
                             {/* Reemplazá esto con los campos reales de tu objeto "usuarioSelected" */}
                             <Typography variant="body1">
@@ -424,7 +413,7 @@ export function TurnGrid() {
                               onClick={() => setUsuarioSelected(null)} // Resetea para permitir volver a buscar
                               sx={{ mt: 2 }}
                             >
-                              Volver a buscar
+                              {C.turnsUserSearchAgain}
                             </Button>
                           </Box>
                         )}
@@ -434,7 +423,7 @@ export function TurnGrid() {
                       <>
                         <Grid size={{ xs: 12, md: 3 }} m={0}>
                           <SAETextField
-                            label="ID Turno"
+                            label={C.turnsId}
                             type="number"
                             fullWidth
                             value={dialogData.id}
@@ -446,7 +435,7 @@ export function TurnGrid() {
                         </Grid>
                         <Grid size={{ xs: 12, md: 9 }} m={0}>
                           <SAETextField
-                            label="Paciente"
+                            label={C.turnsPacientName}
                             value={dialogData.paciente}
                             onChange={(e) =>
                               handleDataChange("paciente", e.target.value)
@@ -457,7 +446,7 @@ export function TurnGrid() {
                         </Grid>
                         <Grid size={{ xs: 12 }} m={0}>
                           <SAETextField
-                            label="Legajo Estudiante"
+                            label={C.turnsUserId}
                             value={dialogData.legajo}
                             onChange={(e) =>
                               handleDataChange("legajo", e.target.value)
@@ -502,7 +491,7 @@ export function TurnGrid() {
                         renderInput={(params) => (
                           <SAETextField
                             {...params}
-                            label="Especialistas"
+                            label={C.turnsMedic}
                             inputProps={{
                               ...params.inputProps,
                               readOnly: true, // Esto evita la escritura
@@ -518,7 +507,7 @@ export function TurnGrid() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETextField
-                        label="Fecha de Atencion"
+                        label={C.turnsAppointment}
                         type="date"
                         value={dialogData.fecha_atencion}
                         onChange={(e) =>
@@ -530,7 +519,7 @@ export function TurnGrid() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
                       <SAETimeField
-                        label="Hora de atención"
+                        label={C.turnsHour}
                         value={
                           dialogData?.hora_atencion?.split?.("hs")?.[0] || ""
                         }
@@ -550,7 +539,7 @@ export function TurnGrid() {
                     </Grid>
                     <Grid size={{ xs: 12 }}>
                       <SAETextField
-                        label="Asunto"
+                        label={C.turnsSubject}
                         value={dialogData.asunto}
                         onChange={(e) =>
                           handleDataChange("asunto", e.target.value)
@@ -562,7 +551,7 @@ export function TurnGrid() {
                     </Grid>
                     <Grid size={{ xs: 12 }}>
                       <Divider textAlign="center">
-                        <Chip label="Estado" size="small" />
+                        <Chip label={C.turnsState} size="small" />
                       </Divider>
                     </Grid>
                     <Grid size={{ xs: 12 }} m={0}>
@@ -616,7 +605,7 @@ export function TurnGrid() {
                 disabled={dialogSaving}
                 startIcon={<CloseIcon />}
               >
-                Cancelar
+                {C.cancel}
               </SAEButton>
               <SAEButton
                 variant="contained"
@@ -633,30 +622,14 @@ export function TurnGrid() {
                 }
               >
                 {dialogMode === "create"
-                  ? "Crear"
+                  ? C.create
                   : dialogMode === "delete"
-                    ? "Eliminar"
-                    : "Guardar"}
+                    ? C.delete
+                    : C.save}
               </SAEButton>
             </DialogActions>
           </Dialog>
         )}
-        {/* MENSAJE DE EXITO */}
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={3000}
-          onClose={() => setSnackbarOpen(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => setSnackbarOpen(false)}
-            severity="success"
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            {snackbarMsg}
-          </Alert>
-        </Snackbar>
       </SAEPage>
     </>
   );
@@ -865,10 +838,10 @@ function TurnList({
                         noWrap
                         sx={{ maxWidth: "140px" }}
                       >
-                        {turno.fecha_solicitud || "Fecha Solicitud"}
+                        {formatDate(turno.fecha_solicitud,"short") || C.turnsNoDate}
                       </Typography>
                       <Chip
-                        label={turno.estado || "Sin Definir"}
+                        label={turno.estado || C.turnsNoState}
                         size="small"
                         sx={{
                           bgcolor: PALETTE[estadoActual],
@@ -885,7 +858,7 @@ function TurnList({
                     <Stack spacing={1} mt={1.5}>
                       <Typography variant="body2" sx={{ maxWidth: "140px" }}>
                         <strong>{"Solicitante: "}</strong>
-                        {turno.paciente || "Error recuperando el nombre"}
+                        {turno.paciente || C.turnsNoName}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -893,23 +866,23 @@ function TurnList({
                         sx={{ maxWidth: "140px" }}
                       >
                         <strong>{"Asunto: "}</strong>
-                        {turno.asunto || "Turno sin Asunto"}
+                        {turno.asunto ||C.turnsNoSubject}
                       </Typography>
                       <Typography variant="body2" sx={{ maxWidth: "140px" }}>
                         <strong>{"Atiende: "}</strong>
-                        {turno.especialista || "Sin medico asignado"}
+                        {turno.especialista || C.turnsNoMedic}
                       </Typography>
                       <Stack direction="row" alignItems="center" gap={1}>
                         <CalendarMonthIcon fontSize="small" color="action" />
                         <Typography variant="body2" color="text.secondary">
-                          {turno.fecha_atencion || "Sin Fecha Asignada"}
+                          {turno.fecha_atencion || C.turnsNoAppointment}
                         </Typography>
                       </Stack>
 
                       <Stack direction="row" alignItems="center" gap={1}>
                         <AccessTimeIcon fontSize="small" color="action" />
                         <Typography variant="body2" color="text.secondary">
-                          {turno.hora_atencion || "Sin Horario Asignado"}
+                          {turno.hora_atencion || C.turnsNoHour}
                         </Typography>
                       </Stack>
                     </Stack>

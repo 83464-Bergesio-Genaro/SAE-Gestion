@@ -21,23 +21,25 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import ScheduleIcon from "@mui/icons-material/Schedule";
 
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import CloseIcon from "@mui/icons-material/Close";
 
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAEPage from "../../../shared/components/page/SAEPage";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import SAEDataGrid from "../../../assets/components/dataGrid/SAEDataGrid";
+import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed";
 
-import GestionarHorariosDialog from "./HorariosDialog";
+import GestionarHorariosDialog from "./horariosDialog";
+import { EmployedCalendar } from "./employedCalendar";
 
-import { EmployedCalendar } from "./EmployedCalendar";
 import { useEmploy } from "../../context/employedContext";
 import { AdminUsersProvider } from "../../context/providers/employProvider";
-import HeaderPageEmployed from "../../../shared/components/headerPageEmployed";
-import SAEDataGrid from "../../../shared/components/dataGrid/SAEDataGrid";
 import { useNotification } from "../../../shared/context/sharedContext";
-// 1. ESTE SUBCOMPONENTE SÍ PUEDE USAR EL HOOK (Porque está abajo del Provider)
+import { USER_STRINGS } from "../../../utils/strings/employed.strings";
+
+const C = USER_STRINGS;
 function EmployedAdminContent() {
   const {
     empleadosRows,
@@ -89,9 +91,9 @@ function EmployedAdminContent() {
   return (
     <SAEPage>
       <HeaderPageEmployed
-        header="Módulo de Empleados"
-        title="Gestión de Empleados y sus Horarios"
-        description="Permite cargar empleados, modificar sus permisos y sus horarios"
+        header={C.headerTitle}
+        title={C.headerMainSubtitle}
+        description={C.headerMainDescription}
       />
 
       <SAEDataGrid sectionConfig={sectionConfig} />
@@ -121,10 +123,10 @@ function EmployedAdminContent() {
               <ScheduleIcon sx={{ fontSize: 32 }} />
               <Box>
                 <Typography variant="h6" fontWeight={700}>
-                  Horarios Empleados
+                  {C.scheduleTitle}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.85 }}>
-                  Nuestros Horarios
+                  {C.scheduleSubtitle}
                 </Typography>
               </Box>
             </Stack>
@@ -140,14 +142,13 @@ function EmployedAdminContent() {
                 "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
               }}
             >
-              Gestionar Horarios
+              {C.scheduleButton}
             </SAEButton>
           </Stack>
         </Box>
       </Card>
       <EmployedCalendar />
 
-      {/*Esto abre un dialog para cargar, modificar o eliminar los datos del tipo seleccionado. Yo lo separo asi porque es mas comodo visualmente */}
       {dialogType === "empleados" && <EmpleadosDialog />}
       {dialogType === "usuarios" && <UsuariosDialog />}
       <GestionarHorariosDialog open={horariosDialogOpen} />
@@ -178,7 +179,7 @@ function EmpleadosDialog() {
         }}
       >
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          {dialogMode === "create" ? "Nuevo Empleado" : "Editar Empleado"}
+          {dialogMode === "create" ? C.employCreate : C.employUpdate}
         </Typography>
         <IconButton onClick={closeDialog} size="small">
           <CloseIcon />
@@ -197,7 +198,7 @@ function EmpleadosDialog() {
             <Grid container spacing={1}>
               <Grid size={{ xs: 12, md: 3 }} m={0}>
                 <SAETextField
-                  label="ID"
+                  label={C.employID}
                   type="number"
                   fullWidth
                   value={dialogData.id}
@@ -207,7 +208,7 @@ function EmpleadosDialog() {
               </Grid>
               <Grid size={{ xs: 12, md: 9 }} m={0}>
                 <SAETextField
-                  label="Nombre Completo"
+                  label={C.employCompleteName}
                   value={dialogData.nombre_empleado}
                   disabled
                   onChange={(e) =>
@@ -234,34 +235,31 @@ function EmpleadosDialog() {
                     fontWeight={600}
                     gutterBottom
                   >
-                    ATENCION
+                    {C.employWarningTitle}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Al crear un nuevo empleado debe escribirse sin errores su
-                    legajo, ya que esta sera la unica forma que pueda acceder a
-                    la aplicacion. Debe contener @utn.frc.edu.ar al final.
+                    {C.employWarningBody1}
                     <br />
                     <br />
-                    Desde esta pestaña solo se podran crear perfiles de
-                    empleados, comedor, salud y administrador.
+                    {C.employWarningEnd}
                   </Typography>
                 </CardContent>
               </Card>
 
               <SAETextField
-                label="Nombres"
+                label={C.employNames}
                 value={dialogData.nombres}
                 onChange={(e) => handleDataChange("nombres", e.target.value)}
                 fullWidth
               />
               <SAETextField
-                label="Apellidos"
+                label={C.employLastName}
                 value={dialogData.apellidos}
                 onChange={(e) => handleDataChange("apellidos", e.target.value)}
                 fullWidth
               />
               <SAETextField
-                label="Nombre de Usuario"
+                label={C.employUserName}
                 value={dialogData.nombre_usuario}
                 onChange={(e) =>
                   handleDataChange("nombre_usuario", e.target.value)
@@ -272,7 +270,7 @@ function EmpleadosDialog() {
           )}
 
           <SAETextField
-            label="Legajo"
+            label={C.studentID}
             value={dialogData.legajo}
             disabled={dialogMode !== "create"}
             onChange={(e) => handleDataChange("legajo", e.target.value)}
@@ -294,7 +292,7 @@ function EmpleadosDialog() {
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Perfil"
+                label={C.employProfile}
                 inputProps={{
                   ...params.inputProps,
                   readOnly: true,
@@ -314,7 +312,7 @@ function EmpleadosDialog() {
                   color="primary"
                 />
               }
-              label={dialogData.activo ? "Usuario Activo" : "Usuario NO Activo"}
+              label={dialogData.activo ? C.employActive: C.employNoActive}
             />
           )}
         </Stack>
@@ -326,7 +324,7 @@ function EmpleadosDialog() {
           onClick={closeDialog}
           disabled={dialogSaving}
         >
-          Cancelar
+          {C.cancel}
         </SAEButton>
         <SAEButton
           variant="contained"
@@ -336,7 +334,7 @@ function EmpleadosDialog() {
             dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
           }
         >
-          {dialogMode === "create" ? "Crear" : "Guardar"}
+          {dialogMode === "create" ? C.create : C.save}
         </SAEButton>
       </DialogActions>
     </Dialog>
@@ -366,7 +364,7 @@ function UsuariosDialog() {
         }}
       >
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          {dialogMode === "create" ? "Nuevo Usuario" : "Editar Usuario"}
+          {dialogMode === "create" ? C.userCreate: C.userUpdate}
         </Typography>
         <IconButton onClick={closeDialog} size="small">
           <CloseIcon />
@@ -385,7 +383,7 @@ function UsuariosDialog() {
             <Grid container spacing={1}>
               <Grid size={{ xs: 12, md: 3 }} m={0}>
                 <SAETextField
-                  label="ID"
+                  label={C.employID}
                   type="number"
                   fullWidth
                   value={dialogData.id}
@@ -395,7 +393,7 @@ function UsuariosDialog() {
               </Grid>
               <Grid size={{ xs: 12, md: 9 }} m={0}>
                 <SAETextField
-                  label="Nombre Completo"
+                  label={C.employCompleteName}
                   value={dialogData.nombre_usuario}
                   disabled
                   onChange={(e) =>
@@ -422,24 +420,22 @@ function UsuariosDialog() {
                     fontWeight={600}
                     gutterBottom
                   >
-                    ATENCION
+                    {C.employWarningTitle}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Al crear el usuario desde esta pestaña se crea como
-                    estudiante, con id_perfil = 1. El legajo debe estar completo
-                    e incluir @utn.frc.edu.ar al final.
+                    {C.userWarningBody2}
                   </Typography>
                 </CardContent>
               </Card>
 
               <SAETextField
-                label="Nombres"
+                label={C.employNames}
                 value={dialogData.nombres}
                 onChange={(e) => handleDataChange("nombres", e.target.value)}
                 fullWidth
               />
               <SAETextField
-                label="Apellidos"
+                label={C.employLastName}
                 value={dialogData.apellidos}
                 onChange={(e) => handleDataChange("apellidos", e.target.value)}
                 fullWidth
@@ -463,7 +459,7 @@ function UsuariosDialog() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Carrera"
+                    label={C.userDegree}
                     inputProps={{
                       ...params.inputProps,
                       readOnly: true,
@@ -475,7 +471,7 @@ function UsuariosDialog() {
           )}
 
           <SAETextField
-            label="Legajo"
+            label={C.studentID}
             value={dialogData.legajo}
             disabled={dialogMode !== "create"}
             onChange={(e) => handleDataChange("legajo", e.target.value)}
@@ -493,7 +489,7 @@ function UsuariosDialog() {
                   color="primary"
                 />
               }
-              label={dialogData.activo ? "Desactivar Usuario" : "Activar Usuario"}
+              label={dialogData.activo ? C.employActive: C.employNoActive}
             />
           )}
         </Stack>
@@ -505,7 +501,7 @@ function UsuariosDialog() {
           onClick={closeDialog}
           disabled={dialogSaving}
         >
-          Cancelar
+          {C.cancel}
         </SAEButton>
         <SAEButton
           variant="contained"
@@ -515,14 +511,14 @@ function UsuariosDialog() {
             dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
           }
         >
-          {dialogMode === "create" ? "Crear" : "Guardar"}
+          {dialogMode === "create" ? C.create : C.save}
         </SAEButton>
       </DialogActions>
     </Dialog>
   );
 }
 
-export default function EmployedAdmin() {
+export default function AdminEmployed() {
   return (
     <AdminUsersProvider>
       <EmployedAdminContent />

@@ -16,23 +16,25 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SendIcon from "@mui/icons-material/Send";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
 
 import {
   CONSULTATION_FAQS,
   QUICK_CONSULTATION_FAQS,
   SAE_EMAIL,
-} from "../../../shared/pages/consultations/consultations.config";
+} from "../../../utils/common/common.config.js"
 
-import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
-import TitleBox from "../../../shared/components/titleBox";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import { SAETypography } from "../../../shared/components/typography/SAETypography";
-import { CONSULTATIONS_STRINGS } from "../../../utils/gena/student.string";
 
-import { getLinkFrecuenteIconByIndex } from "../../../shared/pages/consultations/linkFrecuentesIcons";
+import HeaderPageStudent from "../../../assets/components/headerPage/headerPageStudent.jsx";
+import TitleBox from "../../../assets/components/titleBox.jsx";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import { SAETypography } from "../../../assets/components/typography/SAETypography";
+
+import { CONSULTATIONS_STRINGS } from "../../../utils/strings/student.strings.js"; 
+
+import { getLinkFrecuenteIconByIndex } from "../../../utils/util.jsx"; 
 import { ConsultationAlumnoProvider } from "../../../students/context/providers/consultationsProvider";
 import { useConsultationContext } from "../../context/studentContext";
 
@@ -54,7 +56,7 @@ export function StudentContent() {
 
   return (
     <SAEPage>
-      <StudentHeaderPage
+      <HeaderPageStudent
         title={C.headerTitle}
         description={C.headerDescription}
         backgroundImage="images/buildings/inchaurrondo/FrenteVidriado.jpg"

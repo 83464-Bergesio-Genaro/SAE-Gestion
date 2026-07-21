@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { JPAContext } from "../employedContext";
+import { Box, IconButton, Link } from "@mui/material";
 import {
   ObtenerEventosPublicos,
   ObtenerEventosSAE,
@@ -15,128 +15,27 @@ import {
   modificarInteresado,
   eliminarInteresado,
 } from "../../../api/JPAService";
-import { Box, IconButton, Link } from "@mui/material";
+
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  formatHeader,
-  generateRows,
-  formatTime,
-} from "../../../utils/util.jsx";
+
+import { generateRows,generateColumns } from "../../../utils/datagrid.utils.jsx";
+import { formatDate, formatTime, toApiDateTime } from "../../../utils/date.utils.js";
+import { EMPTY_EVENTO_PUBLICO, EMPTY_INTERESADOS, EMPTY_STANDS } from "../../../utils/common/common.config.js";
+import { JPA_STRINGS } from "../../../utils/strings/employed.strings.js";
+
 import { useNotification } from "../../../shared/context/sharedContext";
+import { JPAContext } from "../employedContext";
 
-const generateColumns = (data, editAction, deleteAction) => {
-  if (!data || data.length === 0) return [];
-
-  const columns = Object.keys(data).map((key) => {
-    const isId = key.toLowerCase().includes("id");
-    const isShort = [
-      "estado",
-      "cupo",
-      "duracion",
-      "horario_inicio",
-      "horario_fin",
-    ].includes(key.toLowerCase());
-    const column = {
-      field: key,
-      headerName: formatHeader(key),
-
-      flex: isId ? 0.3 : 1,
-      minWidth: isId ? 50 : 150,
-      maxWidth: isId ? 70 : isShort ? 100 : NaN,
-      align: isId || isShort ? "center" : "left",
-      headerAlign: isId || isShort ? "center" : "left",
-    };
-
-    if (key.toLowerCase() === "lugar") {
-      column.renderCell = (params) => {
-        const value = String(params.value ?? "").trim();
-        const isLink = /^https?:\/\//i.test(value);
-
-        return isLink ? (
-          <Link
-            href={value}
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="hover"
-            onClick={(event) => event.stopPropagation()}
-          >
-            Ver ubicación
-          </Link>
-        ) : (
-          value || "-"
-        );
-      };
-    }
-
-    return column;
-  });
-
-  // 👉 columna de acciones
-  columns.push({
-    field: "actions",
-    headerName: "Acciones",
-    sortable: false,
-    filterable: false,
-    width: 100,
-    renderCell: (params) => (
-      <Box>
-        <IconButton
-          size="small"
-          sx={{ color: "var(--primary)" }}
-          title="Ver / Editar"
-          onClick={() => editAction(params.row)}
-        >
-          <EditIcon fontSize="small" />
-        </IconButton>
-        <IconButton
-          size="small"
-          sx={{ color: "var(--primary)" }}
-          title="Eliminar"
-          onClick={() => deleteAction(params.row)}
-        >
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </Box>
-    ),
-  });
-
-  return columns;
-};
-const EMPTY_EVENTO_PUBLICO = {
-  id: "",
-  encargado: "",
-  nombre_evento: "",
-  lugar: "",
-  fecha_evento: "",
-  horario_inicio: "",
-  horario_fin: "",
-  duracion: "",
-};
-const EMPTY_STANDS = {
-  id: "",
-  nombre_stand: "",
-  expositor: "",
-  ubicacion: "",
-  horario_inicio: "",
-  horario_fin: "",
-};
-const EMPTY_INTERESADOS = {
-  id: "",
-  nombre_interesado: "",
-  contacto: "",
-  email: "",
-};
+const C = JPA_STRINGS;
 export function JPAProvider({ children }) {
   const {
     showNotification,
+    openDialog,
+    closeDialog,
     dialogData,
     dialogMode,
-    setDialogOpen,
-    setDialogData,
-    setDialogType,
-    setDialogMode,
     setDialogError,
     setDialogSaving,
   } = useNotification();
@@ -158,26 +57,14 @@ export function JPAProvider({ children }) {
     }
   }, []);
   const openCreateEventoPublico = () => {
-    setDialogData(EMPTY_EVENTO_PUBLICO);
-    setDialogType("eventoPublico");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogOpen(true);
+    openDialog("eventoPublico","create",EMPTY_EVENTO_PUBLICO);
   };
   const openEditEventoPublico = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("eventoPublico");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("eventoPublico","edit",row);
+  }, [openDialog]);
   const openDeleteEvento = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("eventoPublico");
-    setDialogMode("delete");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("eventoPublico","delete",row);
+  }, [openDialog]);
 
   useEffect(() => {
     fetchEventosPublicos();
@@ -185,14 +72,12 @@ export function JPAProvider({ children }) {
 
   const handleEventoPublicoSave = async () => {
     setDialogSaving(true);
-    setDialogError("");
     try {
       if (dialogMode === "delete") {
         await eliminarEvento(dialogData.id);
-        setDialogOpen(false);
-        setDialogData(EMPTY_EVENTO_PUBLICO);
+        closeDialog();
         await fetchEventosPublicos();
-        showNotification("Se elimino el evento correctamente","success");
+        showNotification(C.eventDeleteMsg,"success");
         return;
       }
 
@@ -204,9 +89,7 @@ export function JPAProvider({ children }) {
           : id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
       const body = {
         ...rest,
-        fecha_evento: dialogData.fecha_evento
-          ? `${dialogData.fecha_evento}T00:00:00`
-          : new Date(),
+        fecha_evento: toApiDateTime(dialogData.fecha_evento),
         id: id_nuevo,
         ubicacion: lugar,
         horario_inicio: formatTime(dialogData.horario_inicio),
@@ -218,19 +101,18 @@ export function JPAProvider({ children }) {
       } else {
         await modificarEvento(dialogData.id, body);
       }
-      setDialogOpen(false);
-      setDialogData(EMPTY_EVENTO_PUBLICO);
       await fetchEventosPublicos();
+      closeDialog();
       showNotification(
         dialogMode === "create"
-          ? "Evento creado!"
+          ? C.eventCreateMsg
           : dialogMode === "edit"
-            ? "Evento modificado correctamente"
-            : "Se elimino el evento correctamente","success"
+            ? C.eventEditMsg
+            : C.eventDeleteMsg,"success"
       );
     } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-      showNotification("Ocurrió un error al guardar", "error", 2000);
+      setDialogError(err.message || C.eventError);
+      //showNotification(C.eventError, "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -263,37 +145,23 @@ export function JPAProvider({ children }) {
   }, [fetchEventosSAE]);
 
   const openCreateEventoSAE = () => {
-    setDialogData(EMPTY_EVENTO_PUBLICO);
-    setDialogType("eventosInternos");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogOpen(true);
+    openDialog("eventosInternos","create",EMPTY_EVENTO_PUBLICO);
   };
   const openEditEventoSAE = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("eventosInternos");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("eventosInternos","edit",row);
+  }, [openDialog]);
   const openDeleteEventoSAE = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("eventosInternos");
-    setDialogMode("delete");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("eventosInternos","delete",row);
+  }, [openDialog]);
 
   const handleEventoSAESave = async () => {
     setDialogSaving(true);
-    setDialogError("");
     try {
       if (dialogMode === "delete") {
         await eliminarEvento(dialogData.id);
-        setDialogOpen(false);
-        setDialogData(EMPTY_EVENTO_PUBLICO);
+        closeDialog();
         await fetchEventosSAE();
-        showNotification("Se elimino el evento correctamente","success");
+        showNotification(C.eventDeleteMsg,"success");
         return;
       }
 
@@ -305,9 +173,7 @@ export function JPAProvider({ children }) {
           : id; /* Si esta vacio debemos mandar un valor para que no se rompa el objeto */
       const body = {
         ...rest,
-        fecha_evento: dialogData.fecha_evento
-          ? `${dialogData.fecha_evento}T00:00:00`
-          : new Date(),
+        fecha_evento: formatDate(dialogData.fecha_evento),
         id: id_nuevo,
         ubicacion: lugar,
         horario_inicio: formatTime(dialogData.horario_inicio),
@@ -319,19 +185,18 @@ export function JPAProvider({ children }) {
       } else {
         await modificarEvento(dialogData.id, body);
       }
-      setDialogOpen(false);
-      setDialogData(EMPTY_EVENTO_PUBLICO);
       await fetchEventosSAE();
+      closeDialog();
       showNotification(
         dialogMode === "create"
-          ? "Evento creado!"
+          ? C.eventCreateMsg
           : dialogMode === "edit"
-            ? "Evento modificado correctamente"
-            : "Se elimino el evento correctamente","success"
+            ? C.eventEditMsg
+            : C.eventDeleteMsg,"success"
       );
     } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-      showNotification("Ocurrió un error al guardar", "error", 2000);
+      setDialogError(err.message || C.eventError);
+      //showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -364,30 +229,17 @@ export function JPAProvider({ children }) {
   }, [fetchStands]);
 
   const openCreateStands = () => {
-    setDialogData(EMPTY_STANDS);
-    setDialogType("stands");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogOpen(true);
+    openDialog("stands","create",EMPTY_STANDS);
   };
   const openEditStands = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("stands");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("stands","edit",row);
+  }, [openDialog]);
   const openDeleteStands = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("stands");
-    setDialogMode("delete");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("stands","delete",row);
+  }, [openDialog]);
 
   const handleStandSave = async () => {
     setDialogSaving(true);
-    setDialogError("");
     try {
       const { id, ...rest } = dialogData;
       let id_nuevo =
@@ -407,20 +259,19 @@ export function JPAProvider({ children }) {
       } else {
         await eliminarStand(dialogData.id);
       }
-      setDialogOpen(false);
-      setDialogData(EMPTY_STANDS);
       fetchStands();
+      closeDialog();
       showNotification(
         dialogMode === "create"
-          ? "Puesto creado!"
+          ? C.standCreateMsg
           : dialogMode === "edit"
-            ? "Puesto modificado correctamente"
-            : "Se elimino el puesto correctamente",
+            ? C.standEditMsg
+            : C.eventDeleteMsg,
         "success"
       );
     } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-      showNotification("Ocurrió un error al guardar", "error", 2000);
+      setDialogError(err.message || C.eventError);
+      //showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -450,34 +301,17 @@ export function JPAProvider({ children }) {
   }, [fetchInteresados]);
 
   const openCreateInteresados = () => {
-    setDialogType("interesados");
-    setDialogMode("create");
-    setDialogData({ ...EMPTY_INTERESADOS }); // 👈 copia limpia
-    setDialogError("");
-
-    // 👇 asegurar que abre después
-    setTimeout(() => {
-      setDialogOpen(true);
-    }, 0);
+    openDialog("interesados","create",EMPTY_INTERESADOS);
   };
   const openEditInteresados = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("interesados");
-    setDialogMode("edit");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("interesados","edit",row);
+  }, [openDialog]);
   const openDeleteInteresados = useCallback((row) => {
-    setDialogData(row);
-    setDialogType("interesados");
-    setDialogMode("delete");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+    openDialog("interesados","delete",row);
+  }, [openDialog]);
 
   const handleInteresadoSave = async () => {
     setDialogSaving(true);
-    setDialogError("");
     try {
       const { id, ...rest } = dialogData;
       let id_nuevo =
@@ -496,20 +330,19 @@ export function JPAProvider({ children }) {
         let res = await eliminarInteresado(dialogData.id);
         console.log("res:", res);
       }
-      setDialogOpen(false);
-      setDialogData(EMPTY_INTERESADOS);
       fetchInteresados();
+      closeDialog();
       showNotification(
         dialogMode === "create"
-          ? "Interesado creado!"
+          ? C.interestCreateMsg
           : dialogMode === "edit"
-            ? "Interesado modificado correctamente"
-            : "Se elimino el interesado correctamente",
+            ? C.interestEditMsg
+            : C.interestDeleteMsg,
         "success"
       );
     } catch (err) {
-      setDialogError(err.message || "Ocurrió un error al guardar");
-      showNotification("Ocurrió un error al guardar", "error", 2000);
+      setDialogError(err.message || C.eventError);
+      //showNotification("Ocurrió un error al guardar", "error", 2000);
     } finally {
       setDialogSaving(false);
     }
@@ -519,40 +352,113 @@ export function JPAProvider({ children }) {
   }
 
   {
-    /*Necesario para cargar los datos en el dialog (ALTA) */
+    /*COLUMNAS */
   }
 
-  const eventosPublicosColumns = useMemo(
-    () =>
-      generateColumns(
-        EMPTY_EVENTO_PUBLICO,
-        openEditEventoPublico,
-        openDeleteEvento,
-      ),
-    [openEditEventoPublico, openDeleteEvento],
-  );
-  const eventosSAEColumns = useMemo(
-    () =>
-      generateColumns(
-        EMPTY_EVENTO_PUBLICO,
-        openEditEventoSAE,
-        openDeleteEventoSAE,
-      ),
-    [openEditEventoSAE, openDeleteEventoSAE],
-  );
-  const standsColumns = useMemo(
-    () => generateColumns(EMPTY_STANDS, openEditStands, openDeleteStands),
-    [openEditStands, openDeleteStands],
-  );
-  const interesadosColumns = useMemo(
-    () =>
-      generateColumns(
-        EMPTY_INTERESADOS,
-        openEditInteresados,
-        openDeleteInteresados,
-      ),
-    [openEditInteresados, openDeleteInteresados],
-  );
+  //Eventos//
+  const handleEditEventoPublico = useCallback((row) => {
+      openEditEventoPublico(row);
+  }, [openEditEventoPublico]);
+
+  const handleDeleteEvento = useCallback((row) => {
+      openDeleteEvento(row);
+  }, [openDeleteEvento]);
+
+  const eventsActions = useMemo(() => [{
+      icon: EditIcon,
+      color: "primary",
+      title: "Editar Evento",
+      onClick: handleEditEventoPublico, 
+  },{
+      icon: DeleteIcon,
+      color: "primary",
+      title: "Eliminar Evento",
+      onClick: handleDeleteEvento, 
+  }
+  ], [handleEditEventoPublico,handleDeleteEvento]);
+
+  const eventosPublicosColumns = useMemo(() => {
+    return generateColumns(EMPTY_EVENTO_PUBLICO,eventsActions);
+  }, [eventsActions]);
+
+  //EVENTOS SAE
+    const handleEditEventoSAE = useCallback((row) => {
+      openEditEventoSAE(row);
+  }, [openEditEventoSAE]);
+
+  const handleDeleteEventoSAE = useCallback((row) => {
+      openDeleteEventoSAE(row);
+  }, [openDeleteEventoSAE]);
+
+  const eventsSAEActions = useMemo(() => [{
+      icon: EditIcon,
+      color: "primary",
+      title: "Editar Evento",
+      onClick: handleEditEventoSAE, 
+  },{
+      icon: DeleteIcon,
+      color: "primary",
+      title: "Eliminar Evento",
+      onClick: handleDeleteEventoSAE, 
+  }
+  ], [handleEditEventoSAE,handleDeleteEventoSAE]);
+
+  const eventosSAEColumns = useMemo(() => {
+    return generateColumns(EMPTY_EVENTO_PUBLICO,eventsSAEActions);
+  }, [eventsSAEActions]);
+
+  // STANDS
+  const handleEditStands = useCallback((row) => {
+      openEditStands(row);
+  }, [openEditStands]);
+
+  const handleDeleteStands = useCallback((row) => {
+      openDeleteStands(row);
+  }, [openDeleteStands]);
+
+  const standActions = useMemo(() => [{
+      icon: EditIcon,
+      color: "primary",
+      title: "Editar Stands",
+      onClick: handleEditStands, 
+  },{
+      icon: DeleteIcon,
+      color: "primary",
+      title: "Eliminar Stands",
+      onClick: handleDeleteStands, 
+  }
+  ], [handleEditStands,handleDeleteStands]);
+
+  const standsColumns = useMemo(() => {
+    return generateColumns(EMPTY_STANDS,standActions);
+  }, [standActions]); 
+
+  //INTERESADOS
+  const handleEditInteresados = useCallback((row) => {
+      openEditInteresados(row);
+  }, [openEditInteresados]);
+
+  const handleDeleteInteresados = useCallback((row) => {
+      openDeleteInteresados(row);
+  }, [openDeleteInteresados]);
+
+  const interesadosActions = useMemo(() => [{
+      icon: EditIcon,
+      color: "primary",
+      title: "Editar Stands",
+      onClick: handleEditInteresados, 
+  },{
+      icon: DeleteIcon,
+      color: "primary",
+      title: "Eliminar Stands",
+      onClick: handleDeleteInteresados, 
+  }
+  ], [handleEditInteresados,handleDeleteInteresados]);
+
+  const interesadosColumns = useMemo(() => {
+    return generateColumns(EMPTY_INTERESADOS,interesadosActions);
+  }, [interesadosActions]); 
+
 
   return (
     <JPAContext.Provider

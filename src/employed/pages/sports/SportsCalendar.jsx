@@ -12,17 +12,20 @@ import {
 } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import { useSports } from "../../context/employedContext";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
 
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import { useSports } from "../../context/employedContext";
+import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
+
+const C = SPORTS_STRINGS;
 const HOUR_HEIGHT = 32; // px per hour
-const START_HOUR = 12;
-const END_HOUR = 22;
+const START_HOUR = 11;
+const END_HOUR = 23;
 const TOTAL_HOURS = END_HOUR - START_HOUR; // 10
 const TOTAL_HEIGHT = TOTAL_HOURS * HOUR_HEIGHT;
 const TIME_COL_WIDTH = 40; // px
 
-/* .NET DayOfWeek: 0=Sunday, 1=Monday, …, 6=Saturday */
+/* .NET DayOfWeek: 0=Sunday, 1=Monday, …, 6=Saturday Habria que cambiarlo pero no tengo ganas de renegar con el codigo de luis */
 const DAYS = [
   { label: "Lunes", dia: 1 },
   { label: "Martes", dia: 2 },
@@ -127,7 +130,7 @@ export default function SportsCalendar({ subscribedSportIds = null }) {
         if (cancelled) return;
         setAllHorarios(horarios);
       } catch (err) {
-        if (!cancelled) setError(err.message || "Error al cargar los horarios");
+        if (!cancelled) setError(err.message || C.errorScheduleLoad);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -135,7 +138,7 @@ export default function SportsCalendar({ subscribedSportIds = null }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [obtenerDeportesActivos,obtenerHorariosXDeporte]);
 
   const colorOf = useMemo(() => {
     const map = {};
@@ -204,12 +207,12 @@ export default function SportsCalendar({ subscribedSportIds = null }) {
               fontSize: "0.75rem",
             }}
           >
-            Filtrar por deporte
+            {C.scheduleFilter}
           </Typography>
           <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
             <Chip
               icon={<SportsSoccerIcon />}
-              label="Todos los deportes"
+              label={C.scheduleAll}
               variant={selected === null ? "filled" : "outlined"}
               color={selected === null ? "primary" : "default"}
               onClick={() => setSelected(null)}
@@ -218,7 +221,7 @@ export default function SportsCalendar({ subscribedSportIds = null }) {
             {subscribedSportIds !== null && (
               <Chip
                 icon={<EventAvailableIcon />}
-                label="Mis horarios"
+                label={C.scheduleStudent}
                 variant={selected === "mine" ? "filled" : "outlined"}
                 color={selected === "mine" ? "primary" : "default"}
                 onClick={() => setSelected(selected === "mine" ? null : "mine")}

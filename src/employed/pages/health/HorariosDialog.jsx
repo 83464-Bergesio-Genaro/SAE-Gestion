@@ -28,15 +28,17 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAETimeField from "../../../shared/components/inputs/SAETimeField";
+
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAETimeField from "../../../assets/components/inputs/SAETimeField";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useHealth } from "../../context/employedContext";
+import { calendarDays } from "../../../utils/common/constants";
 
 // FORMULARIO DE HORARIOS
 function HorarioFormFields() {
-  const { form, handleChangeForm, DAYS } = useHealth();
+  const { form, handleChangeForm } = useHealth();
   return (
     <Stack spacing={1}>
       <Grid container spacing={1}>
@@ -48,7 +50,7 @@ function HorarioFormFields() {
             fullWidth
             onChange={(e) => handleChangeForm("dia", e.target.value)}
           >
-            {DAYS.map((d) => (
+            {calendarDays.map((d) => (
               <MenuItem key={d.value} value={d.value}>
                 {d.label}
               </MenuItem>
@@ -89,7 +91,6 @@ function NuevoHorarioCard() {
     errorHorario,
     handleCreateHorario,
     setErrorHorario,
-    DAYS,
     setShowNuevoForm,
   } = useHealth();
 
@@ -179,8 +180,7 @@ function HorarioCard({ horario }) {
     handleCancelHorario,
     savingHorario,
     errorHorario,
-    setErrorHorario,
-    DAYS,
+    setErrorHorario
   } = useHealth();
 
   const isEditing = editingId === horario.id;

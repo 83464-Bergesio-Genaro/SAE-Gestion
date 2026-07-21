@@ -33,15 +33,15 @@ import { TravelProvider } from "../../context/providers/travelProvider";
 import { useTravel } from "../../context/studentContext";
 import { HashLink as Link } from "react-router-hash-link";
 
-import SAEPage from "../../../shared/components/page/SAEPage";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import DocumentCard from "../../../shared/components/documents/DocumentCard";
-import TitleBox from "../../../shared/components/titleBox";
-import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import DocumentCard from "../../../assets/components/documents/DocumentCard";
+import TitleBox from "../../../assets/components/titleBox";
+import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent";
 
-import { TRIPS_STRINGS } from "../../../utils/gena/student.string";
-import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/gena/common.config";
+import { TRIPS_STRINGS } from "../../../utils/strings/student.strings"; 
+import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/common/common.config"; 
 //import { useNavigate } from "react-router-dom";
 
 const baseUrl = import.meta.env.BASE_URL;
@@ -498,7 +498,6 @@ function DocSection() {
                   container
                   key={item.id_tipo_documento ?? item.nombre}
                   size={{ xs: 12, sm: 6, md: 4 }}
-                  item
                   sx={{ justifyContent: "center", alignItems: "center" }}
                 >
                   <DocumentCard

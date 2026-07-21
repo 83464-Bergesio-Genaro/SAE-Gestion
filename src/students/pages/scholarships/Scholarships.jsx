@@ -1,4 +1,3 @@
-import { useAuth } from "../../../shared/context/sharedContext";
 import {
   Box,
   Container,
@@ -18,21 +17,21 @@ import {
 import {AddCircleOutline} from "@mui/icons-material";
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 
-import { SCHOLARSHIP_STRINGS } from "../../../utils/gena/student.string"; 
-import { SCHOLARSHIPS_STATES ,SCHOLARSHIP_TYPE } from "../../../utils/gena/constants";
+import { SCHOLARSHIP_STRINGS } from "../../../utils/strings/student.strings"; 
+import { SCHOLARSHIPS_STATES,SCHOLARSHIP_TYPE } from "../../../utils/common/constants"; 
 import { useScholarships } from "../../context/studentContext";
 import { ScholarshipsProvider } from "../../context/providers/scholarshipsProvider";
-import { formatDate } from "../../../utils/util";
+import { formatDate } from "../../../utils/date.utils"; 
 
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
-import SAESpinner from "../../../shared/components/spinner/SAESpinner";
-import SAEPage from "../../../shared/components/page/SAEPage";
-import DocumentPreviewDialog from "../../../shared/components/documents/DocumentPreviewDialog";
-import StudentHeaderPage from "../../components/studentHeaderPage/studentHeaderPage";
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
+import SAEPage from "../../../assets/components/page/SAEPage";
+import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
+import DocumentCard from "../../../assets/components/documents/DocumentCard";
+import TitleBox from "../../../assets/components/titleBox";
+import HeaderPageStudent from "../../../assets/components/headerPage/headerPageStudent";
 
-import DocumentCard from "../../../shared/components/documents/DocumentCard";
-import TitleBox from "../../../shared/components/titleBox";
 import ScholarshipsForm from "./scholarshipsForm";
 
 const C = SCHOLARSHIP_STRINGS;
@@ -65,7 +64,7 @@ function getEstadoBecaConfig(estado) {
 }
 
 
-export default function Scholarships() {
+export default function StudentScholarships() {
   return (
     <ScholarshipsProvider>
       <ScholarshipsContent />
@@ -74,45 +73,36 @@ export default function Scholarships() {
 }
 
 function ScholarshipsContent() {
-  const user = useAuth();
+
   const {
+    preview,
     closePreview,
-    perfilEstudiante,
+    handlePreview,
     camposPerfilFaltantes,
     perfilIncompleto,
-    becarioActual,
     loadingScholarships,
     loadingDocuments,
     misBecas,
-
-    openDialog,
     documentos,
     documentosEconomica,
-    preview,
     cbu,
     cbuGuardado,
     openPopup,
     documentoAEliminar,
-    cargarTiposDocumento,
-    subirDocumentoEstudiante,
-    cargarMisBecas,
     handleArchivoChange,
     handleCbuChange,
     handleGuardarCbu,
     hasEconomica,
     handleAgregarBeca,
     handleDelete,
-    handlePreview,
-    DeleteDocument,
 
-    setOpenDialog,
-    setBecarioActual,
+    DeleteDocument,
     setOpenPopup,
   } = useScholarships();
 
   return (
     <SAEPage>
-        <StudentHeaderPage
+        <HeaderPageStudent
           title={C.bigTitle}
           description={C.bigSubtitle}
           backgroundImage="images/carrousel/EntradaUTN.jpg"
@@ -240,7 +230,7 @@ function ScholarshipsContent() {
                         <strong>{C.requestedDateLabel}</strong>
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
-                        {formatDate(item.fechaSolicitud)}
+                        {formatDate(item.fechaSolicitud),"short"}
                       </Typography>
                     </Box>
 
@@ -473,7 +463,7 @@ function ScholarshipsContent() {
             </Grid>
           ))}
 
-          <Grid size={{ xs: 12}}>
+          <Grid size={{ xs: 3}}>
             <Card
               sx={{
                 width: "100%",
@@ -578,22 +568,7 @@ function ScholarshipsContent() {
       </Box>
 
       {/* El form recibe documentos y callbacks; Scholarships conserva la fuente de verdad. */}
-      <ScholarshipsForm
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        user={{ ...user, datosPerfil: perfilEstudiante }}
-        becarioActual={becarioActual}
-        setBecarioActual={setBecarioActual}
-        cargarMisBecas={cargarMisBecas}
-        cargarTiposDocumento={cargarTiposDocumento}
-        subirDocumentoEstudiante={subirDocumentoEstudiante}
-        documentos={documentos}
-        documentosEconomica={documentosEconomica}
-        handlePreview={handlePreview}
-        handleDeleteDocument={DeleteDocument}
-        perfilCompleto={!perfilIncompleto}
-        camposPerfilFaltantes={camposPerfilFaltantes}
-      />
+      <ScholarshipsForm/>
 
       <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
         <DialogTitle>{C.deleteDocTitle}</DialogTitle>

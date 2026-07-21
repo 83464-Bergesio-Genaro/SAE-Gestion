@@ -3,11 +3,11 @@ import {
   ContarVisualizacionLinkFrecuente,
   BuscarLinkFrecuentes,
 } from "../../../api/EmpleadoService";
-import { isValidEmail } from "../../../utils/util.jsx";
+import { isValidEmail } from "../../../utils/validation.utils.js";
 import { sendConsultationEmail } from "../../../api/EmailService";
 import { ConsultationContext } from "../studentContext";
 import {useAuth,useNotification} from "../../../shared/context/sharedContext";
-import { CONSULTATIONS_STRINGS } from "../../../utils/gena/student.string.js";
+import { CONSULTATIONS_STRINGS } from "../../../utils/strings/student.strings.js"; 
 
 const C = CONSULTATIONS_STRINGS;
 export const ConsultationAlumnoProvider = ({ children }) => {
@@ -57,7 +57,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
   const handleLinkFrecuenteClick = async (event, link) => {
     if (!link.hipervinculo) {
       event.preventDefault();
-      useNotification(
+      showNotification(
         C.errorURL,
         "error",
         6000,
@@ -68,7 +68,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
     try {
       await ContarVisualizacionLinkFrecuente(link.id);
     } catch (error) {
-      useNotification(
+      showNotification(
         C.errorCount + error,
         "error",
         6000,
@@ -80,7 +80,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
     async (event) => {
       event.preventDefault();
       if (invalidFields.length > 0) {
-        useNotification(
+        showNotification(
           C.errorValidateSubmit,
           "warning",
         );
@@ -96,11 +96,11 @@ export const ConsultationAlumnoProvider = ({ children }) => {
           message: form.message.trim(),
           legajo: user?.legajo,
         });
-        useNotification(C.msgSubmit, "success");
+        showNotification(C.msgSubmit, "success");
         setForm((prev) => ({ ...prev, subject: "", message: "" }));
       } catch (error) {
         console.error("Error al enviar consulta:", error);
-        useNotification(
+        showNotification(
           C.errorSubmit,
           "error",
         );
@@ -108,7 +108,7 @@ export const ConsultationAlumnoProvider = ({ children }) => {
         setSending(false);
       }
     },
-    [form, invalidFields.length, useNotification, user?.legajo],
+    [form, invalidFields.length, showNotification, user?.legajo],
   );
 
   useEffect(() => {

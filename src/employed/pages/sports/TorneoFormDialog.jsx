@@ -14,28 +14,20 @@ import {
   DialogActions,
   IconButton,
 } from "@mui/material";
+
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
-import SAEButton from "../../../shared/components/buttons/SAEButton";
-import SAETextField from "../../../shared/components/inputs/SAETextField";
+
+import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
 import { useSports } from "../../context/employedContext";
+import { toApiDateTime } from "../../../utils/date.utils";
+import { EMPTY_TOURNAMENT_FORM } from "../../../utils/common/common.config";
+import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
 
-const EMPTY_FORM = {
-  id: 0,
-  nombre_torneo: "",
-  fecha_inicio: "",
-  fecha_fin: "",
-  fecha_limite_inscripcion: "",
-  activo: true,
-  id_deporte: 0,
-  nombre_deporte: "",
-  cuil_responsable: "",
-  docente_responsable: "",
-  cupo_jugadores: 0,
-};
-
+const C = SPORTS_STRINGS;
 export default function TorneoFormDialog({
   open,
   onClose,
@@ -46,7 +38,7 @@ export default function TorneoFormDialog({
   const { obtenerDeportesCompleto, obtenerDocentesDeportivos } = useSports();
   const isEdit = mode === "edit";
 
-  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [formData, setFormData] = useState(EMPTY_TOURNAMENT_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -57,7 +49,7 @@ export default function TorneoFormDialog({
   // Reset form and load catalogs every time dialog opens
   useEffect(() => {
     if (!open) return;
-    setFormData(initialData ?? EMPTY_FORM);
+    setFormData(initialData ?? EMPTY_TOURNAMENT_FORM);
     setError("");
 
     let cancelled = false;
@@ -87,22 +79,16 @@ export default function TorneoFormDialog({
     try {
       const body = {
         ...formData,
-        fecha_inicio: formData.fecha_inicio
-          ? `${formData.fecha_inicio}T00:00:00`
-          : null,
-        fecha_fin: formData.fecha_fin
-          ? `${formData.fecha_fin}T00:00:00`
-          : null,
-        fecha_limite_inscripcion: formData.fecha_limite_inscripcion
-          ? `${formData.fecha_limite_inscripcion}T00:00:00`
-          : null,
+        fecha_inicio: toApiDateTime(formData.fecha_inicio),
+        fecha_fin: toApiDateTime(formData.fecha_fin),
+        fecha_limite_inscripcion: toApiDateTime(formData.fecha_limite_inscripcion),
         cupo_jugadores: Number(formData.cupo_jugadores) || 0,
         id_deporte: Number(formData.id_deporte) || 0,
       };
       await onSave(body);
       onClose();
     } catch (err) {
-      setError(err.message || "Error al guardar el torneo.");
+      setError(err.message || C.errorSaveTournament);
     } finally {
       setSaving(false);
     }
@@ -116,7 +102,7 @@ export default function TorneoFormDialog({
         ) : (
           <AddIcon color="primary" />
         )}
-        {isEdit ? "Editar Torneo" : "Nuevo Torneo"}
+        {isEdit ? C.tournamentEdit : C.tournamentCreate}
         <IconButton size="small" onClick={onClose} sx={{ ml: "auto" }}>
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -127,13 +113,13 @@ export default function TorneoFormDialog({
           {/* Row: nombre + cupo */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <SAETextField
-              label="Nombre del Torneo"
+              label={C.tournamentName}
               fullWidth
               value={formData.nombre_torneo}
               onChange={(e) => handleChange("nombre_torneo", e.target.value)}
             />
             <SAETextField
-              label="Cupo de Jugadores"
+              label={C.tournamentCapacity}
               type="number"
               sx={{ minWidth: 160 }}
               value={formData.cupo_jugadores}
@@ -174,7 +160,7 @@ export default function TorneoFormDialog({
               String(opt.id) === String(val?.id)
             }
             renderInput={(params) => (
-              <SAETextField {...params} label="Deporte" fullWidth />
+              <SAETextField {...params} label={C.Deporte} fullWidth />
             )}
           />
 
@@ -233,14 +219,14 @@ export default function TorneoFormDialog({
               </li>
             )}
             renderInput={(params) => (
-              <SAETextField {...params} label="Docente Responsable" fullWidth />
+              <SAETextField {...params} label={C.tournamentTeacher} fullWidth />
             )}
           />
 
           {/* Dates row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <SAETextField
-              label="Fecha Inicio"
+              label={C.tournamentStartDate}
               type="date"
               fullWidth
               InputLabelProps={{ shrink: true }}
@@ -248,7 +234,7 @@ export default function TorneoFormDialog({
               onChange={(e) => handleChange("fecha_inicio", e.target.value)}
             />
             <SAETextField
-              label="Fecha Fin"
+              label={C.tournamentEndDate}
               type="date"
               fullWidth
               InputLabelProps={{ shrink: true }}
@@ -256,7 +242,7 @@ export default function TorneoFormDialog({
               onChange={(e) => handleChange("fecha_fin", e.target.value)}
             />
             <SAETextField
-              label="Límite Inscripción"
+              label={C.tournamentDateLimit}
               type="date"
               fullWidth
               InputLabelProps={{ shrink: true }}
@@ -274,7 +260,7 @@ export default function TorneoFormDialog({
                 onChange={(e) => handleChange("activo", e.target.checked)}
               />
             }
-            label="Activo"
+            label={C.active}
           />
 
           {error && <Alert severity="error">{error}</Alert>}
@@ -283,7 +269,7 @@ export default function TorneoFormDialog({
 
       <DialogActions sx={{ px: 3, py: 2 }}>
         <SAEButton variant="outlined" onClick={onClose} disabled={saving}>
-          Cancelar
+          {C.cancel}
         </SAEButton>
         <SAEButton
           variant="contained"
@@ -297,7 +283,7 @@ export default function TorneoFormDialog({
           onClick={handleSave}
           disabled={saving}
         >
-          {isEdit ? "Guardar Cambios" : "Crear Torneo"}
+          {isEdit ? C.save : C.tournamenteCreate}
         </SAEButton>
       </DialogActions>
     </Dialog>

@@ -1,6 +1,4 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { Box, IconButton, Chip } from "@mui/material";
-
 import DeleteIcon from "@mui/icons-material/Delete";
 import FolderIcon from "@mui/icons-material/Folder";
 
@@ -11,84 +9,41 @@ import {
   DescargarDocumentacionXId,
   EliminarCompra,
   EliminarDocumentoCompra,
-  ListarDocumentacionXCompra,
   ModificarInforme,
   ObtenerComprasXFecha,
-  ObtenerInformeXCompra,
 } from "../../../api/CompraService";
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
 import { PurchaseContext } from "../employedContext";
 import { useNotification } from "../../../shared/context/sharedContext";
+import { useDocumentPreview } from "../../../shared/hooks/useDocumentPreview";
 import {
   buildDocumentName,
-  closePreview as closePreviewState,
-  createInitialPreview,
-  formatDateForDisplay,
-  formatDateForInput,
-  formatHeader,
-  generateRows as generateBaseRows,
-  getDocumentName,
   getFileExtension,
   getFileName,
   isFile,
-  isPdfDocument,
-  MAX_FILE_SIZE_BYTES,
-  MAX_FILE_SIZE_MB,
   renameFile,
   sanitizeFileNamePart,
-} from "../../../utils/util.jsx";
-
+  validateDocumentFile,
+} from "../../../utils/documents.utils.js";
+import { formatDate } from "../../../utils/date.utils.js";
+import { generateColumns } from "../../../utils/datagrid.utils.jsx";
 import {
-  formatCurrency,
-  formatCurrencyInput,
-  formatDateInput,
   normalizeCurrencyValue,
-  sanitizeCurrencyInput,
-} from "../../../utils/juan/util.js";
+} from "../../../utils/formatters.utils.js";
+import {
+  PURCHASE_DOCUMENTS,
+  EMPTY_PURCHASES,
+} from "../../../utils/common/common.config.js";
+import { COMPRAS_STRINGS } from "../../../utils/strings/employed.strings.js";
+import {
+  buildCompraBody,
+  buildInformeBody,
+  clonePurchase,
+  generatePurchaseRows,
+  PURCHASE_COLUMNS_SAMPLE,
+} from "../../../api/formatters/CompraFormatter.js";
 
-const EMPTY_PURCHASES = {
-  id: null,
-  nombre_compra: "",
-  precio_sugerido: "",
-  motivo: "",
-  fecha_compra: "",
-  id_usuario: null,
-  nombre_usuario: "",
-  facturas_documentos: [],
-  informe: {
-    nro_expediente: null,
-    id_compra: null,
-    precio_real: "",
-    fecha_licitacion: null,
-    fecha_informe: null,
-    nombre_solicitante: "",
-    nombre_ganador: "",
-    documento_pdf: null,
-  },
-};
-
-const PURCHASE_DOCUMENT_TYPES = [
-  {
-    key: "facturas",
-    id_tipo_documento: null,
-    nombre: "Facturas",
-    descripcion: "Comprobantes de la compra.",
-    formatoNombre: "{nombreCompra}_factura_{nro}",
-    extension: ".pdf,.jpg,.jpeg,.png",
-    multiple: true,
-    required: true,
-  },
-  {
-    key: "informe",
-    id_tipo_documento: null,
-    nombre: "Informe tecnico",
-    descripcion: "Informe tecnico de la compra en PDF.",
-    formatoNombre: "{nombreCompra}_InformeTecnico",
-    extension: ".pdf",
-    multiple: false,
-    required: false,
-  },
-];
+const C = COMPRAS_STRINGS;
 
 const getDefaultPurchaseDateRange = () => {
   const today = new Date();
@@ -99,20 +54,11 @@ const getDefaultPurchaseDateRange = () => {
   );
 
   return {
-    fechaDesde: formatDateInput(firstDayOfMonth),
-    fechaHasta: formatDateInput(today),
+    fechaDesde: formatDate(firstDayOfMonth, "input"),
+    fechaHasta: formatDate(today, "input"),
   };
 };
 
-const clonePurchase = (purchase = EMPTY_PURCHASES) => ({
-  ...purchase,
-  facturas_documentos: [...(purchase.facturas_documentos || [])],
-  informe: {
-    ...EMPTY_PURCHASES.informe,
-    ...(purchase.informe_tecnico || {}),
-    ...(purchase.informe || {}),
-  },
-});
 const isRequiredPurchaseDataComplete = (purchase) => {
   const precioSugerido = normalizeCurrencyValue(purchase.precio_sugerido);
 
@@ -149,122 +95,6 @@ const isInformeComplete = (informe = {}) => {
   );
 };
 
-const isInformeDocument = (
-  document = {},
-  documentTypes = PURCHASE_DOCUMENT_TYPES,
-) => {
-  const typeId = Number(document.id_tipo_documento);
-  const informeType = documentTypes.find(
-    (documentType) => documentType.key === "informe",
-  );
-  const name = getDocumentName(document).toLowerCase();
-
-  return (
-    (informeType?.id_tipo_documento &&
-      typeId === Number(informeType.id_tipo_documento)) ||
-    name.includes("informetecnico") ||
-    name.includes("informe")
-  );
-};
-
-const normalizeDocument = (document = {}) => ({
-  ...document,
-  name: getDocumentName(document),
-});
-
-const normalizeInforme = (informe = {}, idCompra = null) => {
-  const safeInforme = informe ?? {};
-
-  return {
-    nro_expediente:
-      safeInforme.nro_expediente ??
-      safeInforme.nroExpediente ??
-      safeInforme.expediente ??
-      null,
-    id_compra: safeInforme.id_compra ?? safeInforme.idCompra ?? idCompra,
-    precio_real: safeInforme.precio_real ?? safeInforme.precioReal ?? "",
-    fecha_licitacion: formatDateForInput(
-      safeInforme.fecha_licitacion ?? safeInforme.fechaLicitacion ?? null,
-    ),
-    fecha_informe: formatDateForInput(
-      safeInforme.fecha_informe ?? safeInforme.fechaInforme ?? null,
-    ),
-    nombre_solicitante:
-      safeInforme.nombre_solicitante ?? safeInforme.nombreSolicitante ?? "",
-    nombre_ganador:
-      safeInforme.nombre_ganador ?? safeInforme.nombreGanador ?? "",
-    documento_pdf:
-      safeInforme.documento_pdf ?? safeInforme.documentoPdf ?? null,
-  };
-};
-
-const normalizePurchase = (
-  purchase = {},
-  informe = null,
-  documentos = [],
-  documentTypes = PURCHASE_DOCUMENT_TYPES,
-) => {
-  const idCompra = purchase.id;
-  const normalizedDocuments = (Array.isArray(documentos) ? documentos : [])
-    .filter(Boolean)
-    .map(normalizeDocument);
-  const facturaDocs = normalizedDocuments.filter(
-    (document) => !isInformeDocument(document, documentTypes),
-  );
-  const informeDoc =
-    normalizedDocuments.find((document) =>
-      isInformeDocument(document, documentTypes),
-    ) ?? null;
-
-  return {
-    ...purchase,
-    id: idCompra,
-    id_usuario:
-      purchase.id_usuario ??
-      purchase.idUsuario ??
-      purchase.id_usuario_empleado ??
-      purchase.idUsuarioEmpleado ??
-      purchase.id_empleado ??
-      purchase.idEmpleado ??
-      null,
-    nombre_usuario:
-      purchase.nombre_usuario ??
-      purchase.nombreUsuario ??
-      purchase.nombre_empleado ??
-      purchase.nombreEmpleado ??
-      purchase.nombre_usuario_empleado ??
-      purchase.nombreUsuarioEmpleado ??
-      "",
-    nombre_compra: purchase.nombre_compra ?? purchase.nombreCompra ?? "",
-    precio_sugerido: purchase.precio_sugerido ?? purchase.precioSugerido ?? "",
-    motivo: purchase.motivo ?? "",
-    fecha_compra: formatDateForInput(
-      purchase.fecha_compra ?? purchase.fechaCompra ?? "",
-    ),
-    facturas_documentos: facturaDocs,
-    informe: {
-      ...normalizeInforme(
-        informe ??
-          purchase.informe ??
-          purchase.informe_tecnico ??
-          purchase.informeTecnico ??
-          {},
-        idCompra,
-      ),
-      documento_pdf: informeDoc,
-    },
-  };
-};
-
-const buildCompraBody = (purchase = {}) => ({
-  id_usuario: purchase.id_usuario,
-  nombre_usuario: purchase.nombre_usuario,
-  nombre_compra: purchase.nombre_compra,
-  precio_sugerido: normalizeCurrencyValue(purchase.precio_sugerido),
-  motivo: purchase.motivo,
-  fecha_compra: purchase.fecha_compra,
-});
-
 const hasInformeData = (informe = {}) =>
   [
     informe.nro_expediente,
@@ -278,205 +108,25 @@ const hasInformeData = (informe = {}) =>
       value !== null && value !== undefined && String(value).trim() !== "",
   );
 
-const buildInformeBody = (purchase = {}, idCompra = null) => {
-  const informe = purchase.informe || {};
-
-  return {
-    nro_expediente: informe.nro_expediente ?? informe.nroExpediente ?? null,
-    id_compra: idCompra ?? purchase.id,
-    precio_real: normalizeCurrencyValue(informe.precio_real),
-    fecha_licitacion: informe.fecha_licitacion || null,
-    fecha_informe: informe.fecha_informe || null,
-    nombre_solicitante: informe.nombre_solicitante || "",
-    nombre_ganador: informe.nombre_ganador || "",
-  };
-};
-
-const generateColumns = (data, editAction, deleteAction) => {
-  const sample = Array.isArray(data) ? data[0] : data;
-
-  if (!sample) return [];
-
-  const dataColumns = Object.keys(sample)
-    .filter(
-      (key) =>
-        !["informe", "facturas_documentos"].includes(key) &&
-        !key.toLowerCase().includes("id"),
-    )
-    .map((key) => {
-      // Nota: Se asume que data es un array, por eso data[0] para las keys
-      const isDate = key.toLowerCase().includes("fecha");
-      const isCurrency = ["precio_sugerido", "precio_real"].includes(
-        key.toLowerCase(),
-      );
-      const isShort = [
-        "estado",
-        "cupo",
-        "duracion",
-        "horario_inicio",
-        "horario_fin",
-      ].includes(key.toLowerCase());
-
-      if (key.toLowerCase() === "activo") {
-        return {
-          field: "activo",
-          headerName: "Estado",
-          align: "center",
-          headerAlign: "center",
-          width: 100,
-          renderCell: (params) => (
-            <Chip
-              size="small"
-              label={params.value ? "Activo" : "Inactivo"}
-              color={params.value ? "success" : "default"}
-            />
-          ),
-        };
-      } else if (key.toLowerCase() === "seguro") {
-        return {
-          field: "seguro",
-          headerName: "Seguro",
-          align: "center",
-          headerAlign: "center",
-          width: 100,
-          renderCell: (params) => (
-            <Chip
-              size="small"
-              label={params.value ? "Presen" : "Falta"}
-              color={params.value ? "success" : "default"}
-            />
-          ),
-        };
-      } else {
-        return {
-          field: key,
-          headerName: formatHeader(key),
-          flex: 1,
-          minWidth: isCurrency ? 130 : isShort ? 50 : 120,
-          maxWidth: isShort ? 100 : NaN,
-          align: isCurrency ? "right" : isShort ? "center" : "left",
-          headerAlign: isCurrency ? "right" : isShort ? "center" : "left",
-          valueFormatter: isCurrency
-            ? (value) => formatCurrency(value)
-            : isDate
-              ? (value) => formatDateForDisplay(value)
-              : undefined,
-        };
-      }
-    });
-
-  dataColumns.push(
-    {
-      field: "precio_real",
-      headerName: "Precio Real",
-      flex: 1,
-      minWidth: 130,
-      align: "right",
-      headerAlign: "right",
-      valueFormatter: (value) => formatCurrency(value),
-    },
-    {
-      field: "fecha_licitacion",
-      headerName: "Fecha Licitacion",
-      flex: 1,
-      minWidth: 120,
-      valueFormatter: (value) => formatDateForDisplay(value),
-    },
-    {
-      field: "fecha_informe",
-      headerName: "Fecha Informe",
-      flex: 1,
-      minWidth: 120,
-      valueFormatter: (value) => formatDateForDisplay(value),
-    },
-    {
-      field: "nombre_solicitante",
-      headerName: "Nombre Solicitante",
-      flex: 1,
-      minWidth: 160,
-    },
-    {
-      field: "nombre_ganador",
-      headerName: "Nombre Ganador",
-      flex: 1,
-      minWidth: 160,
-    },
-  );
-
-  if (editAction || deleteAction) {
-    dataColumns.push({
-      field: "actions",
-      headerName: "Acciones",
-      sortable: false,
-      filterable: false,
-      width: 100,
-      renderCell: (params) => (
-        <Box>
-          {editAction && (
-            <IconButton
-              size="small"
-              sx={{ color: "var(--primary)" }}
-              title="Ver documentos"
-              onClick={() => editAction(params.row)}
-            >
-              <FolderIcon fontSize="small" />
-            </IconButton>
-          )}
-          {deleteAction && (
-            <IconButton
-              size="small"
-              sx={{ color: "var(--primary)" }}
-              title="Eliminar compra"
-              onClick={() => deleteAction(params.row)}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          )}
-        </Box>
-      ),
-    });
-  }
-
-  return dataColumns;
-};
-
-const generateRows = (data) => {
-  return generateBaseRows(data, (item) => ({
-    id: item.id,
-    id_usuario: item.id_usuario,
-    nombre_usuario: item.nombre_usuario ?? "",
-    nombre_compra: item.nombre_compra ?? "",
-    precio_sugerido: item.precio_sugerido ?? "",
-    motivo: item.motivo ?? "",
-    fecha_compra: item.fecha_compra ?? "",
-    facturas_documentos: item.facturas_documentos ?? [],
-    informe: item.informe ?? {},
-    precio_real: item.informe?.precio_real ?? "",
-    fecha_licitacion: item.informe?.fecha_licitacion ?? "",
-    fecha_informe: item.informe?.fecha_informe ?? "",
-    nombre_solicitante: item.informe?.nombre_solicitante || "",
-    nombre_ganador: item.informe?.nombre_ganador || "",
-  }));
-};
-
 export function PurchaseProvider({ children }) {
   const {
     showNotification,
     dialogData,
     dialogType,
     dialogMode,
-    setDialogOpen,
     setDialogData,
-    setDialogType,
-    setDialogMode,
     setDialogError,
     setDialogSaving,
+    handleDataChange,
+    closeDialog,
+    openDialog,
   } = useNotification();
 
   const [purchasesRows, setPurchaseRows] = useState([]);
   const [loadingPurchase, setLoadingPurchase] = useState(true);
+
   const [purchaseDocumentTypes, setPurchaseDocumentTypes] = useState(() =>
-    PURCHASE_DOCUMENT_TYPES.map((documentType) => ({ ...documentType })),
+    PURCHASE_DOCUMENTS.map((documentType) => ({ ...documentType })),
   );
 
   useEffect(() => {
@@ -484,7 +134,7 @@ export function PurchaseProvider({ children }) {
       try {
         const documentTypes = await obtenerTiposDocumento();
         setPurchaseDocumentTypes(
-          PURCHASE_DOCUMENT_TYPES.map((documento) => {
+          PURCHASE_DOCUMENTS.map((documento) => {
             const match = documentTypes?.find(
               (type) =>
                 type.nombre.trim().toLowerCase() ===
@@ -501,9 +151,7 @@ export function PurchaseProvider({ children }) {
           }),
         );
       } catch (error) {
-        setDialogError(
-          error.message || "No se pudieron cargar los tipos de documento.",
-        );
+        setDialogError(error.message || C.loadDocumentTypesError);
       }
     };
 
@@ -518,37 +166,15 @@ export function PurchaseProvider({ children }) {
 
       setLoadingPurchase(true);
       try {
-        const data = await ObtenerComprasXFecha(from, to);
-        console.log(data);
-        const purchases = Array.isArray(data) ? data : [];
-        const hydratedPurchases = await Promise.all(
-          purchases.map(async (purchase) => {
-            const idCompra = purchase.id;
-            if (!idCompra)
-              return normalizePurchase(
-                purchase,
-                null,
-                [],
-                purchaseDocumentTypes,
-              );
-
-            const [informe, documentos] = await Promise.all([
-              ObtenerInformeXCompra(idCompra).catch(() => null),
-              ListarDocumentacionXCompra(idCompra).catch(() => []),
-            ]);
-            console.log({ purchase, informe, documentos });
-            return normalizePurchase(
-              purchase,
-              informe,
-              documentos,
-              purchaseDocumentTypes,
-            );
-          }),
+        const data = await ObtenerComprasXFecha(
+          from,
+          to,
+          purchaseDocumentTypes,
         );
+        const purchases = Array.isArray(data) ? data : [];
 
-        setPurchaseRows(generateRows(hydratedPurchases));
-      } catch (error) {
-        setDialogError(error.message || "No se pudieron cargar las compras");
+        setPurchaseRows(generatePurchaseRows(purchases));
+      } catch {
         setPurchaseRows([]);
       } finally {
         setLoadingPurchase(false);
@@ -557,21 +183,16 @@ export function PurchaseProvider({ children }) {
     [purchaseDocumentTypes],
   );
 
-  const openCreatePurchases = () => {
-    setDialogData(clonePurchase());
-    setDialogType("purchases");
-    setDialogMode("create");
-    setDialogError("");
-    setDialogOpen(true);
-  };
+  const openCreatePurchases = useCallback(() => {
+    openDialog("purchases", "create", clonePurchase());
+  }, [openDialog]);
 
-  const openEditDocs = useCallback((row) => {
-    setDialogData(clonePurchase(row));
-    setDialogType("docs");
-    setDialogMode("docs");
-    setDialogError("");
-    setDialogOpen(true);
-  }, []);
+  const openEditDocs = useCallback(
+    (row) => {
+      openDialog("docs", "docs", clonePurchase(row));
+    },
+    [openDialog],
+  );
 
   const handleOpenEditDocs = useCallback(
     (row) => {
@@ -582,136 +203,65 @@ export function PurchaseProvider({ children }) {
 
   const openDeletePurchase = useCallback(
     (row) => {
-      setDialogData(clonePurchase(row));
-      setDialogType("purchaseDelete");
-      setDialogMode("delete");
-      setDialogError("");
-      setDialogOpen(true);
+      openDialog("purchaseDelete", "delete", clonePurchase(row));
+    },
+    [openDialog],
+  );
+
+  const handleDeletePurchase = useCallback(
+    async (fechaDesde, fechaHasta) => {
+      const idCompra = dialogData.id;
+      if (!idCompra) {
+        setDialogError(C.deleteMissingId);
+        return;
+      }
+
+      try {
+        setDialogSaving(true);
+        await EliminarCompra(idCompra);
+        await fetchPurchases(fechaDesde, fechaHasta);
+        closeDialog();
+        showNotification(C.deleteSuccess, "success");
+      } catch (error) {
+        setDialogError(error.message || C.deleteError);
+        showNotification(
+          error.message || C.deleteError,
+          "error",
+        );
+      } finally {
+        setDialogSaving(false);
+      }
     },
     [
-      setDialogData,
+      dialogData,
+      closeDialog,
+      fetchPurchases,
       setDialogError,
-      setDialogMode,
-      setDialogOpen,
-      setDialogType,
+      setDialogSaving,
+      showNotification,
     ],
   );
 
-  const handleDeletePurchase = useCallback(async () => {
-    const idCompra = dialogData.id;
-    if (!idCompra) {
-      setDialogError("No se pudo identificar la compra a eliminar.");
-      return;
-    }
-
-    try {
-      setDialogSaving(true);
-      setLoadingPurchase(true);
-      await EliminarCompra(idCompra);
-      setPurchaseRows((prev) =>
-        prev.filter((purchase) => purchase.id !== idCompra),
-      );
-      setDialogOpen(false);
-      setDialogData(clonePurchase());
-      showNotification("Compra eliminada!","success");
-    } catch (error) {
-      setDialogError(error.message || "No se pudo eliminar la compra");
-      showNotification(error.message || "No se pudo eliminar la compra", "error");
-    } finally {
-      setDialogSaving(false);
-      setLoadingPurchase(false);
-    }
-  }, [
-    dialogData,
-    setDialogData,
-    setDialogError,
-    setDialogOpen,
-    setDialogSaving,
-    showNotification,
-  ]);
-
   const [focusedCurrencyField, setFocusedCurrencyField] = useState("");
-  const [preview, setPreview] = useState(createInitialPreview);
+  const {
+    dialogProps: preview,
+    closePreview,
+    openPreview,
+  } = useDocumentPreview({
+    downloadById: DescargarDocumentacionXId,
+  });
 
-  const closePreview = useCallback(() => {
-    closePreviewState(setPreview);
-  }, []);
+  const handlePreview = useCallback(
+    (documentOrId, nombre) => {
+      const document =
+        typeof documentOrId === "object"
+          ? documentOrId
+          : { id: documentOrId, nombre_documento: nombre };
 
-  const handlePreview = useCallback(async (documentOrId, nombre) => {
-    if (isFile(documentOrId)) {
-      setPreview({
-        open: true,
-        loading: true,
-        title: nombre || getFileName(documentOrId) || "Vista previa",
-        imageSrc: null,
-        isPdf: documentOrId.type === "application/pdf",
-        error: null,
-      });
-
-      const reader = new FileReader();
-      reader.onload = () =>
-        setPreview((previous) => ({
-          ...previous,
-          loading: false,
-          imageSrc: reader.result,
-        }));
-      reader.onerror = () =>
-        setPreview((previous) => ({
-          ...previous,
-          loading: false,
-          error: "No se pudo leer el documento seleccionado.",
-        }));
-      reader.readAsDataURL(documentOrId);
-      return;
-    }
-
-    const id =
-      typeof documentOrId === "object" ? documentOrId?.id : documentOrId;
-
-    if (!id) {
-      setPreview({
-        open: true,
-        loading: false,
-        title: nombre || "Vista previa",
-        imageSrc: null,
-        isPdf: false,
-        error: "Guardá el documento antes de previsualizarlo.",
-      });
-      return;
-    }
-
-    setPreview({
-      open: true,
-      loading: true,
-      title: nombre || "Vista previa",
-      imageSrc: null,
-      isPdf: false,
-      error: null,
-    });
-
-    try {
-      const data = await DescargarDocumentacionXId(id);
-      console.log(data);
-      setPreview({
-        open: true,
-        loading: false,
-        title: nombre || getDocumentName(data) || "Vista previa",
-        imageSrc: data.datos_documento,
-        isPdf: isPdfDocument(data),
-        error: null,
-      });
-    } catch (error) {
-      setPreview((previous) => ({
-        ...previous,
-        loading: false,
-        error: error.message || "No se pudo cargar el documento",
-      }));
-    }
-  }, []);
-
-  const handleDialogChange = useCallback((field, value) => {
-    setDialogData((prev) => ({ ...prev, [field]: value }));
-  }, []);
+      return openPreview(document, nombre);
+    },
+    [openPreview],
+  );
 
   const handleInformeTecnicoChange = useCallback((field, value) => {
     setDialogData((prev) => ({
@@ -725,56 +275,16 @@ export function PurchaseProvider({ children }) {
 
   const handleEmpleadoChange = useCallback(
     (_event, empleado) => {
-      handleDialogChange("id_usuario", empleado?.id ?? null);
-      handleDialogChange("nombre_usuario", empleado?.nombre_empleado ?? "");
+      handleDataChange("id_usuario", empleado?.id ?? null);
+      handleDataChange("nombre_usuario", empleado?.nombre_empleado ?? "");
     },
-    [handleDialogChange],
+    [handleDataChange],
   );
-
-  const getCurrencyValue = useCallback(
-    (field, value) => {
-      if (focusedCurrencyField === field) {
-        if (value === null || value === undefined) return "";
-        if (typeof value === "number") return String(value).replace(".", ",");
-
-        return value;
-      }
-
-      return formatCurrencyInput(value);
-    },
-    [focusedCurrencyField],
-  );
-
-  const handleCurrencyInputChange = useCallback((field, value, onChange) => {
-    onChange(field, sanitizeCurrencyInput(value));
-  }, []);
-
-  const handleCurrencyBlur = useCallback((field, value, onChange) => {
-    onChange(field, normalizeCurrencyValue(value));
-    setFocusedCurrencyField("");
-  }, []);
 
   const isPurchaseDataComplete = useMemo(
     () => isRequiredPurchaseDataComplete(dialogData),
     [dialogData],
   );
-
-  const validateDocumentFile = useCallback((file, documentType) => {
-    const extension = getFileExtension(file);
-    const allowedExtensions = documentType.extension
-      .split(",")
-      .map((value) => value.trim().toLowerCase());
-
-    if (!allowedExtensions.includes(extension)) {
-      return `Solo se permiten archivos: ${documentType.extension}`;
-    }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      return `El archivo no puede superar los ${MAX_FILE_SIZE_MB} MB.`;
-    }
-
-    return "";
-  }, []);
 
   const handleFacturaChange = useCallback(
     (event, documentType) => {
@@ -782,9 +292,7 @@ export function PurchaseProvider({ children }) {
       if (files.length === 0) return;
 
       if (!isRequiredPurchaseDataComplete(dialogData)) {
-        setDialogError(
-          "Completá los datos de la compra antes de adjuntar documentación.",
-        );
+        setDialogError(C.documentValidation.incompletePurchaseData);
         event.target.value = "";
         return;
       }
@@ -794,7 +302,11 @@ export function PurchaseProvider({ children }) {
       const renamedFiles = [];
 
       for (const [index, file] of files.entries()) {
-        const validationError = validateDocumentFile(file, documentType);
+        const validationError = validateDocumentFile(
+          file,
+          documentType,
+          C.documentValidation,
+        );
         if (validationError) {
           setDialogError(validationError);
           event.target.value = "";
@@ -823,7 +335,7 @@ export function PurchaseProvider({ children }) {
       setDialogError("");
       event.target.value = "";
     },
-    [dialogData, validateDocumentFile],
+    [dialogData],
   );
 
   const handleInformePdfChange = useCallback(
@@ -832,14 +344,16 @@ export function PurchaseProvider({ children }) {
       if (!file) return;
 
       if (!isRequiredPurchaseDataComplete(dialogData)) {
-        setDialogError(
-          "Completá los datos de la compra antes de adjuntar documentación.",
-        );
+        setDialogError(C.documentValidation.incompletePurchaseData);
         event.target.value = "";
         return;
       }
 
-      const validationError = validateDocumentFile(file, documentType);
+      const validationError = validateDocumentFile(
+        file,
+        documentType,
+        C.documentValidation,
+      );
       if (validationError) {
         setDialogError(validationError);
         event.target.value = "";
@@ -858,7 +372,7 @@ export function PurchaseProvider({ children }) {
       setDialogError("");
       event.target.value = "";
     },
-    [dialogData, handleInformeTecnicoChange, validateDocumentFile],
+    [dialogData, handleInformeTecnicoChange],
   );
 
   const handleRemoveFactura = useCallback(
@@ -876,7 +390,9 @@ export function PurchaseProvider({ children }) {
         }));
         setDialogError("");
       } catch (error) {
-        setDialogError(error.message || "No se pudo eliminar la factura");
+        setDialogError(
+          error.message || C.documentValidation.deleteInvoiceError,
+        );
       }
     },
     [dialogData.facturas_documentos],
@@ -906,7 +422,7 @@ export function PurchaseProvider({ children }) {
         handleInformeTecnicoChange("documento_pdf", null);
         setDialogError("");
       } catch (error) {
-        setDialogError(error.message || "No se pudo eliminar el documento");
+        setDialogError(error.message || C.deleteDocumentError);
       }
     },
     [
@@ -931,7 +447,7 @@ export function PurchaseProvider({ children }) {
               facturas.length === 1
                 ? getFileName(facturas[0])
                 : facturas.length > 1
-                  ? `${facturas.length} facturas adjuntas`
+                  ? C.attachedInvoices(facturas.length)
                   : "",
           };
         }
@@ -970,7 +486,7 @@ export function PurchaseProvider({ children }) {
         }
 
         if (!idCompra) {
-          throw new Error("No se pudo obtener el id de la compra.");
+          throw new Error(C.saveMissingPurchaseId);
         }
 
         const facturaDocumentType = purchaseDocumentTypes.find(
@@ -998,9 +514,7 @@ export function PurchaseProvider({ children }) {
             .filter(isFile)
             .map((file) => {
               if (!facturaDocumentType?.id_tipo_documento) {
-                throw new Error(
-                  "No se encontró el tipo de documento Facturas.",
-                );
+                throw new Error(C.saveMissingInvoiceType);
               }
 
               return CrearDocumentoCompra(
@@ -1013,9 +527,7 @@ export function PurchaseProvider({ children }) {
 
         if (isFile(purchaseToSave.informe?.documento_pdf)) {
           if (!informeDocumentType?.id_tipo_documento) {
-            throw new Error(
-              "No se encontró el tipo de documento Informe tecnico.",
-            );
+            throw new Error(C.saveMissingReportType);
           }
 
           await CrearDocumentoCompra(
@@ -1025,8 +537,7 @@ export function PurchaseProvider({ children }) {
           );
         }
 
-        setDialogOpen(false);
-        setDialogData(clonePurchase());
+        closeDialog();
         const purchaseDate = purchaseToSave.fecha_compra;
         const refreshFrom =
           purchaseDate && (!fechaDesde || purchaseDate < fechaDesde)
@@ -1040,14 +551,15 @@ export function PurchaseProvider({ children }) {
         await fetchPurchases(refreshFrom, refreshTo);
         showNotification(
           dialogMode === "create"
-            ? "Compra creada!"
+            ? C.saveSuccessCreate
             : dialogMode === "docs"
-              ? "Documentos actualizados!"
-              : "Cambios guardados!","success"
+              ? C.saveSuccessDocs
+              : C.saveSuccessUpdate,
+          "success",
         );
       } catch (err) {
-        setDialogError(err.message || "Ocurrió un error al guardar");
-        showNotification(err.message || "Ocurrió un error al guardar", "error");
+        setDialogError(err.message || C.saveError);
+        showNotification(err.message || C.saveError, "error");
       } finally {
         setDialogSaving(false);
       }
@@ -1055,11 +567,10 @@ export function PurchaseProvider({ children }) {
     [
       dialogData,
       dialogMode,
+      closeDialog,
       fetchPurchases,
       purchaseDocumentTypes,
-      setDialogData,
       setDialogError,
-      setDialogOpen,
       setDialogSaving,
       showNotification,
     ],
@@ -1071,14 +582,12 @@ export function PurchaseProvider({ children }) {
         dialogType === "purchases" &&
         !isRequiredPurchaseDataComplete(dialogData)
       ) {
-        setDialogError(
-          "Completá empleado, nombre de la compra, precio sugerido, motivo y fecha de compra.",
-        );
+        setDialogError(C.saveRequiredPurchaseData);
         return;
       }
 
       if (dialogMode === "create" && !hasInvoiceDocument(dialogData)) {
-        setDialogError("Adjuntá al menos una factura para crear la compra.");
+        setDialogError(C.saveRequiredInvoice);
         return;
       }
 
@@ -1087,9 +596,7 @@ export function PurchaseProvider({ children }) {
         hasInformeData(dialogData.informe) &&
         !isInformeComplete(dialogData.informe)
       ) {
-        setDialogError(
-          "Completá todos los campos del informe: nro expediente, precio real, fecha licitación, fecha informe, solicitante y ganador.",
-        );
+        setDialogError(C.saveRequiredReport);
         return;
       }
 
@@ -1144,14 +651,25 @@ export function PurchaseProvider({ children }) {
     ],
   );
 
-  const purchasesColumns = useMemo(
-    () =>
-      generateColumns(
-        EMPTY_PURCHASES,
-        handleOpenEditDocs,
-        openDeletePurchase,
-      ),
+  const purchaseActions = useMemo(
+    () => [
+      {
+        icon: FolderIcon,
+        title: C.actionViewDocuments,
+        onClick: handleOpenEditDocs,
+      },
+      {
+        icon: DeleteIcon,
+        title: C.actionDeletePurchase,
+        onClick: openDeletePurchase,
+      },
+    ],
     [handleOpenEditDocs, openDeletePurchase],
+  );
+
+  const purchasesColumns = useMemo(
+    () => generateColumns(PURCHASE_COLUMNS_SAMPLE, purchaseActions),
+    [purchaseActions],
   );
 
   return (
@@ -1169,14 +687,11 @@ export function PurchaseProvider({ children }) {
         handleConfirmWithoutInforme,
         warningOpen,
         setWarningOpen,
-        handleDialogChange,
+        handleDialogChange: handleDataChange,
         handleInformeTecnicoChange,
         handleEmpleadoChange,
         focusedCurrencyField,
         setFocusedCurrencyField,
-        getCurrencyValue,
-        handleCurrencyInputChange,
-        handleCurrencyBlur,
         isPurchaseDataComplete,
         isInformeReady: isInformeComplete(dialogData.informe),
         purchaseDocuments,
@@ -1184,7 +699,6 @@ export function PurchaseProvider({ children }) {
         handleInformePdfChange,
         handleRemoveFactura,
         handleDeletePurchaseDocument,
-        getFileName,
         preview,
         closePreview,
         handlePreview,

@@ -89,7 +89,11 @@ function EmployedScholarshipsContent() {
     [becariosRows, becariosColumns, loadingBecarios, openCreateBecario],
   );
 
-  const currentSection = useMemo(() => sectionConfig.proyectos, [sectionConfig]);
+  const [activeSection] = "proyectos";
+  const currentSection = useMemo(
+    () => sectionConfig[activeSection],
+    [activeSection, sectionConfig],
+  );
 
   const [activeSectionBecario] = "becarios";
   const currentSectionBecario = useMemo(

@@ -1,6 +1,6 @@
 import { Box, Container, Typography, Stack, Link,Grid} from "@mui/material";
 import { FOOTER_STRINGS,FOOTER_LINKS } from "../../../utils/strings/shared.strings"; 
-
+import {appConfig} from "../../../config/appConfig";
 export default function Footer() {
   return (
     <Box component="footer" sx={{ bgcolor: "var(--primary)", padding: 2, color: "var(--textWhite)" }}>
@@ -47,7 +47,7 @@ export default function Footer() {
 
           <Grid size={{ xs: 12, md: 4 }} mt={1} textAlign={{ xs: "center", md: "right" }}>
             <Typography variant="caption" sx={sx.copyright}>
-              {FOOTER_STRINGS.copyright} {/* - v{appConfig.appVersion} */}
+              {FOOTER_STRINGS.copyright} - v{appConfig.appVersion}
             </Typography>
           </Grid>
 
@@ -57,7 +57,6 @@ export default function Footer() {
   );
 }
 
-// ✅ Definición del objeto de estilos para que MUI no tire error 'sx is not defined'
 const sx = {
   brand: { fontWeight: "bold" },
   icon: { fontSize: "1.2rem", color: "var(--textWhite)" }, // Controla el tamaño y color del ícono aquí

@@ -1,31 +1,23 @@
 import {
-  CardContent,
   Card,
-  Box,
   Grid,
   Dialog,
-  InputAdornment, 
   DialogActions,
   DialogContent,
   DialogTitle,
   DialogContentText,
-  Stack
+  Stack,
 } from "@mui/material";
-
-import { DataGrid } from "@mui/x-data-grid";
-
-import SearchIcon from "@mui/icons-material/Search";
+import { useMemo } from "react";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 
 import DeportesMasonry from "./deportesMasonery";
-import JsonArrayDataGrid from "../../../assets/components/jsonArrayDataGrid/jsonArrayDataGrid";
 import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
 import DocumentCard from "../../../assets/components/documents/DocumentCard";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
-import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAESpinner from "../../../assets/components/spinner/SAESpinner";
 import SAEPage from "../../../assets/components/page/SAEPage";
-import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent.jsx"
+import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent.jsx";
 import TitleBox from "../../../assets/components/titleBox";
 
 //import { SportsProvider as EmployedSportsProvider } from "../../../employed/context/providers/sportsProvider";
@@ -33,12 +25,13 @@ import { useSportsContext } from "../../context/studentContext";
 import { SportsProvider } from "../../context/providers/sportsProvider";
 //import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
 import { SPORTS_STRINGS } from "../../../utils/strings/student.strings";
+import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid.jsx";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 const C = SPORTS_STRINGS;
 
 function StudentSportsContent() {
   const {
-    busquedaTorneos,
     closeDeleteDialog,
     closePreview,
     documentoAEliminar,
@@ -54,12 +47,25 @@ function StudentSportsContent() {
     openPopup,
     preview,
     requestDeleteDocument,
-    rowsTorneosFiltradas,
-    setBusquedaTorneos,
     //subscribedSportIds,
     torneoDeportista,
     torneosColumns,
   } = useSportsContext();
+
+  const sectionConfig = useMemo(
+    () => ({
+      torneos: {
+        key: "torneos",
+        title: "Torneos",
+        dialog: null,
+        icon: EmojiEventsIcon,
+        rows: torneoDeportista,
+        columns: torneosColumns,
+        loading: loadingTournaments,
+      },
+    }),
+    [torneosColumns, torneoDeportista, loadingTournaments],
+  );
 
   return (
     <SAEPage>
@@ -128,95 +134,10 @@ function StudentSportsContent() {
         description={C.tournamnetsSubTitle}
       />
 
-      {loadingTournaments ? (
-        <Stack alignItems="center" sx={{ py: 5 }}>
-          <SAESpinner size="S" />
-        </Stack>
-      ) : torneoDeportista.length > 0 ? (
-        <Card
-          sx={{
-            borderRadius: 6,
-            boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
-            overflow: "hidden",
-          }}
-        >
-          <Box
-            sx={{
-              px: 3,
-              py: 2.5,
-              background: "var(--gradient)",
-            }}
-          >
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              justifyContent="flex-end"
-              alignItems={{ sm: "center" }}
-            >
-              <SAETextField
-                placeholder="Buscar torneo..."
-                size="small"
-                value={busquedaTorneos}
-                onChange={(e) => setBusquedaTorneos(e.target.value)}
-                sx={{
-                  width: { xs: "100%", sm: 260, md: 340 },
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "white",
-                    color: "black",
-                    "& fieldset": { borderColor: "rgba(255, 255, 255, 0.6)" },
-                    "&:hover fieldset": {
-                      borderColor: "white",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "rgb(59, 101, 218)",
-                    },
-                  },
-                  "& input::placeholder": {
-                    color: "rgba(54, 54, 54, 0.7)",
-                    opacity: 1,
-                  },
-                  "& .MuiInputAdornment-root svg": {
-                    color: "rgba(0, 0, 0, 0.7)",
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-            </Stack>
-          </Box>
-          <CardContent sx={{ p: 2 }}>
-            <Box sx={{ width: "100%" }}>
-              <DataGrid
-                rows={rowsTorneosFiltradas}
-                columns={torneosColumns}
-                autoHeight
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 10, 25]}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 5 } },
-                }}
-                localeText={{ noRowsLabel: "No hay torneos activos" }}
-                sx={{
-                  minWidth: 850,
-                  "& .MuiDataGrid-columnHeaderTitle": {
-                    whiteSpace: "normal",
-                    lineHeight: "1.2",
-                    fontWeight: "bold",
-                  },
-                  borderRadius: 4,
-                }}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-      ) : null}
+      <SAEDataGrid
+        sectionConfig={sectionConfig}
+        currentSection={sectionConfig.torneos}
+      />
       {/*  DESPUES HAY QUE HABILITARLO
       {!loadingSports && horariosDeportista.length > 0 && (
         <>
@@ -254,7 +175,6 @@ function StudentSportsContent() {
         loading={preview.loading}
         error={preview.error}
       />
-
     </SAEPage>
   );
 }

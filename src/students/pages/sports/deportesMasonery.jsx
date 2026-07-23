@@ -19,7 +19,7 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 
 import { useMemo, useState } from "react";
-import SAEButton from "../../../assets/components/buttons/SAEButton"; 
+import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import { completeWeekDays } from "../../../utils/common/constants";
 
@@ -88,14 +88,12 @@ function profesoresToTexto(profesores) {
     }
   }
 
-  // if (unicos.length === 1) {
-  //   return unicos[0].docente_responsable;
-  // }
-
   return (
     <ul style={{ margin: 0, paddingLeft: 18 }}>
       {unicos.map((p, idx) => (
-        <li key={p.cuil_docente || idx}>{p.docente_responsable}</li>
+        <li key={p.cuil_docente || idx}>
+          <Typography variant="body1">{p.docente_responsable}</Typography>
+        </li>
       ))}
     </ul>
   );
@@ -369,7 +367,7 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
         {/* DERECHA */}
         <SAETextField
           size="small"
-          placeholder="Buscar..."
+          placeholder="Buscar Deportes..."
           value={textoBusqueda}
           onChange={(e) => setTextoBusqueda(e.target.value)}
           sx={{
@@ -423,11 +421,16 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
         }}
       >
         {agrupadoFiltrado.map((card, index) => (
-          <Grid spacing={10} size={{ xs: 12, sm: 4, md: 4 }} key={card.id_deporte ?? index}>
+          <Grid
+            spacing={10}
+            size={{ xs: 12, sm: 4, md: 4 }}
+            key={card.id_deporte ?? index}
+          >
             <Card
               sx={{
                 borderRadius: 4,
-                minHeight:"330px",maxHeight:"330px",//Lo agrego porque seamos sinceros juan no queda tan bien el cualquier tamaño
+                minHeight: { xs: "auto", sm: "330px" },
+                maxHeight: { xs: "none", sm: "330px" }, // Mantiene las cards parejas en desktop sin recortar contenido en mobile.
                 px: 0,
                 py: 0,
                 m: { xs: 0, sm: 1 },
@@ -480,7 +483,9 @@ export default function DeportesMasonry({ deportes, onInscribirClick }) {
                       transform: "none",
                     }}
                   >
-                    <SportsBasketballIcon sx={{ fontSize: { xs: 28, sm: 32 } }} />
+                    <SportsBasketballIcon
+                      sx={{ fontSize: { xs: 28, sm: 32 } }}
+                    />
                   </Box>
                   <Box>
                     <Typography

@@ -1,3 +1,5 @@
+import { formatDate } from "../../utils/date.utils";
+
 export const mapHorarioAlumno = (HorarioAlumno) => ({
   id: HorarioAlumno.id,
   id_espacio_deportivo: HorarioAlumno.id_espacio_deportivo,
@@ -35,17 +37,10 @@ export const mapInscripcionesXDeportista = (InscripcionesXDeportista) => ({
 });
 
 export const mapTorneo = (Torneo) => ({
-  id: Torneo.id,
-  nombre: Torneo.nombre_torneo,
-  fecha_inicio: Torneo.fecha_inicio,
-  fecha_fin: Torneo.fecha_fin,
-  fecha_limite_inscripcion: Torneo.fecha_limite_inscripcion,
-  activo: Torneo.activo ? "Sí" : "No",
-  id_deporte: Torneo.id_deporte,
-  deporte: Torneo.nombre_deporte,
-  cuil_responsable: Torneo.cuil_responsable,
-  docente_responsable: Torneo.docente_responsable,
-  cupo_jugadores: Torneo.cupo_jugadores,
+  ...Torneo,
+  fecha_inicio: formatDate(Torneo.fecha_inicio),
+  fecha_fin: formatDate(Torneo.fecha_fin),
+  fecha_limite_inscripcion: formatDate(Torneo.fecha_limite_inscripcion),
 });
 
 export function mapHorarios(
@@ -109,4 +104,3 @@ export const mapResponseInscripcionDeporte = (ResponseInscripcionDeporte) => ({
 export const mapResponseEliminar = (ResponseEliminar) => ({
   texto: ResponseEliminar,
 });
-

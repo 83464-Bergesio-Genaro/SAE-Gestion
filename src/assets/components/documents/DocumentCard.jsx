@@ -61,7 +61,7 @@ export default function DocumentCard({
         height: "100%",
         borderRadius: 6,
         width: "100%",
-        maxWidth: 357,
+        maxWidth: { xs: "100%", sm: 357 },
         mx: { xs: "auto", sm: 0 },
         minWidth: 0,
         flexDirection: "column",
@@ -77,7 +77,7 @@ export default function DocumentCard({
     >
       <CardContent
         sx={{
-          p: 3,
+          p: { xs: 2, sm: 3 },
           width: "100%",
           flexGrow: 1,
           display: "flex",
@@ -89,7 +89,7 @@ export default function DocumentCard({
             direction="row"
             justifyContent="space-between"
             alignItems="center"
-            sx={{ mb: 0.25 }}
+            sx={{ mb: 0.25, gap: 1, flexWrap: "wrap" }}
           >
             <Chip
               variant={!documento.subido ? "filled" : "outlined"}
@@ -206,19 +206,40 @@ export default function DocumentCard({
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "flex-end",
+                justifyContent: { xs: "stretch", sm: "flex-end" },
                 gap: 1,
                 alignItems: "center",
                 flexWrap: "wrap",
                 mt: "auto",
                 pt: 1.5,
+                "& > button, & > label": {
+                  flex: { xs: "1 1 140px", sm: "0 0 auto" },
+                },
               }}
             >
+              <SAEButton
+                component="label"
+                variant="contained"
+                startIcon={<FileUpload />}
+                disabled={uploadDisabled}
+                sx={{ display: { xs: "inline-flex", sm: "none" } }}
+              >
+                Subir
+                <input
+                  type="file"
+                  hidden
+                  accept={documento.extension}
+                  multiple={Boolean(documento.multiple)}
+                  onChange={(event) => onFileChange?.(event, documento)}
+                />
+              </SAEButton>
               <IconButton
                 component="label"
                 size="small"
                 color="primary"
                 disabled={uploadDisabled}
+                sx={{ display: { xs: "none", sm: "inline-flex" } }}
+                aria-label="Subir documento"
               >
                 <FileUpload />
                 <input
@@ -231,14 +252,28 @@ export default function DocumentCard({
               </IconButton>
 
               {!hasMultipleDocuments && (
-                <IconButton
-                  size="small"
-                  color="error"
-                  disabled={deleteDisabled}
-                  onClick={() => onDelete?.(documento)}
-                >
-                  <Delete />
-                </IconButton>
+                <>
+                  <SAEButton
+                    variant="outlined"
+                    color="error"
+                    startIcon={<Delete />}
+                    disabled={deleteDisabled}
+                    onClick={() => onDelete?.(documento)}
+                    sx={{ display: { xs: "inline-flex", sm: "none" } }}
+                  >
+                    Eliminar
+                  </SAEButton>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    disabled={deleteDisabled}
+                    onClick={() => onDelete?.(documento)}
+                    sx={{ display: { xs: "none", sm: "inline-flex" } }}
+                    aria-label="Eliminar documento"
+                  >
+                    <Delete />
+                  </IconButton>
+                </>
               )}
             </Box>
           )}

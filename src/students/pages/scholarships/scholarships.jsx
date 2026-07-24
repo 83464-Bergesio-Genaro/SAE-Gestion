@@ -11,17 +11,20 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  DialogContentText
+  DialogContentText,
 } from "@mui/material";
 
-import {AddCircleOutline} from "@mui/icons-material";
-import Diversity3Icon from '@mui/icons-material/Diversity3';
+import { AddCircleOutline } from "@mui/icons-material";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
 
-import { SCHOLARSHIP_STRINGS } from "../../../utils/strings/student.strings"; 
-import { SCHOLARSHIPS_STATES,SCHOLARSHIP_TYPE } from "../../../utils/common/constants"; 
+import { SCHOLARSHIP_STRINGS } from "../../../utils/strings/student.strings";
+import {
+  SCHOLARSHIPS_STATES,
+  SCHOLARSHIP_TYPE,
+} from "../../../utils/common/constants";
 import { useScholarships } from "../../context/studentContext";
 import { ScholarshipsProvider } from "../../context/providers/scholarshipsProvider";
-import { formatDate } from "../../../utils/date.utils"; 
+import { formatDate } from "../../../utils/date.utils";
 
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
@@ -63,7 +66,6 @@ function getEstadoBecaConfig(estado) {
   }
 }
 
-
 export default function StudentScholarships() {
   return (
     <ScholarshipsProvider>
@@ -73,7 +75,6 @@ export default function StudentScholarships() {
 }
 
 function ScholarshipsContent() {
-
   const {
     preview,
     closePreview,
@@ -102,16 +103,16 @@ function ScholarshipsContent() {
 
   return (
     <SAEPage>
-        <HeaderPageStudent
-          title={C.bigTitle}
-          description={C.bigSubtitle}
-          backgroundImage="images/carrousel/EntradaUTN.jpg"
-          icon={Diversity3Icon}
-        />
+      <HeaderPageStudent
+        title={C.bigTitle}
+        description={C.bigSubtitle}
+        backgroundImage="images/carrousel/EntradaUTN.jpg"
+        icon={Diversity3Icon}
+      />
 
       <TitleBox
-        title={C.documentationTitle}
-        description={C.documentationSubtitle}
+        title={C.scholarshipTitle}
+        description={C.scholarshipSubtitle}
       />
       {!loadingScholarships && perfilIncompleto && (
         <Box
@@ -160,7 +161,7 @@ function ScholarshipsContent() {
         >
           {misBecas.map((item) => (
             <Grid
-            size={{ xs: 12, sm: 6, md: 4 }}
+              size={{ xs: 12, sm: 6, md: 4 }}
               key={`${item.tipoBeca}-${item.id}`}
             >
               <Card
@@ -230,7 +231,7 @@ function ScholarshipsContent() {
                         <strong>{C.requestedDateLabel}</strong>
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
-                        {formatDate(item.fechaSolicitud),"short"}
+                        {formatDate(item.fechaSolicitud, "short")}
                       </Typography>
                     </Box>
 
@@ -444,7 +445,8 @@ function ScholarshipsContent() {
           sx={{ mt: 1, display: loadingDocuments ? "none" : "flex" }}
         >
           {documentos.map((item) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}
+            <Grid
+              size={{ xs: 12, sm: 6, md: 4 }}
               key={item.id_tipo_documento ?? item.id ?? item.nombre}
             >
               <DocumentCard
@@ -463,14 +465,16 @@ function ScholarshipsContent() {
             </Grid>
           ))}
 
-          <Grid size={{ xs: 3}}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 width: "100%",
                 minWidth: 0,
                 height: "100%",
                 display: "flex",
-                borderRadius: 4,
+                maxWidth: 357,
+                borderRadius: 6,
+                mx: { xs: "auto", sm: 0 },
                 flexDirection: "column",
                 boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
                 border: "1px solid rgba(17, 53, 101, 0.08)",
@@ -543,7 +547,8 @@ function ScholarshipsContent() {
             <Box sx={{ mt: 4, position: "relative" }}>
               <Grid container spacing={2.5} sx={{ mt: 1 }}>
                 {documentosEconomica.map((item) => (
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }}
+                  <Grid
+                    size={{ xs: 12, sm: 6, md: 4 }}
                     key={item.id_tipo_documento ?? item.id ?? item.nombre}
                   >
                     <DocumentCard
@@ -568,7 +573,7 @@ function ScholarshipsContent() {
       </Box>
 
       {/* El form recibe documentos y callbacks; Scholarships conserva la fuente de verdad. */}
-      <ScholarshipsForm/>
+      <ScholarshipsForm />
 
       <Dialog open={openPopup} onClose={() => setOpenPopup(false)}>
         <DialogTitle>{C.deleteDocTitle}</DialogTitle>
@@ -600,7 +605,6 @@ function ScholarshipsContent() {
       />
 
       {/* Mensaje final de éxito/error/advertencia. */}
-      
     </SAEPage>
   );
 }

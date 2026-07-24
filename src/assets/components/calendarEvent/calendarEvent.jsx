@@ -1,49 +1,58 @@
-import { Box, IconButton, Stack, useMediaQuery, Card, CardContent, Divider, Link, Typography } from "@mui/material";
+import {
+  Box,
+  Stack,
+  useMediaQuery,
+  Card,
+  CardContent,
+  Chip,
+  Link,
+  Typography,
+} from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { CalendarIcon } from "@mui/x-date-pickers";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { formatDate } from "../../../utils/date.utils";
 const settingsSchedule = {
   dots: true,
   infinite: false,
   speed: 500,
-  slidesToShow:3,     // Cuántas tarjetas se ven en computadora
+  slidesToShow: 3, // Cuántas tarjetas se ven en computadora
   slidesToScroll: 1,
-  swipe: true,           
-  swipeToSlide: true,    
-  touchMove: true,       
-  draggable: true,  
+  swipe: true,
+  swipeToSlide: true,
+  touchMove: true,
+  draggable: true,
   responsive: [
     {
       breakpoint: 1024, // En pantallas medianas (tablets)
       settings: {
         slidesToShow: 2,
         slidesToScroll: 1,
-      }
+      },
     },
     {
-      breakpoint: 600,  
+      breakpoint: 600,
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1,
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 
-export function CalendarEvent({eventos}){
+export function CalendarEvent({ eventos }) {
   const isMobile = useMediaQuery("(max-width:932px)");
   const isTablet = useMediaQuery("(max-width:1199px)");
   const slidesToShow = isMobile ? 1 : isTablet ? 2 : 3;
 
-  return(
+  return (
     <Box
       sx={{
-        py:{ xs: 2, sm: 8 },
+        py: { xs: 2, sm: 8 },
         px: { xs: 0, sm: 4 },
         width: "100%",
         boxSizing: "border-box",
@@ -58,154 +67,258 @@ export function CalendarEvent({eventos}){
         "& .slick-slide": {
           padding: { xs: "0 6px", sm: "0 10px" },
           boxSizing: "border-box",
-          height: "auto", 
+          height: "auto",
           "& > div": {
             width: "100%",
-          }
+          },
         },
         "& .slick-slide > div": {
           padding: { xs: "0 4px", sm: "0 10px" },
           boxSizing: "border-box",
-          height: "auto", 
+          height: "auto",
           "& > div": {
             width: "100%",
-          }
+          },
         },
-        ".slick-prev:before,.slick-next:before":{
-        color: "black"
-      }
-
+        ".slick-prev:before,.slick-next:before": {
+          color: "black",
+        },
       }}
     >
-      <Slider
-        {...settingsSchedule}
-        responsive={[]}
-        slidesToShow={slidesToShow}
-      >
-      { eventos.map((evento) => {
-
-          return(
-          <EventoCard key={evento.id ?? `${evento.nombre_evento}-${evento.fecha_evento}`} evento={evento}>
-          </EventoCard>)
+      <Slider {...settingsSchedule} responsive={[]} slidesToShow={slidesToShow}>
+        {eventos.map((evento) => {
+          return (
+            <EventoCard
+              key={
+                evento.id ?? `${evento.nombre_evento}-${evento.fecha_evento}`
+              }
+              evento={evento}
+            ></EventoCard>
+          );
         })}
-      </Slider> 
+      </Slider>
     </Box>
   );
 }
 
 function EventoCard({ evento }) {
   return (
-    <Card sx={{
-      my: 2,
-      minHeight: { xs: 330, sm: 390 },
-      position: "relative",
-      borderRadius: 5,
-      overflow: "hidden",
-      border: { xs: "1px solid rgba(18, 54, 102, 0.12)", sm: '2px solid transparent' },
-      bgcolor: "white",
-      backgroundClip: 'padding-box',
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0, right: 0, bottom: 0, left: 0,
-        zIndex: -1,
-        margin: '-2px', // Ancho del borde
-        borderRadius: 'inherit',
-        background: 'linear-gradient(45deg, #6a11cb 0%, #2575fc 100%)', // Borde colorido
-      },
-      boxShadow: { xs: "0 8px 24px rgba(18, 54, 102, 0.12)", sm: 4 },
-      color: '#000000',
-      }}>
+    <Card
+      sx={{
+        my: 2,
+        minHeight: { xs: "auto", sm: 360 },
+        height: "100%",
+        borderRadius: 3,
+        overflow: "hidden",
+        bgcolor: "white",
+        border: "1px solid rgba(18, 54, 102, 0.1)",
+        boxShadow: "0 16px 42px rgba(21, 61, 113, 0.11)",
+        transition: "transform .22s ease, box-shadow .22s ease",
+        "&:hover": {
+          transform: { xs: "none", sm: "translateY(-4px)" },
+          boxShadow: "0 24px 56px rgba(21, 61, 113, 0.17)",
+        },
+      }}
+    >
       <CardContent
         sx={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)',
-          backdropFilter: 'blur(10px)', // Efecto de desenfoque si hay algo detrás
-          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07)', // Sombra suave azulada
-          border: '1px solid rgba(255, 255, 255, 0.18)', // Borde sutil
-          borderRadius: 2,
-          color: '#000000',
           p: { xs: 2.25, sm: 3 },
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          color: "text.primary",
         }}
       >
-      <Stack direction="row" justifyContent="flex-start" alignItems="center" pb={1} spacing={{ xs: 1, sm: 2 }}>
-        <Box
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "stretch", sm: "center" }}
+          spacing={1.5}
+        >
+          <Stack direction="row" alignItems="center" spacing={1.25}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                flexShrink: 0,
+                borderRadius: 2.5,
+                bgcolor: "rgba(48, 98, 172, 0.09)",
+                color: "var(--primary)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <EventAvailableIcon sx={{ fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography
+                sx={{ fontSize: 13, color: "text.secondary", fontWeight: 700 }}
+              >
+                Fecha
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: 17, sm: 18 },
+                  fontWeight: 800,
+                  color: "#123666",
+                }}
+              >
+                {formatDate(evento.fecha_evento, "short")}
+              </Typography>
+            </Box>
+          </Stack>
+          <Chip
+            icon={<AccessTimeIcon />}
+            label={evento.horario_inicio}
+            size="small"
+            sx={{
+              alignSelf: { xs: "flex-start", sm: "center" },
+              height: 34,
+              borderRadius: 2,
+              bgcolor: "rgba(18, 54, 102, 0.08)",
+              color: "#123666",
+              fontWeight: 800,
+              "& .MuiChip-icon": { color: "inherit" },
+            }}
+          />
+        </Stack>
+
+        <Typography
           sx={{
-            width: 40,
-            height: 40,
-            flexShrink: 0,
-            borderRadius: "50%",
-            bgcolor: "#E7F1FF",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            mt: 2.5,
+            px: { xs: 1.5, sm: 2 },
+            py: { xs: 1.5, sm: 1.75 },
+            borderRadius: 2.5,
+            bgcolor: "#123666",
+            fontSize: { xs: 21, sm: 24 },
+            lineHeight: 1.18,
+            fontWeight: 850,
+            color: "white",
+            textAlign: "center",
           }}
         >
-          <CalendarIcon sx={{ fontSize: 20, color: "#2A548B" }} />
-        </Box>
-          <Typography sx={{ fontSize: { xs: 16, sm: 18 }, fontWeight: 700, flexGrow: 1 }}>
-            {formatDate(evento.fecha_evento,"short")}
-          </Typography>
-          <Typography sx={{ fontSize: { xs: 18, sm: 24 }, fontWeight: 800, color: "#123666" }}>
-            {evento.horario_inicio}
-          </Typography>          
-      </Stack>        
-      <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.5)", mb: 2 }} />
-      <Stack sx={{ flexGrow: 1, justifyContent: "space-between" }}>
-        <Box sx={{ minHeight: { xs: "auto", sm: "75px" }, overflow: "hidden"}}> 
-          <Typography sx={{ mt: 0.5, fontSize: { xs: 22, sm: 26 }, lineHeight: 1.2, fontWeight: 700, textAlign: "left" }}>
-            {evento.nombre_evento}
-          </Typography>
+          {evento.nombre_evento}
+        </Typography>
 
-      
-        </Box>
-        <Box sx={{ minHeight: "45px", overflow: "hidden", pt: 2 }}> 
-          <Typography sx={{textAlign:"left" }}>
-            <strong>Expositor: </strong>{evento.encargado}
-          </Typography>  
-        </Box>
-      </Stack>
+        <Box
+          sx={{
+            mt: 2,
+            flexGrow: 1,
+          }}
+        >
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
+            <Stack
+              direction="row"
+              spacing={1.25}
+              alignItems="flex-start"
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: "#f7f9fc",
+                border: "1px solid rgba(17, 53, 101, 0.08)",
+              }}
+            >
+              <PersonOutlineIcon
+                sx={{ mt: 0.2, fontSize: 20, color: "var(--primary)" }}
+              />
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: "text.secondary",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Expositor
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 15,
+                    fontWeight: 650,
+                    color: "text.primary",
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  {evento.encargado}
+                </Typography>
+              </Box>
+            </Stack>
 
-      <Box sx={{ minHeight: "40px", pr: 0.5 }} my={{ xs: 1.5, sm: 2 }}>
-        <Typography sx={{ mb: 2 }}>
-          <Box component="span" sx={{ fontWeight: 700 }}>
-            Duración:
-          </Box>{" "}
-          {evento.duracion}
-        </Typography>        
-      </Box>
-        <Divider
-          sx={{ borderColor: "rgba(0, 0, 0, 0.6)", mt: "auto", mb: 2 }}
-        />
-        <Box sx={{ minHeight: "24px"}} my={1}>
-          <Link 
-            target="_blank" 
-            href={evento.lugar} 
+            <Stack
+              direction="row"
+              spacing={1.25}
+              alignItems="flex-start"
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: "#f7f9fc",
+                border: "1px solid rgba(17, 53, 101, 0.08)",
+              }}
+            >
+              <AccessTimeIcon
+                sx={{ mt: 0.2, fontSize: 20, color: "var(--primary)" }}
+              />
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: "text.secondary",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Duracion
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 15,
+                    fontWeight: 650,
+                    color: "text.primary",
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  {evento.duracion}
+                </Typography>
+              </Box>
+            </Stack>
+          </Stack>
+        </Box>
+
+        <Box sx={{ mt: 2.25 }}>
+          <Link
+            target="_blank"
+            href={evento.lugar}
             underline="none"
-            sx={{ 
-              display: "flex", 
-              alignItems: "center", 
-              gap: 1, 
-              color: "primary.main",
-              transition: "all 0.2s ease",
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              width: "100%",
+              minHeight: 44,
+              borderRadius: 2,
+              bgcolor: "white",
+              color: "var(--primary)",
+              border: "1px solid rgba(48, 98, 172, 0.28)",
+              fontWeight: 800,
+              transition:
+                "background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease",
               "&:hover": {
-                color: "primary.dark",
-                transform: "scale(1.02)",
+                bgcolor: "rgba(48, 98, 172, 0.08)",
+                borderColor: "var(--primary)",
               },
-              "&:active": {
-                color: "secondary.main", 
-                transform: "scale(0.98)", 
-              }
             }}
           >
-          <LocationOnIcon sx={{ fontSize: 22 }} />
-          <Typography sx={{ fontSize: 16, fontWeight: 500 }}>
-            Ver Ubicacion en Maps
-          </Typography>
-        </Link>
-                  
+            <LocationOnIcon sx={{ fontSize: 21 }} />
+            <Typography sx={{ fontSize: 15, fontWeight: 800 }}>
+              Ver ubicacion en Maps
+            </Typography>
+          </Link>
         </Box>
       </CardContent>
     </Card>

@@ -18,13 +18,17 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  useMediaQuery,
 } from "@mui/material";
 import { useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-import { useAuth, useNotification} from "../../../shared/context/sharedContext";
+import {
+  useAuth,
+  useNotification,
+} from "../../../shared/context/sharedContext";
 import { useHealth } from "../../context/studentContext";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 
@@ -35,11 +39,11 @@ import SAESpinner from "../../../assets/components/spinner/SAESpinner";
 import TitleBox from "../../../assets/components/titleBox";
 import HeaderPageStudent from "../../../assets/components/headerPage/headerPageStudent.jsx";
 import { SAETypography } from "../../../assets/components/typography/SAETypography";
-import { ScaleText } from "../../../assets/components/scaleText/scaleText";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SearchIcon from "@mui/icons-material/Search";
 import SchoolIcon from "@mui/icons-material/School";
@@ -54,9 +58,9 @@ import ScienceIcon from "@mui/icons-material/Science";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import BloodtypeIcon from "@mui/icons-material/Bloodtype";
 
-import { calendarDays } from "../../../utils/common/constants"; 
-import { formatDate, formatTime } from "../../../utils/date.utils"; 
-import { HEALTH_STRINGS } from "../../../utils/strings/student.strings"; 
+import { calendarDays } from "../../../utils/common/constants";
+import { formatDate, formatTime } from "../../../utils/date.utils";
+import { HEALTH_STRINGS } from "../../../utils/strings/student.strings";
 import { DataGrid } from "@mui/x-data-grid";
 
 const C = HEALTH_STRINGS;
@@ -70,13 +74,7 @@ const PALETTE = [
   "#F1C6A3", //Reprogramado
 ];
 
-const COURSE_PALETTE = [
-  "#C8C1DF",
-  "#BFEBA2",
-  "#AB95EE",
-  "#F6F399",
-  "#F1C6A3",
-];
+const COURSE_PALETTE = ["#C8C1DF", "#BFEBA2", "#AB95EE", "#F6F399", "#F1C6A3"];
 
 const settings = {
   dots: true,
@@ -110,7 +108,7 @@ const settingsSchedule = {
   dots: true,
   infinite: false,
   speed: 500,
-  slidesToShow: 4, // Cuántas tarjetas se ven en computadora
+  slidesToShow: 1,
   slidesToScroll: 1,
   swipe: true,
   swipeToSlide: true,
@@ -118,9 +116,9 @@ const settingsSchedule = {
   draggable: true,
   responsive: [
     {
-      breakpoint: 1024, // En pantallas medianas (tablets)
+      breakpoint: 1200,
       settings: {
-        slidesToShow: 2,
+        slidesToShow: 1,
         slidesToScroll: 1,
       },
     },
@@ -146,6 +144,50 @@ const MEDICINE_ICONS = [
   ContentPasteSearchIcon, // Historial clínico / estudios / recetas
   BloodtypeIcon, // Gota de sangre / hematología / extracciones
 ];
+
+const sliderDotsSx = {
+  "& .slick-dots": {
+    position: "static",
+    mt: 1.25,
+    mb: 0.75,
+    lineHeight: 1,
+  },
+  "& .slick-dots li": {
+    width: 12,
+    height: 12,
+    mx: 0.25,
+  },
+  "& .slick-dots li button": {
+    width: 12,
+    height: 12,
+    p: 0,
+  },
+  "& .slick-dots li button:before": {
+    fontSize: 10,
+    color: "rgba(255,255,255,0.72)",
+    opacity: 1,
+  },
+  "& .slick-dots li.slick-active button:before": {
+    color: "white",
+    opacity: 1,
+  },
+  "& .slick-prev, & .slick-next": {
+    zIndex: 2,
+    width: 28,
+    height: 28,
+  },
+  "& .slick-prev": {
+    left: { xs: -2, sm: -18 },
+  },
+  "& .slick-next": {
+    right: { xs: -2, sm: -18 },
+  },
+  "& .slick-prev:before, & .slick-next:before": {
+    fontSize: { xs: 22, sm: 26 },
+    color: "white",
+    opacity: 0.9,
+  },
+};
 
 const agruparPorEspecialidad = (horariosMapeados) => {
   const agrupado = horariosMapeados.reduce((acumulador, horario) => {
@@ -176,8 +218,47 @@ const agruparPorEspecialidad = (horariosMapeados) => {
   return Object.values(agrupado);
 };
 
+const formatTurnDate = (value) => {
+  if (!value) return "";
+
+  const date =
+    typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)
+      ? new Date(value.substring(0, 10).replace(/-/g, "/"))
+      : new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  const month = date.toLocaleDateString("es-ES", { month: "long" });
+  const formattedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+
+  return `${date.getDate()} de ${formattedMonth}`;
+};
+
+const formatTurnHour = (value) => {
+  if (!value) return "";
+
+  const normalized = String(value).replace(/hs/gi, "").trim().substring(0, 5);
+
+  return normalized ? `${normalized} hs` : "";
+};
+
 export function EmployedStudentContent() {
   const { user } = useAuth();
+  const isDesktopSchedule = useMediaQuery("(min-width:1200px)", {
+    noSsr: true,
+  });
+  const isDesktopTurns = useMediaQuery("(min-width:1200px)", {
+    noSsr: true,
+  });
+  const isTabletTurns = useMediaQuery("(min-width:900px)", {
+    noSsr: true,
+  });
+  const isDesktopCourses = useMediaQuery("(min-width:1200px)", {
+    noSsr: true,
+  });
+  const isTabletCourses = useMediaQuery("(min-width:900px)", {
+    noSsr: true,
+  });
 
   const {
     allHorarios,
@@ -201,20 +282,43 @@ export function EmployedStudentContent() {
   }, [fetchTurnosEstudiante, user]);
 
   const horariosAgrupados = agruparPorEspecialidad(allHorarios);
+  const scheduleSliderSettings = {
+    ...settingsSchedule,
+    slidesToShow: isDesktopSchedule ? 4 : 1,
+    responsive: [],
+  };
+  const activeTurnsSliderSettings = {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: isDesktopTurns ? 3 : isTabletTurns ? 2 : 1,
+    slidesToScroll: 1,
+    swipe: true,
+    swipeToSlide: true,
+    touchMove: true,
+    draggable: true,
+    responsive: [],
+  };
+  const coursesSlidesToShow = Math.min(
+    cursos.length || 1,
+    isDesktopCourses ? 3 : isTabletCourses ? 2 : 1,
+  );
+  const coursesSliderSettings = {
+    ...settings,
+    slidesToShow: coursesSlidesToShow,
+    responsive: [],
+  };
 
   return (
     <SAEPage>
       <HeaderPageStudent
         title={C.headerTitle}
-        description={C.headerDescription }
+        description={C.headerDescription}
         backgroundImage="images/varias/campus.jpg"
         icon={HealingIcon}
       />
 
-      <TitleBox
-        title={C.servicesTitle}
-        description={C.servicesDescription}
-      />
+      <TitleBox title={C.servicesTitle} description={C.servicesDescription} />
 
       <Card
         sx={{
@@ -238,7 +342,7 @@ export function EmployedStudentContent() {
           direction={{ xs: "column", md: "row" }}
           alignItems="center"
           spacing={1.5}
-          p={5}
+          p={{ xs: 2, sm: 3, md: 5 }}
         >
           {loadingHorarios && (
             <Stack alignItems="center" width={"100%"} gap={1}>
@@ -248,28 +352,31 @@ export function EmployedStudentContent() {
           {!loadingHorarios && (
             <Box
               sx={{
-                px: { xs: 2, sm: 4 },
+                px: { xs: 0, sm: 4 },
                 width: "100%",
                 boxSizing: "border-box",
-                overflow: "hidden",
+                overflow: "visible",
+                ...sliderDotsSx,
                 "& .slick-slider": {
                   width: "100%",
                   touchAction: "pan-y",
                 },
                 "& .slick-list": {
-                  margin: "0 -10px",
+                  margin: { xs: 0, sm: "0 -10px" },
                 },
                 "& .slick-slide": {
-                  padding: "0 10px",
+                  padding: { xs: "0 4px", sm: "0 10px" },
                   boxSizing: "border-box",
                   height: "auto",
                   "& > div": {
                     width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
                   },
                 },
               }}
             >
-              <Slider {...settingsSchedule}>
+              <Slider {...scheduleSliderSettings}>
                 {horariosAgrupados.map((especialidad, index) => {
                   const IconoDinamico =
                     MEDICINE_ICONS[index % MEDICINE_ICONS.length];
@@ -278,12 +385,14 @@ export function EmployedStudentContent() {
                       key={especialidad.id_especialidad}
                       variant="outlined"
                       sx={{
-                        minWidth: 300,
-                        maxWidth: 300,
-                        minHeight: 400,
-                        maxHeight: 400,
-                        borderRadius: 4,
-                        my: 3,
+                        width: { xs: "calc(100% - 34px)", sm: 300 },
+                        minWidth: 0,
+                        maxWidth: { xs: 320, sm: 300 },
+                        minHeight: 0,
+                        height: "auto",
+                        borderRadius: { xs: 3, sm: 4 },
+                        my: { xs: 2, sm: 3 },
+                        mx: "auto",
                         background:
                           "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)", //GRADIENTE??
                         border: "1px solid #DCE7F5",
@@ -303,8 +412,7 @@ export function EmployedStudentContent() {
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          height: "100%",
-                          p: 2,
+                          p: { xs: 1.75, sm: 2 },
                           "&:last-child": { pb: 2 },
                         }}
                       >
@@ -313,12 +421,13 @@ export function EmployedStudentContent() {
                           direction="row"
                           justifyContent="flex-start"
                           alignItems="center"
-                          spacing={2}
+                          spacing={1.5}
                         >
                           <Box
                             sx={{
-                              width: 55,
-                              height: 60,
+                              width: { xs: 48, sm: 55 },
+                              height: { xs: 48, sm: 60 },
+                              flexShrink: 0,
                               borderRadius: "50%",
                               bgcolor: "#E7F1FF",
                               display: "flex",
@@ -330,7 +439,15 @@ export function EmployedStudentContent() {
                               sx={{ fontSize: 30, color: "#2A548B" }}
                             />
                           </Box>
-                          <SAETypography variant="h6" fontWeight="bold" noWrap>
+                          <SAETypography
+                            variant="h6"
+                            fontWeight="bold"
+                            sx={{
+                              fontSize: { xs: "1rem", sm: "1.25rem" },
+                              lineHeight: 1.2,
+                              overflowWrap: "anywhere",
+                            }}
+                          >
                             {especialidad.nombre_especialidad}
                           </SAETypography>
                         </Stack>
@@ -340,30 +457,65 @@ export function EmployedStudentContent() {
                         {/* NUEVO: Stack intermedio que se estira para ocupar el espacio y empujar el botón */}
                         <Stack
                           sx={{
-                            flexGrow: 1,
-                            justifyContent: "space-between",
+                            gap: 1.1,
                           }}
                         >
                           {/* SECCIÓN 2: DESCRIPCIÓN (Le damos un alto fijo para que no mueva lo demás) */}
-                          <Box sx={{ height: "80px", overflow: "hidden" }}>
-                            <ScaleText
-                              text={
-                                especialidad?.descripcion_especialidad ?? ""
-                              }
-                              maxWidth={"300px"}
-                              maxHeight={"80px"}
-                            />
+                          <Box
+                            sx={{
+                              p: { xs: 1, sm: 1.1 },
+                              borderRadius: 2,
+                              bgcolor: "#F3F7FC",
+                              border: "1px solid #E0EAF6",
+                              maxHeight: { xs: 150, sm: 130 },
+                              overflowY: "auto",
+                            }}
+                          >
+                            <SAETypography
+                              variant="body2"
+                              sx={{
+                                lineHeight: 1.3,
+                                overflowWrap: "anywhere",
+                              }}
+                            >
+                              {especialidad?.descripcion_especialidad ?? ""}
+                            </SAETypography>
                           </Box>
-
-                          <Divider sx={{ my: 0.5, borderStyle: "dashed" }} />
 
                           <Box
                             sx={{
-                              height: "90px",
-                              overflowY: "auto",
-                              pr: 0.5,
+                              p: 1,
+                              borderRadius: 2,
+                              bgcolor: "#EEF5FF",
                             }}
-                            my={2}
+                          >
+                            <SAETypography
+                              variant="caption"
+                              sx={{ color: "text.secondary", fontWeight: 700 }}
+                            >
+                              Profesional
+                            </SAETypography>
+                            <SAETypography
+                              variant="body2"
+                              sx={{
+                                lineHeight: 1.3,
+                                overflowWrap: "anywhere",
+                                display: "-webkit-box",
+                                WebkitBoxOrient: "vertical",
+                                WebkitLineClamp: 2,
+                                overflow: "hidden",
+                              }}
+                            >
+                              {especialidad.especialista}
+                            </SAETypography>
+                          </Box>
+
+                          <Box
+                            sx={{
+                              maxHeight: { xs: 170, sm: 135 },
+                              overflowY: "auto",
+                              pr: 0.25,
+                            }}
                           >
                             <SAETypography
                               variant="body2"
@@ -387,13 +539,21 @@ export function EmployedStudentContent() {
                                   direction="row"
                                   alignItems="center"
                                   gap={1}
-                                  sx={{ mt: 0.5 }}
+                                  sx={{
+                                    mt: 0.5,
+                                    bgcolor: "#F3F7FC",
+                                    borderRadius: 2,
+                                    p: 0.75,
+                                  }}
                                 >
                                   <AccessTimeIcon
                                     fontSize="small"
                                     color="action"
                                   />
-                                  <SAETypography variant="body2">
+                                  <SAETypography
+                                    variant="body2"
+                                    sx={{ overflowWrap: "anywhere" }}
+                                  >
                                     <strong>{nombreDia}:</strong>{" "}
                                     {formatTime(item.hora_inicio)} a{" "}
                                     {formatTime(item.hora_fin)}
@@ -402,10 +562,6 @@ export function EmployedStudentContent() {
                               );
                             })}
                           </Box>
-                          <SAETypography variant="body2" sx={{ pt: 1.5 }}>
-                            <strong>{"Profesional: "}</strong>
-                            {especialidad.especialista}
-                          </SAETypography>
                           {/* SECCIÓN EN EL FONDO: EL BOTÓN (Queda alineado abajo siempre igual) */}
                           <SAEButton
                             variant="contained"
@@ -417,13 +573,15 @@ export function EmployedStudentContent() {
                               )
                             }
                             sx={{
-                              whiteSpace: "nowrap",
+                              width: "100%",
+                              whiteSpace: { xs: "normal", sm: "nowrap" },
+                              justifyContent: "center",
                               color: "white",
                               border: "1px solid rgba(255,255,255,0.4)",
-                              mt: 1, // Pequeño margen superior de seguridad
+                              mt: 0.25,
                             }}
                           >
-                           {C.servicesButton}
+                            {C.servicesButton}
                           </SAEButton>
                         </Stack>
                       </CardContent>
@@ -467,7 +625,7 @@ export function EmployedStudentContent() {
             alignItems="center"
             justifyContent="center"
           >
-            <SAESpinner/>
+            <SAESpinner />
           </Grid>
         )}
         {!loadingTurnos && estudianteTurnos.length === 0 && (
@@ -484,126 +642,277 @@ export function EmployedStudentContent() {
             {C.noActiveTurns}
           </SAETypography>
         )}
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          alignItems="center"
-          width={"100%"}
-          spacing={1.5}
-          p={2}
+        <Box
+          sx={{
+            width: "100%",
+            px: { xs: 0, sm: 2 },
+            py: { xs: 0.5, sm: 1 },
+            boxSizing: "border-box",
+            overflow: "visible",
+            ...sliderDotsSx,
+            "& .slick-slider": {
+              width: "100%",
+              touchAction: "pan-y",
+            },
+            "& .slick-list": {
+              margin: { xs: 0, sm: "0 -10px" },
+            },
+            "& .slick-track": {
+              display: "flex",
+            },
+              "& .slick-slide": {
+                height: "auto",
+                padding: { xs: "0 4px", sm: "0 10px" },
+                boxSizing: "border-box",
+                "& > div": {
+                  height: "auto",
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                },
+              },
+          }}
         >
-          {!loadingTurnos &&
-            estudianteTurnos.length > 0 &&
-            //ESTAS SON LAS TARJETAS QUE VES ADENTRO DEL COMPONENTE
-            estudianteTurnos.map((turno) => (
-              <Card
-                key={turno.id}
-                variant="outlined"
-                sx={{
-                  minWidth: 350,
-                  maxWidth: 350,
-                  color: "var(--textBlack)",
-                  my: 2,
-                  borderRadius: 2,
-                  p: 1.1,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                  transition: "background-color 0.3s ease, width 0.3s ease",
-                }}
-              >
-                <CardContent sx={{ "&:last-child": { paddingBottom: 2 } }}>
-                  {/* Cabecera: Nombre y Estado */}
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    mb={1.5}
+          {!loadingTurnos && estudianteTurnos.length > 0 && (
+            <Slider {...activeTurnsSliderSettings}>
+              {estudianteTurnos.map((turno) => (
+                <Card
+                  key={turno.id}
+                  variant="outlined"
+                  sx={{
+                    width: { xs: "calc(100% - 34px)", sm: "100%" },
+                    height: "auto",
+                    minWidth: 0,
+                    maxWidth: { xs: 330, sm: "none" },
+                    color: "var(--textBlack)",
+                    my: { xs: 1, sm: 1.25 },
+                    borderRadius: { xs: 3, sm: 4 },
+                    border: "1px solid #DCE7F5",
+                    boxShadow: "0 10px 25px rgba(18,54,102,0.12)",
+                    background:
+                      "linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)",
+                    transition: "background-color 0.3s ease, width 0.3s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <CardContent
+                    sx={{
+                      p: { xs: 1.25, sm: 1.5 },
+                      display: "flex",
+                      flexDirection: "column",
+                      "&:last-child": { pb: { xs: 1.25, sm: 1.5 } },
+                    }}
                   >
-                    <SAETypography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      sx={{ maxWidth: "140px"}}
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                      gap={1}
+                      mb={0.9}
                     >
-                      {formatDate(turno.fecha_solicitud,"short") || "-"}
-                    </SAETypography>
-                    <Chip
-                      label={turno.estado || "-"}
-                      size="small"
-                      sx={{
-                        bgcolor: PALETTE[turno.id_estado_turno],
-                        color: "var(--textWhite)",
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                      }}
-                    />
-                  </Stack>
-
-                  <Divider sx={{ my: 1 }} />
-
-                  {/* Datos Mínimos: Fecha y Hora */}
-                  <Stack spacing={1} mt={1.5}>
-                    <SAETypography variant="body2">
-                      <strong>{C.turnsCardPacient}</strong>
-                      <br />
-                      {turno.paciente || C.noNameTurn}
-                    </SAETypography>
-                    <SAETypography variant="body2">
-                      <strong>{C.turnsCardSuject}</strong>
-                      <br />
-                      {turno.asunto || C.noSubject}
-                    </SAETypography>
-                    <SAETypography variant="body2">
-                      <strong>{C.turnsCardMedic}</strong>
-                      <br />
-                      {turno.especialista || C.noMedic}
-                    </SAETypography>
-                    <Stack direction="row" alignItems="center" gap={1}>
-                      <CalendarMonthIcon fontSize="medium" />
-                      <SAETypography variant="body2">
-                        {turno.fecha_atencion || C.noDate}
-                      </SAETypography>
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={0.75}
+                        sx={{ minWidth: 0, flex: 1 }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.75,
+                            minWidth: 0,
+                            bgcolor: "#EEF5FF",
+                            borderRadius: 2,
+                            p: 0.75,
+                          }}
+                        >
+                          <CalendarMonthIcon fontSize="small" color="primary" />
+                          <SAETypography
+                            variant="body2"
+                            fontWeight="bold"
+                            sx={{ overflowWrap: "anywhere", minWidth: 0 }}
+                          >
+                            {formatTurnDate(turno.fecha_atencion) || C.noDate}
+                          </SAETypography>
+                        </Box>
+                        <SAETypography
+                          component="div"
+                          variant="body2"
+                          fontWeight="bold"
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.75,
+                            minWidth: 0,
+                            bgcolor: "#EEF5FF",
+                            borderRadius: 2,
+                            p: 0.75,
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          <AccessTimeIcon fontSize="small" color="primary" />
+                          {formatTurnHour(turno.hora_atencion) || C.noSchedule}
+                        </SAETypography>
+                      </Stack>
+                      <Chip
+                        label={turno.estado || "-"}
+                        size="small"
+                        sx={{
+                          bgcolor:
+                            PALETTE[turno.id_estado_turno] ||
+                            "var(--secondary)",
+                          color: "var(--textWhite)",
+                          height: 30,
+                          fontSize: "0.82rem",
+                          fontWeight: 700,
+                          flexShrink: 0,
+                          "& .MuiChip-label": {
+                            px: 1.25,
+                          },
+                        }}
+                      />
                     </Stack>
 
-                    <Stack direction="row" alignItems="center" gap={1}>
-                      <AccessTimeIcon fontSize="medium" />
-                      <SAETypography variant="body2">
-                        {turno.hora_atencion || C.noSchedule}
+                    <Box
+                      sx={{
+                        p: { xs: 0.9, sm: 1.1 },
+                        borderRadius: 2,
+                        bgcolor: "#F3F7FC",
+                        border: "1px solid #E0EAF6",
+                      }}
+                    >
+                      <SAETypography
+                        variant="caption"
+                        sx={{
+                          color: "text.secondary",
+                          display: "block",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {C.turnsCardSuject}
+                      </SAETypography>
+                      <SAETypography
+                        variant="body2"
+                        sx={{
+                          mt: 0.25,
+                          fontWeight: 700,
+                          lineHeight: 1.25,
+                          overflowWrap: "anywhere",
+                          display: "-webkit-box",
+                          WebkitBoxOrient: "vertical",
+                          WebkitLineClamp: 2,
+                          overflow: "hidden",
+                        }}
+                      >
+                        {turno.asunto || C.noSubject}
+                      </SAETypography>
+                    </Box>
+
+                    {/* Datos Mínimos: Fecha y Hora */}
+                    <Stack spacing={1} mt={1.1}>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                          gap: 1,
+                        }}
+                      >
+                        <Box sx={{ minWidth: 0 }}>
+                          <SAETypography
+                            variant="caption"
+                            sx={{ color: "text.secondary", fontWeight: 700 }}
+                          >
+                            {C.turnsCardPacient}
+                          </SAETypography>
+                          <SAETypography
+                            variant="body2"
+                            sx={{
+                              overflowWrap: "anywhere",
+                              lineHeight: 1.3,
+                              display: "-webkit-box",
+                              WebkitBoxOrient: "vertical",
+                              WebkitLineClamp: 2,
+                              overflow: "hidden",
+                            }}
+                          >
+                            {turno.paciente || C.noNameTurn}
+                          </SAETypography>
+                        </Box>
+                        <Box sx={{ minWidth: 0 }}>
+                          <SAETypography
+                            variant="caption"
+                            sx={{ color: "text.secondary", fontWeight: 700 }}
+                          >
+                            {C.turnsCardMedic}
+                          </SAETypography>
+                          <SAETypography
+                            variant="body2"
+                            sx={{
+                              overflowWrap: "anywhere",
+                              lineHeight: 1.3,
+                              display: "-webkit-box",
+                              WebkitBoxOrient: "vertical",
+                              WebkitLineClamp: 2,
+                              overflow: "hidden",
+                            }}
+                          >
+                            {turno.especialista || C.noMedic}
+                          </SAETypography>
+                        </Box>
+                      </Box>
+                      <SAETypography
+                        variant="caption"
+                        sx={{ color: "text.secondary", fontWeight: 700 }}
+                      >
+                        Solicitud:{" "}
+                        {formatTurnDate(turno.fecha_solicitud) || "-"}
                       </SAETypography>
                     </Stack>
-                  </Stack>
-                  <Stack spacing={2} mt={1.5} p={2}>
-                    <SAEButton
-                      variant="contained"
-                      onClick={() => openShowTurnos(turno)}
-                      sx={{
-                        whiteSpace: "nowrap",
-                        color: "var(--textWhite)",
-                        border: "1px solid rgba(255,255,255,0.4)",
-                      }}
-                    >
-                     {C.showTurn}
-                    </SAEButton>
-                    <SAEButton
-                      variant="contained"
-                      color="error"
-                      onClick={() => openDeleteTurnos(turno)}
-                      sx={{
-                        whiteSpace: "nowrap",
-                        color: "white",
-                        border: "1px solid rgba(255,255,255,0.4)",
-                      }}
-                    >
-                      {C.deleteTurn}
-                    </SAEButton>
-                  </Stack>
-                </CardContent>
-              </Card>
-            ))}
-        </Stack>
+                    <Stack direction="row" spacing={1} mt={1.15}>
+                      <SAEButton
+                        variant="contained"
+                        startIcon={<SearchIcon />}
+                        onClick={() => openShowTurnos(turno)}
+                        sx={{
+                          flex: 1,
+                          minHeight: 32,
+                          py: 0.35,
+                          px: 1,
+                          justifyContent: "center",
+                          color: "var(--textWhite)",
+                          border: "1px solid rgba(255,255,255,0.4)",
+                        }}
+                      >
+                        Ver
+                      </SAEButton>
+                      <SAEButton
+                        variant="contained"
+                        color="error"
+                        startIcon={<DeleteOutlineIcon />}
+                        onClick={() => openDeleteTurnos(turno)}
+                        sx={{
+                          flex: 1,
+                          minHeight: 32,
+                          py: 0.35,
+                          px: 1,
+                          justifyContent: "center",
+                          color: "white",
+                          border: "1px solid rgba(255,255,255,0.4)",
+                        }}
+                      >
+                        Cancelar
+                      </SAEButton>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+            </Slider>
+          )}
+        </Box>
       </Card>
 
-      <TitleBox
-        title={C.courseTitle}
-        description={C.courseDescription}
-      />
+      <TitleBox title={C.courseTitle} description={C.courseDescription} />
 
       <Card
         sx={{
@@ -646,9 +955,12 @@ export function EmployedStudentContent() {
             <Box
               sx={{
                 px: { xs: 0, sm: 4 },
+                pt: { xs: 1.5, sm: 0 },
+                pb: { xs: 1, sm: 0 },
                 width: "100%",
                 boxSizing: "border-box",
-                overflow: "hidden",
+                overflow: "visible",
+                ...sliderDotsSx,
                 "& .slick-slider": {
                   width: "100%",
                   touchAction: "pan-y",
@@ -662,23 +974,27 @@ export function EmployedStudentContent() {
                   height: "auto",
                   "& > div": {
                     width: "100%",
+                    height: "auto",
+                    display: "flex",
+                    justifyContent: "center",
                   },
                 },
               }}
             >
-              <Slider {...settings}>
+              <Slider {...coursesSliderSettings}>
                 {cursos.map((curso, index) => {
                   return (
                     <Card
                       key={curso.id || index}
                       variant="outlined"
                       sx={{
-                        width: { xs: "calc(100% - 5px)", sm: 350 },
-                        minWidth: { xs: 0, sm: 350 },
-                        maxWidth: { xs: "none", sm: 300 },
-                        height: 210,
+                        width: { xs: "calc(100% - 40px)", sm: "100%" },
+                        minWidth: 0,
+                        maxWidth: { xs: 300, sm: 340 },
+                        minHeight: { xs: 0, sm: 210 },
+                        height: "auto",
                         borderRadius: { xs: 3, sm: 4 },
-                        my: { xs: 2, sm: 3, md: 1.5 },
+                        my: { xs: 1.25, sm: 1.75 },
                         mx: "auto",
                         background:
                           "linear-gradient(180deg,#1D3557 0%,#2A548B 100%)", // GRADIENT
@@ -694,18 +1010,17 @@ export function EmployedStudentContent() {
                         flexDirection: "column",
                       }}
                     >
-
                       <Stack
                         direction="row"
                         justifyContent="flex-start"
                         alignItems="center"
                         spacing={1.5}
-                        sx={{ px: 1.5, pt: 1.5, pb: 1 }}
+                        sx={{ px: { xs: 1.25, sm: 1.5 }, pt: 1.25, pb: 1 }}
                       >
                         <Box
                           sx={{
                             width: 48,
-                            height: 48,
+                            height: 42,
                             flexShrink: 0,
                             display: "flex",
                             alignItems: "center",
@@ -727,6 +1042,10 @@ export function EmployedStudentContent() {
                             fontSize: { xs: "1rem", sm: "1.1rem" },
                             lineHeight: 1.2,
                             overflowWrap: "anywhere",
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            overflow: "hidden",
                           }}
                         >
                           {curso.nombre_curso}
@@ -743,14 +1062,12 @@ export function EmployedStudentContent() {
                       {/* NUEVO: Stack intermedio que se estira para ocupar el espacio y empujar el botón */}
                       <CardContent
                         sx={{
-                          flex: 1,
                           display: "flex",
                           flexDirection: "column",
-                          justifyContent: "space-between",
-                          px: 1.5,
+                          px: { xs: 1.25, sm: 1.5 },
                           pt: 1,
-                          pb: 1.5,
-                          "&:last-child": { pb: 1.5 },
+                          pb: 1.25,
+                          "&:last-child": { pb: 1.25 },
                         }}
                       >
                         <Stack spacing={1}>
@@ -764,17 +1081,61 @@ export function EmployedStudentContent() {
                               fontWeight: 700,
                             }}
                           />
-                          <SAETypography variant="body2">
-                            {C.courseTeacher}<strong> 👨‍🏫 {curso.nombre_docente}</strong>
-                          </SAETypography>
-                          <SAETypography variant="body2">
-                            {C.courseStart}
-                            <strong>
-                              {" "}
-                              {formatDate(curso.fecha_inicio,"short")}
-                            </strong>{C.courseEnd}
-                            <strong>{formatDate(curso.fecha_fin,"short")}</strong>
-                          </SAETypography>
+                          <Box 
+                            sx={{
+                              bgcolor: "rgba(255,255,255,0.1)",
+                              borderRadius: 2,
+                              p: 0.8,
+                            }}
+                          >
+                            <SAETypography
+                              variant="caption"
+                              sx={{
+                                color: "rgba(255,255,255,0.72)",
+                                fontWeight: 700,
+                              }}
+                            >
+                              {C.courseTeacher}
+                            </SAETypography>
+                            <SAETypography
+                              variant="body2"
+                              sx={{
+                                lineHeight: 1.3,
+                                overflowWrap: "anywhere",
+                                display: "-webkit-box",
+                                WebkitBoxOrient: "vertical",
+                                WebkitLineClamp: 2,
+                                overflow: "hidden",
+                              }}
+                            >
+                              {curso.nombre_docente}
+                            </SAETypography>
+                          </Box>
+                          <Box
+                            sx={{
+                              bgcolor: "rgba(255,255,255,0.1)",
+                              borderRadius: 2,
+                              p: 0.8,
+                            }}
+                          >
+                            <SAETypography
+                              variant="caption"
+                              sx={{
+                                color: "rgba(255,255,255,0.72)",
+                                fontWeight: 700,
+                              }}
+                            >
+                              Duracion
+                            </SAETypography>
+                            <SAETypography
+                              variant="body2"
+                              fontWeight="bold"
+                              sx={{ lineHeight: 1.3 }}
+                            >
+                              {formatDate(curso.fecha_inicio, "short")} -{" "}
+                              {formatDate(curso.fecha_fin, "short")}
+                            </SAETypography>
+                          </Box>
                         </Stack>
                       </CardContent>
                     </Card>
@@ -978,7 +1339,7 @@ function DialogHealth() {
                           }
                           multiline
                           fullWidth
-                          rows={4} 
+                          rows={4}
                         />
                       </Grid>
                     </Grid>
@@ -1050,7 +1411,7 @@ function DialogHealth() {
                         <SAETextField
                           label={C.dialogDate}
                           type="date"
-                          value={dialogData?.fecha_atencion||""}
+                          value={dialogData?.fecha_atencion || ""}
                           onChange={(e) =>
                             handleDataChange("fecha_atencion", e.target.value)
                           }
@@ -1119,8 +1480,8 @@ function DialogHealth() {
                 {dialogMode === "create"
                   ? C.create
                   : dialogMode === "delete"
-                  ? C.delete
-                  : C.close}
+                    ? C.delete
+                    : C.close}
               </SAEButton>
             )}
           </DialogActions>

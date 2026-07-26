@@ -1,7 +1,7 @@
 import React, { useState,useCallback,useEffect } from "react";
 import { ObtenerPerfilXLegajo,ModificarPerfilEstudiante } from "../../../api/EstudianteService";
 import { listarDocumentacionXLegajo } from "../../../api/BecasService";
-import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
+import { mapEstudiante, mapResponseDocumento } from "../../../api/formatters/EstudianteFormatters";
 import {  useAuth, useNotification,ProfileContext } from "../sharedContext"; 
 
 import { cleanField,cleanNumericField,isEmpty,onlyDigits,sanitizeAddressPart,getInitials } from "../../../utils/text.utils.js";
@@ -49,7 +49,7 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
 
       try {
         const data = await listarDocumentacionXLegajo(user.email);
-        setDocumentosPerfil(Array.isArray(data) ? data : []);
+        setDocumentosPerfil(  data.map(mapResponseDocumento));
       } catch {
         setDocumentosPerfil([]);
       } finally {

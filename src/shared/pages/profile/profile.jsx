@@ -504,7 +504,7 @@ export function MyProfileContent() {
                                   >
                                     {extension && (
                                       <Chip
-                                        label={extension.toUpperCase()}
+                                        label={extension}
                                         size="small"
                                         color="primary"
                                         variant="outlined"

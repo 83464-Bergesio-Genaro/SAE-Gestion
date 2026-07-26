@@ -122,21 +122,31 @@ export async function apiRequest(
 ) {
   const isFormData = body instanceof FormData;
   const authorizationToken = token ?? (auth ? getSessionToken() : null);
+
+  // Opción 3: Limpiamos customHeaders para evitar que valores 'undefined' rompan la petición
+  const cleanCustomHeaders = Object.fromEntries(
+    Object.entries(customHeaders).filter((entry) => entry[1] != null)
+  );
   const headers = {
-    ...(warning ? { "ngrok-skip-browser-warning": "true" } : {}),
+    // SÓLO agrega la cabecera si warning es true Y la URL de destino NO es localhost
+    ...(warning && !resolveApiUrl(endpoint).includes("localhost") 
+      ? { "ngrok-skip-browser-warning": "true" } 
+      : {}),
     ...(!isFormData && body != null
       ? { "Content-Type": "application/json" }
       : {}),
     ...(authorizationToken
       ? { Authorization: `Bearer ${authorizationToken}` }
       : {}),
-    ...customHeaders,
+    ...cleanCustomHeaders, // Aplicamos las cabeceras externas ya saneadas
   };
 
+  // Opción 4: Agregamos 'mode: "cors"' explícitamente al fetch
   const response = await fetch(resolveApiUrl(endpoint), {
     method,
     headers,
     signal,
+    mode: "cors", // <-- Fuerza al navegador a validar las reglas CORS correctamente
     body:
       body == null ? undefined : isFormData ? body : JSON.stringify(body),
   });

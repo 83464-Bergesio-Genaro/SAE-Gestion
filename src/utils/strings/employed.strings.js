@@ -28,6 +28,7 @@ export const CONSULTATIONS_STRINGS = {
     "Las consultas preparadas por estudiantes se dirigen actualmente a: ",
 
   errorName: "Nombre vacio o no valido",
+  errorRequiredLink: "Ingresa un hipervinculo",
   errorLink: "Ingresa un hipervinculo valido con http:// o https://",
   errorSaving: "Revisa los campos marcados antes de guardar.",
 

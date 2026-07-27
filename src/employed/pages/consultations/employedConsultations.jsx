@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -39,9 +39,21 @@ import { CONSULTATION_FAQS,QUICK_CONSULTATION_FAQS,SAE_EMAIL } from "../../../ut
 import { CONSULTATIONS_STRINGS } from "../../../utils/strings/employed.strings";
 import { getDialogTitle } from "../../../utils/util";
 import { isValidHyperlink } from "../../../utils/validation.utils";
+import { isEmpty } from "../../../utils/text.utils";
 
 
 const C = CONSULTATIONS_STRINGS;
+const validateLinkField = (field, value) => {
+  switch (field) {
+    case "titulo":
+      return isEmpty(value) ? C.errorName : "";
+    case "hipervinculo":
+      if (isEmpty(value)) return C.errorRequiredLink;
+      return isValidHyperlink(value) ? "" : C.errorLink;
+    default:
+      return "";
+  }
+};
 
 function EmployedContent() {
   const {
@@ -164,6 +176,13 @@ function DialogConsultation() {
     handleLinksFrecuenteDelete,
     linksFrecuentesIcons,
   } = useConsultations();
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  useEffect(() => {
+    if (dialogOpen && dialogType === "linkFrecuentes") {
+      setFieldErrors({});
+    }
+  }, [dialogOpen, dialogType, dialogMode]);
 
   const selectedDialogIcon = useMemo(() => {
     const iconIndex = Number(dialogData?.id_index_ico) || 0;
@@ -174,12 +193,29 @@ function DialogConsultation() {
   }, [dialogData?.id_index_ico, linksFrecuentesIcons]);
 
   const SelectedDialogIcon = selectedDialogIcon.icon;
-  const hyperlinkError =
-    Boolean(dialogData.hipervinculo) && !isValidHyperlink(dialogData.hipervinculo)
-      ? C.errorLink
-      : "";
+  const handleLinkFieldChange = (field, value) => {
+    handleDataChange(field, value);
+    setFieldErrors((previous) => ({
+      ...previous,
+      [field]: validateLinkField(field, value),
+    }));
+  };
+
+  const validateLinkDialog = () => {
+    const fields = ["titulo", "hipervinculo"];
+    const errors = fields.reduce((result, field) => {
+      const message = validateLinkField(field, dialogData[field]);
+      if (message) result[field] = message;
+      return result;
+    }, {});
+
+    setFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSaveLinkFrecuente = () => {
-    if (hyperlinkError) {
+    if (!validateLinkDialog()) {
       setDialogError(C.errorSaving);
       return;
     }
@@ -261,8 +297,10 @@ function DialogConsultation() {
                         label={C.formTitle}
                         value={dialogData.titulo}
                         onChange={(e) =>
-                          handleDataChange("titulo", e.target.value)
+                          handleLinkFieldChange("titulo", e.target.value)
                         }
+                        error={Boolean(fieldErrors.titulo)}
+                        helperText={fieldErrors.titulo ?? ""}
                         fullWidth
                       />
                     </Grid>
@@ -271,10 +309,10 @@ function DialogConsultation() {
                         label={C.formLink}
                         value={dialogData.hipervinculo}
                         onChange={(e) =>
-                          handleDataChange("hipervinculo", e.target.value)
+                          handleLinkFieldChange("hipervinculo", e.target.value)
                         }
-                        error={Boolean(hyperlinkError)}
-                        helperText={hyperlinkError}
+                        error={Boolean(fieldErrors.hipervinculo)}
+                        helperText={fieldErrors.hipervinculo ?? ""}
                         fullWidth
                       />
                     </Grid>                    

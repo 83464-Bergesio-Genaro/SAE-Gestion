@@ -8,25 +8,19 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  FormControl,
   Grid,
-  InputLabel,
-  TextField,
   MenuItem,
   Paper,
-  Select,
   Stack,
   Typography,
   Tab,
 } from "@mui/material";
 import { useState } from "react";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 import SAEButton from "../../../assets/components/buttons/SAEButton";
+import SAETextField from "../../../assets/components/inputs/SAETextField";
 
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
@@ -35,9 +29,18 @@ import SendRoundedIcon from "@mui/icons-material/SendRounded";
 
 import { sendJPAEmailForm } from "../../../api/EmailService";
 import { JPA_STRINGS } from "../../../utils/strings/shared.strings";
+import { isValidEmail, isValidPhone } from "../../../utils/validation.utils";
+import { isEmpty, onlyDigits } from "../../../utils/text.utils";
 
 const C = JPA_STRINGS;
 const checkImage = `${import.meta.env.BASE_URL}images/logos/comprobado.png`;
+const requiredMessage = "Este campo es obligatorio";
+const emailRequiredMessage = "Ingrese el email";
+const emailFormatMessage = "Ingrese un email valido";
+const phoneRequiredMessage = "Ingrese el telefono";
+const phoneFormatMessage = "Ingrese un telefono valido";
+const amountRequiredMessage = "Ingrese la cantidad";
+const amountFormatMessage = "Ingrese una cantidad valida";
 
 export default function SharedJPAParticipar() {
   const colectivos = [
@@ -145,11 +148,74 @@ export default function SharedJPAParticipar() {
     setDialog(false);
   };
 
-  //Envio Mail
-  const [visitDate, setVisitDate] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validateField = (field, value) => {
+    switch (field) {
+      case "user_name":
+      case "desc":
+      case "date":
+      case "carrera":
+        return isEmpty(value) ? requiredMessage : "";
+      case "user_email":
+        if (isEmpty(value)) return emailRequiredMessage;
+        return isValidEmail(value) ? "" : emailFormatMessage;
+      case "phone":
+        if (isEmpty(value)) return phoneRequiredMessage;
+        return isValidPhone(value) ? "" : phoneFormatMessage;
+      case "amount":
+        if (isEmpty(value)) return amountRequiredMessage;
+        return Number.isInteger(Number(value)) && Number(value) > 0
+          ? ""
+          : amountFormatMessage;
+      default:
+        return "";
+    }
+  };
+
+  const handleFieldChange = (field, value) => {
+    setFieldErrors((previous) => ({
+      ...previous,
+      [field]: validateField(field, value),
+    }));
+  };
+
+  const handlePhoneChange = (event) => {
+    const value = onlyDigits(event.target.value);
+    event.target.value = value;
+    handleFieldChange("phone", value);
+  };
+
+  const validate = (form) => {
+    const formData = new FormData(form);
+    const fieldsByType = {
+      "Colegio / Municipio / ONG": [
+        "user_name",
+        "user_email",
+        "phone",
+        "amount",
+        "date",
+      ],
+      Empresas: ["user_name", "user_email", "phone", "desc"],
+      Estudiantes: ["user_name", "user_email", "phone", "carrera"],
+    };
+    const formType = formData.get("form_type");
+    const fields = fieldsByType[formType] ?? [];
+    const errors = fields.reduce((result, field) => {
+      const message = validateField(field, formData.get(field));
+      if (message) result[field] = message;
+      return result;
+    }, {});
+
+    setFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
 
   const sendEmail = (e) => {
     e.preventDefault();
+
+    if (!validate(e.currentTarget)) return;
 
     sendJPAEmailForm(e.currentTarget)
       .then(() => {
@@ -165,6 +231,7 @@ export default function SharedJPAParticipar() {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    setFieldErrors({});
   };
 
   const [carrera, setCarrera] = useState(
@@ -173,6 +240,7 @@ export default function SharedJPAParticipar() {
 
   const handleChangeCombo = (event) => {
     setCarrera(event.target.value);
+    handleFieldChange("carrera", event.target.value);
   };
   return (
     <Box
@@ -225,7 +293,7 @@ export default function SharedJPAParticipar() {
               </Typography>
               <Typography
                 variant="h6"
-                sx={{ opacity: 0.9, mt: 0.5, maxWidth:{ xs:680,md:1000} }}
+                sx={{ opacity: 0.9, mt: 0.5, maxWidth: { xs: 680, md: 1000 } }}
               >
                 {C.participateDescription}
               </Typography>
@@ -384,7 +452,7 @@ export default function SharedJPAParticipar() {
                 </TabList>
               </Box>
               <TabPanel value="1" style={{ padding: 0 }}>
-                <form onSubmit={sendEmail}>
+                <form onSubmit={sendEmail} noValidate>
                   <input
                     type="hidden"
                     name="subject"
@@ -398,51 +466,71 @@ export default function SharedJPAParticipar() {
                   />
                   <Grid container spacing={2.5} p={{ xs: 2.5, md: 4 }}>
                     <Grid size={{ xs: 12 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         label={C.participateName}
                         name="user_name"
+                        onChange={(event) =>
+                          handleFieldChange("user_name", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.user_name)}
+                        helperText={fieldErrors.user_name ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         label={C.participateEmail}
                         name="user_email"
                         type="email"
+                        onChange={(event) =>
+                          handleFieldChange("user_email", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.user_email)}
+                        helperText={fieldErrors.user_email ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 4 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         label={C.participatePhone}
                         name="phone"
+                        type="tel"
+                        onChange={handlePhoneChange}
+                        error={Boolean(fieldErrors.phone)}
+                        helperText={fieldErrors.phone ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 4 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         label={C.participateQuant}
                         name="amount"
+                        type="number"
+                        onChange={(event) =>
+                          handleFieldChange("amount", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.amount)}
+                        helperText={fieldErrors.amount ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 4 }}>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          label={C.participateDate}
-                          value={visitDate}
-                          onChange={setVisitDate}
-                          slotProps={{ textField: { fullWidth: true } }}
-                        />
-                      </LocalizationProvider>
-                      <input
-                        type="hidden"
+                      <SAETextField
+                        fullWidth
+                        required
+                        label={C.participateDate}
                         name="date"
-                        value={visitDate ? visitDate.format("DD/MM/YYYY") : ""}
+                        InputLabelProps={{ shrink: true }}
+                        type="date"
+                        onChange={(event) =>
+                          handleFieldChange("date", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.date)}
+                        helperText={fieldErrors.date ?? ""}
                       />
                     </Grid>
                     <Grid
@@ -453,6 +541,7 @@ export default function SharedJPAParticipar() {
                       <SAEButton
                         variant="contained"
                         type="submit"
+                        color="primary"
                         endIcon={<SendRoundedIcon />}
                         sx={{
                           width: { xs: "100%", sm: "auto" },
@@ -467,7 +556,7 @@ export default function SharedJPAParticipar() {
                 </form>
               </TabPanel>
               <TabPanel value="2" style={{ padding: 0 }}>
-                <form onSubmit={sendEmail}>
+                <form onSubmit={sendEmail} noValidate>
                   <input type="hidden" name="form_type" value="Empresas" />
                   <input
                     type="hidden"
@@ -477,41 +566,60 @@ export default function SharedJPAParticipar() {
 
                   <Grid container spacing={2.5} p={{ xs: 2.5, md: 4 }}>
                     <Grid size={{ xs: 12 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         id="outlined-required"
                         label="Nombre de la empresa"
                         name="user_name"
+                        onChange={(event) =>
+                          handleFieldChange("user_name", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.user_name)}
+                        helperText={fieldErrors.user_name ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 6 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         id="outlined-required"
                         label="Ingrese el email"
                         name="user_email"
                         type="email"
+                        onChange={(event) =>
+                          handleFieldChange("user_email", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.user_email)}
+                        helperText={fieldErrors.user_email ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 6 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         id="outlined-required"
                         label="Teléfono"
                         name="phone"
+                        type="tel"
+                        onChange={handlePhoneChange}
+                        error={Boolean(fieldErrors.phone)}
+                        helperText={fieldErrors.phone ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 12 }}>
-                      <TextField
+                      <SAETextField
                         multiline
                         fullWidth
                         required
                         id="outlined-required"
                         label="Descripción stand"
                         name="desc"
+                        onChange={(event) =>
+                          handleFieldChange("desc", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.desc)}
+                        helperText={fieldErrors.desc ?? ""}
                       />
                     </Grid>
                     <Grid
@@ -522,6 +630,7 @@ export default function SharedJPAParticipar() {
                       <SAEButton
                         variant="contained"
                         type="submit"
+                        color="primary"
                         endIcon={<SendRoundedIcon />}
                         sx={{
                           width: { xs: "100%", sm: "auto" },
@@ -536,7 +645,7 @@ export default function SharedJPAParticipar() {
                 </form>
               </TabPanel>
               <TabPanel value="3" style={{ padding: 0 }}>
-                <form onSubmit={sendEmail}>
+                <form onSubmit={sendEmail} noValidate>
                   <input type="hidden" name="form_type" value="Estudiantes" />
                   <input
                     type="hidden"
@@ -545,75 +654,87 @@ export default function SharedJPAParticipar() {
                   />
                   <Grid container spacing={2.5} p={{ xs: 2.5, md: 4 }}>
                     <Grid size={{ xs: 12 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         id="outlined-required"
                         label="Nombre y apellido"
                         name="user_name"
+                        onChange={(event) =>
+                          handleFieldChange("user_name", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.user_name)}
+                        helperText={fieldErrors.user_name ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         id="outlined-required"
                         label="Ingrese el email"
                         name="user_email"
                         type="email"
+                        onChange={(event) =>
+                          handleFieldChange("user_email", event.target.value)
+                        }
+                        error={Boolean(fieldErrors.user_email)}
+                        helperText={fieldErrors.user_email ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 6 }}>
-                      <TextField
+                      <SAETextField
                         fullWidth
                         required
                         id="outlined-required"
                         label="Teléfono"
                         name="phone"
+                        type="tel"
+                        onChange={handlePhoneChange}
+                        error={Boolean(fieldErrors.phone)}
+                        helperText={fieldErrors.phone ?? ""}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, lg: 6 }}>
-                      <FormControl fullWidth>
-                        <InputLabel id="demo-simple-select-label">
-                          Carrera
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          defaultValue=""
-                          value={carrera}
-                          label="Carrera"
-                          onChange={handleChangeCombo}
-                          name="carrera"
+                      <SAETextField
+                        select
+                        fullWidth
+                        required
+                        id="demo-simple-select"
+                        value={carrera}
+                        label="Carrera"
+                        onChange={handleChangeCombo}
+                        name="carrera"
+                        error={Boolean(fieldErrors.carrera)}
+                        helperText={fieldErrors.carrera ?? ""}
+                      >
+                        <MenuItem
+                          value={"Ingeniería en Sistemas de Información"}
                         >
-                          <MenuItem
-                            value={"Ingeniería en Sistemas de Información"}
-                          >
-                            Ingeniería en Sistemas de Información
-                          </MenuItem>
-                          <MenuItem value={"Ingeniería Industrial"}>
-                            Ingeniería Industrial
-                          </MenuItem>
-                          <MenuItem value={"Ingeniería Mecánica"}>
-                            Ingeniería Mecánica
-                          </MenuItem>
-                          <MenuItem value={"Ingeniería Metalúrgica"}>
-                            Ingeniería Metalúrgica
-                          </MenuItem>
-                          <MenuItem value={"Ingeniería Química"}>
-                            Ingeniería Química
-                          </MenuItem>
-                          <MenuItem value={"Ingeniería Civil"}>
-                            Ingeniería Civil
-                          </MenuItem>
-                          <MenuItem value={"Ingeniería Eléctrica"}>
-                            Ingeniería Eléctrica
-                          </MenuItem>
-                          <MenuItem value={"Ingeniería Electrónica"}>
-                            Ingeniería Electrónica
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
+                          Ingeniería en Sistemas de Información
+                        </MenuItem>
+                        <MenuItem value={"Ingeniería Industrial"}>
+                          Ingeniería Industrial
+                        </MenuItem>
+                        <MenuItem value={"Ingeniería Mecánica"}>
+                          Ingeniería Mecánica
+                        </MenuItem>
+                        <MenuItem value={"Ingeniería Metalúrgica"}>
+                          Ingeniería Metalúrgica
+                        </MenuItem>
+                        <MenuItem value={"Ingeniería Química"}>
+                          Ingeniería Química
+                        </MenuItem>
+                        <MenuItem value={"Ingeniería Civil"}>
+                          Ingeniería Civil
+                        </MenuItem>
+                        <MenuItem value={"Ingeniería Eléctrica"}>
+                          Ingeniería Eléctrica
+                        </MenuItem>
+                        <MenuItem value={"Ingeniería Electrónica"}>
+                          Ingeniería Electrónica
+                        </MenuItem>
+                      </SAETextField>
                     </Grid>
                     <Grid
                       size={{ xs: 12 }}
@@ -623,6 +744,7 @@ export default function SharedJPAParticipar() {
                       <SAEButton
                         variant="contained"
                         type="submit"
+                        color="primary"
                         endIcon={<SendRoundedIcon />}
                         sx={{
                           width: { xs: "100%", sm: "auto" },
@@ -672,6 +794,7 @@ export default function SharedJPAParticipar() {
         <DialogActions>
           <SAEButton
             variant="contained"
+            color="primary"
             onClick={closeDialog}
             style={{ color: "white" }}
           >

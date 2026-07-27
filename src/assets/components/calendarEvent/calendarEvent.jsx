@@ -52,7 +52,7 @@ export function CalendarEvent({ eventos }) {
   return (
     <Box
       sx={{
-        py: { xs: 2, sm: 8 },
+        py: { xs: 4, sm: 8 },
         px: { xs: 0, sm: 4 },
         width: "100%",
         boxSizing: "border-box",
@@ -130,7 +130,7 @@ function EventoCard({ evento }) {
         }}
       >
         <Stack
-          direction={{ xs: "column", sm: "row" }}
+          direction={{ xs: "row", sm: "row" }}
           justifyContent="space-between"
           alignItems={{ xs: "stretch", sm: "center" }}
           spacing={1.5}
@@ -170,7 +170,7 @@ function EventoCard({ evento }) {
           <Chip
             icon={<AccessTimeIcon />}
             label={evento.horario_inicio}
-            size="small"
+            size="large"
             sx={{
               alignSelf: { xs: "flex-start", sm: "center" },
               height: 34,

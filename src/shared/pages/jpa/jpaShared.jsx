@@ -288,9 +288,9 @@ function JPAContent() {
       <HeroSection />
       <Container maxWidth="xl">
         <DegreesCarrousel />
-        <Divider sx={{mb:"-10px"}} />
+        <Divider sx={{ mb: "-10px" }} />
         <JourneySection />
-        <Divider sx={{mb:"-10px"}} />
+        <Divider sx={{ mb: "-10px" }} />
         <EventSection />
         <ParticipeButton />
       </Container>
@@ -361,11 +361,11 @@ function HeroSection() {
                         fontWeight: 600,
                       }}
                     />
-                    
+
                     <SAETypography variant="h1" color="white">
                       Ingeniería
                       <Box
-                      //Despues deberiamos fijarnos un metodo mas limpio
+                        //Despues deberiamos fijarnos un metodo mas limpio
                         component="br"
                         sx={{ display: { xs: "block", md: "none" } }}
                       />
@@ -453,7 +453,7 @@ function HeroSection() {
             overflow: "hidden",
           }}
         >
-          <Grid container /*Deberiamos hacerlo una lista y luego mapear*/ >
+          <Grid container /*Deberiamos hacerlo una lista y luego mapear*/>
             <Grid size={{ xs: 6, sm: 3 }}>
               <StatCard value={8} label={C.heroCard1} />
             </Grid>
@@ -489,7 +489,6 @@ function DegreesCarrousel() {
       id={"carreras"}
       style={{ scrollMarginTop: "120px" }}
     >
-
       <Box
         sx={{
           mt: { xs: 7, md: 10 },
@@ -762,20 +761,20 @@ function EventSection() {
         }}
       >
         <Box
-        sx={{
-          mt: { xs: 7, md: 10 },
-          textAlign: "center",
-          mb: { xs: 3, md: 6 },
-        }}
-      >
-        <Typography variant="h2" fontWeight={700}>
-          {C.eventsTitle}
-        </Typography>
+          sx={{
+            mt: { xs: 4, md: 10 },
+            textAlign: "center",
+            mb: { xs: 1, md: 6 },
+          }}
+        >
+          <Typography variant="h2" fontWeight={700}>
+            {C.eventsTitle}
+          </Typography>
 
-        <Typography variant="h6" color="text.secondary">
-          {C.eventsDescription}
-        </Typography>
-      </Box>
+          <Typography variant="h6" color="text.secondary">
+            {C.eventsDescription}
+          </Typography>
+        </Box>
 
         {loadingEventos && (
           <Stack alignItems="center" width={"100%"} gap={1}>
@@ -845,7 +844,7 @@ function JourneySection() {
       sx={{
         position: "relative",
         zIndex: 1,
-        mt: { xs: 4,md:10 },
+        mt: { xs: 4, md: 10 },
         px: { xs: 0, md: 4 },
         py: { xs: 2, md: 4 },
       }}
@@ -999,7 +998,7 @@ function JourneySection() {
         <Box
           sx={{
             height: 6,
-            my:3,
+            my: 3,
             width: `${((selectedStep + 1) / studentJourney.length) * 100}%`,
             bgcolor: "#123666",
             transition: ".4s",

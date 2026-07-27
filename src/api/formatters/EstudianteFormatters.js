@@ -38,6 +38,6 @@ export const mapResponseDocumento = (ResponseDocumento) => ({
   id_tipo_documento: ResponseDocumento.id_tipo_documento,
   nombre_documento: ResponseDocumento.nombre_documento,
   tamanio: ResponseDocumento.tamanio,
-  extension: ResponseDocumento.extension.replace(".",",").toUpperCase(),
+  extension: ResponseDocumento.extension.toUpperCase(),
   ruta: ResponseDocumento.ruta,
 });

@@ -14,6 +14,12 @@ import {
   Grid,
   IconButton,
   useMediaQuery,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 
 import LocalAirportIcon from "@mui/icons-material/LocalAirport";
@@ -28,7 +34,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 import { useAuth } from "../../../shared/context/sharedContext";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { TravelProvider } from "../../context/providers/travelProvider";
 import { useTravel } from "../../context/studentContext";
 import { HashLink as Link } from "react-router-hash-link";
@@ -223,9 +229,10 @@ function NotificacionEstudiante() {
 function CarrouselVertical() {
   const [indiceActivo, setIndiceActivo] = useState(0);
   const isMobile = useMediaQuery("(max-width:599px)");
+  const isTablet = useMediaQuery("(max-width:1024px)");
   const sliderRef = useRef(null);
 
-  const ALTURA_TARJETA = isMobile ? 470 : 600;
+  const ALTURA_TARJETA = isMobile ? 400 : isTablet? 350: 500;
 
   const settings = {
     dots: false,
@@ -265,6 +272,7 @@ function CarrouselVertical() {
       <Box
         sx={{
           height: { xs: ALTURA_TARJETA, sm: ALTURA_TARJETA + 80 },
+          
           position: "relative",
           "& .slick-list": {
             overflow: "hidden",
@@ -280,7 +288,7 @@ function CarrouselVertical() {
             let desplazamientoY = 0;
             let escala = 1;
             let zIndex = tarjetas.length;
-
+            let MX = isMobile? 2:0;
             if (yaPaso) {
               const lugaresMovidos = indiceActivo - index;
               desplazamientoY =
@@ -298,7 +306,7 @@ function CarrouselVertical() {
             }
             if (index === 0 && indiceActivo > 0) escala = 0.93;
             return (
-              <Box key={item.id} sx={{ padding: "0", outline: "none" }}>
+              <Box key={item.id} sx={{ outline: "none" }} padding={MX}>
                 <Card
                   elevation={esActiva ? 6 : 4}
                   onClick={() => {
@@ -424,6 +432,7 @@ function CarrouselVertical() {
           zIndex: 20,
           backgroundColor: "transparent",
           borderRadius: 2,
+          mt:{xs:4,md:-2},
           position: "relative",
         }}
         direction="row"
@@ -469,8 +478,14 @@ function DocSection() {
     handlePreview,
     handleArchivoChange,
     requestDeleteDocument,
+    documentosParaMostrar,
+    loadingDocumentos,
+    documentoAEliminar,
+    openPopup,
+    closeDeleteDialog,
+    handleDelete
   } = useTravel();
-
+  const isMobile = useMediaQuery("(max-width:599px)");
   return (
     <>
       {!loadingTravel && travelsLegajo.length > 0 && (
@@ -480,43 +495,91 @@ function DocSection() {
               borderRadius: 5,
               mt: 10,
               p: 4,
-              textAlign: "center",
-              border: "1px solid rgba(235, 41, 41, 0.1)",
+              boxShadow: "0 18px 45px rgba(21, 61, 113, 0.3)"
+            }}
+            style={{
+              background: "rgba(255,255,255,0.18)" // Funciona directamente
             }}
           >
             <Typography
               pt={2}
-              variant="h3"
+              variant="h4"
               fontWeight={800}
               textAlign={"center"}
             >
               {C.myDocumentTitle}
             </Typography>
+           
             <Grid container spacing={2} sx={{ mt: 4 }}>
-              {TRAVEL_REQUIRED_DOCUMENTS.map((item) => (
-                <Grid
-                  container
-                  key={item.id_tipo_documento ?? item.nombre}
-                  size={{ xs: 12, sm: 6, md: 4 }}
-                  sx={{ justifyContent: "center", alignItems: "center" }}
-                >
-                  <DocumentCard
-                    documento={item}
-                    onPreview={handlePreview}
-                    onFileChange={handleArchivoChange}
-                    onDelete={requestDeleteDocument}
-                    uploadDisabled={item.subido}
-                    deleteDisabled={!item.subido}
-                    notUploadedLabel={"No Subido"}
-                    uploadedLabel={"Subido!"}
-                    showRequirement
+
+             {loadingDocumentos && (
+              <Grid size={12} display={"flex"} justifyContent={"center"}>
+                <SAESpinner size="L"/>
+              </Grid>
+            )}
+             {documentosParaMostrar.map((item) => (
+                <React.Fragment key={item.id_tipo_documento ?? item.nombre}>
+                  {isMobile && (
+                  <Divider 
+                 
+                    sx={{ 
+                      borderStyle: 'dashed',
+                      width:"100%",
+                      borderWidth: 1,
+                      borderColor: 'black', 
+                      opacity: 1, // Asegura que no sea transparente
+                      '&::before, &::after': {
+                        borderColor: 'black', // Fuerza el color en los pseudo-elementos internos de MUI
+                        borderWidth: 1,
+                        borderStyle: 'dashed'
+                      }
+                    }} 
                   />
-                </Grid>
+                  )}
+                  
+                  <Grid
+                    container
+                    // La key ya está en el Fragment, pero Grid también puede necesitarla si se reordena
+                    size={{ xs: 12, sm: 6, md: 4 }}
+                    sx={{ justifyContent: "center", alignItems: "center" }}
+                  >
+
+                    {!loadingDocumentos &&(
+                      <DocumentCard
+                        documento={item}
+                        onPreview={handlePreview}
+                        onFileChange={handleArchivoChange}
+                        onDelete={requestDeleteDocument}
+                        uploadDisabled={item.subido}
+                        deleteDisabled={!item.subido}
+                        notUploadedLabel={"No Subido"}
+                        uploadedLabel={"Subido!"}
+                        showRequirement
+                      />
+                    )}
+                    
+                  </Grid>
+                </React.Fragment>
               ))}
             </Grid>
           </Card>
         </section>
       )}
+      <Dialog open={openPopup} onClose={closeDeleteDialog}>
+          <DialogTitle>{C.deleteDocTitle}</DialogTitle>
+  
+          <DialogContent>
+            <DialogContentText>
+              {C.deleteDocMessage(documentoAEliminar?.archivoNombre)}
+            </DialogContentText>
+          </DialogContent>
+  
+          <DialogActions>
+            <SAEButton onClick={() => handleDelete(documentoAEliminar)} autoFocus>
+              {C.deleteDocButton}
+            </SAEButton>
+          </DialogActions>
+        </Dialog>
     </>
   );
 }

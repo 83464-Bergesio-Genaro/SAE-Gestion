@@ -44,12 +44,12 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
 
   useEffect(() => {
     const fetchDocumentos = async () => {
-      if (!loadDocuments || !user?.email) return;
+      if (!loadDocuments || !user?.legajo) return;
       setLoadingDocumentos(true);
 
       try {
-        const data = await listarDocumentacionXLegajo(user.email);
-        setDocumentosPerfil(  data.map(mapResponseDocumento));
+        const data = await listarDocumentacionXLegajo(user.legajo);
+        setDocumentosPerfil(data.map(mapResponseDocumento));
       } catch {
         setDocumentosPerfil([]);
       } finally {
@@ -58,7 +58,7 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
     };
 
     fetchDocumentos();
-  }, [loadDocuments, user?.email]);
+  }, [loadDocuments, user?.legajo]);
 
   const handleChange = useCallback((field, value) => {
     setDatosPerfil((prev) => ({ ...prev, [field]: value }));

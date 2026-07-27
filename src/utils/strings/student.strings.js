@@ -306,6 +306,12 @@ export const TRIPS_STRINGS = {
   travelCardMessage: "Conoce mas de este viaje →",
 
   myDocumentTitle:"Tu Documentación",
+  deleteDocTitle: "Eliminar Documento",
+    deleteDocMessage: (nombreDoc) =>
+    `¿Estás seguro de que deseas eliminar ${nombreDoc}?`,
+  deleteDocButton: "Eliminar",
+  docEliminado: "Documento eliminado con éxito",
+  docEliminadoError: "Error al eliminar el documento",
 
   faqsTitle:"Más respuestas rápidas",
   faqsDescription:"Revisá estas preguntas antes de enviar una consulta.",

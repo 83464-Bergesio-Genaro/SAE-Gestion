@@ -90,6 +90,7 @@ export const CrearBecarioSAE = (body) =>
   RequestAPI("/api/Beca/CrearBecarioSAE", "POST", body);
 
 export function EditarBecarioSAE(id, body) {
+  console.log(body);
   return RequestAPI(
     `/api/Beca/ModificarBecarioSAE/${encodeURIComponent(id)}`,
     "PUT",

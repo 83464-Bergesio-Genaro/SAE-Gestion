@@ -127,6 +127,15 @@ export function ScholarshipProvider({ children }) {
     data.legajo ??
     "";
 
+  const normalizePreviousBecarioId = (value) => {
+    if (value === null || value === undefined || value === "") return null;
+
+    const numberValue = Number(value);
+    if (Number.isNaN(numberValue) || numberValue < 0) return null;
+
+    return value;
+  };
+
   // Arma el payload del registro base SAE, separado de las becas especificas.
   const buildBecarioPayload = (data = {}) => ({
     id: data.id ?? 0,
@@ -138,7 +147,7 @@ export function ScholarshipProvider({ children }) {
     puede_pagarle: Boolean(data.puede_pagarle),
     activo: data.activo ?? true,
     anio_beca: data.anio_beca || new Date().getFullYear(),
-    id_becario_previo: data.id_becario_previo || null,
+    id_becario_previo: normalizePreviousBecarioId(data.id_becario_previo),
   });
 
   // Version estable para comparar contra el snapshot original del dialog.

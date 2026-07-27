@@ -359,14 +359,15 @@ export default function DialogBecas() {
   const validateBecarioData = () => {
     const errors = {};
 
-    if (dialogData.anio_beca && !/^\d{4}$/.test(String(dialogData.anio_beca))) {
+    if (!dialogData.anio_beca) {
+      errors.anio_beca = BS.validationYearRequired;
+    } else if (!/^\d{4}$/.test(String(dialogData.anio_beca))) {
       errors.anio_beca = BS.validationYear;
     }
 
-    if (
-      dialogData.fecha_solicitud &&
-      String(dialogData.fecha_solicitud) > todayInputDate
-    ) {
+    if (!dialogData.fecha_solicitud) {
+      errors.fecha_solicitud = BS.validationRequestDateRequired;
+    } else if (String(dialogData.fecha_solicitud) > todayInputDate) {
       errors.fecha_solicitud = BS.validationFutureDate;
     }
 

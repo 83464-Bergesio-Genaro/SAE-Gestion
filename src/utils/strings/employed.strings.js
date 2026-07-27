@@ -643,6 +643,8 @@ export const BECAS_STRINGS = {
     loadScholarshipsError: "No se pudieron recuperar las becas del alumno",
 
     validationYear: "Ingresá un año válido",
+    validationYearRequired: "Ingresá el año de la beca",
+    validationRequestDateRequired: "Ingresá la fecha de solicitud",
     validationFutureDate: "La fecha no puede ser mayor a hoy",
     validationScholarshipType: "Seleccioná un tipo de beca",
     validationDuplicateScholarship: "El becario ya tiene ese tipo de beca",

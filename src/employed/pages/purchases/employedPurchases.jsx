@@ -45,6 +45,7 @@ import {
   getCurrencyValue,
   handleCurrencyBlur,
   handleCurrencyInputChange,
+  normalizeCurrencyValue,
 } from "../../../utils/formatters.utils";
 
 export default function EmployedPurchases() {
@@ -224,6 +225,7 @@ function DialogPurchase({ dateRange }) {
   const showPurchaseForm = dialogType === "purchases";
   const showDocumentsForm = dialogMode === "create" || isDocsDialog;
   const { empleados, loadingEmpleados } = useEmploy();
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const {
     isPurchaseDataComplete,
@@ -251,6 +253,135 @@ function DialogPurchase({ dateRange }) {
       ) || null,
     [dialogData.id_usuario, empleados],
   );
+
+  useEffect(() => {
+    if (dialogOpen && ["purchases", "docs"].includes(dialogType)) {
+      setFieldErrors({});
+    }
+  }, [dialogOpen, dialogType, dialogMode]);
+
+  const isBlank = (value) => String(value ?? "").trim() === "";
+  const isValidCurrency = (value) => {
+    const normalizedValue = normalizeCurrencyValue(value);
+
+    return (
+      normalizedValue !== "" &&
+      normalizedValue !== null &&
+      normalizedValue !== undefined &&
+      !Number.isNaN(Number(normalizedValue)) &&
+      Number(normalizedValue) >= 0
+    );
+  };
+  const hasInformeData = (informe = {}) =>
+    [
+      informe.nro_expediente,
+      informe.precio_real,
+      informe.fecha_licitacion,
+      informe.fecha_informe,
+      informe.nombre_solicitante,
+      informe.nombre_ganador,
+    ].some((value) => !isBlank(value));
+
+  const validatePurchaseDialog = () => {
+    const errors = {};
+    const informe = dialogData.informe || {};
+
+    if (!dialogData.id_usuario) {
+      errors.id_usuario = COMPRAS_STRINGS.validationEmployeeRequired;
+    }
+    if (isBlank(dialogData.nombre_compra)) {
+      errors.nombre_compra = COMPRAS_STRINGS.validationPurchaseNameRequired;
+    }
+    if (!isValidCurrency(dialogData.precio_sugerido)) {
+      errors.precio_sugerido = COMPRAS_STRINGS.validationSuggestedPrice;
+    }
+    if (isBlank(dialogData.motivo)) {
+      errors.motivo = COMPRAS_STRINGS.validationReasonRequired;
+    }
+    if (isBlank(dialogData.fecha_compra)) {
+      errors.fecha_compra = COMPRAS_STRINGS.validationPurchaseDateRequired;
+    }
+    if (dialogMode === "create" && !dialogData.facturas_documentos?.length) {
+      errors.facturas_documentos = COMPRAS_STRINGS.saveRequiredInvoice;
+    }
+
+    if (hasInformeData(informe)) {
+      if (isBlank(informe.nro_expediente)) {
+        errors["informe.nro_expediente"] =
+          COMPRAS_STRINGS.validationFileNumberRequired;
+      }
+      if (!isValidCurrency(informe.precio_real)) {
+        errors["informe.precio_real"] = COMPRAS_STRINGS.validationRealPrice;
+      }
+      if (isBlank(informe.nombre_solicitante)) {
+        errors["informe.nombre_solicitante"] =
+          COMPRAS_STRINGS.validationRequesterRequired;
+      }
+      if (isBlank(informe.nombre_ganador)) {
+        errors["informe.nombre_ganador"] =
+          COMPRAS_STRINGS.validationWinnerRequired;
+      }
+      if (isBlank(informe.fecha_licitacion)) {
+        errors["informe.fecha_licitacion"] =
+          COMPRAS_STRINGS.validationTenderDateRequired;
+      }
+      if (isBlank(informe.fecha_informe)) {
+        errors["informe.fecha_informe"] =
+          COMPRAS_STRINGS.validationReportDateRequired;
+      }
+    }
+
+    setFieldErrors(errors);
+
+    if (errors.facturas_documentos) {
+      setDialogError(errors.facturas_documentos);
+    } else if (Object.keys(errors).length > 0) {
+      setDialogError(
+        hasInformeData(informe)
+          ? COMPRAS_STRINGS.saveRequiredReport
+          : COMPRAS_STRINGS.saveRequiredPurchaseData,
+      );
+    } else {
+      setDialogError("");
+    }
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const clearFieldError = (field) => {
+    setFieldErrors((previous) =>
+      previous[field] ? { ...previous, [field]: undefined } : previous,
+    );
+  };
+
+  const handlePurchaseFieldChange = (field, value) => {
+    clearFieldError(field);
+    setDialogError("");
+    handleDataChange(field, value);
+  };
+
+  const handleInformeFieldChange = (field, value) => {
+    clearFieldError(`informe.${field}`);
+    setDialogError("");
+    handleInformeTecnicoChange(field, value);
+  };
+
+  const handlePurchaseSaveClick = () => {
+    if (!validatePurchaseDialog()) return;
+
+    handleSavePurchase(dateRange.fechaDesde, dateRange.fechaHasta);
+  };
+
+  const handleDocumentFileChange = (event, item) => {
+    if (item.key === "facturas") {
+      clearFieldError("facturas_documentos");
+      setDialogError("");
+      handleFacturaChange(event, item);
+      return;
+    }
+
+    handleInformePdfChange(event, item);
+  };
 
   const deleteDialogConfig = {
     purchaseDelete: {
@@ -333,7 +464,10 @@ function DialogPurchase({ dateRange }) {
                     options={empleados}
                     loading={loadingEmpleados}
                     value={selectedEmpleado}
-                    onChange={handleEmpleadoChange}
+                    onChange={(event, value) => {
+                      clearFieldError("id_usuario");
+                      handleEmpleadoChange(event, value);
+                    }}
                     getOptionLabel={(option) => option?.nombre_empleado || ""}
                     isOptionEqualToValue={(option, value) =>
                       String(option.id) === String(value.id)
@@ -344,6 +478,8 @@ function DialogPurchase({ dateRange }) {
                         label={COMPRAS_STRINGS.fieldEmployee}
                         required
                         fullWidth
+                        error={Boolean(fieldErrors.id_usuario)}
+                        helperText={fieldErrors.id_usuario ?? ""}
                       />
                     )}
                     sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
@@ -353,8 +489,10 @@ function DialogPurchase({ dateRange }) {
                     required
                     value={dialogData.nombre_compra ?? ""}
                     onChange={(e) =>
-                      handleDataChange("nombre_compra", e.target.value)
+                      handlePurchaseFieldChange("nombre_compra", e.target.value)
                     }
+                    error={Boolean(fieldErrors.nombre_compra)}
+                    helperText={fieldErrors.nombre_compra ?? ""}
                     fullWidth
                   />
                   <SAETextField
@@ -370,7 +508,7 @@ function DialogPurchase({ dateRange }) {
                       handleCurrencyBlur(
                         "precio_sugerido",
                         dialogData.precio_sugerido,
-                        handleDataChange,
+                        handlePurchaseFieldChange,
                         setFocusedCurrencyField,
                       )
                     }
@@ -378,9 +516,11 @@ function DialogPurchase({ dateRange }) {
                       handleCurrencyInputChange(
                         "precio_sugerido",
                         e.target.value,
-                        handleDataChange,
+                        handlePurchaseFieldChange,
                       )
                     }
+                    error={Boolean(fieldErrors.precio_sugerido)}
+                    helperText={fieldErrors.precio_sugerido ?? ""}
                     fullWidth
                     slotProps={{
                       input: {
@@ -398,7 +538,11 @@ function DialogPurchase({ dateRange }) {
                     label={COMPRAS_STRINGS.fieldReason}
                     required
                     value={dialogData.motivo ?? ""}
-                    onChange={(e) => handleDataChange("motivo", e.target.value)}
+                    onChange={(e) =>
+                      handlePurchaseFieldChange("motivo", e.target.value)
+                    }
+                    error={Boolean(fieldErrors.motivo)}
+                    helperText={fieldErrors.motivo ?? ""}
                     fullWidth
                     multiline
                     minRows={3}
@@ -410,8 +554,10 @@ function DialogPurchase({ dateRange }) {
                     type="date"
                     value={dialogData.fecha_compra ?? ""}
                     onChange={(e) =>
-                      handleDataChange("fecha_compra", e.target.value)
+                      handlePurchaseFieldChange("fecha_compra", e.target.value)
                     }
+                    error={Boolean(fieldErrors.fecha_compra)}
+                    helperText={fieldErrors.fecha_compra ?? ""}
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
                     sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}
@@ -439,11 +585,13 @@ function DialogPurchase({ dateRange }) {
                     label={COMPRAS_STRINGS.fieldFileNumber}
                     value={dialogData.informe?.nro_expediente ?? ""}
                     onChange={(e) =>
-                      handleInformeTecnicoChange(
+                      handleInformeFieldChange(
                         "nro_expediente",
                         e.target.value,
                       )
                     }
+                    error={Boolean(fieldErrors["informe.nro_expediente"])}
+                    helperText={fieldErrors["informe.nro_expediente"] ?? ""}
                     fullWidth
                   />
                   <SAETextField
@@ -458,7 +606,7 @@ function DialogPurchase({ dateRange }) {
                       handleCurrencyBlur(
                         "precio_real",
                         dialogData.informe?.precio_real,
-                        handleInformeTecnicoChange,
+                        handleInformeFieldChange,
                         setFocusedCurrencyField,
                       )
                     }
@@ -466,9 +614,11 @@ function DialogPurchase({ dateRange }) {
                       handleCurrencyInputChange(
                         "precio_real",
                         e.target.value,
-                        handleInformeTecnicoChange,
+                        handleInformeFieldChange,
                       )
                     }
+                    error={Boolean(fieldErrors["informe.precio_real"])}
+                    helperText={fieldErrors["informe.precio_real"] ?? ""}
                     fullWidth
                     slotProps={{
                       input: {
@@ -486,10 +636,14 @@ function DialogPurchase({ dateRange }) {
                     label={COMPRAS_STRINGS.fieldRequesterName}
                     value={dialogData.informe?.nombre_solicitante ?? ""}
                     onChange={(e) =>
-                      handleInformeTecnicoChange(
+                      handleInformeFieldChange(
                         "nombre_solicitante",
                         e.target.value,
                       )
+                    }
+                    error={Boolean(fieldErrors["informe.nombre_solicitante"])}
+                    helperText={
+                      fieldErrors["informe.nombre_solicitante"] ?? ""
                     }
                     fullWidth
                   />
@@ -497,11 +651,13 @@ function DialogPurchase({ dateRange }) {
                     label={COMPRAS_STRINGS.fieldWinnerName}
                     value={dialogData.informe?.nombre_ganador ?? ""}
                     onChange={(e) =>
-                      handleInformeTecnicoChange(
+                      handleInformeFieldChange(
                         "nombre_ganador",
                         e.target.value,
                       )
                     }
+                    error={Boolean(fieldErrors["informe.nombre_ganador"])}
+                    helperText={fieldErrors["informe.nombre_ganador"] ?? ""}
                     fullWidth
                   />
                   <SAETextField
@@ -509,11 +665,13 @@ function DialogPurchase({ dateRange }) {
                     type="date"
                     value={dialogData.informe?.fecha_licitacion ?? ""}
                     onChange={(e) =>
-                      handleInformeTecnicoChange(
+                      handleInformeFieldChange(
                         "fecha_licitacion",
                         e.target.value,
                       )
                     }
+                    error={Boolean(fieldErrors["informe.fecha_licitacion"])}
+                    helperText={fieldErrors["informe.fecha_licitacion"] ?? ""}
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
@@ -522,11 +680,13 @@ function DialogPurchase({ dateRange }) {
                     type="date"
                     value={dialogData.informe?.fecha_informe ?? ""}
                     onChange={(e) =>
-                      handleInformeTecnicoChange(
+                      handleInformeFieldChange(
                         "fecha_informe",
                         e.target.value,
                       )
                     }
+                    error={Boolean(fieldErrors["informe.fecha_informe"])}
+                    helperText={fieldErrors["informe.fecha_informe"] ?? ""}
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
@@ -556,11 +716,7 @@ function DialogPurchase({ dateRange }) {
                     >
                       <DocumentCard
                         documento={documentType}
-                        onFileChange={(event, item) =>
-                          item.key === "facturas"
-                            ? handleFacturaChange(event, item)
-                            : handleInformePdfChange(event, item)
-                        }
+                        onFileChange={handleDocumentFileChange}
                         onDelete={(item) => handleDeletePurchaseDocument(item)}
                         onPreview={handlePreview}
                         documents={documentType.documentos}
@@ -597,9 +753,7 @@ function DialogPurchase({ dateRange }) {
           {!isDocsDialog && (
             <SAEButton
               variant="contained"
-              onClick={() =>
-                handleSavePurchase(dateRange.fechaDesde, dateRange.fechaHasta)
-              }
+              onClick={handlePurchaseSaveClick}
               disabled={dialogSaving}
               startIcon={
                 dialogSaving ? (

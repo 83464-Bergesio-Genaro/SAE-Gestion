@@ -26,8 +26,17 @@ import { useSports } from "../../context/employedContext";
 import { toApiDateTime } from "../../../utils/date.utils";
 import { EMPTY_TOURNAMENT_FORM } from "../../../utils/common/common.config";
 import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
+import { isEmpty } from "../../../utils/text.utils";
 
 const C = SPORTS_STRINGS;
+const requiredMessage = "Este campo es obligatorio";
+const capacityMessage = "Ingrese un cupo valido";
+const sportMessage = "Seleccione un deporte";
+const teacherMessage = "Seleccione un docente responsable";
+const endDateMessage = "La fecha de fin no puede ser anterior al inicio";
+const limitDateMessage =
+  "El limite de inscripcion no puede ser posterior al inicio";
+
 export default function TorneoFormDialog({
   open,
   onClose,
@@ -39,6 +48,7 @@ export default function TorneoFormDialog({
   const isEdit = mode === "edit";
 
   const [formData, setFormData] = useState(EMPTY_TOURNAMENT_FORM);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -50,6 +60,7 @@ export default function TorneoFormDialog({
   useEffect(() => {
     if (!open) return;
     setFormData(initialData ?? EMPTY_TOURNAMENT_FORM);
+    setFieldErrors({});
     setError("");
 
     let cancelled = false;
@@ -69,11 +80,100 @@ export default function TorneoFormDialog({
     };
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const validateField = (field, value, data = formData) => {
+    switch (field) {
+      case "nombre_torneo":
+      case "fecha_inicio":
+      case "fecha_fin":
+      case "fecha_limite_inscripcion":
+        if (isEmpty(value)) return requiredMessage;
+        if (
+          field === "fecha_fin" &&
+          data.fecha_inicio &&
+          value < data.fecha_inicio
+        ) {
+          return endDateMessage;
+        }
+        if (
+          field === "fecha_limite_inscripcion" &&
+          data.fecha_inicio &&
+          value > data.fecha_inicio
+        ) {
+          return limitDateMessage;
+        }
+        return "";
+      case "cupo_jugadores": {
+        const numberValue = Number(value);
+        return Number.isInteger(numberValue) && numberValue > 0
+          ? ""
+          : capacityMessage;
+      }
+      case "id_deporte":
+        return Number(value) >= 0 ? "" : sportMessage;
+      case "cuil_responsable":
+        return isEmpty(value) ? teacherMessage : "";
+      default:
+        return "";
+    }
+  };
+
+  const handleChanges = (changes) => {
+    setFormData((previousFormData) => {
+      const next = { ...previousFormData, ...changes };
+      setFieldErrors((previousErrors) => {
+        const nextErrors = { ...previousErrors };
+
+        Object.keys(changes).forEach((field) => {
+          nextErrors[field] = validateField(field, next[field], next);
+        });
+
+        if (Object.hasOwn(changes, "fecha_inicio")) {
+          nextErrors.fecha_fin = validateField(
+            "fecha_fin",
+            next.fecha_fin,
+            next,
+          );
+          nextErrors.fecha_limite_inscripcion = validateField(
+            "fecha_limite_inscripcion",
+            next.fecha_limite_inscripcion,
+            next,
+          );
+        }
+
+        return nextErrors;
+      });
+      return next;
+    });
+  };
+
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    handleChanges({ [field]: value });
+  };
+
+  const validate = () => {
+    const fields = [
+      "nombre_torneo",
+      "cupo_jugadores",
+      "id_deporte",
+      "cuil_responsable",
+      "fecha_inicio",
+      "fecha_fin",
+      "fecha_limite_inscripcion",
+    ];
+    const errors = fields.reduce((result, field) => {
+      const message = validateField(field, formData[field]);
+      if (message) result[field] = message;
+      return result;
+    }, {});
+
+    setFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
+    if (!validate()) return;
+
     setSaving(true);
     setError("");
     try {
@@ -81,7 +181,9 @@ export default function TorneoFormDialog({
         ...formData,
         fecha_inicio: toApiDateTime(formData.fecha_inicio),
         fecha_fin: toApiDateTime(formData.fecha_fin),
-        fecha_limite_inscripcion: toApiDateTime(formData.fecha_limite_inscripcion),
+        fecha_limite_inscripcion: toApiDateTime(
+          formData.fecha_limite_inscripcion,
+        ),
         cupo_jugadores: Number(formData.cupo_jugadores) || 0,
         id_deporte: Number(formData.id_deporte) || 0,
       };
@@ -97,11 +199,7 @@ export default function TorneoFormDialog({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        {isEdit ? (
-          <EditIcon color="primary" />
-        ) : (
-          <AddIcon color="primary" />
-        )}
+        {isEdit ? <EditIcon color="primary" /> : <AddIcon color="primary" />}
         {isEdit ? C.tournamentEdit : C.tournamentCreate}
         <IconButton size="small" onClick={onClose} sx={{ ml: "auto" }}>
           <CloseIcon fontSize="small" />
@@ -115,15 +213,22 @@ export default function TorneoFormDialog({
             <SAETextField
               label={C.tournamentName}
               fullWidth
+              required
               value={formData.nombre_torneo}
               onChange={(e) => handleChange("nombre_torneo", e.target.value)}
+              error={Boolean(fieldErrors.nombre_torneo)}
+              helperText={fieldErrors.nombre_torneo ?? ""}
             />
             <SAETextField
               label={C.tournamentCapacity}
               type="number"
+              required
               sx={{ minWidth: 160 }}
               value={formData.cupo_jugadores}
               onChange={(e) => handleChange("cupo_jugadores", e.target.value)}
+              slotProps={{ htmlInput: { min: 1, step: 1 } }}
+              error={Boolean(fieldErrors.cupo_jugadores)}
+              helperText={fieldErrors.cupo_jugadores ?? ""}
             />
           </Stack>
 
@@ -132,16 +237,16 @@ export default function TorneoFormDialog({
             options={deportesList}
             loading={loadingCatalogos}
             getOptionLabel={(opt) =>
-              typeof opt === "string" ? opt : opt.nombre ?? ""
+              typeof opt === "string" ? opt : (opt.nombre ?? "")
             }
             value={
               deportesList.find(
-                (d) => String(d.id) === String(formData.id_deporte)
+                (d) => String(d.id) === String(formData.id_deporte),
               ) ??
               deportesList.find(
                 (d) =>
                   d.nombre?.toLowerCase() ===
-                  formData.nombre_deporte?.toLowerCase()
+                  formData.nombre_deporte?.toLowerCase(),
               ) ??
               (formData.id_deporte
                 ? { id: formData.id_deporte, nombre: formData.nombre_deporte }
@@ -149,18 +254,29 @@ export default function TorneoFormDialog({
             }
             onChange={(_, val) => {
               if (val) {
-                handleChange("id_deporte", val.id);
-                handleChange("nombre_deporte", val.nombre);
+                handleChanges({
+                  id_deporte: val.id,
+                  nombre_deporte: val.nombre,
+                });
               } else {
-                handleChange("id_deporte", 0);
-                handleChange("nombre_deporte", "");
+                handleChanges({
+                  id_deporte: 0,
+                  nombre_deporte: "",
+                });
               }
             }}
             isOptionEqualToValue={(opt, val) =>
               String(opt.id) === String(val?.id)
             }
             renderInput={(params) => (
-              <SAETextField {...params} label={C.Deporte} fullWidth />
+              <SAETextField
+                {...params}
+                label={C.Deporte}
+                fullWidth
+                required
+                error={Boolean(fieldErrors.id_deporte)}
+                helperText={fieldErrors.id_deporte ?? ""}
+              />
             )}
           />
 
@@ -174,9 +290,7 @@ export default function TorneoFormDialog({
                 : `${opt.nombres ?? ""} ${opt.apellidos ?? ""}`.trim()
             }
             value={
-              docentesList.find(
-                (d) => d.cuil === formData.cuil_responsable
-              ) ??
+              docentesList.find((d) => d.cuil === formData.cuil_responsable) ??
               (formData.cuil_responsable
                 ? {
                     cuil: formData.cuil_responsable,
@@ -187,14 +301,16 @@ export default function TorneoFormDialog({
             }
             onChange={(_, val) => {
               if (val) {
-                handleChange("cuil_responsable", val.cuil);
-                handleChange(
-                  "docente_responsable",
-                  `${val.nombres ?? ""} ${val.apellidos ?? ""}`.trim()
-                );
+                handleChanges({
+                  cuil_responsable: val.cuil,
+                  docente_responsable:
+                    `${val.nombres ?? ""} ${val.apellidos ?? ""}`.trim(),
+                });
               } else {
-                handleChange("cuil_responsable", "");
-                handleChange("docente_responsable", "");
+                handleChanges({
+                  cuil_responsable: "",
+                  docente_responsable: "",
+                });
               }
             }}
             isOptionEqualToValue={(opt, val) => opt.cuil === val?.cuil}
@@ -203,7 +319,7 @@ export default function TorneoFormDialog({
               return opts.filter(
                 (d) =>
                   d.cuil?.toLowerCase().includes(lower) ||
-                  `${d.nombres} ${d.apellidos}`.toLowerCase().includes(lower)
+                  `${d.nombres} ${d.apellidos}`.toLowerCase().includes(lower),
               );
             }}
             renderOption={(props, opt) => (
@@ -219,7 +335,14 @@ export default function TorneoFormDialog({
               </li>
             )}
             renderInput={(params) => (
-              <SAETextField {...params} label={C.tournamentTeacher} fullWidth />
+              <SAETextField
+                {...params}
+                label={C.tournamentTeacher}
+                fullWidth
+                required
+                error={Boolean(fieldErrors.cuil_responsable)}
+                helperText={fieldErrors.cuil_responsable ?? ""}
+              />
             )}
           />
 
@@ -229,27 +352,36 @@ export default function TorneoFormDialog({
               label={C.tournamentStartDate}
               type="date"
               fullWidth
+              required
               InputLabelProps={{ shrink: true }}
               value={formData.fecha_inicio}
               onChange={(e) => handleChange("fecha_inicio", e.target.value)}
+              error={Boolean(fieldErrors.fecha_inicio)}
+              helperText={fieldErrors.fecha_inicio ?? ""}
             />
             <SAETextField
               label={C.tournamentEndDate}
               type="date"
               fullWidth
+              required
               InputLabelProps={{ shrink: true }}
               value={formData.fecha_fin}
               onChange={(e) => handleChange("fecha_fin", e.target.value)}
+              error={Boolean(fieldErrors.fecha_fin)}
+              helperText={fieldErrors.fecha_fin ?? ""}
             />
             <SAETextField
               label={C.tournamentDateLimit}
               type="date"
               fullWidth
+              required
               InputLabelProps={{ shrink: true }}
               value={formData.fecha_limite_inscripcion}
               onChange={(e) =>
                 handleChange("fecha_limite_inscripcion", e.target.value)
               }
+              error={Boolean(fieldErrors.fecha_limite_inscripcion)}
+              helperText={fieldErrors.fecha_limite_inscripcion ?? ""}
             />
           </Stack>
 

@@ -105,7 +105,8 @@ function EmployedSportsContent() {
       profesoresRows,
       profesoresColumns,
       loadingProfesores,
-      openCreateDocente,
+      
+      ,
       espaciosRows,
       espaciosColumns,
       loadingEspacios,

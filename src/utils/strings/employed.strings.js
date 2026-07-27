@@ -620,6 +620,14 @@ export const PRENSA_STRINGS = {
     docCount: (count) => `${count} documento${count === 1 ? "" : "s"}`,
     saving: "Guardando...",
     saveButton: "Guardar",
+    validationTitleRequired: "Ingresá el título.",
+    validationDescriptionRequired: "Ingresá la descripción.",
+    validationStartDateRequired: "Ingresá la fecha de inicio.",
+    validationEndDateRequired: "Ingresá la fecha de vigencia.",
+    validationEndDateAfterStart:
+      "La fecha de vigencia no puede ser anterior al inicio.",
+    validationDocumentRequired: "Adjuntá o seleccioná un documento.",
+    validationFormError: "Revisá los campos marcados antes de guardar.",
   },
 };
 

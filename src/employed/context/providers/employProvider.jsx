@@ -3,7 +3,7 @@ import { Box, IconButton, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
 import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario,
-        ObtenerEmpleados,ObtenerUsuarios,ObtenerHorarios,
+        ObtenerEmpleados,ObtenerUsuariosXLegajo,ObtenerHorarios,
         BuscarHorariosXEmpleado,CrearHorarioEmpleado,
         ModificarHorario,EliminarHorario } from "../../../api/EmpleadoService";
 import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService";
@@ -119,30 +119,33 @@ export const AdminUsersProvider = ({ children }) => {
     };
 
     // --- SECCIÓN USUARIOS (ESTUDIANTES) ---
-    const [usuariosRows, setUsuariosRows] = useState([]);
+    const [estudianteBuscado, setEstudiante] = useState();
     const [loadingUsuarios, setLoadingUsuarios] = useState(false);
 
-    const fetchUsuarios = useCallback(async () => {
+    const fetchUsuariosXLegajo = useCallback(async (legajo) => {
+        if(!legajo){
+            setEstudiante(null);
+            return;
+        }
+        let data = null;
         setLoadingUsuarios(true);
         try {
-            const data = await ObtenerUsuarios();
-            let userData = data.filter(item => item.id_perfil === 1); // Solo estudiantes
-            setUsuariosRows(generateRows(userData));
+            data = await ObtenerUsuariosXLegajo(legajo);
+            
+            //let userData = data.filter(item => item.id_perfil === 1); // Solo estudiantes
+            //setEstudiante(data);     
         } catch {
-            setUsuariosRows([]);
+            setEstudiante(null);
         } finally {
-            setLoadingUsuarios(false);
+            setLoadingUsuarios(false); 
         }
+        return data;
     }, []);
 
-    useEffect(() => { fetchUsuarios(); }, [fetchUsuarios]);
+    useEffect(() => { fetchUsuariosXLegajo(); }, [fetchUsuariosXLegajo]);
 
     const openCreateUsuarios = useCallback(() => {
         openDialog("usuarios", "create", { id: "", legajo: "", nombre_usuario: "", nombres: "", apellidos: "", id_perfil: 1, activo: true, id_carrera: "", nombre_carrera: "" });
-    }, [openDialog]);
-
-    const openEditUsuarios = useCallback((row) => {
-        openDialog("usuarios", "edit", { id: row.id, legajo: row.legajo, nombre_usuario: row.nombre_usuario, nombres: row.nombres, apellidos: row.apellidos, id_perfil: row.id_perfil, activo: row.activo, id_carrera: row.id_carrera, nombre_carrera: row.nombre_carrera });
     }, [openDialog]);
 
     const handleUsuariosSave = async () => {
@@ -163,7 +166,6 @@ export const AdminUsersProvider = ({ children }) => {
                 await ModificarUsuario(dialogData.id, body);
             }
             closeDialog();
-            fetchUsuarios();
             showNotification(dialogMode === "create" ? "Usuario creado!" : "Usuario modificado correctamente", "success");
         } catch (err) {
             setDialogError(err.message || "Ocurrió un error al guardar");
@@ -330,10 +332,6 @@ export const AdminUsersProvider = ({ children }) => {
         openEditEmpleados(row);
     }, [openEditEmpleados]);
 
-    const handleOpenEditUser = useCallback((row) => {
-        openEditUsuarios(row);
-    }, [openEditUsuarios]);
-
     const employActions = useMemo(() => [{
         icon: EditIcon,
         color: "primary",
@@ -341,21 +339,10 @@ export const AdminUsersProvider = ({ children }) => {
         onClick: handleOpenEditEmploy, 
     }], [handleOpenEditEmploy]);
 
-    const userActions = useMemo(() => [{
-    icon: EditIcon,
-    color: "primary",
-    title: "Editar Usuario",
-    onClick: handleOpenEditUser, 
-    }], [handleOpenEditUser]);
-
-
     const empleadosColumns = useMemo(() => {
     return generateColumns(EMPTY_EMPLEADO, employActions);
     }, [ employActions]); 
 
-    const usuariosColumns = useMemo(() => {
-    return generateColumns(EMPTY_USUARIO, userActions);
-    }, [ userActions]); 
     
     return (
         <EmployContext.Provider value={{
@@ -364,8 +351,8 @@ export const AdminUsersProvider = ({ children }) => {
             empleados,carreras,perfiles,allHorarios,
             //Valores para las tablas y funciones de guardado Empleados y Usuarios
             empleadosRows, empleadosColumns, loadingEmpleados, openCreateEmpleados,
-            usuariosRows, usuariosColumns, loadingUsuarios, openCreateUsuarios,
-            handleUsuariosSave,handleEmpleadosSave,
+            estudianteBuscado, setEstudiante, loadingUsuarios, openCreateUsuarios,
+            handleUsuariosSave,handleEmpleadosSave,fetchUsuariosXLegajo,
             //Valores para la seccion de horarios
             loadingHorarios, horariosDialogOpen, setHorariosDialogOpen,selectedHorariosLoading,selectedHorarios,selectedEmploy,setSelectedEmploy,
 

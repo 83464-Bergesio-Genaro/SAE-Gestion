@@ -137,7 +137,6 @@ function EventoCard({ evento }) {
             height: 40,
             flexShrink: 0,
             borderRadius: "50%",
-            bgcolor: "#E7F1FF",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -179,7 +178,7 @@ function EventoCard({ evento }) {
         <Divider
           sx={{ borderColor: "rgba(0, 0, 0, 0.6)", mt: "auto", mb: 2 }}
         />
-        <Box sx={{ minHeight: "24px"}} my={1}>
+        <Box sx={{ minHeight: "24px"}} my={2.3}>
           <Link 
             target="_blank" 
             href={evento.lugar} 
@@ -202,7 +201,7 @@ function EventoCard({ evento }) {
           >
           <LocationOnIcon sx={{ fontSize: 22 }} />
           <Typography sx={{ fontSize: 16, fontWeight: 500 }}>
-            Ver Ubicacion en Maps
+            Ver Ubicación en Maps
           </Typography>
         </Link>
                   

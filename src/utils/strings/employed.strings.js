@@ -220,10 +220,16 @@ export const USER_STRINGS = {
   create:"Crear",
   save:"Guardar",
   delete:"Eliminar",
+  clean:"Volver a Buscar",
 
   userCreate:"Nuevo Usuario",
   userUpdate:"Editar Usuario",
   userDegree:"Carrera",
+
+  userTitle:"Estudiantes",
+  userDescription:"Permite la busqueda de estudiante registrados",
+  userName:"Nombre de Usuario",
+  userSearch:"Buscar Usuarios",
 
 }
 

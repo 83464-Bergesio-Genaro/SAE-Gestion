@@ -1,7 +1,4 @@
 import React, { useMemo } from "react";
-import Diversity3Icon from "@mui/icons-material/Diversity3";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-
 import {
   Autocomplete,
   Box,
@@ -22,6 +19,9 @@ import {
   Alert,
 } from "@mui/material";
 
+import AddIcon from "@mui/icons-material/Add";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -30,6 +30,7 @@ import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAEPage from "../../../assets/components/page/SAEPage";
 import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
 import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx";
+import SearchStudent from "../../../assets/components/searchStudent/SearchStudent.jsx";
 
 import GestionarHorariosDialog from "./horariosDialog.jsx";
 import { EmployedCalendar } from "./employedCalendar.jsx";
@@ -38,6 +39,7 @@ import { useEmploy } from "../../context/employedContext";
 import { AdminUsersProvider } from "../../context/providers/employProvider";
 import { useNotification } from "../../../shared/context/sharedContext";
 import { USER_STRINGS } from "../../../utils/strings/employed.strings";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner.jsx";
 
 const C = USER_STRINGS;
 function EmployedAdminContent() {
@@ -46,13 +48,10 @@ function EmployedAdminContent() {
     empleadosColumns,
     loadingEmpleados,
     openCreateEmpleados,
-    usuariosRows,
-    usuariosColumns,
-    loadingUsuarios,
-    openCreateUsuarios,
     dialogType,
     horariosDialogOpen,
     setHorariosDialogOpen,
+    openCreateUsuarios
   } = useEmploy();
 
   const sectionConfig = useMemo(
@@ -66,25 +65,12 @@ function EmployedAdminContent() {
         columns: empleadosColumns,
         loading: loadingEmpleados,
       },
-      usuarios: {
-        title: "Estudiantes Registrados",
-        dialog: openCreateUsuarios,
-        addButton: "Nuevo Usuario",
-        icon: PersonAddAltIcon,
-        rows: usuariosRows,
-        columns: usuariosColumns,
-        loading: loadingUsuarios,
-      },
     }),
     [
       empleadosRows,
       empleadosColumns,
       loadingEmpleados,
-      openCreateEmpleados,
-      usuariosRows,
-      usuariosColumns,
-      loadingUsuarios,
-      openCreateUsuarios,
+      openCreateEmpleados
     ],
   );
 
@@ -96,7 +82,59 @@ function EmployedAdminContent() {
         description={C.headerMainDescription}
       />
 
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: "0 18px 45px rgba(21, 61, 113, 0.08)",
+          overflow: "hidden",
+          my: 3,
+        }}
+      >
+        <Box
+          sx={{
+            background: "var(--gradient)",
+            color: "white",
+            px: 3,
+            py: 2.5,
+          }}
+        >
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ sm: "center" }}
+            justifyContent="space-between"
+            spacing={2}
+          >
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <PersonAddAltIcon sx={{ fontSize: 32 }} />
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  {C.userTitle}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.85 }}>
+                  {C.userDescription}
+                </Typography>
+              </Box>
+            </Stack>
+            <SAEButton
+              variant="contained"
+              startIcon={<Diversity3Icon />}
+              onClick={openCreateUsuarios}
+              sx={{
+                whiteSpace: "nowrap",
+                bgcolor: "rgba(255,255,255,0.18)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.4)",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.28)" },
+              }}
+            >
+              {C.userCreate}
+            </SAEButton>
+          </Stack>
+        </Box>
+      <StudentSection/>
+      </Card>
       <SAEDataGrid sectionConfig={sectionConfig} />
+
       <Card
         sx={{
           borderRadius: 4,
@@ -152,6 +190,7 @@ function EmployedAdminContent() {
       {dialogType === "empleados" && <EmpleadosDialog />}
       {dialogType === "usuarios" && <UsuariosDialog />}
       <GestionarHorariosDialog open={horariosDialogOpen} />
+
     </SAEPage>
   );
 }
@@ -198,7 +237,7 @@ function EmpleadosDialog() {
             <Grid container spacing={1}>
               <Grid size={{ xs: 12, md: 3 }} m={0}>
                 <SAETextField
-                  label={C.employID}
+                  label={C.employID ||""}
                   type="number"
                   fullWidth
                   value={dialogData.id}
@@ -208,7 +247,7 @@ function EmpleadosDialog() {
               </Grid>
               <Grid size={{ xs: 12, md: 9 }} m={0}>
                 <SAETextField
-                  label={C.employCompleteName}
+                  label={C.employCompleteName ||""}
                   value={dialogData.nombre_empleado}
                   disabled
                   onChange={(e) =>
@@ -247,19 +286,19 @@ function EmpleadosDialog() {
               </Card>
 
               <SAETextField
-                label={C.employNames}
+                label={C.employNames ||""}
                 value={dialogData.nombres}
                 onChange={(e) => handleDataChange("nombres", e.target.value)}
                 fullWidth
               />
               <SAETextField
-                label={C.employLastName}
+                label={C.employLastName ||""}
                 value={dialogData.apellidos}
                 onChange={(e) => handleDataChange("apellidos", e.target.value)}
                 fullWidth
               />
               <SAETextField
-                label={C.employUserName}
+                label={C.employUserName ||""}
                 value={dialogData.nombre_usuario}
                 onChange={(e) =>
                   handleDataChange("nombre_usuario", e.target.value)
@@ -378,33 +417,6 @@ function UsuariosDialog() {
               {dialogError}
             </Alert>
           )}
-
-          {dialogMode === "edit" && (
-            <Grid container spacing={1}>
-              <Grid size={{ xs: 12, md: 3 }} m={0}>
-                <SAETextField
-                  label={C.employID}
-                  type="number"
-                  fullWidth
-                  value={dialogData.id}
-                  onChange={(e) => handleDataChange("id", e.target.value)}
-                  disabled
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 9 }} m={0}>
-                <SAETextField
-                  label={C.employCompleteName}
-                  value={dialogData.nombre_usuario}
-                  disabled
-                  onChange={(e) =>
-                    handleDataChange("nombre_usuario", e.target.value)
-                  }
-                  fullWidth
-                />
-              </Grid>
-            </Grid>
-          )}
-
           {dialogMode === "create" && (
             <>
               <Card
@@ -478,20 +490,6 @@ function UsuariosDialog() {
             fullWidth
           />
 
-          {dialogMode === "edit" && (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={dialogData.activo}
-                  onChange={(e) =>
-                    handleDataChange("activo", e.target.checked)
-                  }
-                  color="primary"
-                />
-              }
-              label={dialogData.activo ? C.employActive: C.employNoActive}
-            />
-          )}
         </Stack>
       </DialogContent>
 
@@ -517,6 +515,134 @@ function UsuariosDialog() {
     </Dialog>
   );
 }
+
+function StudentSection(){
+ const {
+      estudianteBuscado, 
+      setEstudiante,
+      loadingUsuarios,
+      fetchUsuariosXLegajo
+    } = useEmploy();
+
+  const {
+    handleDataChange,
+    dialogData,
+    setDialogData,
+    showNotification
+  } = useNotification();
+
+  const handleStudentSearch = async(student) => {
+    const resultado = await fetchUsuariosXLegajo(student);
+    return resultado;
+  };
+  const handleStudentClear = () =>{
+    setEstudiante(null);
+    setDialogData({legajo:"",nombre_usuario:""});
+    console.log("Here");
+  }
+  const handleStudentChange = (field, value) => {
+    setEstudiante((prev) => ({ ...prev, [field]: value }));
+  };
+  const handleSelectStudent = (student) => {
+    setEstudiante(student);
+  };
+
+  return(
+
+     <Grid container spacing={2} my={{xs:2,md:4}} px={{xs:2,md:4}}
+      sx={{
+          display: 'flex',
+          justifyContent: 'center', 
+          alignItems: 'center',
+      }}>
+
+      {loadingUsuarios && (
+        <Stack alignItems="center" sx={{ py: 5 }}>
+          <SAESpinner size="L" />
+        </Stack>
+      )}
+      {!loadingUsuarios && !estudianteBuscado && (
+      <Grid size={{ xs: 12 }} m={0} >
+        <SearchStudent
+          legajo={dialogData?.legajo ?? ""}
+          onLegajoChange={(value) =>
+            handleDataChange("legajo", value)
+          }
+          onSelectStudent={handleSelectStudent}
+          onClearStudent={handleStudentClear}
+          onSearchStudent={handleStudentSearch}
+          onError={showNotification}
+        />
+      </Grid>
+      )}
+      {!loadingUsuarios && estudianteBuscado && (
+        <>
+          <Grid size={{ xs: 2, md: 1 }} m={0} pl={{xs:0,md:2}}>
+            <SAETextField
+              label={C.employID||""}
+              type="number"
+              fullWidth
+              value={estudianteBuscado?.id}
+              disabled
+            />
+          </Grid>
+          <Grid size={{ xs: 10, md: 3 }} m={0}>
+            <SAETextField
+              label={C.studentID||""}
+              value={estudianteBuscado?.legajo ?? ""}
+              disabled
+              fullWidth
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }} m={0}>
+            <SAETextField
+              label={C.userName||""}
+              value={estudianteBuscado?.nombre_usuario ?? "Not Found"}
+              disabled
+              fullWidth
+            />
+          </Grid>
+          <Grid
+            size={{ xs: 6, md: 2 }}
+            sx={{
+                display: 'flex',
+                justifyContent: 'center', 
+                alignItems: 'center',
+            }}
+            >
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={estudianteBuscado?.activo}
+                    onChange={(e) => handleStudentChange("activo", e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label={estudianteBuscado.activo ? C.employActive: C.employNoActive}
+              />
+            </Grid>
+          <Grid
+            size={{ xs:6,sm:6, md: 2 }}
+            m={0}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <SAEButton
+              variant="outlined"
+              onClick={()=>setEstudiante(null)}
+              startIcon={<CloseIcon />}
+            >
+              {C.clean}
+            </SAEButton>
+          </Grid>
+
+        </>
+      )}
+    </Grid>
+  );
+}
+
 
 export default function AdminEmployed() {
   return (

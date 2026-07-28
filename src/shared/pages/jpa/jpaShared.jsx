@@ -115,6 +115,7 @@ const studentJourney = [
       "Donde comienza tu vida universitaria, conociendo el campus, tus compañeros y la facultad.",
     text: "Tu etapa de ingreso es un momento emocionante y crucial en tu vida universitaria. Es el punto de partida donde comienzas a construir tu experiencia académica y social. Durante esta fase, tendrás la oportunidad de familiarizarte con el campus, conocer a tus compañeros de clase y establecer conexiones que pueden durar toda la vida. Además, es un momento para descubrir los recursos y servicios que la universidad ofrece para apoyarte en tu camino académico. Aprovechá al máximo esta etapa inicial, participando en actividades de bienvenida, explorando el campus y conectándote con otros estudiantes para comenzar tu aventura universitaria con el pie derecho.",
     image: `${baseUrl}images/infoSection/becasFRC.jpg`,
+    alt: "Vista Afuera UTN",
   },
   {
     icon: <GroupsIcon />,
@@ -123,6 +124,7 @@ const studentJourney = [
     description: "Todo lo que debes saber",
     text: "Comenzas a ser parte de la comunidad universitaria cuando realizas nuestro ingreso, para completar este proceso tenes que cumplir con una serie de requisitos como haber  <strong>finalizado el secundario, rendir un examen de ingreso y presentar la documentacion necesaria. </strong> Es posible que te preinscribas para rendir aun sin finalizar tus estudios pero te sera requisito una vez hayas realizado los examenes de ingreso, en la instancia de evaluacion deberas rendir <strong> Matematica, Fisica e Introduccion a la vida universitaria. </strong> El centro de estudiantes y la SAE proveen de cursos intensivos para que finalices tu formacion academica en estas 3 disciplinas. Acercate a nuestras charlas de ingreso para mas informacion.",
     image: `${baseUrl}images/journeyJPA/aulaMagnaFRC.jpg`,
+    alt: "Aula Magna de la UTN",
   },
   {
     icon: <DocumentScannerIcon />,
@@ -131,6 +133,7 @@ const studentJourney = [
     description: "Informacion importante para simplificarte la vida.",
     text: "Una vez que ingreses y hayas aprobado los examenes de ingreso deberas realizar una serie de tramites para completar tu inscripcion, entre los cuales se encuentran la presentacion de tu <strong>documentacion personal, la eleccion de tu carrera y la inscripcion a materias.</strong> Uno de los tramites mas importantes para ser estudiante hecho y derecho corresponde al departamento de Alumnos y es indispensable que lo hagas antes de finalizar tu primer año de carrera. La secretaría de asuntos estudiantiles esta disponible para ayudarte a completar estos tramites y resolver cualquier duda que puedas tener durante este proceso, no dudes en acercarte para obtener asistencia personalizada.",
     image: `${baseUrl}images/infoSection/congresoFRC.webp`,
+    alt: "Audtiorio de la UTN",
   },
   {
     icon: <SportsSoccerIcon />,
@@ -139,6 +142,7 @@ const studentJourney = [
     description: "Ir a la UTN es mas que estudiar.",
     text: "Desde la secretaria de asuntos estudiantiles contamos con un area dedicada a la realización de deportes como actividad recreativa, en nuestra facultad contamos con deportes como:<strong> Futbol, Futbol sala, Voley, Basket, Natación, Arquería</strong> todos estos con sus respectivos entrenamientos para todos los generos. Ademas contamos con convenios con diferentes gimnasios para que puedas entrenar en tu dia a dia, ofreciendo descuentos especiales por ser alumno de nuestra Universidad. Si estas interesado en representar a la facultad dentro de las diferentes disciplinas deportivas podes acercarte a la <strong>S</strong>ecretaria de <strong>A</strong>suntos <strong>E</strong>studiantiles para mas información.",
     image: `${baseUrl}images/infoSection/deportesFRC.webp`,
+    alt: "Campus de la UTN",
   },
   {
     icon: <BusinessIcon />,
@@ -147,6 +151,7 @@ const studentJourney = [
     description: "Te acercamos a la realidad laboral.",
     text: "Las visitas a empresas son una excelente oportunidad para conocer la realidad del <strong>mundo laboral y establecer contactos con profesionales de la industria.</strong> Durante estas visitas, los estudiantes pueden aprender sobre las prácticas empresariales, las oportunidades de empleo y las tendencias del mercado. La secretaría en conjunto a diferentes catedras de la facultad organiza visitas a empresas de diversos sectores, brindando a los estudiantes la oportunidad de explorar diferentes industrias y <strong>conocer de primera mano las oportunidades laborales disponibles.</strong> Estas visitas son una parte importante de la experiencia universitaria, ya que permiten a los estudiantes conectar su formación académica con el mundo real y prepararse para su futura carrera profesional.",
     image: `${baseUrl}images/infoSection/visitasFRC.jpg`,
+    alt: "Visita Guiada a Fabrica",
   },
   {
     icon: <CampaignIcon />,
@@ -156,6 +161,7 @@ const studentJourney = [
       "Participás en congresos, competencias y actividades académicas.",
     text: "Nuestra facultad organiza y participa en diversos congresos y eventos académicos a lo largo del año, brindando a los estudiantes la oportunidad de <strong>presentar sus trabajos, aprender de expertos en el campo y establecer contactos con profesionales de la industria.</strong> Estos eventos son una excelente oportunidad para ampliar tus conocimientos, compartir tus investigaciones y conectarte con la comunidad académica.  Un ejemplo de esto es el <strong>CNEISI</strong> que se realiza anualmente e incluye otras regionales del pais con eje en la ingeniería en sistemas.",
     image: `${baseUrl}images/infoSection/congresoFRC.webp`,
+    alt: "Audtiorio de la UTN",
   },
   {
     icon: <WorkIcon />,
@@ -165,6 +171,7 @@ const studentJourney = [
       "Aplicás tus conocimientos en proyectos y prácticas profesionales.",
     text: "En el area de becas de la secretaría se realiza la gestión de becas propias de la universidad y te ayudamos aplicar a becas de caracter nacional. La secretaría ofrece las siguientes becas: <strong>Beca de servicio, beca de ayuda economica y beca de investigación. </strong> Que lo economico no sea un impedimento para que puedas estudiar, desde el area nos interesa que puedas acceder a las mejores oportunidades para finalizar tus estudios de grado. Si estas intersado en aplicar a alguna de nuestras becas o como pedir/mantener otras becas estatales podes acercarte a la <strong>S</strong>ecretaria de <strong>A</strong>suntos <strong>E</strong>studiantiles para obtener mas información.",
     image: `${baseUrl}images/navbar/inchaUTN.png`,
+    alt: "Edificio de la UTN",
   },
   {
     icon: <EmojiEventsIcon />,
@@ -173,6 +180,7 @@ const studentJourney = [
     description: "Obtenés tu título y celebrás el esfuerzo realizado.",
     text: "Después de años de dedicación y esfuerzo, llega el momento de la graduación, un hito significativo en tu vida universitaria. Es el momento en el que obtienes tu título y celebras todo lo que has logrado durante tu carrera. La graduación no solo marca el final de una etapa, sino también el comienzo de nuevas oportunidades y desafíos en tu vida profesional. Es un momento para reflexionar sobre tu viaje académico, agradecer a quienes te apoyaron y mirar hacia el futuro con entusiasmo y confianza.<br/><br/> <strong>¡Felicitamos a todos nuestros ingenieros formados en esta casa de altos estudios publica de calidad y gratuita!</strong>",
     image: `${baseUrl}images/journeyJPA/aulaMagnaFRC.jpg`,
+    alt: "Aula Magna de la UTN",
   },
 ];
 const carreras = [
@@ -1029,7 +1037,7 @@ function JourneyDetailCard({ step, mobile = false }) {
           <Box
             component="img"
             src={step.image}
-            alt=""
+            alt={step.alt}
             sx={{
               width: "100%",
               height: mobile ? 210 : "100%",

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import NovedadesEstudiantiles from "../../../assets/components/studentNews/studentNews";
-import SAEButton from "../../../assets/components/buttons/SAEButton"; 
+import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAEPage from "../../../assets/components/page/SAEPage";
 const baseUrl = import.meta.env.BASE_URL;
 
@@ -30,8 +30,8 @@ function SAEHero() {
       sx={{
         mt: "-90px",
         pt: { xs: "50px", md: "100px" },
-        pb: {xs:0,md:4},
-        minHeight: {xs:"none",md:"calc(100vh - 90px)"},
+        pb: { xs: 0, md: 4 },
+        minHeight: { xs: "none", md: "calc(100vh - 90px)" },
         background: "var(--gradient)",
         overflow: "hidden",
         position: "relative",
@@ -53,7 +53,7 @@ function SAEHero() {
             display={{ xs: "block", md: "none" }}
             sx={{
               mb: 3,
-              textAlign:"center"
+              textAlign: "center",
             }}
           >
             <MotionImg
@@ -164,14 +164,13 @@ function SAEHero() {
           </Stack>
 
           {/* ---------------- DESCRIPCIÓN ---------------- */}
-          
+
           <Typography
             variant="caption"
-            
             sx={{
-              my:{xs:2,md:5},
-              maxWidth: {xs:"100%", md:"60vw"},
-              fontSize:{xs:"inherit",md:"1rem"},
+              my: { xs: 2, md: 5 },
+              maxWidth: { xs: "100%", md: "60vw" },
+              fontSize: { xs: "inherit", md: "1rem" },
               textAlign: "center",
               color: "var(--textWhite)",
               opacity: 0.9,
@@ -223,7 +222,7 @@ function SAEHero() {
                 <Box
                   component="img"
                   src={`${baseUrl}logoUTN.svg`}
-                  alt=""
+                  alt="UTN Logo"
                   aria-hidden="true"
                   sx={{
                     width: 22,

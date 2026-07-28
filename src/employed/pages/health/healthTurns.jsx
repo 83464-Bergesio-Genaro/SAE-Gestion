@@ -81,7 +81,7 @@ export function TurnGrid() {
     openShowNoActivos,
     // Personal y estados
     personal,
-    estadosTurno
+    estadosTurno,
   } = useHealth();
 
   const {
@@ -104,13 +104,16 @@ export function TurnGrid() {
       inactiveTurns: {
         key: "inactiveTurns",
         title:
-          inactiveTurnsType === "cancelados"
-            ? C.turnsCancel
-            : C.turnsFinish,
+          inactiveTurnsType === "cancelados" ? C.turnsCancel : C.turnsFinish,
         icon: CalendarMonthIcon,
         rows: noActivosRows,
         columns: noActivosColumns,
         loading: loadingNoActivos,
+        initialState: {
+          sorting: {
+            sortModel: [{ field: "fecha_solicitud", sort: "desc" }],
+          },
+        },
       },
     }),
     [inactiveTurnsType, loadingNoActivos, noActivosColumns, noActivosRows],
@@ -193,7 +196,7 @@ export function TurnGrid() {
                     {/* <DashboardIcon sx={{ fontSize: 32 }} /> */}
                     <Box>
                       <Typography variant="h4" fontWeight={700}>
-                       {C.turnsCreation}
+                        {C.turnsCreation}
                       </Typography>
                     </Box>
                   </Stack>
@@ -210,7 +213,6 @@ export function TurnGrid() {
                     }}
                   >
                     {C.turnsCreationButton}
-                    
                   </SAEButton>
                 </Stack>
               </Box>
@@ -276,8 +278,11 @@ export function TurnGrid() {
           <Dialog
             open={dialogOpen}
             onClose={closeDialog}
-            maxWidth="sm"
+            maxWidth="md"
             fullWidth
+            PaperProps={{
+              sx: { width: "min(900px, calc(100% - 32px))" },
+            }}
           >
             <DialogTitle
               sx={{
@@ -294,7 +299,7 @@ export function TurnGrid() {
                 component="span"
                 sx={{ fontWeight: "bold" }}
               >
-                {dialogMode === "create" ? C.turnsCreation: C.turnsEdit}
+                {dialogMode === "create" ? C.turnsCreation : C.turnsEdit}
               </Typography>
               <IconButton onClick={closeDialog} size="small" color="inherit">
                 <CloseIcon />
@@ -399,7 +404,7 @@ export function TurnGrid() {
                             }}
                           >
                             <Typography variant="subtitle1" fontWeight="bold">
-                             {C.turnsUser}
+                              {C.turnsUser}
                             </Typography>
                             {/* Reemplazá esto con los campos reales de tu objeto "usuarioSelected" */}
                             <Typography variant="body1">
@@ -421,7 +426,7 @@ export function TurnGrid() {
                     )}
                     {dialogMode === "edit" && (
                       <>
-                        <Grid size={{ xs: 12, md: 3 }} m={0}>
+                        <Grid size={{ xs: 12, md: 2 }} m={0}>
                           <SAETextField
                             label={C.turnsId}
                             type="number"
@@ -433,7 +438,7 @@ export function TurnGrid() {
                             disabled={true}
                           />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 9 }} m={0}>
+                        <Grid size={{ xs: 12, md: 4 }} m={0}>
                           <SAETextField
                             label={C.turnsPacientName}
                             value={dialogData.paciente}
@@ -444,7 +449,7 @@ export function TurnGrid() {
                             disabled={true}
                           />
                         </Grid>
-                        <Grid size={{ xs: 12 }} m={0}>
+                        <Grid size={{ xs: 12, md: 5 }} m={0}>
                           <SAETextField
                             label={C.turnsUserId}
                             value={dialogData.legajo}
@@ -838,7 +843,8 @@ function TurnList({
                         noWrap
                         sx={{ maxWidth: "140px" }}
                       >
-                        {formatDate(turno.fecha_solicitud,"short") || C.turnsNoDate}
+                        {formatDate(turno.fecha_solicitud, "short") ||
+                          C.turnsNoDate}
                       </Typography>
                       <Chip
                         label={turno.estado || C.turnsNoState}
@@ -866,7 +872,7 @@ function TurnList({
                         sx={{ maxWidth: "140px" }}
                       >
                         <strong>{"Asunto: "}</strong>
-                        {turno.asunto ||C.turnsNoSubject}
+                        {turno.asunto || C.turnsNoSubject}
                       </Typography>
                       <Typography variant="body2" sx={{ maxWidth: "140px" }}>
                         <strong>{"Atiende: "}</strong>

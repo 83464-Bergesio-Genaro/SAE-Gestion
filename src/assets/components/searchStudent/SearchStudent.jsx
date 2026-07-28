@@ -8,6 +8,7 @@ import {
   Stack,
   Typography,
   useMediaQuery,
+  Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import SAEButton from "../buttons/SAEButton";
@@ -78,14 +79,9 @@ export default function SearchStudent({
   };
 
 const clearStudentSearch = () => {
-  console.log("Avisando al padre...");
-  
-  // 1. Primero ejecutamos la función del padre
   if (typeof onClearStudent === 'function') {
     onClearStudent(); 
   }
-  
-  // 2. Después limpiamos el estado local del hijo
   setStudentSelected(null);
   setCareerSearch("");
 };
@@ -126,7 +122,7 @@ const clearStudentSearch = () => {
       spacing={1}
       alignItems={{ sm: "center" }}
     >
-       <Grid size={{ xs: 8, md: 3 }} my={2}>
+       <Grid size={{ xs:12, md: 3 }} >
           <SAETextField
             label="Legajo"
             value={legajo ?? ""}
@@ -138,7 +134,7 @@ const clearStudentSearch = () => {
             fullWidth
           />
       </Grid>
-      <Grid size={{ xs: 4, md: 1 }} my={2} display={"flex"} justifyContent={"center"}>
+      <Grid size={{ xs: 12, md: 1 }} my={{xs:-1,md:2}} display={"flex"} justifyContent={"center"}>
         <Typography
           variant="subtitle2"
           alignSelf={"center"}
@@ -151,7 +147,7 @@ const clearStudentSearch = () => {
         > @
         </Typography>
       </Grid>
-      <Grid size={{ xs: 8, md: 4 }} my={2}>
+      <Grid size={{ xs: 12, md: 4 }} >
         <Autocomplete
           options={CAREERS}
           value={CAREERS.find((career) => career.value === careerSearch) ?? null}
@@ -163,7 +159,7 @@ const clearStudentSearch = () => {
           renderInput={(params) => <SAETextField {...params} label="Carrera" />}
         />
       </Grid>
-      <Grid size={{ xs: 4, md: 3 }} my={2} display={"flex"} justifyContent={"center"} >
+      <Grid size={{ xs: 12, md: 3 }} my={{xs:-1,md:2}} display={"flex"} justifyContent={"center"} >
         <Typography 
         alignSelf={"center"}
             variant="subtitle1"

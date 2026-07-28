@@ -202,10 +202,10 @@ export const USER_STRINGS = {
   employCompleteName:"Nombre Completo",
 
   employWarningTitle:"¡ATENCIÓN!",
-  employWarningBody1:"Al crear un nuevo empleado debe escribirse sin errores su legajo, ya que esta sera la unica forma que pueda acceder a la aplicacion. Debe contener @utn.frc.edu.ar al final.",
+  employWarningBody1:"Al crear un nuevo empleado debe escribirse sin errores su legajo, ya que esta sera la unica forma que pueda acceder a la aplicacion.",
   employWarningEnd:"Desde esta pestaña solo se podran crear perfiles de empleados, comedor, salud y administrador.",
 
-  userWarningBody2:"Al crear el usuario desde esta pestaña se crea como estudiante, con id_perfil = 1. El legajo debe estar completo e incluir @utn.frc.edu.ar al final.",
+  userWarningBody2:"Al crear el usuario desde esta pestaña se crea como estudiante sin que se tenga la posibilidad de cambiar ese rol.",
 
   employNames:"Nombres",
   employLastName:"Apellidos",
@@ -230,7 +230,7 @@ export const USER_STRINGS = {
   userDescription:"Permite la busqueda de estudiante registrados",
   userName:"Nombre de Usuario",
   userSearch:"Buscar Usuarios",
-
+  dominio:"frc.utn.edu.ar"
 }
 
 export const TRAVEL_STRINGS = {

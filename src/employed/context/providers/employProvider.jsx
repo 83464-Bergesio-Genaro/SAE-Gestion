@@ -28,6 +28,34 @@ export const AdminUsersProvider = ({ children }) => {
         openDialog,
         closeDialog,
     } = useNotification();
+
+    const validateField = (field, value, data = dialogData) => {
+        switch (field) {
+        case "nombre":
+            return isEmpty(value) ? BS.validationName : "";
+        case "nro_telefono":
+            if (isEmpty(value)) return BS.validationPhoneRequired;
+            return isValidPhone(value) ? "" : BS.validationPhoneFormat;
+        case "nro_telefono_interno":
+            return !isEmpty(value) && !isValidMinLengthPhone(value, 2)
+            ? BS.validationInternalPhone
+            : "";
+        case "email_institucional":
+            if (isEmpty(value)) return BS.validationEmailRequired;
+            return isValidEmail(value) ? "" : BS.validationEmailFormat;
+        case "horario_atencion":
+            return isEmpty(value) ? BS.validationOpeningTime : "";
+        case "horario_atencion_final":
+            if (isEmpty(value)) return BS.validationClosingTime;
+            return isTimeAfter(value, data.horario_atencion)
+            ? ""
+            : BS.validationClosingTimeAfterOpening;
+        default:
+            return "";
+        }
+    };
+
+
     const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
 
     const [perfiles, setPerfiles] = useState([]);

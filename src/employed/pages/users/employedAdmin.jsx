@@ -394,7 +394,7 @@ function UsuariosDialog() {
   } = useNotification();
 
   return (
-    <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
+    <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="xl" fullWidth>
       <DialogTitle
         sx={{
           display: "flex",
@@ -417,9 +417,7 @@ function UsuariosDialog() {
               {dialogError}
             </Alert>
           )}
-          {dialogMode === "create" && (
-            <>
-              <Card
+            <Card
                 sx={{
                   bgcolor: "rgba(235, 235, 41, 0.7)",
                   border: "1px solid rgba(235, 41, 41, 0.1)",
@@ -439,6 +437,74 @@ function UsuariosDialog() {
                   </Typography>
                 </CardContent>
               </Card>
+              <Grid container spacing={2} display={"flex"} justifyContent={"center"} size={12}>
+                <Grid size={{xs:12,sm:3}}>
+                  <SAETextField
+                    label={C.studentID}
+                    value={dialogData.legajo}
+                    disabled={dialogMode !== "create"}
+                    onChange={(e) => handleDataChange("legajo", e.target.value)}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid size={{xs:12,sm:1}} display={"flex"} justifyContent={"center"}>
+                <Typography
+                    variant="subtitle2"
+                     alignSelf={"center"}
+                    sx={{
+                      fontSize:{xs:"20px",sm:"22px"},
+                      color: "text.secondary",
+                      fontWeight: 700,
+                      lineHeight: { sm: "56px" },
+                    }}
+                  > @
+                  </Typography>
+                </Grid>
+                <Grid size={{xs:12,sm:6}}>
+                  <Autocomplete
+                    disablePortal
+                    options={carreras || []} // Ensure options is never undefined
+                    getOptionLabel={(option) => option.nombre}
+                    onChange={(_event, newValue) => {
+                      handleDataChange(
+                        "id_carrera",
+                        newValue ? newValue.id : null,
+                      );
+                    }}
+                    isOptionEqualToValue={(option, value) => option.id === value?.id} // Safe navigation
+                    value={
+                      carreras?.find(
+                        (carrera) => carrera.id === dialogData.id_carrera,
+                      ) ?? null // Use ?? to strictly catch null/undefined
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={C.userDegree}
+                        inputProps={{
+                          ...params.inputProps,
+                          readOnly: true,
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid size={{xs:12,sm:2}} display={"flex"} justifyContent={"center"}>
+                  <Typography
+                    variant="body1"
+                    textAlign={"center"}
+                    alignSelf={"center"}
+                    sx={{
+                      color: "text.secondary",
+                      fontWeight: 500,
+                      lineHeight: { sm: "56px" },
+                    }}
+                  > {C.dominio}
+                  </Typography>
+                </Grid>
+              </Grid>
+              
+              
 
               <SAETextField
                 label={C.employNames}
@@ -452,44 +518,6 @@ function UsuariosDialog() {
                 onChange={(e) => handleDataChange("apellidos", e.target.value)}
                 fullWidth
               />
-              <Autocomplete
-                disablePortal
-                options={carreras}
-                getOptionLabel={(option) => option.nombre}
-                onChange={(_event, newValue) => {
-                  handleDataChange(
-                    "id_carrera",
-                    newValue ? newValue.id : null,
-                  );
-                }}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                value={
-                  carreras.find(
-                    (carrera) => carrera.id === dialogData.id_carrera,
-                  ) || null
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label={C.userDegree}
-                    inputProps={{
-                      ...params.inputProps,
-                      readOnly: true,
-                    }}
-                  />
-                )}
-              />
-            </>
-          )}
-
-          <SAETextField
-            label={C.studentID}
-            value={dialogData.legajo}
-            disabled={dialogMode !== "create"}
-            onChange={(e) => handleDataChange("legajo", e.target.value)}
-            fullWidth
-          />
-
         </Stack>
       </DialogContent>
 
@@ -538,7 +566,6 @@ function StudentSection(){
   const handleStudentClear = () =>{
     setEstudiante(null);
     setDialogData({legajo:"",nombre_usuario:""});
-    console.log("Here");
   }
   const handleStudentChange = (field, value) => {
     setEstudiante((prev) => ({ ...prev, [field]: value }));
@@ -563,7 +590,7 @@ function StudentSection(){
       )}
       {!loadingUsuarios && !estudianteBuscado && (
       <Grid size={{ xs: 12 }} m={0} >
-        <SearchStudent
+        <SearchStudent 
           legajo={dialogData?.legajo ?? ""}
           onLegajoChange={(value) =>
             handleDataChange("legajo", value)
@@ -630,7 +657,7 @@ function StudentSection(){
           >
             <SAEButton
               variant="outlined"
-              onClick={()=>setEstudiante(null)}
+              onClick={handleStudentClear}
               startIcon={<CloseIcon />}
             >
               {C.clean}

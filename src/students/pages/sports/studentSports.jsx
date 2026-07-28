@@ -20,10 +20,10 @@ import SAEPage from "../../../assets/components/page/SAEPage";
 import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent.jsx";
 import TitleBox from "../../../assets/components/titleBox";
 
-//import { SportsProvider as EmployedSportsProvider } from "../../../employed/context/providers/sportsProvider";
+import { SportsProvider as EmployedSportsProvider } from "../../../employed/context/providers/sportsProvider";
 import { useSportsContext } from "../../context/studentContext";
 import { SportsProvider } from "../../context/providers/sportsProvider";
-//import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
+import SportsCalendar from "../../../employed/pages/sports/SportsCalendar";
 import { SPORTS_STRINGS } from "../../../utils/strings/student.strings";
 import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid.jsx";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -47,7 +47,7 @@ function StudentSportsContent() {
     openPopup,
     preview,
     requestDeleteDocument,
-    //subscribedSportIds,
+    subscribedSportIds,
     torneoDeportista,
     torneosColumns,
   } = useSportsContext();
@@ -75,12 +75,10 @@ function StudentSportsContent() {
         backgroundImage="images/carrousel/EntradaUTN.jpg"
         icon={SportsHandballIcon}
       />
-
       <TitleBox
         title={C.documentationTitle}
         description={C.documentationSubtitle}
       />
-
       {loadingDocuments ? (
         <Stack alignItems="center" sx={{ py: 5 }}>
           <SAESpinner size="S" />
@@ -108,7 +106,6 @@ function StudentSportsContent() {
           ))}
         </Grid>
       )}
-
       <TitleBox title={C.sportsTitle} description={C.sportsSubTitle} />
       {loadingSports ? (
         <Stack alignItems="center" sx={{ py: 5 }}>
@@ -128,17 +125,15 @@ function StudentSportsContent() {
           />
         </Card>
       ) : null}
-
       <TitleBox
         title={C.tournamnetsTitle}
         description={C.tournamnetsSubTitle}
       />
-
       <SAEDataGrid
         sectionConfig={sectionConfig}
         currentSection={sectionConfig.torneos}
       />
-      {/*  DESPUES HAY QUE HABILITARLO
+      {/* DESPUES HAY QUE HABILITARLO */}
       {!loadingSports && horariosDeportista.length > 0 && (
         <>
           <TitleBox title={C.horariosTitle} description={C.horariosSubTitle} />
@@ -147,8 +142,6 @@ function StudentSportsContent() {
           </EmployedSportsProvider>
         </>
       )}
-      */}
-
       {/*Dialog para Borrar Documento*/}
       <Dialog open={openPopup} onClose={closeDeleteDialog}>
         <DialogTitle>{C.deleteDocTitle}</DialogTitle>
@@ -165,7 +158,6 @@ function StudentSportsContent() {
           </SAEButton>
         </DialogActions>
       </Dialog>
-
       <DocumentPreviewDialog
         open={preview.open}
         onClose={closePreview}

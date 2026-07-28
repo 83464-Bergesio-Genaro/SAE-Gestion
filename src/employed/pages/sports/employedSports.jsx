@@ -204,11 +204,8 @@ function EmployedSportsContent() {
             </SAEButton>
           </Stack>
         </Box>
+        <SportsCalendar embedded />
       </Card>
-
-      <Box sx={{ mt: 3 }}>
-        <SportsCalendar />
-      </Box>
 
       <SportsEntityDialog />
       <SportsDocsDialog />

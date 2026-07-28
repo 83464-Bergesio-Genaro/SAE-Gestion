@@ -13,6 +13,7 @@ import {
   DialogTitle,
   FormControl,
   FormControlLabel,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -29,6 +30,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";
+import PlaceIcon from "@mui/icons-material/Place";
+import PersonIcon from "@mui/icons-material/Person";
 
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
@@ -39,14 +42,32 @@ import { calendarDays } from "../../../utils/common/constants";
 import { toApiTime, toTimeInput } from "../../../utils/date.utils";
 import { EMPTY_SCHEDULE } from "../../../utils/common/common.config";
 import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
+import { isEmpty } from "../../../utils/text.utils";
 
 const C = SPORTS_STRINGS;
 
+const hasAssignedValue = (value) =>
+  !isEmpty(value) && String(value).trim() !== "0";
+
+const headerChipSx = {
+  bgcolor: "rgba(255,255,255,0.22)",
+  color: "white",
+  fontWeight: 700,
+  fontSize: "0.7rem",
+};
+
+const getDayLabel = (day) =>
+  calendarDays.find((calendarDay) => calendarDay.value === day)?.label ||
+  "Día no encontrado";
+
+const getTimeRangeLabel = (startTime, endTime) =>
+  `${toTimeInput(startTime) || "--:--"} - ${toTimeInput(endTime) || "--:--"}`;
+
 function HorarioFormFields({ form, onChange, espacios, docentes }) {
   return (
-    <Stack spacing={1}>
-      <Stack direction="row" spacing={1} flexWrap="wrap">
-        <FormControl size="small" sx={{ minWidth: 120 }}>
+    <Grid container spacing={2}>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <FormControl size="small" fullWidth>
           <InputLabel>Día</InputLabel>
           <Select
             value={form.dia}
@@ -60,34 +81,28 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
             ))}
           </Select>
         </FormControl>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
         <SAETimeField
           label={C.scheduleStartTime}
           value={form.hora_inicio}
           onChange={(v) => onChange("hora_inicio", v)}
           minTime="12:00"
           maxTime="22:00"
+          fullWidth
         />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
         <SAETimeField
           label={C.scheduleEndTime}
           value={form.hora_fin}
           onChange={(v) => onChange("hora_fin", v)}
           minTime="12:00"
           maxTime="22:00"
+          fullWidth
         />
-        <FormControlLabel
-          control={
-            <Switch
-              checked={form.activo}
-              onChange={(e) => onChange("activo", e.target.checked)}
-              size="small"
-              color="primary"
-            />
-          }
-          label={C.active}
-          sx={{ ml: 0.5 }}
-        />
-      </Stack>
-      <Stack direction="row" spacing={1}>
+      </Grid>
+      <Grid size={{ xs: 12, md: 5 }}>
         <FormControl size="small" fullWidth>
           <InputLabel>Espacio deportivo</InputLabel>
           <Select
@@ -105,6 +120,8 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
             ))}
           </Select>
         </FormControl>
+      </Grid>
+      <Grid size={{ xs: 12, md: 5 }}>
         <FormControl size="small" fullWidth>
           <InputLabel>{C.scheduleTeacher}</InputLabel>
           <Select
@@ -122,8 +139,43 @@ function HorarioFormFields({ form, onChange, espacios, docentes }) {
             ))}
           </Select>
         </FormControl>
-      </Stack>
-    </Stack>
+      </Grid>
+      <Grid size={{ xs: 12, md: 2 }}>
+        <Box
+          sx={{
+            minHeight: 40,
+            px: 1.25,
+            border: "1px solid",
+            borderColor: "rgba(21,101,192,0.2)",
+            borderRadius: 1,
+            bgcolor: "rgba(255,255,255,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: { xs: "flex-start", md: "center" },
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.activo}
+                onChange={(e) => onChange("activo", e.target.checked)}
+                size="small"
+                color="primary"
+              />
+            }
+            label={C.active}
+            sx={{
+              m: 0,
+              ".MuiFormControlLabel-label": {
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                color: "#153b6f",
+              },
+            }}
+          />
+        </Box>
+      </Grid>
+    </Grid>
   );
 }
 
@@ -290,21 +342,36 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
     return (
       <Card
         variant="outlined"
-        sx={{ borderRadius: 2, overflow: "hidden", borderColor: "#d6e4f7" }}
+        sx={{
+          borderRadius: 2,
+          overflow: "hidden",
+          borderColor: "#d6e4f7",
+          bgcolor: "#fbfdff",
+          transition: "border-color 0.15s, box-shadow 0.15s",
+          "&:hover": {
+            borderColor: "#8eb8e8",
+            boxShadow: "0 8px 24px rgba(21,101,192,0.12)",
+          },
+        }}
       >
-        <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
+        <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
           <Stack
-            direction="row"
-            alignItems="center"
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
             justifyContent="space-between"
-            spacing={1}
+            spacing={1.5}
           >
-            <Stack spacing={0.2} sx={{ flex: 1, minWidth: 0 }}>
+            <Stack spacing={1} sx={{ flex: 1, minWidth: 0 }}>
               <Stack
                 direction="row"
                 alignItems="center"
                 spacing={1}
-                sx={{ flexWrap: "wrap" }}
+                sx={{
+                  flexWrap: "wrap",
+                  p: 1,
+                  borderRadius: 1,
+                  bgcolor: horario.activo ? "#eaf4ff" : "#f1f3f5",
+                }}
               >
                 <Typography
                   variant="subtitle2"
@@ -312,7 +379,11 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
                 >
                   {calendarDays.find(d => d.value === horario.dia)?.label || "Día no encontrado"}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
+                <AccessTimeIcon sx={{ color: "#1565C0", display: "none", fontSize: 18 }} />
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#153b6f", display: "none", fontWeight: 800 }}
+                >
                   {toTimeInput(horario.hora_inicio)} –{" "}
                   {toTimeInput(horario.hora_fin)}
                 </Typography>
@@ -322,18 +393,40 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
                   color={horario.activo ? "success" : "default"}
                 />
               </Stack>
-              {horario.espacio_deportivo && (
-                <Typography variant="caption" color="text.secondary" noWrap>
-                  {horario.espacio_deportivo}
+              <Stack direction="row" alignItems="center" spacing={0.75}>
+                <AccessTimeIcon sx={{ color: "#1565C0", fontSize: 16 }} />
+                <Typography
+                  variant="caption"
+                  sx={{ color: "#153b6f", fontWeight: 800 }}
+                  noWrap
+                >
+                  {toTimeInput(horario.hora_inicio)} -{" "}
+                  {toTimeInput(horario.hora_fin)}
                 </Typography>
+              </Stack>
+              {hasAssignedValue(horario.espacio_deportivo) && (
+                <Stack direction="row" alignItems="center" spacing={0.75}>
+                  <PlaceIcon sx={{ color: "#7890ad", fontSize: 16 }} />
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {horario.espacio_deportivo}
+                  </Typography>
+                </Stack>
               )}
-              {horario.docente_responsable && (
-                <Typography variant="caption" color="text.secondary" noWrap>
-                  {horario.docente_responsable}
-                </Typography>
+              {hasAssignedValue(horario.docente_responsable) && (
+                <Stack direction="row" alignItems="center" spacing={0.75}>
+                  <PersonIcon sx={{ color: "#7890ad", fontSize: 16 }} />
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {horario.docente_responsable}
+                  </Typography>
+                </Stack>
               )}
             </Stack>
-            <Stack direction="row" spacing={0.5}>
+            <Stack
+              direction="row"
+              spacing={0.5}
+              justifyContent={{ xs: "flex-end", sm: "center" }}
+              sx={{ flexShrink: 0 }}
+            >
               <IconButton
                 size="small"
                 onClick={() => setEditing(true)}
@@ -413,7 +506,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
     >
       {editHeader}
       <CardContent
-        sx={{ py: 1.5, bgcolor: "#f0f6ff", "&:last-child": { pb: 1.5 } }}
+        sx={{ p: 2, bgcolor: "#f0f6ff", "&:last-child": { pb: 2 } }}
       >
         {error && (
           <Alert severity="error" sx={{ mb: 1.5 }} onClose={() => setError("")}>
@@ -430,7 +523,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
           direction="row"
           spacing={1}
           justifyContent="flex-end"
-          sx={{ mt: 1 }}
+          sx={{ mt: 2 }}
         >
           <SAEButton
             variant="outlined"
@@ -520,9 +613,18 @@ function NuevoHorarioCard({
       }}
     >
       <AccessTimeIcon sx={{ color: "white", fontSize: 16 }} />
-      <Typography variant="subtitle2" sx={{ color: "white", fontWeight: 700 }}>
+      <Typography
+        variant="subtitle2"
+        sx={{ color: "white", fontWeight: 700, flex: 1 }}
+      >
         {C.scheduleCreating}
       </Typography>
+      <Chip size="small" label={getDayLabel(form.dia)} sx={headerChipSx} />
+      <Chip
+        size="small"
+        label={getTimeRangeLabel(form.hora_inicio, form.hora_fin)}
+        sx={headerChipSx}
+      />
     </Box>
   );
 
@@ -537,7 +639,7 @@ function NuevoHorarioCard({
     >
       {createHeader}
       <CardContent
-        sx={{ py: 1.5, bgcolor: "#f1faf2", "&:last-child": { pb: 1.5 } }}
+        sx={{ p: 2, bgcolor: "#f1faf2", "&:last-child": { pb: 2 } }}
       >
         {error && (
           <Alert severity="error" sx={{ mb: 1.5 }} onClose={() => setError("")}>
@@ -554,7 +656,7 @@ function NuevoHorarioCard({
           direction="row"
           spacing={1}
           justifyContent="flex-end"
-          sx={{ mt: 1 }}
+          sx={{ mt: 2 }}
         >
           <SAEButton variant="outlined" onClick={onCancel} disabled={saving}>
             {C.cancel}

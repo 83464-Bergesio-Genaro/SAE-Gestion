@@ -42,8 +42,14 @@ import { ObtenerUsuariosXLegajo } from "../../../api/EmpleadoService";
 import { HealthContext } from "../employedContext";
 import { useNotification } from "../../../shared/context/sharedContext";
 import { EMPTY_CURSO, EMPTY_ESPECIALIDAD, EMPTY_FALTA, EMPTY_HORARIO, EMPTY_PERSONAL, EMPTY_TURNO } from "../../../utils/common/common.config.js";
+import { compareDatesDesc } from "../../../utils/date.utils";
 
 // #endregion
+
+const sortTurnosByFechaAtencionDesc = (turnos) =>
+  [...turnos].sort((a, b) =>
+    compareDatesDesc(a?.fecha_atencion, b?.fecha_atencion),
+  );
 
 export const HealthUsersProvider = ({ children }) => {
   
@@ -145,7 +151,7 @@ export const HealthUsersProvider = ({ children }) => {
       let data = await ObtenerTurnosActivos();
       data = data.map(mapTurnos);
 
-      setAllTurnos(data);
+      setAllTurnos(sortTurnosByFechaAtencionDesc(data));
 
       // 1. Crear arrays temporales vacíos
       const pendientes = [];
@@ -180,12 +186,12 @@ export const HealthUsersProvider = ({ children }) => {
             break; // Por si llega un ID desconocido
         }
       });
-      setPendienteTurnos(pendientes);
-      setAsignadosTurnos(asignados);
-      setEnCursoTurnos(enCurso);
-      setFinalizadoTurnos(finalizados);
-      setCanceladoTurnos(cancelados);
-      setReprogramadoTurnos(reprogramados);
+      setPendienteTurnos(sortTurnosByFechaAtencionDesc(pendientes));
+      setAsignadosTurnos(sortTurnosByFechaAtencionDesc(asignados));
+      setEnCursoTurnos(sortTurnosByFechaAtencionDesc(enCurso));
+      setFinalizadoTurnos(sortTurnosByFechaAtencionDesc(finalizados));
+      setCanceladoTurnos(sortTurnosByFechaAtencionDesc(cancelados));
+      setReprogramadoTurnos(sortTurnosByFechaAtencionDesc(reprogramados));
 
     } catch {
       setPendienteTurnos([]);
@@ -310,7 +316,7 @@ export const HealthUsersProvider = ({ children }) => {
           const selector =
             operacion === "sacar"
               ? (prev) => prev.filter((t) => t.id !== id_turno)
-              : (prev) => [...prev, turno];
+              : (prev) => sortTurnosByFechaAtencionDesc([...prev, turno]);
 
           switch (estado) {
             case 0:
@@ -344,7 +350,9 @@ export const HealthUsersProvider = ({ children }) => {
 
         // Actualizar la lista global en memoria
         setAllTurnos((prev) =>
-          prev.map((t) => (t.id === id_turno ? turnoActualizado : t)),
+          sortTurnosByFechaAtencionDesc(
+            prev.map((t) => (t.id === id_turno ? turnoActualizado : t)),
+          ),
         );
 
         // 4. PETICIÓN A LA API
@@ -356,7 +364,9 @@ export const HealthUsersProvider = ({ children }) => {
           actualizarListaPorEstado(id_estado_nuevo, "sacar");
           actualizarListaPorEstado(estadoAnterior, "agregar", foundTurn);
           setAllTurnos((prev) =>
-            prev.map((t) => (t.id === id_turno ? foundTurn : t)),
+            sortTurnosByFechaAtencionDesc(
+              prev.map((t) => (t.id === id_turno ? foundTurn : t)),
+            ),
           );
 
           showNotification(
@@ -440,7 +450,7 @@ export const HealthUsersProvider = ({ children }) => {
         const selector =
           operacion === "sacar"
             ? (prev) => prev.filter((t) => t.id !== turno.id)
-            : (prev) => [...prev, turno];
+            : (prev) => sortTurnosByFechaAtencionDesc([...prev, turno]);
 
         switch (estado) {
           case 0:
@@ -484,7 +494,9 @@ export const HealthUsersProvider = ({ children }) => {
           "agregar",
           turnoCreadoCompleto,
         );
-        setAllTurnos((prev) => [...prev, turnoCreadoCompleto]);
+        setAllTurnos((prev) =>
+          sortTurnosByFechaAtencionDesc([...prev, turnoCreadoCompleto]),
+        );
       } else if (dialogMode === "edit") {
         // En edición conocemos el ID anterior, buscamos el estado viejo antes de actualizarlo
         const turnoPrevio = allTurnos.find((t) => t.id === id_nuevo);
@@ -509,7 +521,9 @@ export const HealthUsersProvider = ({ children }) => {
           turnoModificadoCompleto,
         );
         setAllTurnos((prev) =>
-          prev.map((t) => (t.id === id_nuevo ? turnoModificadoCompleto : t)),
+          sortTurnosByFechaAtencionDesc(
+            prev.map((t) => (t.id === id_nuevo ? turnoModificadoCompleto : t)),
+          ),
         );
 
         // 2. Guardamos en la base de datos en segundo plano
@@ -524,7 +538,9 @@ export const HealthUsersProvider = ({ children }) => {
           if (turnoPrevio) {
             actualizarListaPorEstado(estadoAnterior, "agregar", turnoPrevio);
             setAllTurnos((prev) =>
-              prev.map((t) => (t.id === id_nuevo ? turnoPrevio : t)),
+              sortTurnosByFechaAtencionDesc(
+                prev.map((t) => (t.id === id_nuevo ? turnoPrevio : t)),
+              ),
             );
           }
           throw apiError; // Lanza el error al catch principal para disparar el DialogError

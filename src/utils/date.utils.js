@@ -106,6 +106,18 @@ export function getTodayInputDate() {
   return formatDate(new Date(), "input");
 }
 
+export function compareDatesDesc(valueA, valueB) {
+  const getTimestamp = (value) => {
+    const normalizedDate = normalizeDateInput(value);
+    if (!normalizedDate) return Number.NEGATIVE_INFINITY;
+
+    const [year, month, day] = normalizedDate.split("-").map(Number);
+    return new Date(year, month - 1, day).getTime();
+  };
+
+  return getTimestamp(valueB) - getTimestamp(valueA);
+}
+
 /**
  * Normaliza cualquier formato de fecha
  * y devuelve yyyy-MM-dd

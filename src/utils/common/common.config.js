@@ -1,62 +1,62 @@
 export const EMPTY_BUSSINESS = {
-    id: "-1",
-    nombre: "",
-    contacto: "",
-    email: "",
-    cuit:"",
-    cbu:"",
-    activo:true
-}
-export const EMPTY_VIAJES ={
-    id: "-1",
-    nombre: "",
-    fecha_inicio: "",
-    fecha_fin: "",
-    seguro: false,
-    origen: "",
-    destino: "",
-    cantidad_personas: 0,
-    nombre_empresa:"",
-    costo_aproximado: 0,
-}
-export const EMPTY_VIAJES_FORM ={
-    id: "-1",
-    nombre: "",
-    fecha_inicio: "",
-    fecha_fin: "",
-    seguro: false,
-    origen: "",
-    destino: "",
-    cantidad_personas: 0,
-    id_empresa_viaje:-1,
-    nombre_empresa:"",
-    costo_aproximado: 0,
-    motivo:""
-}
+  id: "-1",
+  nombre: "",
+  contacto: "",
+  email: "",
+  cuit: "",
+  cbu: "",
+  activo: true,
+};
+export const EMPTY_VIAJES = {
+  id: "-1",
+  nombre: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  seguro: false,
+  origen: "",
+  destino: "",
+  cantidad_personas: 0,
+  nombre_empresa: "",
+  costo_aproximado: 0,
+};
+export const EMPTY_VIAJES_FORM = {
+  id: "-1",
+  nombre: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  seguro: false,
+  origen: "",
+  destino: "",
+  cantidad_personas: 0,
+  id_empresa_viaje: -1,
+  nombre_empresa: "",
+  costo_aproximado: 0,
+  motivo: "",
+};
 export const EMPTY_DOCUMENTACION_VIAJE = {
-    id: "-1",
-    nombre: "",
-    datos:"",
-    ruta:"",
-}
+  id: "-1",
+  nombre: "",
+  datos: "",
+  ruta: "",
+};
 
 export const EMPTY_DOCUMENTACION_ESTUDIANTE = {
-    id: "-1",
-    nombre: "",
-    datos:"",
-    ruta:"",
-}
+  id: "-1",
+  nombre: "",
+  datos: "",
+  ruta: "",
+};
 // ------------------------- DEPORTES -------------------------- //
 export const EMPTY_TOURNAMENT = {
   nombre_torneo: "",
   fecha_inicio: "",
   fecha_fin: "",
-  fecha_limite_inscripcion:"",
-  activo:"",
-  nombre_deporte:"",
-  docente_responsable:"",
-  cupo_jugadores:""
-}
+  fecha_limite_inscripcion: "",
+  activo: "",
+  nombre_deporte: "",
+  docente_responsable: "",
+  cupo_jugadores: "",
+};
 export const EMPTY_TOURNAMENT_FORM = {
   id: 0,
   nombre_torneo: "",
@@ -113,12 +113,12 @@ export const EMPTY_TURNO = {
 //DEBE SER IGUAL LAS COLUMNAS QUE LAS FILAS
 export const EMPTY_TURNO_PACIENTE = {
   id: 0,
+  estado: "",
+  asunto: "",
   especialista: "",
   fecha_solicitud: "",
   fecha_atencion: "",
   hora_atencion: "",
-  asunto: "",
-  estado: "",
 };
 
 export const EMPTY_ESPECIALIDAD = {

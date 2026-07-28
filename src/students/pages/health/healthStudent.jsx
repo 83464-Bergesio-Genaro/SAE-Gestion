@@ -34,6 +34,7 @@ import { HealthUsersProvider } from "../../context/providers/healthProvider";
 
 import SAEPage from "../../../assets/components/page/SAEPage";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
+import SAETimeField from "../../../assets/components/inputs/SAETimeField";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAESpinner from "../../../assets/components/spinner/SAESpinner";
 import TitleBox from "../../../assets/components/titleBox";
@@ -44,6 +45,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import AddIcon from "@mui/icons-material/Add";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SearchIcon from "@mui/icons-material/Search";
 import SchoolIcon from "@mui/icons-material/School";
@@ -242,6 +244,20 @@ const formatTurnHour = (value) => {
   return normalized ? `${normalized} hs` : "";
 };
 
+const getCalendarDayLabel = (value) =>
+  calendarDays.find((day) => day.value === Number(value))?.label ??
+  C.servicesNoDay;
+
+const formatAvailability = (availability) =>
+  `${getCalendarDayLabel(availability.dia)} - ${formatTurnHour(
+    availability.hora,
+  )}`;
+
+const formatSchedule = (schedule) =>
+  `${getCalendarDayLabel(schedule.dia)}: ${formatTime(
+    schedule.hora_inicio,
+  )} a ${formatTime(schedule.hora_fin)}`;
+
 export function EmployedStudentContent() {
   const { user } = useAuth();
   const isDesktopSchedule = useMediaQuery("(min-width:1200px)", {
@@ -291,7 +307,7 @@ export function EmployedStudentContent() {
     dots: true,
     infinite: false,
     speed: 500,
-    slidesToShow: isDesktopTurns ? 3 : isTabletTurns ? 2 : 1,
+    slidesToShow: isDesktopTurns ? 4 : isTabletTurns ? 2 : 1,
     slidesToScroll: 1,
     swipe: true,
     swipeToSlide: true,
@@ -387,7 +403,7 @@ export function EmployedStudentContent() {
                       sx={{
                         width: { xs: "calc(100% - 34px)", sm: 300 },
                         minWidth: 0,
-                        maxWidth: { xs: 320, sm: 300 },
+                        maxWidth: { xs: 300, sm: 300 },
                         minHeight: 0,
                         height: "auto",
                         borderRadius: { xs: 3, sm: 4 },
@@ -566,11 +582,7 @@ export function EmployedStudentContent() {
                           <SAEButton
                             variant="contained"
                             onClick={() =>
-                              openCreateTurnos(
-                                user.legajo,
-                                especialidad.id_especialidad,
-                                especialidad.diasYHorarios,
-                              )
+                              openCreateTurnos(user.legajo, especialidad)
                             }
                             sx={{
                               width: "100%",
@@ -598,6 +610,17 @@ export function EmployedStudentContent() {
         title={C.activeTurnsTitle}
         description={C.activeTurnsDescription}
       />
+
+      <Alert
+        severity="info"
+        sx={{
+          mb: 2,
+          borderRadius: 3,
+          fontWeight: 700,
+        }}
+      >
+        {C.activeTurnsReminder}
+      </Alert>
 
       <Card
         sx={{
@@ -660,17 +683,17 @@ export function EmployedStudentContent() {
             "& .slick-track": {
               display: "flex",
             },
-              "& .slick-slide": {
+            "& .slick-slide": {
+              height: "auto",
+              padding: { xs: "0 4px", sm: "0 10px" },
+              boxSizing: "border-box",
+              "& > div": {
                 height: "auto",
-                padding: { xs: "0 4px", sm: "0 10px" },
-                boxSizing: "border-box",
-                "& > div": {
-                  height: "auto",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                },
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
               },
+            },
           }}
         >
           {!loadingTurnos && estudianteTurnos.length > 0 && (
@@ -680,10 +703,14 @@ export function EmployedStudentContent() {
                   key={turno.id}
                   variant="outlined"
                   sx={{
-                    width: { xs: "calc(100% - 34px)", sm: "100%" },
+                    width: {
+                      xs: "calc(100% - 104px)",
+                      sm: "min(100%, 320px)",
+                      lg: "min(100%, 300px)",
+                    },
                     height: "auto",
                     minWidth: 0,
-                    maxWidth: { xs: 330, sm: "none" },
+                    maxWidth: { xs: 300, sm: 320, lg: 300 },
                     color: "var(--textBlack)",
                     my: { xs: 1, sm: 1.25 },
                     borderRadius: { xs: 3, sm: 4 },
@@ -698,10 +725,11 @@ export function EmployedStudentContent() {
                 >
                   <CardContent
                     sx={{
-                      p: { xs: 1.25, sm: 1.5 },
+                      p: { xs: 1.25, sm: 1.75 },
                       display: "flex",
                       flexDirection: "column",
-                      "&:last-child": { pb: { xs: 1.25, sm: 1.5 } },
+                      flex: 1,
+                      "&:last-child": { pb: { xs: 1.25, sm: 1.75 } },
                     }}
                   >
                     <Stack
@@ -709,11 +737,11 @@ export function EmployedStudentContent() {
                       justifyContent="space-between"
                       alignItems="flex-start"
                       gap={1}
-                      mb={0.9}
+                      mb={1.1}
                     >
                       <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={0.75}
+                        direction="row"
+                        spacing={1}
                         sx={{ minWidth: 0, flex: 1 }}
                       >
                         <Box
@@ -722,20 +750,31 @@ export function EmployedStudentContent() {
                             alignItems: "center",
                             gap: 0.75,
                             minWidth: 0,
-                            bgcolor: "#EEF5FF",
-                            borderRadius: 2,
-                            p: 0.75,
                           }}
                         >
                           <CalendarMonthIcon fontSize="small" color="primary" />
-                          <SAETypography
-                            variant="body2"
-                            fontWeight="bold"
-                            sx={{ overflowWrap: "anywhere", minWidth: 0 }}
-                          >
-                            {formatTurnDate(turno.fecha_atencion) || C.noDate}
-                          </SAETypography>
+                          <Box sx={{ minWidth: 0 }}>
+                            <SAETypography
+                              variant="caption"
+                              sx={{
+                                color: "text.secondary",
+                                display: "block",
+                                fontWeight: 800,
+                                lineHeight: 1,
+                              }}
+                            >
+                              Fecha
+                            </SAETypography>
+                            <SAETypography
+                              variant="body2"
+                              fontWeight="bold"
+                              sx={{ overflowWrap: "anywhere", minWidth: 0 }}
+                            >
+                              {formatTurnDate(turno.fecha_atencion) || C.noDate}
+                            </SAETypography>
+                          </Box>
                         </Box>
+
                         <SAETypography
                           component="div"
                           variant="body2"
@@ -745,14 +784,25 @@ export function EmployedStudentContent() {
                             alignItems: "center",
                             gap: 0.75,
                             minWidth: 0,
-                            bgcolor: "#EEF5FF",
-                            borderRadius: 2,
-                            p: 0.75,
                             overflowWrap: "anywhere",
                           }}
                         >
                           <AccessTimeIcon fontSize="small" color="primary" />
-                          {formatTurnHour(turno.hora_atencion) || C.noSchedule}
+                          <Box sx={{ minWidth: 0 }}>
+                            <SAETypography
+                              variant="caption"
+                              sx={{
+                                color: "text.secondary",
+                                display: "block",
+                                fontWeight: 800,
+                                lineHeight: 1,
+                              }}
+                            >
+                              Hora
+                            </SAETypography>
+                            {formatTurnHour(turno.hora_atencion) ||
+                              C.noSchedule}
+                          </Box>
                         </SAETypography>
                       </Stack>
                       <Chip
@@ -767,13 +817,13 @@ export function EmployedStudentContent() {
                           fontSize: "0.82rem",
                           fontWeight: 700,
                           flexShrink: 0,
+                          ml: "auto",
                           "& .MuiChip-label": {
                             px: 1.25,
                           },
                         }}
                       />
                     </Stack>
-
                     <Box
                       sx={{
                         p: { xs: 0.9, sm: 1.1 },
@@ -797,11 +847,11 @@ export function EmployedStudentContent() {
                         sx={{
                           mt: 0.25,
                           fontWeight: 700,
-                          lineHeight: 1.25,
+                          lineHeight: 1.3,
                           overflowWrap: "anywhere",
                           display: "-webkit-box",
                           WebkitBoxOrient: "vertical",
-                          WebkitLineClamp: 2,
+                          WebkitLineClamp: 3,
                           overflow: "hidden",
                         }}
                       >
@@ -809,67 +859,75 @@ export function EmployedStudentContent() {
                       </SAETypography>
                     </Box>
 
-                    {/* Datos Mínimos: Fecha y Hora */}
-                    <Stack spacing={1} mt={1.1}>
-                      <Box
-                        sx={{
-                          display: "grid",
-                          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                          gap: 1,
-                        }}
-                      >
-                        <Box sx={{ minWidth: 0 }}>
-                          <SAETypography
-                            variant="caption"
-                            sx={{ color: "text.secondary", fontWeight: 700 }}
-                          >
-                            {C.turnsCardPacient}
-                          </SAETypography>
-                          <SAETypography
-                            variant="body2"
-                            sx={{
-                              overflowWrap: "anywhere",
-                              lineHeight: 1.3,
-                              display: "-webkit-box",
-                              WebkitBoxOrient: "vertical",
-                              WebkitLineClamp: 2,
-                              overflow: "hidden",
-                            }}
-                          >
-                            {turno.paciente || C.noNameTurn}
-                          </SAETypography>
-                        </Box>
-                        <Box sx={{ minWidth: 0 }}>
-                          <SAETypography
-                            variant="caption"
-                            sx={{ color: "text.secondary", fontWeight: 700 }}
-                          >
-                            {C.turnsCardMedic}
-                          </SAETypography>
-                          <SAETypography
-                            variant="body2"
-                            sx={{
-                              overflowWrap: "anywhere",
-                              lineHeight: 1.3,
-                              display: "-webkit-box",
-                              WebkitBoxOrient: "vertical",
-                              WebkitLineClamp: 2,
-                              overflow: "hidden",
-                            }}
-                          >
-                            {turno.especialista || C.noMedic}
-                          </SAETypography>
-                        </Box>
+                    <Stack spacing={0.5} mb={0.5}>
+                      <Box sx={{ minWidth: 0 }}>
+                        <SAETypography
+                          variant="caption"
+                          sx={{ color: "text.secondary", fontWeight: 700 }}
+                        >
+                          {C.turnsCardPacient}
+                        </SAETypography>
+                        <SAETypography
+                          variant="body2"
+                          sx={{
+                            overflowWrap: "anywhere",
+                            lineHeight: 1.3,
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            overflow: "hidden",
+                          }}
+                        >
+                          {turno.paciente || C.noNameTurn}
+                        </SAETypography>
                       </Box>
-                      <SAETypography
-                        variant="caption"
-                        sx={{ color: "text.secondary", fontWeight: 700 }}
-                      >
-                        Solicitud:{" "}
-                        {formatTurnDate(turno.fecha_solicitud) || "-"}
-                      </SAETypography>
+                      <Box sx={{ minWidth: 0 }}>
+                        <SAETypography
+                          variant="caption"
+                          sx={{ color: "text.secondary", fontWeight: 700 }}
+                        >
+                          {C.turnsCardMedic}
+                        </SAETypography>
+                        <SAETypography
+                          variant="body2"
+                          sx={{
+                            overflowWrap: "anywhere",
+                            lineHeight: 1.3,
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            overflow: "hidden",
+                          }}
+                        >
+                          {turno.especialista || C.noMedic}
+                        </SAETypography>
+                      </Box>
+                      <Box sx={{ minWidth: 0 }}>
+                        <SAETypography
+                          variant="caption"
+                          sx={{ color: "text.secondary", fontWeight: 700 }}
+                        >
+                          Solicitud:{" "}
+                        </SAETypography>
+                        <SAETypography
+                          variant="body2"
+                          sx={{
+                            overflowWrap: "anywhere",
+                            lineHeight: 1.3,
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            overflow: "hidden",
+                          }}
+                        >
+                          {formatTurnDate(turno.fecha_solicitud) || "-"}
+                        </SAETypography>
+                      </Box>
                     </Stack>
-                    <Stack direction="row" spacing={1} mt={1.15}>
+
+                    {/* Datos Mínimos: Fecha y Hora */}
+
+                    <Stack direction="row" spacing={1} mt="auto" pt={1.25}>
                       <SAEButton
                         variant="contained"
                         startIcon={<SearchIcon />}
@@ -1081,7 +1139,7 @@ export function EmployedStudentContent() {
                               fontWeight: 700,
                             }}
                           />
-                          <Box 
+                          <Box
                             sx={{
                               bgcolor: "rgba(255,255,255,0.1)",
                               borderRadius: 2,
@@ -1170,6 +1228,9 @@ export function EmployedStudentContent() {
               pageSizeOptions={[5, 10, 25]}
               initialState={{
                 pagination: { paginationModel: { pageSize: 5 } },
+                sorting: {
+                  sortModel: [{ field: "fecha_solicitud", sort: "desc" }],
+                },
               }}
               localeText={{ noRowsLabel: C.noRegisters }}
               sx={{ borderRadius: 0, border: "none" }}
@@ -1195,6 +1256,40 @@ function DialogHealth() {
     closeDialog,
   } = useNotification();
   const { handleTurnosSave } = useHealth();
+  const disponibilidades = dialogData.disponibilidades ?? [];
+  const horariosDisponibles = dialogData.horarios_disponibles ?? [];
+
+  const handleAddAvailability = () => {
+    if (!dialogData.dia_selecionado || !dialogData.horario_disponible) {
+      setDialogError(C.availabilityRequired);
+      return;
+    }
+
+    const nuevaDisponibilidad = {
+      dia: Number(dialogData.dia_selecionado),
+      hora: dialogData.horario_disponible,
+    };
+    const alreadyExists = disponibilidades.some(
+      (item) =>
+        Number(item.dia) === nuevaDisponibilidad.dia &&
+        item.hora === nuevaDisponibilidad.hora,
+    );
+
+    if (alreadyExists) return;
+
+    setDialogError("");
+    handleDataChange("disponibilidades", [
+      ...disponibilidades,
+      nuevaDisponibilidad,
+    ]);
+  };
+
+  const handleRemoveAvailability = (indexToRemove) => {
+    handleDataChange(
+      "disponibilidades",
+      disponibilidades.filter((_item, index) => index !== indexToRemove),
+    );
+  };
 
   return (
     <>
@@ -1212,9 +1307,11 @@ function DialogHealth() {
               component="span"
               sx={{ fontWeight: "bold" }}
             >
-              {dialogMode === "cancelados"
-                ? C.cancelTurnsTitle
-                : C.realizedTurnsTitle}
+              {dialogMode === "create"
+                ? C.requestTurnTitle
+                : dialogMode === "delete"
+                  ? C.cancelTurnTitle
+                  : C.realizedTurnsTitle}
             </SAETypography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -1251,7 +1348,7 @@ function DialogHealth() {
                               variant="body2"
                               color="var(--textBlack)"
                             >
-                              {C.creationAclaration}
+                              {C.turnCancellationDisclaimer}
                             </SAETypography>
                           </CardContent>
                         </Card>
@@ -1260,7 +1357,7 @@ function DialogHealth() {
                         <InputLabel>{C.yourData}</InputLabel>
                       </Grid>
 
-                      <Grid size={{ xs: 12 }} m={0}>
+                      <Grid size={{ xs: 12, md: 6 }} m={0}>
                         <SAETextField
                           label={C.youtID}
                           fullWidth
@@ -1271,7 +1368,7 @@ function DialogHealth() {
                           disabled={true}
                         />
                       </Grid>
-                      <Grid size={{ xs: 12 }} m={0}>
+                      <Grid size={{ xs: 12, md: 6 }} m={0}>
                         <SAETextField
                           label={C.solicitudDate}
                           type="date"
@@ -1285,46 +1382,191 @@ function DialogHealth() {
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
-                        <InputLabel>{C.availability}</InputLabel>
-                      </Grid>
-                      <Grid size={{ xs: 12, md: 6 }} m={0}>
-                        <Select
-                          value={dialogData.dia_selecionado}
-                          label={C.day}
-                          fullWidth
-                          onChange={(e) =>
-                            handleDataChange("dia_selecionado", e.target.value)
-                          }
-                        >
-                          {calendarDays.map((d) => (
-                            <MenuItem key={d.value} value={d.value}>
-                              {d.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Grid>
-                      <Grid size={{ xs: 12, md: 6 }} m={0}>
-                        <SAETextField
-                          label={C.estimateSchedule}
-                          type="time"
-                          fullWidth
-                          value={dialogData.horario_disponible}
-                          onChange={(e) =>
-                            handleDataChange(
-                              "horario_disponible",
-                              e.target.value,
-                            )
-                          }
-                          slotProps={{ inputLabel: { shrink: true } }}
-                        />
-                        <Chip
-                          label={C.seeMedicAvaila}
+                        <Card
+                          variant="outlined"
                           sx={{
-                            bgcolor: "var(--chipBackground)",
-                            color: "white",
-                            fontWeight: 700,
+                            borderRadius: 3,
+                            borderColor: "#DCE7F5",
+                            bgcolor: "#F8FBFF",
                           }}
-                        />
+                        >
+                          <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                            <Stack spacing={1.25}>
+                              <Box>
+                                <SAETypography
+                                  variant="caption"
+                                  sx={{
+                                    color: "text.secondary",
+                                    fontWeight: 800,
+                                    textTransform: "uppercase",
+                                  }}
+                                >
+                                  {C.selectedSpecialty}
+                                </SAETypography>
+                                <SAETypography
+                                  variant="h6"
+                                  sx={{
+                                    color: "var(--secondary)",
+                                    fontWeight: 800,
+                                    lineHeight: 1.2,
+                                  }}
+                                >
+                                  {dialogData.nombre_especialidad}
+                                </SAETypography>
+                              </Box>
+                              <Box>
+                                <SAETypography
+                                  variant="caption"
+                                  sx={{
+                                    color: "text.secondary",
+                                    fontWeight: 800,
+                                  }}
+                                >
+                                  {C.specialtySchedules}
+                                </SAETypography>
+                                <Stack
+                                  direction="row"
+                                  flexWrap="wrap"
+                                  gap={1}
+                                  sx={{ mt: 0.75 }}
+                                >
+                                  {horariosDisponibles.map((horario, index) => (
+                                    <Chip
+                                      key={`${horario.dia}-${horario.hora_inicio}-${index}`}
+                                      icon={<AccessTimeIcon />}
+                                      label={formatSchedule(horario)}
+                                      sx={{
+                                        bgcolor: "#E7F1FF",
+                                        color: "#153b6f",
+                                        fontWeight: 700,
+                                        height: "auto",
+                                        minHeight: 32,
+                                        "& .MuiChip-label": {
+                                          whiteSpace: "normal",
+                                          py: 0.5,
+                                        },
+                                      }}
+                                    />
+                                  ))}
+                                </Stack>
+                              </Box>
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <InputLabel>{C.availability}</InputLabel>
+                        <SAETypography variant="body2" color="text.secondary">
+                          {C.availabilityHint}
+                        </SAETypography>
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <Stack
+                          direction={{ xs: "column", md: "row" }}
+                          spacing={1.5}
+                          alignItems={{ md: "center" }}
+                        >
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Select
+                              value={dialogData.dia_selecionado}
+                              label={C.day}
+                              fullWidth
+                              onChange={(e) =>
+                                handleDataChange(
+                                  "dia_selecionado",
+                                  e.target.value,
+                                )
+                              }
+                            >
+                              {calendarDays.map((d) => (
+                                <MenuItem key={d.value} value={d.value}>
+                                  {d.label}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </Box>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <SAETimeField
+                              label={C.estimateSchedule}
+                              value={dialogData.horario_disponible}
+                              onChange={(value) =>
+                                handleDataChange("horario_disponible", value)
+                              }
+                              minTime="00:00"
+                              maxTime="23:59"
+                              timeStepsMinutes={15}
+                              size="big"
+                              fullWidth
+                            />
+                          </Box>
+                          <SAEButton
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={handleAddAvailability}
+                            sx={{
+                              color: "white",
+                              minHeight: 40,
+                              width: { xs: "100%", md: "auto" },
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {C.addAvailability}
+                          </SAEButton>
+                        </Stack>
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <Stack
+                          spacing={1}
+                          sx={{
+                            p: 1.25,
+                            borderRadius: 2,
+                            bgcolor: "#F3F7FC",
+                            border: "1px solid #E0EAF6",
+                          }}
+                        >
+                          <SAETypography
+                            variant="subtitle2"
+                            sx={{ color: "#153b6f", fontWeight: 800 }}
+                          >
+                            {C.selectedAvailability}
+                          </SAETypography>
+                          <Stack direction="row" flexWrap="wrap" gap={1}>
+                            {disponibilidades.length > 0 ? (
+                              disponibilidades.map((disponibilidad, index) => (
+                                <Chip
+                                  key={`${disponibilidad.dia}-${disponibilidad.hora}-${index}`}
+                                  label={formatAvailability(disponibilidad)}
+                                  onDelete={() =>
+                                    handleRemoveAvailability(index)
+                                  }
+                                  deleteIcon={<DeleteOutlineIcon />}
+                                  sx={{
+                                    bgcolor: "#FFFFFF",
+                                    border: "1px solid #B7CBE5",
+                                    color: "#153b6f",
+                                    fontWeight: 700,
+                                    minHeight: 34,
+                                    "& .MuiChip-label": {
+                                      whiteSpace: "normal",
+                                      py: 0.5,
+                                    },
+                                    "& .MuiChip-deleteIcon": {
+                                      color: "#d85656",
+                                      "&:hover": { color: "#b93636" },
+                                    },
+                                  }}
+                                />
+                              ))
+                            ) : (
+                              <SAETypography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {C.noAvailability}
+                              </SAETypography>
+                            )}
+                          </Stack>
+                        </Stack>
                       </Grid>
                       <Grid size={{ xs: 12 }} m={0}>
                         <InputLabel>{C.turnsCardSuject}</InputLabel>
@@ -1351,21 +1593,170 @@ function DialogHealth() {
                           sx={{
                             bgcolor: "rgba(193, 73, 55, 0.7)",
                             border: "1px solid rgba(235, 41, 41, 0.1)",
+                            borderRadius: 3,
                           }}
                         >
                           <CardContent sx={{ p: 2 }}>
                             <SAETypography
-                              variant="subtitle2"
-                              color="textPrimary"
-                              fontWeight={600}
-                              gutterBottom
-                              fontSize={"22px"}
+                              variant="h6"
+                              sx={{
+                                color: "black",
+                                fontWeight: 800,
+                                mb: 1,
+                              }}
                             >
                               {C.dialogSubtitle}
                             </SAETypography>
-                            <SAETypography variant="body2">
+                            <SAETypography
+                              variant="body2"
+                              sx={{
+                                color: "black",
+                                fontWeight: 500,
+                                lineHeight: 1.35,
+                                overflowWrap: "anywhere",
+                              }}
+                            >
                               {C.deleteAclaration}
                             </SAETypography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      <Grid size={{ xs: 12 }} m={0}>
+                        <Card
+                          variant="outlined"
+                          sx={{
+                            borderRadius: 3,
+                            borderColor: "#DCE7F5",
+                            bgcolor: "#F8FBFF",
+                          }}
+                        >
+                          <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                            <SAETypography
+                              variant="subtitle1"
+                              sx={{
+                                color: "var(--primary)",
+                                fontWeight: 800,
+                                mb: 1.25,
+                              }}
+                            >
+                              {C.cancelTurnSummary}
+                            </SAETypography>
+                            <Stack spacing={1.1}>
+                              <Stack
+                                direction={{ xs: "column", sm: "row" }}
+                                spacing={1.5}
+                              >
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                  <SAETypography
+                                    variant="caption"
+                                    sx={{
+                                      color: "text.secondary",
+                                      fontWeight: 800,
+                                    }}
+                                  >
+                                    {C.dialogDate}
+                                  </SAETypography>
+                                  <SAETypography
+                                    variant="body2"
+                                    fontWeight={700}
+                                  >
+                                    {formatTurnDate(
+                                      dialogData.fecha_atencion,
+                                    ) || C.noDate}
+                                  </SAETypography>
+                                </Box>
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                  <SAETypography
+                                    variant="caption"
+                                    sx={{
+                                      color: "text.secondary",
+                                      fontWeight: 800,
+                                    }}
+                                  >
+                                    {C.dialogSchedule}
+                                  </SAETypography>
+                                  <SAETypography
+                                    variant="body2"
+                                    fontWeight={700}
+                                  >
+                                    {formatTurnHour(dialogData.hora_atencion) ||
+                                      C.noSchedule}
+                                  </SAETypography>
+                                </Box>
+                              </Stack>
+                              <Box sx={{ minWidth: 0 }}>
+                                <SAETypography
+                                  variant="caption"
+                                  sx={{
+                                    color: "text.secondary",
+                                    fontWeight: 800,
+                                  }}
+                                >
+                                  {C.turnsCardPacient}
+                                </SAETypography>
+                                <SAETypography
+                                  variant="body2"
+                                  sx={{
+                                    fontWeight: 700,
+                                    overflowWrap: "anywhere",
+                                  }}
+                                >
+                                  {dialogData.paciente || C.noNameTurn}
+                                </SAETypography>
+                              </Box>
+                              <Box sx={{ minWidth: 0 }}>
+                                <SAETypography
+                                  variant="caption"
+                                  sx={{
+                                    color: "text.secondary",
+                                    fontWeight: 800,
+                                  }}
+                                >
+                                  {C.turnsCardMedic}
+                                </SAETypography>
+                                <SAETypography
+                                  variant="body2"
+                                  sx={{
+                                    fontWeight: 700,
+                                    overflowWrap: "anywhere",
+                                  }}
+                                >
+                                  {dialogData.especialista || C.noMedic}
+                                </SAETypography>
+                              </Box>
+                              <Box
+                                sx={{
+                                  p: 1,
+                                  borderRadius: 2,
+                                  bgcolor: "#F3F7FC",
+                                  border: "1px solid #E0EAF6",
+                                }}
+                              >
+                                <SAETypography
+                                  variant="caption"
+                                  sx={{
+                                    color: "text.secondary",
+                                    display: "block",
+                                    fontWeight: 800,
+                                  }}
+                                >
+                                  {C.turnsCardSuject}
+                                </SAETypography>
+                                <SAETypography
+                                  variant="body2"
+                                  sx={{
+                                    fontWeight: 700,
+                                    overflowWrap: "anywhere",
+                                    display: "-webkit-box",
+                                    WebkitBoxOrient: "vertical",
+                                    WebkitLineClamp: 3,
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  {dialogData.asunto || C.noSubject}
+                                </SAETypography>
+                              </Box>
+                            </Stack>
                           </CardContent>
                         </Card>
                       </Grid>
@@ -1454,23 +1845,45 @@ function DialogHealth() {
               </>
             </Stack>
           </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
+          <DialogActions
+            sx={{
+              px: 3,
+              pb: 2,
+              gap: 1,
+              flexDirection: { xs: "column-reverse", sm: "row" },
+              "& > :not(style) ~ :not(style)": { ml: { xs: 0, sm: 1 } },
+            }}
+          >
             <SAEButton
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              sx={{
+                minWidth: { sm: 140 },
+                width: { xs: "100%", sm: "auto" },
+                whiteSpace: "nowrap",
+              }}
             >
-              {dialogMode === "create"
-                ? C.close
-                : dialogMode === "delete"
-                  ? C.delete
-                  : C.close}
+              {C.close}
             </SAEButton>
             {dialogMode !== "show" && (
               <SAEButton
                 variant="contained"
+                color={dialogMode === "delete" ? "error" : undefined}
                 onClick={handleTurnosSave}
                 disabled={dialogSaving}
+                sx={{
+                  minWidth: { sm: 190 },
+                  width: { xs: "100%", sm: "auto" },
+                  whiteSpace: "nowrap",
+                  ...(dialogMode === "delete" && {
+                    bgcolor: "#d85656",
+                    color: "white",
+                    "&:hover": {
+                      bgcolor: "#b93636",
+                    },
+                  }),
+                }}
                 startIcon={
                   dialogSaving ? (
                     <CircularProgress size={16} color="inherit" />
@@ -1480,7 +1893,7 @@ function DialogHealth() {
                 {dialogMode === "create"
                   ? C.create
                   : dialogMode === "delete"
-                    ? C.delete
+                    ? C.confirmCancelTurn
                     : C.close}
               </SAEButton>
             )}

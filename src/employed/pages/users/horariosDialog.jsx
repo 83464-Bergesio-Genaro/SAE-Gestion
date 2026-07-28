@@ -36,7 +36,10 @@ import SAETimeField from "../../../assets/components/inputs/SAETimeField";
 
 import { useEmploy } from "../../context/employedContext";
 import { AdminUsersProvider } from "../../context/providers/employProvider";
+import { USER_STRINGS } from "../../../utils/strings/employed.strings";
+import { calendarDays } from "../../../utils/common/constants";
 
+const C = USER_STRINGS;
 // FORMULARIO DE HORARIOS
 function HorarioFormFields() {
   const { form, handleChangeForm, DAYS } = useEmploy();
@@ -46,8 +49,8 @@ function HorarioFormFields() {
         <Grid size={{ xs: 12 }} m={0}>
           <InputLabel>Día</InputLabel>
           <Select
+            label={C.day}
             value={form.dia}
-            label="Día"
             fullWidth
             onChange={(e) => handleChangeForm("dia", e.target.value)}
           >
@@ -60,7 +63,7 @@ function HorarioFormFields() {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }} m={0}>
           <SAETimeField
-            label="Hora inicio"
+            label={C.startTime}
             value={form.hora_inicio}
             onChange={(value) => handleChangeForm("hora_inicio", value)}
             minTime="08:00"
@@ -71,7 +74,7 @@ function HorarioFormFields() {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }} m={0}>
           <SAETimeField
-            label="Hora fin"
+            label={C.endTime}
             value={form.hora_fin}
             onChange={(value) => handleChangeForm("hora_fin", value)}
             minTime="08:00"
@@ -109,7 +112,7 @@ function NuevoHorarioCard() {
     >
       <AccessTimeIcon sx={{ color: "white", fontSize: 16 }} />
       <Typography variant="subtitle2" sx={{ color: "white", fontWeight: 700 }}>
-        Nuevo horario
+        {C.scheduleCreate}
       </Typography>
     </Box>
   );
@@ -148,7 +151,7 @@ function NuevoHorarioCard() {
             onClick={() => setShowNuevoForm(false)}
             disabled={savingHorario}
           >
-            Cancelar
+           {C.cancel}
           </SAEButton>
           <SAEButton
             variant="contained"
@@ -162,7 +165,7 @@ function NuevoHorarioCard() {
               )
             }
           >
-            Crear
+           {C.create}
           </SAEButton>
         </Stack>
       </CardContent>
@@ -188,16 +191,7 @@ function HorarioCard({ horario }) {
 
   const isEditing = editingId === horario.id;
   const isDeleting = deleteId === horario.id;
-  //Porque no podia usar los otros no tengo ni idea.
-  const DIAS_LABEL = {
-    0: "Domingo",
-    1: "Lunes",
-    2: "Martes",
-    3: "Miércoles",
-    4: "Jueves",
-    5: "Viernes",
-    6: "Sábado",
-  };
+
   function toTimeInput(str) {
     if (!str || typeof str !== "string") return "";
 
@@ -231,11 +225,11 @@ function HorarioCard({ horario }) {
               variant="subtitle2"
               sx={{ color: "white", fontWeight: 700, flex: 1 }}
             >
-              Eliminar horario
+             {C.scheduleDeleteButton}
             </Typography>
             <Chip
               size="small"
-              label={DIAS_LABEL[horario.dia]}
+              label={calendarDays.find(d => d.value === (horario.dia === 0 ? 7 : horario.dia))?.label || "Día no laborable"}
               sx={{
                 bgcolor: "rgba(255,255,255,0.22)",
                 color: "white",
@@ -258,8 +252,7 @@ function HorarioCard({ horario }) {
             sx={{ py: 1.5, bgcolor: "#fff5f5", "&:last-child": { pb: 1.5 } }}
           >
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-              ¿Estás seguro que querés eliminar este horario? Esta acción no se
-              puede deshacer.
+              {C.scheduleDeleteWarning}
             </Typography>
             <Stack direction="row" spacing={1} justifyContent="flex-end">
               <SAEButton
@@ -267,7 +260,7 @@ function HorarioCard({ horario }) {
                 onClick={() => setDeleteId(horario.id)}
                 disabled={!isDeleting}
               >
-                Cancelar
+                {C.cancel}
               </SAEButton>
               <SAEButton
                 variant="contained"
@@ -282,7 +275,7 @@ function HorarioCard({ horario }) {
                   )
                 }
               >
-                Eliminar
+                {C.delete}
               </SAEButton>
             </Stack>
           </CardContent>
@@ -313,7 +306,7 @@ function HorarioCard({ horario }) {
                   variant="subtitle2"
                   sx={{ fontWeight: 700, color: "#153b6f" }}
                 >
-                  {DIAS_LABEL[horario.dia]}
+                  {calendarDays.find(d => d.value === (horario.dia === 0 ? 7 : horario.dia))?.label || "Día no laborable"}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
                   {toTimeInput(horario.hora_inicio)} –{" "}
@@ -372,11 +365,11 @@ function HorarioCard({ horario }) {
         variant="subtitle2"
         sx={{ color: "white", fontWeight: 700, flex: 1 }}
       >
-        Editando horario
+        {C.scheduleEditing}
       </Typography>
       <Chip
         size="small"
-        label={DIAS_LABEL[horario.dia]}
+        label={calendarDays.find(d => d.value === (horario.dia === 0 ? 7 : horario.dia))?.label || "Día no laborable"}
         sx={{
           bgcolor: "rgba(255,255,255,0.22)",
           color: "white",
@@ -431,7 +424,7 @@ function HorarioCard({ horario }) {
             onClick={handleCancelHorario}
             disabled={savingHorario}
           >
-            Cancelar
+            {C.cancel}
           </SAEButton>
           <SAEButton
             variant="contained"
@@ -445,7 +438,7 @@ function HorarioCard({ horario }) {
               )
             }
           >
-            Guardar cambios
+            {C.save}
           </SAEButton>
         </Stack>
       </CardContent>
@@ -478,7 +471,7 @@ export default function GestionarHorariosDialog({ open }) {
         }}
       >
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          Gestionar Horarios Empleados
+          {C.scheduleManagmentTitle}
         </Typography>
         <IconButton onClick={handleClose} size="small">
           <CloseIcon />
@@ -500,9 +493,9 @@ export default function GestionarHorariosDialog({ open }) {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Seleccionar empleado"
+                  label={C.scheduleSelectEmploy}
                   size="small"
-                  placeholder="Escribí para filtrar..."
+                  placeholder={C.scheduleFilterMsg}
                 />
               )}
               isOptionEqualToValue={(opt, val) => opt.id === val.id}
@@ -514,7 +507,7 @@ export default function GestionarHorariosDialog({ open }) {
                 color="text.secondary"
                 sx={{ textAlign: "center", py: 3 }}
               >
-                Seleccioná un empleado para ver sus horarios
+                {C.scheduleSelectMsg}
               </Typography>
             )}
 
@@ -529,7 +522,7 @@ export default function GestionarHorariosDialog({ open }) {
                     variant="subtitle2"
                     sx={{ color: "#5a6f8f", fontWeight: 600 }}
                   >
-                    Horarios registrados — {selectedEmploy.nombre_empleado}
+                    {C.scheduleMsg} {selectedEmploy.nombre_empleado}
                   </Typography>
                   <IconButton
                     onClick={() => setShowNuevoForm(true)}
@@ -574,7 +567,7 @@ export default function GestionarHorariosDialog({ open }) {
                       color="text.secondary"
                       sx={{ textAlign: "center", py: 2 }}
                     >
-                      No hay horarios registrados para este empleado.
+                      {C.scheduleNoData}
                     </Typography>
                   )}
 
@@ -591,7 +584,7 @@ export default function GestionarHorariosDialog({ open }) {
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <SAEButton variant="outlined" onClick={handleClose}>
-          Cerrar
+         {C.close}
         </SAEButton>
       </DialogActions>
     </Dialog>

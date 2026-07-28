@@ -221,6 +221,7 @@ export const USER_STRINGS = {
   save:"Guardar",
   delete:"Eliminar",
   clean:"Volver a Buscar",
+  close:"Cerrar",
 
   userCreate:"Nuevo Usuario",
   userUpdate:"Editar Usuario",
@@ -230,7 +231,39 @@ export const USER_STRINGS = {
   userDescription:"Permite la busqueda de estudiante registrados",
   userName:"Nombre de Usuario",
   userSearch:"Buscar Usuarios",
-  dominio:"frc.utn.edu.ar"
+  dominio:"frc.utn.edu.ar",
+
+  //Horarios
+  scheduleCreate: "Nuevo horario",
+  scheduleEdit: "Editar horario",
+  scheduleDelete:"Eliminar horario",
+
+  day:"Día",
+  startTime:"Hora inicio",
+  endTime:"Hora fin",
+  scheduleDeleteButton:"Eliminar Horario",
+  scheduleDeleteWarning:"¿Estás seguro que querés eliminar este horario? Esta acción no se puede deshacer.",
+  scheduleEditing:"Editando horario",
+  scheduleManagmentTitle:"Gestionar horarios de los empleados",
+  scheduleSelectEmploy:"Seleccionar empleado...",
+  scheduleFilterMsg:"Escribí para filtrar...",
+  scheduleSelectMsg:"Seleccioná un empleado para ver sus horarios",
+  scheduleMsg:"Horarios registrados —",
+  scheduleNoData:"No hay horarios registrados para este empleado.",
+  //Provider
+  validationID:"No posee ID, error",
+  validationStudentID: "Ingrese un legajo",
+  validationNames: "Este campo no puede estar vacio",
+  validationActive:"Ocurrio un error en el formulario",
+  validationProfile:"Debe seleccionar un perfil",
+  validationDegree:"Debe seleccionar una carrera",
+
+  userCreatedMsg:"Usuario creado!",
+  userUpdatedMsg:"Se actualizaron los datos del usuario!",
+  userErrorMsg:"Ocurrio un error al guardar",
+  userErrorUpdateMsg:"Ocurrio un error al actualizar el usuario...",
+  scheduleGetError:"Ocurrio un error recuperando los horarios",
+  
 }
 
 export const TRAVEL_STRINGS = {

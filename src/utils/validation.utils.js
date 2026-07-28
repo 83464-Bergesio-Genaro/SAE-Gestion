@@ -193,3 +193,8 @@ export function validateDeporte(data) {
 
   return errors;
 }
+
+export const isBooleanValid = (value) => {
+    // Retorna true solo si el valor es explícitamente true o false
+    return typeof value === "boolean";
+};

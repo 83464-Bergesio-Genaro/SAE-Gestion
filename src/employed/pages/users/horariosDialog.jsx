@@ -33,17 +33,32 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAETimeField from "../../../assets/components/inputs/SAETimeField";
+import { toTimeInput } from "../../../utils/date.utils";
 
 import { useEmploy } from "../../context/employedContext";
 import { AdminUsersProvider } from "../../context/providers/employProvider";
+
+const headerChipSx = {
+  bgcolor: "rgba(255,255,255,0.22)",
+  color: "white",
+  fontWeight: 700,
+  fontSize: "0.7rem",
+};
+
+const getDayLabel = (days, day) =>
+  days.find((calendarDay) => calendarDay.value === day)?.label ||
+  "Día no encontrado";
+
+const getTimeRangeLabel = (startTime, endTime) =>
+  `${toTimeInput(startTime) || "--:--"} - ${toTimeInput(endTime) || "--:--"}`;
 
 // FORMULARIO DE HORARIOS
 function HorarioFormFields() {
   const { form, handleChangeForm, DAYS } = useEmploy();
   return (
-    <Stack spacing={1}>
-      <Grid container spacing={1}>
-        <Grid size={{ xs: 12 }} m={0}>
+    <Grid container spacing={2}>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <FormControl size="small" fullWidth>
           <InputLabel>Día</InputLabel>
           <Select
             value={form.dia}
@@ -57,8 +72,9 @@ function HorarioFormFields() {
               </MenuItem>
             ))}
           </Select>
+          </FormControl>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }} m={0}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <SAETimeField
             label="Hora inicio"
             value={form.hora_inicio}
@@ -69,7 +85,7 @@ function HorarioFormFields() {
             fullWidth
           />
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }} m={0}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <SAETimeField
             label="Hora fin"
             value={form.hora_fin}
@@ -81,7 +97,6 @@ function HorarioFormFields() {
           />
         </Grid>
       </Grid>
-    </Stack>
   );
 }
 //ALTA DE FORMULARIOS
@@ -93,6 +108,7 @@ function NuevoHorarioCard() {
     handleCreateHorario,
     setErrorHorario,
     DAYS,
+    form,
     setShowNuevoForm,
   } = useEmploy();
 
@@ -108,9 +124,18 @@ function NuevoHorarioCard() {
       }}
     >
       <AccessTimeIcon sx={{ color: "white", fontSize: 16 }} />
-      <Typography variant="subtitle2" sx={{ color: "white", fontWeight: 700 }}>
+      <Typography
+        variant="subtitle2"
+        sx={{ color: "white", fontWeight: 700, flex: 1 }}
+      >
         Nuevo horario
       </Typography>
+      <Chip size="small" label={getDayLabel(DAYS, form.dia)} sx={headerChipSx} />
+      <Chip
+        size="small"
+        label={getTimeRangeLabel(form.hora_inicio, form.hora_fin)}
+        sx={headerChipSx}
+      />
     </Box>
   );
 
@@ -125,7 +150,7 @@ function NuevoHorarioCard() {
     >
       {createHeader}
       <CardContent
-        sx={{ py: 1.5, bgcolor: "#f1faf2", "&:last-child": { pb: 1.5 } }}
+        sx={{ p: 2, bgcolor: "#f1faf2", "&:last-child": { pb: 2 } }}
       >
         {errorHorario && (
           <Alert
@@ -141,7 +166,7 @@ function NuevoHorarioCard() {
           direction="row"
           spacing={1}
           justifyContent="flex-end"
-          sx={{ mt: 1 }}
+          sx={{ mt: 2 }}
         >
           <SAEButton
             variant="outlined"
@@ -264,7 +289,7 @@ function HorarioCard({ horario }) {
             <Stack direction="row" spacing={1} justifyContent="flex-end">
               <SAEButton
                 variant="outlined"
-                onClick={() => setDeleteId(horario.id)}
+                onClick={() => setDeleteId(null)}
                 disabled={!isDeleting}
               >
                 Cancelar
@@ -293,35 +318,69 @@ function HorarioCard({ horario }) {
     return (
       <Card
         variant="outlined"
-        sx={{ borderRadius: 2, overflow: "hidden", borderColor: "#d6e4f7" }}
+        sx={{
+          borderRadius: 2,
+          overflow: "hidden",
+          borderColor: "#d6e4f7",
+          bgcolor: "#fbfdff",
+          transition: "border-color 0.15s, box-shadow 0.15s",
+          "&:hover": {
+            borderColor: "#8eb8e8",
+            boxShadow: "0 8px 24px rgba(21,101,192,0.12)",
+          },
+        }}
       >
-        <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
+        <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
           <Stack
-            direction="row"
-            alignItems="center"
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
             justifyContent="space-between"
-            spacing={1}
+            spacing={1.5}
           >
-            <Stack spacing={0.2} sx={{ flex: 1, minWidth: 0 }}>
+            <Stack spacing={1} sx={{ flex: 1, minWidth: 0 }}>
               <Stack
                 direction="row"
                 alignItems="center"
                 spacing={1}
-                sx={{ flexWrap: "wrap" }}
+                sx={{
+                  flexWrap: "wrap",
+                  p: 1,
+                  borderRadius: 1,
+                  bgcolor: "#eaf4ff",
+                }}
               >
                 <Typography
                   variant="subtitle2"
                   sx={{ fontWeight: 700, color: "#153b6f" }}
                 >
-                  {DIAS_LABEL[horario.dia]}
+                  {getDayLabel(DAYS, horario.dia)}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#5a6f8f" }}>
+                <AccessTimeIcon sx={{ color: "#1565C0", display: "none", fontSize: 18 }} />
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#5a6f8f", display: "none" }}
+                >
                   {toTimeInput(horario.hora_inicio)} –{" "}
                   {toTimeInput(horario.hora_fin)}
                 </Typography>
               </Stack>
+              <Stack direction="row" alignItems="center" spacing={0.75}>
+                <AccessTimeIcon sx={{ color: "#1565C0", fontSize: 16 }} />
+                <Typography
+                  variant="caption"
+                  sx={{ color: "#153b6f", fontWeight: 800 }}
+                  noWrap
+                >
+                  {getTimeRangeLabel(horario.hora_inicio, horario.hora_fin)}
+                </Typography>
+              </Stack>
             </Stack>
-            <Stack direction="row" spacing={0.5}>
+            <Stack
+              direction="row"
+              spacing={0.5}
+              justifyContent={{ xs: "flex-end", sm: "center" }}
+              sx={{ flexShrink: 0 }}
+            >
               <IconButton
                 size="small"
                 onClick={() => {
@@ -408,7 +467,7 @@ function HorarioCard({ horario }) {
     >
       {editHeader}
       <CardContent
-        sx={{ py: 1.5, bgcolor: "#f0f6ff", "&:last-child": { pb: 1.5 } }}
+        sx={{ p: 2, bgcolor: "#f0f6ff", "&:last-child": { pb: 2 } }}
       >
         {errorHorario && (
           <Alert
@@ -424,7 +483,7 @@ function HorarioCard({ horario }) {
           direction="row"
           spacing={1}
           justifyContent="flex-end"
-          sx={{ mt: 1 }}
+          sx={{ mt: 2 }}
         >
           <SAEButton
             variant="outlined"

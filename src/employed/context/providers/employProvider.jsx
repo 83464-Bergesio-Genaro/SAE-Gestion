@@ -17,6 +17,7 @@ import { EMPTY_FORM,EMPTY_EMPLEADO,EMPTY_USUARIO } from '../../../utils/common/c
 import { USER_STRINGS } from '../../../utils/strings/employed.strings.js';
 import { isEmpty } from '../../../utils/text.utils.js';
 import { isNumber } from '@mui/x-data-grid/internals';
+import { isTimeAfter } from '../../../utils/validation.utils.js';
 
 const C = USER_STRINGS;
 export const AdminUsersProvider = ({ children }) => {
@@ -33,14 +34,13 @@ export const AdminUsersProvider = ({ children }) => {
         closeDialog,
     } = useNotification();
 
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [touchedFields, setTouchedFields] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [touchedFields, setTouchedFields] = useState({});
 
     const resetValidation = () => {
         setFieldErrors({});
         setTouchedFields({});
     };
-
     const validateField = (field, value, data = dialogData) => {
         switch (true) {
             case field === "id":
@@ -52,13 +52,25 @@ export const AdminUsersProvider = ({ children }) => {
             case field === "activo":
                 return isEmpty(value)? C.validationActive:"";
             case field === "id_perfil":
-                return isEmpty(value) || !isNumber(value) ? C.validationProfile : ""; 
-                
+                return isEmpty(value) || !isNumber(value)|| Number(value) <=0  ? C.validationProfile : "";    
             case field === "id_carrera":
-                return isEmpty(value) || !isNumber(value) ? C.validationDegree:"";
+                return isEmpty(value) || !isNumber(value)|| Number(value) <=0  ? C.validationDegree:"";
+            //Exclusivos de horarios:
+            case  field === "hora_inicio":
+                return isEmpty(value) ? C.validationOpeningTime : "";
+            case  field === "hora_fin":
+                if (isEmpty(value)) return C.validationClosingTime;
+                return isTimeAfter(value, data.hora_inicio)
+                    ? ""
+                    : C.validationClosingTimeAfterOpening;
+            case field === "dia":
+                return  isEmpty(value) || !isNumber(value) ? C.validationDay:"";
+            case field === "id_empleado":
+                return  isEmpty(value) || !isNumber(value)|| Number(value) <=0  ? C.validationEmploy:"";                
             default:
                 return data?C.validationActive:"";
         }
+
     };
     const validate = () => {
         const fields = dialogType === "empleados"? 
@@ -77,22 +89,29 @@ export const AdminUsersProvider = ({ children }) => {
     };
     //Hoy se me rompio absolutamente todo en provincia asi que me doy el lujo de duplicar el codigo para hacer codigo menos enrevesado
     //Lo tengo que pedir lo se...
-     const validateSchedule = () => {
+    const validateSchedule = () => {
         const fields = 
-            dialogMode === "create"? 
-                ["id","legajo","nombre_empleado","nombre_usuario","nombres","apellidos","activo","id_perfil"]:
-            dialogMode === "edit"?
-                ["id","legajo","nombre_usuario","nombres","apellidos","activo","id_perfil","id_carrera"]:
-            [];//Depende el objeto es el tipo de estructura
-
+            dialogMode === "create" ? 
+                ["hora_inicio", "hora_fin", "dia", "id_empleado"] :
+            dialogMode === "edit" ?
+                ["id", "hora_inicio", "hora_fin", "dia", "id_empleado"] :
+            [];
+  
         const errors = fields.reduce((result, field) => {
-            const message = validateField(field, dialogData[field]);
+            // CORRECCIÓN 1: Buscamos el valor en 'form', que es el que tiene los datos reales
+            const valorActual = form[field]; 
+            
+            // CORRECCIÓN 2: Le pasamos 'form' como tercer parámetro para que actúe como "data"
+            const message = validateField(field, valorActual, form);
+            
             return message ? { ...result, [field]: message } : result;
         }, {});
+
         setFieldErrors(errors);
         setTouchedFields(
             fields.reduce((result, field) => ({ ...result, [field]: true }), {}),
         );
+        
         return Object.keys(errors).length === 0;
     };
 
@@ -258,8 +277,33 @@ export const AdminUsersProvider = ({ children }) => {
     const [showNuevoForm, setShowNuevoForm] = useState(false);
 
     const [form, setForm] = useState(EMPTY_FORM);
-    const handleChangeForm = (field, value) => setForm((p) => ({ ...p, [field]: value }));
 
+    const handleChangeForm = (field, value, options = {}) => {
+        const previousValue = dialogData[field];
+        
+        // 1. Evita renderizados innecesarios si el valor no cambió
+        const emptyEquivalent = isEmpty(previousValue) && isEmpty(value);
+        if (previousValue === value || emptyEquivalent) return;
+
+        // 2. Actualiza los datos locales del diálogo
+        setForm((prev) => ({ ...prev, [field]: value }));
+
+        // Extraction de los controladores opcionales desde las opciones
+        const { setTouched, setErrors, validateFn } = options;
+
+        // 3. Ejecuta la lógica externa solo si se pasaron los controladores
+        if (setTouched && setErrors && validateFn) {
+        setTouched((previous) => ({ ...previous, [field]: true }));
+
+        setErrors((previous) => {
+            const nextData = { ...dialogData, [field]: value };
+            return {
+            ...previous,
+            [field]: validateFn(field, value, nextData)
+            };
+        });
+        }
+    };
     const [savingHorario, setSavingHorario] = useState(false);
     const [errorHorario, setErrorHorario] = useState(null);
 
@@ -270,7 +314,6 @@ export const AdminUsersProvider = ({ children }) => {
     const fetchHorarios = useCallback(async () => {
         setLoadingHorarios(true);
         try {
-            
             let data = await ObtenerHorarios();  
             data = data.map(mapHorarioSAE);
             setAllHorarios(data)       
@@ -333,6 +376,8 @@ export const AdminUsersProvider = ({ children }) => {
     };
 
     const handleCreateHorario = async () => {
+
+        if(!validateSchedule())return;
         setSavingHorario(true);
         setErrorHorario("");
         try {
@@ -343,6 +388,7 @@ export const AdminUsersProvider = ({ children }) => {
             dia: form.dia,
             id_empleado: selectedEmploy.id,
             nombre_empleado_atencion: selectedEmploy.nombre_empleado};
+
             await CrearHorarioEmpleado(body);
             fetchHorarios();
             setShowNuevoForm(false);
@@ -352,9 +398,11 @@ export const AdminUsersProvider = ({ children }) => {
             setErrorHorario(err.message || C.userErrorMsg);
         } finally {
             setSavingHorario(false);
+            resetValidation();
         }
     };
     const handleEditHorario = async () => {
+        if(!validateSchedule())return;
         //Son todas cosas que queremos mostrar antes de ejecutar una query asincrona
         setSavingHorario(true);
         setErrorHorario("");
@@ -377,22 +425,28 @@ export const AdminUsersProvider = ({ children }) => {
             setErrorHorario(err.message || C.userErrorMsg);
         } finally {
             setSavingHorario(false);
+            resetValidation();
         }
     };
     const handleDeleteHorario = async () => {
 
-        try {
-            await EliminarHorario(deleteId);
-            setForm(null);
-            setDeleteId(null);
-            fetchHorarios();
-            fetchHorariosXEmpleado(selectedEmploy.id);
-            setConfirmDelete(false);
+        if(deleteId && isNumber(deleteId)){
+            try {
+                await EliminarHorario(deleteId);
+                setForm(null);
+                setDeleteId(null);
+                fetchHorarios();
+                fetchHorariosXEmpleado(selectedEmploy.id);
+                setConfirmDelete(false);
 
-        } catch (err) {
+            } catch (err) {
 
-            setConfirmDelete(false);
-            setErrorHorario(err.message || C.userErrorMsg);
+                setConfirmDelete(false);
+                setErrorHorario(err.message || C.userErrorMsg);
+            }
+        }
+        else{
+            showNotification("No se encuentra el ID para eliminar","error");
         }
     };
     const handleCancelHorario = () => {
@@ -430,7 +484,7 @@ export const AdminUsersProvider = ({ children }) => {
             //Valores para la seccion de horarios
             loadingHorarios, horariosDialogOpen, setHorariosDialogOpen,selectedHorariosLoading,selectedHorarios,selectedEmploy,setSelectedEmploy,
 
-            handleEmployChange,handleHorarioSaved,handleHorarioCreated,handleClose,showNuevoForm,setShowNuevoForm,form,setForm,handleChangeForm,DAYS: calendarDays,
+            handleEmployChange,handleHorarioSaved,handleHorarioCreated,handleClose,showNuevoForm,setShowNuevoForm,form,setForm,handleChangeForm, calendarDays,
             savingHorario,errorHorario,setErrorHorario,handleCreateHorario,handleEditHorario,handleDeleteHorario,handleCancelHorario,
             editingId, setEditingId,confirmDelete,deleteId,setDeleteId,setConfirmDelete,
             //Valores de error, mostrar mensajes, etc.

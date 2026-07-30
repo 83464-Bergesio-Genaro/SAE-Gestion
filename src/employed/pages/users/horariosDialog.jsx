@@ -13,6 +13,7 @@ import {
   DialogTitle,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   IconButton,
   InputLabel,
   MenuItem,
@@ -42,45 +43,70 @@ import { calendarDays } from "../../../utils/common/constants";
 const C = USER_STRINGS;
 // FORMULARIO DE HORARIOS
 function HorarioFormFields() {
-  const { form, handleChangeForm, DAYS } = useEmploy();
+  const { form, handleChangeForm,fieldErrors,setFieldErrors,setTouchedFields,validateField } = useEmploy();
   return (
     <Stack spacing={1}>
       <Grid container spacing={1}>
         <Grid size={{ xs: 12 }} m={0}>
-          <InputLabel>Día</InputLabel>
+          
+          <FormControl fullWidth error={Boolean(fieldErrors.hora_inicio)}>
+          <InputLabel>{C.day}</InputLabel>
           <Select
             label={C.day}
             value={form.dia}
-            fullWidth
-            onChange={(e) => handleChangeForm("dia", e.target.value)}
+            onChange={(e) => handleChangeForm("dia", e.target.value,
+            {
+              setTouched: setTouchedFields,
+              setErrors: setFieldErrors,
+              validateFn: validateField
+            })}
           >
-            {DAYS.map((d) => (
+            {calendarDays.map((d) => (
               <MenuItem key={d.value} value={d.value}>
                 {d.label}
               </MenuItem>
             ))}
           </Select>
+          
+          <FormHelperText sx={{color:"red"}}>
+            {fieldErrors.dia ?? ""}
+          </FormHelperText>
+        </FormControl>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }} m={0}>
           <SAETimeField
             label={C.startTime}
             value={form.hora_inicio}
-            onChange={(value) => handleChangeForm("hora_inicio", value)}
+            onChange={(value) => handleChangeForm("hora_inicio", value,
+            {
+              setTouched: setTouchedFields,
+              setErrors: setFieldErrors,
+              validateFn: validateField
+            })}
             minTime="08:00"
             maxTime="24:00"
             size="big"
             fullWidth
+            error={Boolean(fieldErrors.hora_inicio)}
+            helperText={fieldErrors.hora_inicio ?? ""}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }} m={0}>
           <SAETimeField
             label={C.endTime}
             value={form.hora_fin}
-            onChange={(value) => handleChangeForm("hora_fin", value)}
+            onChange={(value) => handleChangeForm("hora_fin", value,
+            {
+              setTouched: setTouchedFields,
+              setErrors: setFieldErrors,
+              validateFn: validateField
+            })}
             minTime="08:00"
             maxTime="24:00"
             size="big"
             fullWidth
+            error={Boolean(fieldErrors.hora_fin)}
+            helperText={fieldErrors.hora_fin ?? ""}            
           />
         </Grid>
       </Grid>
@@ -496,6 +522,8 @@ export default function GestionarHorariosDialog({ open }) {
                   label={C.scheduleSelectEmploy}
                   size="small"
                   placeholder={C.scheduleFilterMsg}
+                  //error={Boolean(fieldErrors.hora_fin)} Ya viene preseleccionado
+                  ///helperText={fieldErrors.hora_fin ?? ""}                      
                 />
               )}
               isOptionEqualToValue={(opt, val) => opt.id === val.id}

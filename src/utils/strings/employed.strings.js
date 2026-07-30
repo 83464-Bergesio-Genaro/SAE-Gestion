@@ -241,6 +241,7 @@ export const USER_STRINGS = {
   day:"Día",
   startTime:"Hora inicio",
   endTime:"Hora fin",
+  selectDay:"Selecciona un día...",
   scheduleDeleteButton:"Eliminar Horario",
   scheduleDeleteWarning:"¿Estás seguro que querés eliminar este horario? Esta acción no se puede deshacer.",
   scheduleEditing:"Editando horario",
@@ -257,6 +258,12 @@ export const USER_STRINGS = {
   validationActive:"Ocurrio un error en el formulario",
   validationProfile:"Debe seleccionar un perfil",
   validationDegree:"Debe seleccionar una carrera",
+
+  validationOpeningTime: "Ingresá el horario de atención",
+  validationClosingTime: "Ingresá el horario de cierre",
+  validationClosingTimeAfterOpening: "El horario final no puede ser anterior al inicial",
+  validationDay:"Seleccione un día valido",
+  validationEmploy:"Seleccione un empleado valido",
 
   userCreatedMsg:"Usuario creado!",
   userUpdatedMsg:"Se actualizaron los datos del usuario!",
@@ -290,6 +297,7 @@ export const TRAVEL_STRINGS = {
   create:"Crear",
   save:"Guardar",
   delete:"Eliminar",
+  search:"Buscar",
 
   travelCreate:"Nuevo Viaje",
   travelUpdate:"Editar Viaje",
@@ -352,6 +360,10 @@ export const TRAVEL_STRINGS = {
   inscriptsReviewed: "Documentacion Revisada",
   inscriptsNoReviewed:"Documentacion No Validada",
 
+  historyTravelTitle:"Historial de Viajes",
+  filterDateFrom: "Fecha Desde",
+  filterDateTo: "Fecha Hasta",
+
   // Provider
   errorNoInscFound:"Inscriptos no encontrados",
   errorSavingBuss:"Ocurrió un error al guardar la empresa",
@@ -382,8 +394,22 @@ export const TRAVEL_STRINGS = {
   onlyExtensions:"Solo se permiten archivos:",
   
   inscriptsDocsUpload:"subido con exito",
-  errorInscUpload:"Error subiendo el archivo"
+  errorInscUpload:"Error subiendo el archivo",
 
+  validationID: "ID no encontrado",
+  validationName: "Ingresa un nombre para esta empresa",
+  validationPhone: "El telefono debe contener 12 digitos Ej:(54 355 222 4924)",
+  validationActive: "Error al leer este campo",
+  validationEmail: "Escriba un correo electronico válido",
+  validationCuil: "Ingresa un CUIL/CUIT válido",
+  validationCBU: "Ingrese un CBU válido",
+
+  validationDate:"Ingresa una fecha válida",
+  validationPlace:"Todos los campos son obligatorios",
+  validationQuant:"Cantidad no válida",
+  validationBuss:"Seleccione una empresa",
+  validationCost:"Ingrese un costo valido",
+  validationMotive:"Ingrese un motivo u objetivo del viaje"
 }
 
 export const SPORTS_STRINGS = {

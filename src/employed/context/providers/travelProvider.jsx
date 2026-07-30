@@ -1,5 +1,5 @@
 import {useState, useEffect,useCallback,useMemo,useRef} from "react";
-import { IconButton, Chip, Stack } from "@mui/material";
+import { IconButton, Chip, Stack, isEmpty } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -12,7 +12,8 @@ import { ObtenerEmpresas,ObtenerViajesActivos,ObtenerInscriptosViaje, EliminarIn
     ModificarInscripto, CrearEmpresa, ModificarEmpresa, CrearViaje, ModificarViaje, ObtenerDocumentacionViaje, 
     DescargarDocumentacionXId, EliminarDocumentoViaje, 
     CrearDocumentoViaje,
-    listarDocumentacionXLegajo} from "../../../api/TravelService";
+    listarDocumentacionXLegajo,
+    ObtenerViajesXFecha} from "../../../api/TravelService";
 
 import { mapViajes } from "../../../api/formatters/ViajeFormatter";
 import { generateRows,generateColumns } from "../../../utils/datagrid.utils.jsx";
@@ -24,8 +25,10 @@ import { cleanObjectFields } from "../../../utils/util.jsx";
 
 import { TRAVEL_STRINGS } from "../../../utils/strings/employed.strings.js";
 import { EMPTY_DOCUMENTACION_ESTUDIANTE,EMPTY_DOCUMENTACION_VIAJE,EMPTY_VIAJES_FORM,EMPTY_VIAJES,EMPTY_BUSSINESS } from "../../../utils/common/common.config.js";
-import { formatDate } from "../../../utils/date.utils.js";
-
+import { formatDate, toApiDateTime } from "../../../utils/date.utils.js";
+import { isNumber } from "@mui/x-data-grid/internals";
+import { isValidAddress, isValidCbu, isValidCuit, isValidEmail, isValidPhone } from "../../../utils/validation.utils.js";
+ 
 const C = TRAVEL_STRINGS;
 const checkAndCleanDialogData = (data) => cleanObjectFields(data);
 
@@ -34,6 +37,7 @@ export function TravelProvider({ children }){
     const {
         showNotification,
         setDialogOpen,
+        dialogType,
         setDialogType,
         dialogMode,
         setDialogMode,
@@ -43,6 +47,74 @@ export function TravelProvider({ children }){
         openDialog,
         closeDialog
     } = useNotification();
+
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [touchedFields, setTouchedFields] = useState({});
+
+    const resetValidation = () => {
+        setFieldErrors({});
+        setTouchedFields({});
+    };
+    const validateField = (field, value, data = dialogData) => {
+
+        switch (true) {
+            case field === "id":
+                return dialogMode === "edit" && isEmpty(value) ? C.validationID:"";
+           case field === "nombre":
+                return isEmpty(value)? C.validationName:"";
+            case field === "contacto":
+                return isEmpty(value) || !isValidPhone(value) ? C.validationPhone : "";                   
+            case field === "activo":
+                return isEmpty(value)? C.validationActive:"";
+            case field === "email":
+                return !isValidEmail(value)? C.validationEmail:"";
+            case  field === "cuit":
+                return !isValidCuit(value) ? C.validationCuil : "";
+            case  field === "cbu":
+                return !isValidCbu(value) ? C.validationCBU : "";
+
+            //Valores exclusivos de viaje
+            case field === "fecha_inicio":
+                return  isEmpty(value) ? C.validationDate:"";
+            case field === "fecha_fin":
+                return  isEmpty(value) ? C.validationDate:"";
+            case field === "seguro":
+                return  isEmpty(value) ? C.validationActive:"";
+            case field === "origen":
+                return  isEmpty(value) || !isValidAddress(value) ? C.validationPlace:"";
+            case field === "destino":
+                return  isEmpty(value) || !isValidAddress(value)? C.validationPlace:"";
+            case field === "cantidad_personas":
+                return  isEmpty(value) || !isNumber(value) || Number(value) <=0 ? C.validationQuant:""; 
+
+            case field === "id_empresa_viaje":
+                return  isEmpty(value) || !isNumber(value) || Number(value) <=0 ? C.validationBuss:"";
+            case field === "costo_aproximado":
+                return  isEmpty(value) || !isNumber(value)  || Number(value) <=0? C.validationCost:"";
+            case field === "motivo":
+                return  isEmpty(value) ? C.validationMotive:""; 
+                
+            default:
+                return data?C.validationActive:"";
+        }
+
+    };
+    const validate = () => {
+
+        const fields = dialogType === "bussiness"? 
+        ["id","nombre","contacto","email","cuit","cbu","activo"]:
+        ["id","nombre","fecha_inicio","fecha_fin","seguro","origen","destino","cantidad_personas","id_empresa_viaje","costo_aproximado","motivo"];//Depende el objeto es el tipo de estructura
+
+        const errors = fields.reduce((result, field) => {
+            const message = validateField(field, dialogData[field]);
+            return message ? { ...result, [field]: message } : result;
+        }, {});
+        setFieldErrors(errors);
+        setTouchedFields(
+            fields.reduce((result, field) => ({ ...result, [field]: true }), {}),
+        );
+        return Object.keys(errors).length === 0;
+    };
 
     const [travelData, setTravelData] = useState(null);
 
@@ -99,6 +171,7 @@ export function TravelProvider({ children }){
     }, [openEditBussiness]);
 
     const handleBussinessSave  = async () => {
+        if(!validate())return;
         setDialogSaving(true);
         setDialogError("");
         try {
@@ -135,6 +208,7 @@ export function TravelProvider({ children }){
             //showNotification(err.message || "Ocurrió un error al guardar", "error");
         } finally {
             setDialogSaving(false);
+            resetValidation();
         }
     };
     const [travels, setTravels] = useState([]); 
@@ -213,6 +287,7 @@ export function TravelProvider({ children }){
     }, [fetchDocsXTravel, setDialogError, setDialogOpen, setDialogType]);
     
     const handleTravelSave  = async () => {
+        if(!validate())return;
         setDialogSaving(true);
         setDialogError("");
         try {
@@ -251,6 +326,7 @@ export function TravelProvider({ children }){
             setDialogError(err.message || C.errorSavingTravel);
         } finally {
             setDialogSaving(false);
+            resetValidation();
         }
     };
 
@@ -623,6 +699,36 @@ export function TravelProvider({ children }){
         }
     }, [fetchDocsXInscript, setDialogError, setDialogOpen, setDialogType]);
 
+    const [oldTravelsRows, setOldTravelsRows] = useState([]);
+    const [loadingOldTravels, setLoadingOldTravels] = useState(true);
+
+    const fetchTravelsXDate = useCallback(async (desde,hasta) => {
+        if(isEmpty(desde)||isEmpty(hasta))return;
+        setLoadingOldTravels(true);
+        try {
+            let data = await ObtenerViajesXFecha(toApiDateTime(desde),toApiDateTime(hasta)); 
+            data = data.map(mapViajes);
+            const datosLimpios = data.map(viaje => {
+                const copiaViaje = { ...viaje }; 
+                delete copiaViaje.motivo;
+                delete copiaViaje.id_empresa;
+                return copiaViaje;
+            });
+            datosLimpios.sort((a, b) => {
+                return new Date(b.fecha_fin) - new Date(a.fecha_fin);
+            });
+
+            setOldTravelsRows(generateRows(datosLimpios));
+        } catch {
+
+            setOldTravelsRows([]);
+        } finally {
+            setLoadingOldTravels(false);
+        }
+    }, []);
+    useEffect(() => {
+        fetchTravelsXDate();
+    }, [fetchTravelsXDate]);
     return (
     <TravelContext.Provider
         value={{
@@ -648,6 +754,8 @@ export function TravelProvider({ children }){
         
         travelNewFile, setTravelNewFile,fileInputRef,handleArchivoChange,
 
+        fetchTravelsXDate,oldTravelsRows,loadingOldTravels,
+
         handlePreviewDoc,handleDownloadDoc,
         previewOpen,setPreviewOpen,
         previewTitle, setPreviewTitle,
@@ -655,7 +763,9 @@ export function TravelProvider({ children }){
         previewIsPdf, setPreviewIsPdf,
         loadingPreview, setLoadingPreview,
         previewError, setPreviewError,
-        previewDocRef, setPreviewDocRef
+        previewDocRef, setPreviewDocRef,
+
+        fieldErrors, setFieldErrors,touchedFields, setTouchedFields,resetValidation,validate,validateField
         }}
     >
         {children}

@@ -24,16 +24,9 @@ import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutl
 import { useMyProfile } from "../../context/sharedContext"; 
 import { ProfileContextProvider } from "../../context/providers/profileProvider";
 import { PROFILE_STRINGS } from "../../../utils/strings/student.strings";
-
+import { formatDocumentSize } from "../../../utils/documents.utils";
 const SHOW_PROFILE_DOCUMENTS = true;
 const C = PROFILE_STRINGS;
-const formatDocumentSize = (size) => {
-  const bytes = Number(size);
-  if (!Number.isFinite(bytes) || bytes <= 0) return null;
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
 
 export function MyProfileContent() {
   const {
@@ -502,14 +495,23 @@ export function MyProfileContent() {
                                     flexWrap="wrap"
                                     useFlexGap
                                   >
-                                    {extension && (
-                                      <Chip
-                                        label={extension.toUpperCase()}
-                                        size="small"
-                                        color="primary"
-                                        variant="outlined"
-                                      />
-                                    )}
+                                  {extension && (
+                                    extension
+                                      .replace(/^\./, "") // Opcional: Quita solo la coma/punto inicial si existe
+                                      .split(',')
+                                      .map((ext, index) => {
+                                        const cleanExt = ext.replace(/\./g, "").trim(); // Elimina TODOS los puntos y espacios
+                                        return cleanExt ? (
+                                          <Chip
+                                            key={index}
+                                            label={cleanExt.toUpperCase()} // Opcional: Normalizar a mayúsculas
+                                            size="small"
+                                            color="primary"
+                                            variant="outlined"
+                                          />
+                                        ) : null;
+                                      })
+                                  )}
                                     {size && (
                                       <Chip
                                         label={size}

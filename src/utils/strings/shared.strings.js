@@ -30,6 +30,11 @@ export const FOOTER_LINKS = [
     external: true,
   },
 ];
+export const MAIN_STRINGS ={
+  mainDescription:"Acompañamiento estudiantil para que disfrutes al máximo tu experiencia universitaria.",
+  meetUsButton:"Conocé nuestra Universidad",
+  logButton:"Soy parte de la UTN"
+}
 
 export const NEWS_STRINGS = {
   title: "Novedades Estudiantiles",
@@ -51,6 +56,7 @@ export const LOGIN_STRINGS = {
     errorID:"Debe ingresar su legajo",
     errorPassword:"Debe ingresar la contraseña",
 
+    closeSession:"Cerrar Sesión",
     alreadySession:"Ya hay una sesión activa",
     loginTitle:"SAE GESTIÓN",
     loginSubtitle:"Inicia sesión para continuar",

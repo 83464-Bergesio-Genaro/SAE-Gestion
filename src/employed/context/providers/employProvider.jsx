@@ -3,18 +3,23 @@ import { Box, IconButton, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
 import {CrearRegistroUsuario,CrearEmpleado,ModificarUsuario,
-        ObtenerEmpleados,ObtenerUsuarios,ObtenerHorarios,
+        ObtenerEmpleados,ObtenerUsuariosXLegajo,ObtenerHorarios,
         BuscarHorariosXEmpleado,CrearHorarioEmpleado,
         ModificarHorario,EliminarHorario } from "../../../api/EmpleadoService";
 import {obtenerPerfiles,obtenerCarreras} from "../../../api/HerramientasService";
 import {mapEmpleadoSAE,mapHorarioSAE} from "../../../api/formatters/EmpleadoFormatter";
 
 import { EmployContext } from '../employedContext';
-import { generateColumns, generateRows } from "../../../utils/datagrid.utils.jsx";
 import { useNotification } from "../../../shared/context/sharedContext";
+import { generateColumns, generateRows } from "../../../utils/datagrid.utils.jsx";
 import { calendarDays } from '../../../utils/common/constants.js';
 import { EMPTY_FORM,EMPTY_EMPLEADO,EMPTY_USUARIO } from '../../../utils/common/common.config.js';
+import { USER_STRINGS } from '../../../utils/strings/employed.strings.js';
+import { isEmpty } from '../../../utils/text.utils.js';
+import { isNumber } from '@mui/x-data-grid/internals';
+import { isTimeAfter } from '../../../utils/validation.utils.js';
 
+const C = USER_STRINGS;
 export const AdminUsersProvider = ({ children }) => {
     // Estados globales de Diálogo compartidos por ambas secciones
     const {
@@ -28,6 +33,88 @@ export const AdminUsersProvider = ({ children }) => {
         openDialog,
         closeDialog,
     } = useNotification();
+
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [touchedFields, setTouchedFields] = useState({});
+
+    const resetValidation = () => {
+        setFieldErrors({});
+        setTouchedFields({});
+    };
+    const validateField = (field, value, data = dialogData) => {
+        switch (true) {
+            case field === "id":
+                return dialogMode === "edit" && isEmpty(value) ? C.validationID:"";
+            case field === "legajo":
+                return isEmpty(value)? C.validationStudentID:"";
+           case field.includes("nombre") || field.includes("apellido"):
+                return isEmpty(value)? C.validationNames:"";
+            case field === "activo":
+                return isEmpty(value)? C.validationActive:"";
+            case field === "id_perfil":
+                return isEmpty(value) || !isNumber(value)|| Number(value) <=0  ? C.validationProfile : "";    
+            case field === "id_carrera":
+                return isEmpty(value) || !isNumber(value)|| Number(value) <=0  ? C.validationDegree:"";
+            //Exclusivos de horarios:
+            case  field === "hora_inicio":
+                return isEmpty(value) ? C.validationOpeningTime : "";
+            case  field === "hora_fin":
+                if (isEmpty(value)) return C.validationClosingTime;
+                return isTimeAfter(value, data.hora_inicio)
+                    ? ""
+                    : C.validationClosingTimeAfterOpening;
+            case field === "dia":
+                return  isEmpty(value) || !isNumber(value) ? C.validationDay:"";
+            case field === "id_empleado":
+                return  isEmpty(value) || !isNumber(value)|| Number(value) <=0  ? C.validationEmploy:"";                
+            default:
+                return data?C.validationActive:"";
+        }
+
+    };
+    const validate = () => {
+        const fields = dialogType === "empleados"? 
+        ["id","legajo","nombre_empleado","nombre_usuario","nombres","apellidos","activo","id_perfil"]:
+        ["id","legajo","nombre_usuario","nombres","apellidos","activo","id_perfil","id_carrera"];//Depende el objeto es el tipo de estructura
+
+        const errors = fields.reduce((result, field) => {
+            const message = validateField(field, dialogData[field]);
+            return message ? { ...result, [field]: message } : result;
+        }, {});
+        setFieldErrors(errors);
+        setTouchedFields(
+            fields.reduce((result, field) => ({ ...result, [field]: true }), {}),
+        );
+        return Object.keys(errors).length === 0;
+    };
+    //Hoy se me rompio absolutamente todo en provincia asi que me doy el lujo de duplicar el codigo para hacer codigo menos enrevesado
+    //Lo tengo que pedir lo se...
+    const validateSchedule = () => {
+        const fields = 
+            dialogMode === "create" ? 
+                ["hora_inicio", "hora_fin", "dia", "id_empleado"] :
+            dialogMode === "edit" ?
+                ["id", "hora_inicio", "hora_fin", "dia", "id_empleado"] :
+            [];
+  
+        const errors = fields.reduce((result, field) => {
+            // CORRECCIÓN 1: Buscamos el valor en 'form', que es el que tiene los datos reales
+            const valorActual = form[field]; 
+            
+            // CORRECCIÓN 2: Le pasamos 'form' como tercer parámetro para que actúe como "data"
+            const message = validateField(field, valorActual, form);
+            
+            return message ? { ...result, [field]: message } : result;
+        }, {});
+
+        setFieldErrors(errors);
+        setTouchedFields(
+            fields.reduce((result, field) => ({ ...result, [field]: true }), {}),
+        );
+        
+        return Object.keys(errors).length === 0;
+    };
+
     const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
 
     const [perfiles, setPerfiles] = useState([]);
@@ -84,14 +171,17 @@ export const AdminUsersProvider = ({ children }) => {
     useEffect(() => { fetchEmpleados(); }, [fetchEmpleados]);
 
     const openCreateEmpleados = useCallback(() => {
+        resetValidation();
         openDialog("empleados", "create", { id: "", legajo: "", nombre_empleado: "", nombres: "", apellidos: "", activo: true, id_perfil: "", nombre_perfil: "" });
     }, [openDialog]);
 
     const openEditEmpleados = useCallback((row) => {
+        resetValidation();
         openDialog("empleados", "edit", { id: row.id, legajo: row.legajo, nombre_empleado: row.nombre_empleado, nombres: row.nombres, apellidos: row.apellidos, activo: row.activo, id_perfil: row.id_perfil, nombre_perfil: row.nombre_perfil });
     }, [openDialog]);
 
     const handleEmpleadosSave = async () => {
+        if(!validate())return;
         setDialogSaving(true);
         setDialogError("");
         try {
@@ -110,45 +200,48 @@ export const AdminUsersProvider = ({ children }) => {
             }
             closeDialog();
             fetchEmpleados();
-            showNotification(dialogMode === "create" ? "Empleado creado!" : "Empleado modificado correctamente", "success");
+            showNotification(dialogMode === "create" ? C.userCreatedMsg : C.userUpdatedMsg, "success");
         } catch (err) {
-            setDialogError(err.message || "Ocurrió un error al guardar");
+            setDialogError(err.message || C.userErrorMsg);
         } finally {
             setDialogSaving(false);
+            resetValidation();
         }
     };
 
     // --- SECCIÓN USUARIOS (ESTUDIANTES) ---
-    const [usuariosRows, setUsuariosRows] = useState([]);
+    const [estudianteBuscado, setEstudiante] = useState();
     const [loadingUsuarios, setLoadingUsuarios] = useState(false);
 
-    const fetchUsuarios = useCallback(async () => {
+    const fetchUsuariosXLegajo = useCallback(async (legajo) => {
+        if(!legajo){
+            setEstudiante(null);
+            return;
+        }
+        let data = null;
         setLoadingUsuarios(true);
         try {
-            const data = await ObtenerUsuarios();
-            let userData = data.filter(item => item.id_perfil === 1); // Solo estudiantes
-            setUsuariosRows(generateRows(userData));
+            data = await ObtenerUsuariosXLegajo(legajo);    
         } catch {
-            setUsuariosRows([]);
+            setEstudiante(null);
         } finally {
-            setLoadingUsuarios(false);
+            setLoadingUsuarios(false); 
         }
+        return data;
     }, []);
 
-    useEffect(() => { fetchUsuarios(); }, [fetchUsuarios]);
+    useEffect(() => { fetchUsuariosXLegajo(); }, [fetchUsuariosXLegajo]);
 
     const openCreateUsuarios = useCallback(() => {
         openDialog("usuarios", "create", { id: "", legajo: "", nombre_usuario: "", nombres: "", apellidos: "", id_perfil: 1, activo: true, id_carrera: "", nombre_carrera: "" });
     }, [openDialog]);
 
-    const openEditUsuarios = useCallback((row) => {
-        openDialog("usuarios", "edit", { id: row.id, legajo: row.legajo, nombre_usuario: row.nombre_usuario, nombres: row.nombres, apellidos: row.apellidos, id_perfil: row.id_perfil, activo: row.activo, id_carrera: row.id_carrera, nombre_carrera: row.nombre_carrera });
-    }, [openDialog]);
-
     const handleUsuariosSave = async () => {
+        if(!validate())return;
         setDialogSaving(true);
         setDialogError("");
         try {
+
             const { id } = dialogData;
             let id_nuevo = id === "" ? 0 : id;
             const body = { id: id_nuevo, 
@@ -158,17 +251,19 @@ export const AdminUsersProvider = ({ children }) => {
                   activo: dialogData.activo };
             
             if (dialogMode === "create") {
-                // await CrearUsuario(body);
+                await CrearRegistroUsuario(body);
+                closeDialog();
             } else if (dialogMode === "edit") {
                 await ModificarUsuario(dialogData.id, body);
             }
-            closeDialog();
-            fetchUsuarios();
-            showNotification(dialogMode === "create" ? "Usuario creado!" : "Usuario modificado correctamente", "success");
+            
+            showNotification(dialogMode === "create" ? C.userCreatedMsg : C.userUpdatedMsg, "success");
         } catch (err) {
-            setDialogError(err.message || "Ocurrió un error al guardar");
+            if(dialogMode === "create")setDialogError(err.message || C.userErrorMsg);
+            else showNotification(C.userErrorUpdateMsg,"error");
         } finally {
             setDialogSaving(false);
+            resetValidation();
         }
     };
 
@@ -182,8 +277,33 @@ export const AdminUsersProvider = ({ children }) => {
     const [showNuevoForm, setShowNuevoForm] = useState(false);
 
     const [form, setForm] = useState(EMPTY_FORM);
-    const handleChangeForm = (field, value) => setForm((p) => ({ ...p, [field]: value }));
 
+    const handleChangeForm = (field, value, options = {}) => {
+        const previousValue = dialogData[field];
+        
+        // 1. Evita renderizados innecesarios si el valor no cambió
+        const emptyEquivalent = isEmpty(previousValue) && isEmpty(value);
+        if (previousValue === value || emptyEquivalent) return;
+
+        // 2. Actualiza los datos locales del diálogo
+        setForm((prev) => ({ ...prev, [field]: value }));
+
+        // Extraction de los controladores opcionales desde las opciones
+        const { setTouched, setErrors, validateFn } = options;
+
+        // 3. Ejecuta la lógica externa solo si se pasaron los controladores
+        if (setTouched && setErrors && validateFn) {
+        setTouched((previous) => ({ ...previous, [field]: true }));
+
+        setErrors((previous) => {
+            const nextData = { ...dialogData, [field]: value };
+            return {
+            ...previous,
+            [field]: validateFn(field, value, nextData)
+            };
+        });
+        }
+    };
     const [savingHorario, setSavingHorario] = useState(false);
     const [errorHorario, setErrorHorario] = useState(null);
 
@@ -194,12 +314,11 @@ export const AdminUsersProvider = ({ children }) => {
     const fetchHorarios = useCallback(async () => {
         setLoadingHorarios(true);
         try {
-            
             let data = await ObtenerHorarios();  
             data = data.map(mapHorarioSAE);
             setAllHorarios(data)       
         } catch {
-            setDialogError("Error recuperando los horarios");
+            setDialogError(C.scheduleGetError);
             setAllHorarios([]);
         } finally {
             setLoadingHorarios(false);
@@ -224,7 +343,7 @@ export const AdminUsersProvider = ({ children }) => {
                 setSelectedHorarios([]);
             }
         } catch {
-            setDialogError("Error recuperando los horarios");
+            setDialogError(C.scheduleGetError);
             setSelectedHorarios([]);
         } finally {
             setSelectedHorariosLoading(false);
@@ -257,6 +376,8 @@ export const AdminUsersProvider = ({ children }) => {
     };
 
     const handleCreateHorario = async () => {
+
+        if(!validateSchedule())return;
         setSavingHorario(true);
         setErrorHorario("");
         try {
@@ -267,18 +388,21 @@ export const AdminUsersProvider = ({ children }) => {
             dia: form.dia,
             id_empleado: selectedEmploy.id,
             nombre_empleado_atencion: selectedEmploy.nombre_empleado};
+
             await CrearHorarioEmpleado(body);
             fetchHorarios();
             setShowNuevoForm(false);
             fetchHorariosXEmpleado(selectedEmploy.id);
             setHorariosDialogOpen(false);
         } catch (err) {
-            setErrorHorario(err.message || "Error al crear");
+            setErrorHorario(err.message || C.userErrorMsg);
         } finally {
             setSavingHorario(false);
+            resetValidation();
         }
     };
     const handleEditHorario = async () => {
+        if(!validateSchedule())return;
         //Son todas cosas que queremos mostrar antes de ejecutar una query asincrona
         setSavingHorario(true);
         setErrorHorario("");
@@ -298,25 +422,31 @@ export const AdminUsersProvider = ({ children }) => {
             fetchHorariosXEmpleado(selectedEmploy.id);
             setForm(null);
         } catch (err) {
-            setErrorHorario(err.message || "Error al guardar");
+            setErrorHorario(err.message || C.userErrorMsg);
         } finally {
             setSavingHorario(false);
+            resetValidation();
         }
     };
     const handleDeleteHorario = async () => {
 
-        try {
-            await EliminarHorario(deleteId);
-            setForm(null);
-            setDeleteId(null);
-            fetchHorarios();
-            fetchHorariosXEmpleado(selectedEmploy.id);
-            setConfirmDelete(false);
+        if(deleteId && isNumber(deleteId)){
+            try {
+                await EliminarHorario(deleteId);
+                setForm(null);
+                setDeleteId(null);
+                fetchHorarios();
+                fetchHorariosXEmpleado(selectedEmploy.id);
+                setConfirmDelete(false);
 
-        } catch (err) {
+            } catch (err) {
 
-            setConfirmDelete(false);
-            setErrorHorario(err.message || "Error al crear");
+                setConfirmDelete(false);
+                setErrorHorario(err.message || C.userErrorMsg);
+            }
+        }
+        else{
+            showNotification("No se encuentra el ID para eliminar","error");
         }
     };
     const handleCancelHorario = () => {
@@ -330,10 +460,6 @@ export const AdminUsersProvider = ({ children }) => {
         openEditEmpleados(row);
     }, [openEditEmpleados]);
 
-    const handleOpenEditUser = useCallback((row) => {
-        openEditUsuarios(row);
-    }, [openEditUsuarios]);
-
     const employActions = useMemo(() => [{
         icon: EditIcon,
         color: "primary",
@@ -341,21 +467,10 @@ export const AdminUsersProvider = ({ children }) => {
         onClick: handleOpenEditEmploy, 
     }], [handleOpenEditEmploy]);
 
-    const userActions = useMemo(() => [{
-    icon: EditIcon,
-    color: "primary",
-    title: "Editar Usuario",
-    onClick: handleOpenEditUser, 
-    }], [handleOpenEditUser]);
-
-
     const empleadosColumns = useMemo(() => {
     return generateColumns(EMPTY_EMPLEADO, employActions);
     }, [ employActions]); 
 
-    const usuariosColumns = useMemo(() => {
-    return generateColumns(EMPTY_USUARIO, userActions);
-    }, [ userActions]); 
     
     return (
         <EmployContext.Provider value={{
@@ -364,16 +479,19 @@ export const AdminUsersProvider = ({ children }) => {
             empleados,carreras,perfiles,allHorarios,
             //Valores para las tablas y funciones de guardado Empleados y Usuarios
             empleadosRows, empleadosColumns, loadingEmpleados, openCreateEmpleados,
-            usuariosRows, usuariosColumns, loadingUsuarios, openCreateUsuarios,
-            handleUsuariosSave,handleEmpleadosSave,
+            estudianteBuscado, setEstudiante, loadingUsuarios, openCreateUsuarios,
+            handleUsuariosSave,handleEmpleadosSave,fetchUsuariosXLegajo,
             //Valores para la seccion de horarios
             loadingHorarios, horariosDialogOpen, setHorariosDialogOpen,selectedHorariosLoading,selectedHorarios,selectedEmploy,setSelectedEmploy,
 
-            handleEmployChange,handleHorarioSaved,handleHorarioCreated,handleClose,showNuevoForm,setShowNuevoForm,form,setForm,handleChangeForm,DAYS: calendarDays,
+            handleEmployChange,handleHorarioSaved,handleHorarioCreated,handleClose,showNuevoForm,setShowNuevoForm,form,setForm,handleChangeForm, calendarDays,
             savingHorario,errorHorario,setErrorHorario,handleCreateHorario,handleEditHorario,handleDeleteHorario,handleCancelHorario,
             editingId, setEditingId,confirmDelete,deleteId,setDeleteId,setConfirmDelete,
             //Valores de error, mostrar mensajes, etc.
-            dialogType, dialogError
+            dialogType, dialogError,
+            fieldErrors,touchedFields,
+            setFieldErrors,setTouchedFields,
+            validateField
             
         }}>
             {children}

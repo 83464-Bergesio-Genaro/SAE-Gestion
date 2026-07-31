@@ -7,6 +7,7 @@ import {
   Chip,
   Link,
   Typography,
+  Divider,
 } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -185,7 +186,6 @@ function EventoCard({ evento }) {
 
         <Typography
           sx={{
-            mt: 2.5,
             px: { xs: 1.5, sm: 2 },
             py: { xs: 1.5, sm: 1.75 },
             borderRadius: 2.5,
@@ -196,17 +196,22 @@ function EventoCard({ evento }) {
             color: "white",
             textAlign: "center",
           }}
+          mt={2.3}
         >
           {evento.nombre_evento}
         </Typography>
 
         <Box
           sx={{
-            mt: 2,
-            flexGrow: 1,
+            flexShrink: 0,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
+          mt={2.3}
         >
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
             <Stack
               direction="row"
               spacing={1.25}
@@ -289,7 +294,7 @@ function EventoCard({ evento }) {
           </Stack>
         </Box>
 
-        <Box sx={{ mt: 2.25 }}>
+        <Box sx={{ minHeight: "24px" }} mt={2.3}>
           <Link
             target="_blank"
             href={evento.lugar}
@@ -314,9 +319,9 @@ function EventoCard({ evento }) {
               },
             }}
           >
-            <LocationOnIcon sx={{ fontSize: 21 }} />
-            <Typography sx={{ fontSize: 15, fontWeight: 800 }}>
-              Ver ubicacion en Maps
+            <LocationOnIcon sx={{ fontSize: 22 }} />
+            <Typography sx={{ fontSize: 16, fontWeight: 700 }}>
+              Ver Ubicación en Maps
             </Typography>
           </Link>
         </Box>

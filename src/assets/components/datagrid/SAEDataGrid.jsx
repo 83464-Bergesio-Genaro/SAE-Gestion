@@ -70,7 +70,7 @@ export default function SAEDataGrid({
       >
         <Stack
           direction="row"
-          overflow={{ xs: "scroll", md: "hidden" }}
+          overflow={{ xs: "scroll", sm: "hidden" }}
           spacing={0}
         >
           {Object.entries(sectionConfig).map(([key, section]) => (

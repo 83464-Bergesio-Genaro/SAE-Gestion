@@ -543,7 +543,7 @@ export const ECONOMIC_OPTIONAL_DOCUMENTS = [
 ];
 export const TRAVEL_REQUIRED_DOCUMENTS = [
   {
-    id_tipo_documento: null,
+    id_tipo_documento: 1,
     nombre: "Certificado de Alumno Regular",
     descripcion:
       "Certificado vigente que acredita tu condición de estudiante regular.",
@@ -552,11 +552,11 @@ export const TRAVEL_REQUIRED_DOCUMENTS = [
     archivoNombre: "",
     formatoNombre: "{legajo}_AlumnoRegular",
     id_archivo: null,
-    extension: null,
+    extension: ".pdf",
     required: true,
   },
   {
-    id_tipo_documento: null,
+    id_tipo_documento: 2,
     nombre: "Fotocopia Documento",
     descripcion:
       "Copia legible del frente y dorso de tu DNI en un único archivo.",
@@ -565,11 +565,11 @@ export const TRAVEL_REQUIRED_DOCUMENTS = [
     archivoNombre: "",
     formatoNombre: "{legajo}_DNI",
     id_archivo: null,
-    extension: null,
+    extension:".pdf",
     required: true,
   },
   {
-    id_tipo_documento: null,
+    id_tipo_documento:13,
     nombre: "Declaracion Jurada",
     descripcion:
       "Certificadofirmado en el cual establece un heredero a tu fortuna.",
@@ -578,7 +578,7 @@ export const TRAVEL_REQUIRED_DOCUMENTS = [
     archivoNombre: "",
     formatoNombre: "{idViaje}_{legajo}_DDJJ",
     id_archivo: null,
-    extension: null,
+    extension: ".pdf",
     required: true,
   },
 ];

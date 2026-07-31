@@ -5,6 +5,10 @@ import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import NovedadesEstudiantiles from "../../../assets/components/studentNews/studentNews";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAEPage from "../../../assets/components/page/SAEPage";
+
+import { MAIN_STRINGS } from "../../../utils/strings/shared.strings";
+
+const C = MAIN_STRINGS;
 const baseUrl = import.meta.env.BASE_URL;
 
 export default function Main() {
@@ -29,9 +33,9 @@ function SAEHero() {
     <Box
       sx={{
         mt: "-90px",
-        pt: { xs: "50px", md: "100px" },
-        pb: { xs: 0, md: 4 },
-        minHeight: { xs: "none", md: "calc(100vh - 90px)" },
+        pt: { xs: "100px"  },
+        pb: {xs:4},
+        minHeight: {xs:"none",md:"calc(100vh - 90px)"},
         background: "var(--gradient)",
         overflow: "hidden",
         position: "relative",
@@ -168,17 +172,15 @@ function SAEHero() {
           <Typography
             variant="caption"
             sx={{
-              my: { xs: 2, md: 5 },
-              maxWidth: { xs: "100%", md: "60vw" },
-              fontSize: { xs: "inherit", md: "1rem" },
+              my:{xs:3,md:5},
+              maxWidth: {xs:"95%", md:"60vw"},
+              fontSize:{xs:"inherit",md:"1rem"},
               textAlign: "center",
               color: "var(--textWhite)",
               opacity: 0.9,
             }}
           >
-            Deportes, becas, salud, viajes, congresos, actividades recreativas y
-            acompañamiento estudiantil para que disfrutes al máximo tu
-            experiencia universitaria.
+            {C.mainDescription}
           </Typography>
 
           {/* ---------------- BOTONES ---------------- */}
@@ -192,7 +194,7 @@ function SAEHero() {
             justifyContent="center"
             spacing={2}
             sx={{
-              width: "100%",
+              width: "100%"
             }}
           >
             <SAEButton
@@ -201,7 +203,7 @@ function SAEHero() {
               size="large"
               startIcon={<SchoolOutlinedIcon />}
               sx={{
-                width: 340,
+                width: {xs:300,md:340},
                 py: 1.6,
                 borderRadius: 2,
                 textTransform: "none",
@@ -211,7 +213,7 @@ function SAEHero() {
                 background: "var(--secondary)",
               }}
             >
-              Conocé nuestra Universidad
+              {C.meetUsButton}
             </SAEButton>
 
             <SAEButton
@@ -233,7 +235,7 @@ function SAEHero() {
                 />
               }
               sx={{
-                width: 340,
+                width: {xs:300,md:340},
                 py: 1.6,
                 borderRadius: 2,
                 textTransform: "none",
@@ -248,7 +250,7 @@ function SAEHero() {
                 },
               }}
             >
-              Soy parte de la UTN
+              {C.logButton}
             </SAEButton>
           </Stack>
         </Stack>

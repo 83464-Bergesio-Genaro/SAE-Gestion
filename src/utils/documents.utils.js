@@ -278,8 +278,7 @@ export const buildDocumentName = (format = "", data = {}, extension = "") => {
       result.replace(new RegExp(`\\{${key}\\}`, "gi"), value ?? ""),
     format,
   );
-
-  return `${name}${extension}`;
+  return `${name}.${extension}`;
 };
 
 /* ==========================================================

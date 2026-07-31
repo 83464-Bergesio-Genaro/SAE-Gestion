@@ -83,7 +83,7 @@ export default function Navbar() {
               backgroundSize: "contain",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "left center",
-              width: 240,
+              width: {xs:240,md:180,lg:150},
               height: 60,
               display: "block",
               flexShrink: 0,
@@ -91,7 +91,7 @@ export default function Navbar() {
             }}
           />
 
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1, flexGrow: 1, justifyContent: "flex-end", alignItems: "center" }}>
+          <Box sx={{ display: { xs: "none", lg: "flex" }, gap: 1, flexGrow: 1, justifyContent: "flex-end", alignItems: "center" }}>
             {menu.map((item) => (
               <SAEButton
                 key={item.path}
@@ -155,7 +155,7 @@ export default function Navbar() {
           <IconButton
             color="inherit"
             edge="end"
-            sx={{ display: { xs: "flex", md: "none" } }}
+            sx={{ display: { xs: "flex", lg: "none" } }}
             onClick={handleMobileOpen}
           >
             <MenuIcon />
@@ -170,7 +170,7 @@ export default function Navbar() {
         onClose={handleMobileClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
-        sx={{ display: { xs: "block", md: "none" } }}
+        sx={{ display: { xs: "block", lg: "none" } }}
       >
         {user && (
           <Box

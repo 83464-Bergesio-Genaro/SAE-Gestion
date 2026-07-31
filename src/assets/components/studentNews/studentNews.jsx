@@ -12,6 +12,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Skeleton
 } from "@mui/material";
 import { PressProvider } from "../../../shared/context/providers/pressProvider";
 import { usePress } from "../../../shared/context/sharedContext";
@@ -38,54 +39,64 @@ const baseUrl = import.meta.env.BASE_URL;
 const MAX_DESCRIPTION_PREVIEW_LENGTH = 440;
 
 function ItemNovedad({ item, invertida }) {
+  // 1. Inicializar en TRUE si hay portada, sino en FALSE (no hay nada que cargar)
+  const { titulo_publicacion, descripcion, fecha_inicio, portada, documentos } = item;
+  const [isLoadingImage, setLoadingImage] = useState(!!portada?.id);
   const { handleCardClick } = usePress();
-  const { titulo_publicacion, descripcion, fecha_inicio, portada, documentos } =
-    item;
+  
+  // ... (resto de tus variables y lógica de descripción) ...
   const fullDescription = String(descripcion ?? "").trim();
-  const isDescriptionTruncated =
-    fullDescription.length > MAX_DESCRIPTION_PREVIEW_LENGTH;
+  const isDescriptionTruncated = fullDescription.length > MAX_DESCRIPTION_PREVIEW_LENGTH;
   const descriptionPreview = isDescriptionTruncated
     ? fullDescription.slice(0, MAX_DESCRIPTION_PREVIEW_LENGTH).trimEnd()
     : fullDescription;
-  // Estado para la imagen. Empieza con la foto genérica por defecto
+
   const [imagenUrl, setImagenUrl] = useState(`${baseUrl}${PLACEHOLDER_IMAGE}`);
 
   useEffect(() => {
-    // Si no hay portada o no tiene ID, dejamos la imagen genérica
+    // Si no hay portada, aseguramos que no esté cargando y usamos placeholder
     if (!portada || !portada.id) {
+      setLoadingImage(false); // <--- IMPORTANTE: Forzar fin de carga
+      setImagenUrl(`${baseUrl}${PLACEHOLDER_IMAGE}`);
       return;
     }
 
+    // 2. Forzar estado de carga ANTES de cualquier otra cosa
+    setLoadingImage(true);
+    setImagenUrl(`${baseUrl}${PLACEHOLDER_IMAGE}`); // Opcional: resetear a placeholder mientras carga
+
     const cargarImagen = async () => {
       try {
-        // Llamamos a tu función del provider
         const resultado = await descargarDocumentoPorId(portada.id);
-
-        // Tu función devuelve un objeto con 'datos_documento' (que es el DataURL)
         if (resultado && resultado.datos_documento) {
           setImagenUrl(resultado.datos_documento);
+        } else {
+           // Si la API responde pero sin datos
+           setImagenUrl(`${baseUrl}${PLACEHOLDER_IMAGE}`);
         }
       } catch (error) {
-        console.error("No se pudo cargar la imagen de portada: ", error);
-        // Si hay un error en la API, se mantiene la imagen por defecto
+        console.error("Error cargando imagen: ", error);
         setImagenUrl(`${baseUrl}${PLACEHOLDER_IMAGE}`);
+      } finally {
+        // 3. Siempre finalizar carga
+        setLoadingImage(false);
       }
     };
 
     cargarImagen();
-  }, [portada]);
+  }, [portada]); // <--- IMPORTANTE: Depender solo del ID para asegurar que cambie
 
   return (
     <>
       <Card
         onClick={() => handleCardClick({ ...item, imageSrc: imagenUrl })}
         sx={{
+          // ... tus estilos ...
           position: "relative",
           borderRadius: 4,
           boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
           border: "1px solid rgba(17, 53, 101, 0.08)",
           cursor: { xs: "default", md: "pointer" },
-          opacity: 1,
           marginBottom: 3,
           display: "flex",
           flexDirection: {
@@ -101,26 +112,50 @@ function ItemNovedad({ item, invertida }) {
           },
         }}
       >
-        <CardMedia
-          sx={{
-            width: { xs: "100%", md: 300 },
-            height: { xs: 200, md: "auto" },
-            objectFit: "cover",
-          }}
-          component="img"
-          image={imagenUrl ?? `url('${baseUrl}${PLACEHOLDER_IMAGE}')`}
-          alt={portada?.name ?? "UTN"}
-        />
-
-        <Box
-          sx={{
-            flex: 1,
-          }}
-        >
+        {/* Renderizado Condicional */}
+        {isLoadingImage ? (
+          <Skeleton 
+            variant="rectangular"
+            animation={false}
+            sx={{
+              width: { xs: "100%", md: 300 },
+              height: { xs: 200, md: "auto" }, // Asegura que coincida con CardMedia
+              bgcolor: "grey.900",
+              background: "linear-gradient(90deg, #333 25%, #444 50%, #333 75%)",
+              backgroundSize: "200% 100%",
+              animation: "shimmer 1.5s infinite linear",
+              "@keyframes shimmer": {
+                "0%": { backgroundPosition: "200% 0" },
+                "100%": { backgroundPosition: "-200% 0" },
+              },
+            }} 
+          />
+        ) : (
+          <CardMedia
+            sx={{
+              width: { xs: "100%", md: 300 },
+              height: { xs: 200, md: "auto" },
+              objectFit: "cover",
+              // Añade una pequeña transición de opacidad para suavizar la aparición
+              opacity: isLoadingImage ? 0 : 1, 
+              transition: 'opacity 0.4s ease-in',
+            }}
+            component="img"
+            image={imagenUrl}
+            alt={portada?.name ?? "UTN"}
+            onError={(e) => {
+                // Fallback por si la URL generada falla al renderizar
+                e.target.src = `${baseUrl}${PLACEHOLDER_IMAGE}`;
+            }}
+          />
+        )}
+        
+        <Box sx={{ flex: 1, position: 'relative' }}> 
+          {/* Asegura que el Box padre tenga posición relativa para el overlay absoluto */}
           <Box
             sx={{
               position: "absolute",
-              inset: 0,
+              inset: 0, // Esto funciona si el padre es relative
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -128,6 +163,7 @@ function ItemNovedad({ item, invertida }) {
               opacity: 0,
               transition: "all .3s ease",
               cursor: "pointer",
+              zIndex: 1,
             }}
             className="hover-overlay"
           >
@@ -143,18 +179,15 @@ function ItemNovedad({ item, invertida }) {
               {C.showMore}
             </SAETypography>
           </Box>
-          <CardContent>
+          
+          <CardContent sx={{ position: 'relative', zIndex: 2 }}>
             <SAETypography variant="h6" sx={{ color: "var(--secondary)" }}>
               {titulo_publicacion}
             </SAETypography>
             <SAETypography variant="body2">{fecha_inicio}</SAETypography>
             <SAETypography
               variant="body1"
-              sx={{
-                mt: 1,
-                color: "#5a6f8f",
-                minHeight: 48,
-              }}
+              sx={{ mt: 1, color: "#5a6f8f", minHeight: 48 }}
             >
               {descriptionPreview}
               {isDescriptionTruncated && <Box component="span"> ...</Box>}
@@ -171,7 +204,7 @@ function ItemNovedad({ item, invertida }) {
       </Card>
     </>
   );
-}
+}   
 
 export function NovedadesContent() {
   const {

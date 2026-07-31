@@ -4,8 +4,11 @@ import {
   Box,
   CircularProgress,
   IconButton,
+  Grid,
   Stack,
   Typography,
+  useMediaQuery,
+  Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import SAEButton from "../buttons/SAEButton";
@@ -28,6 +31,7 @@ export default function SearchStudent({
   onSearchStudent,
   onError,
 }) {
+  const isMobile = useMediaQuery("(max-width:932px)");
   const [careerSearch, setCareerSearch] = useState("");
   const [studentSearchLoading, setStudentSearchLoading] = useState(false);
   const [studentSelected, setStudentSelected] = useState(null);
@@ -56,32 +60,31 @@ export default function SearchStudent({
     try {
       setStudentSearchLoading(true);
       setStudentSelected(null);
-      onError?.("");
 
       const student = await onSearchStudent?.(
         `${studentId}@${careerSearch}.frc.utn.edu.ar`,
       );
-
       if (!student?.legajo) {
-        onError?.("Alumno no encontrado");
+        onError?.("Alumno no encontrado","error");
         return;
       }
-
       setStudentSelected(student);
       onSelectStudent?.(student);
     } catch {
       setStudentSelected(null);
-      onError?.("Alumno no encontrado");
+      onError?.("Alumno no encontrado","error");
     } finally {
       setStudentSearchLoading(false);
     }
   };
 
-  const clearStudentSearch = () => {
-    setStudentSelected(null);
-    setCareerSearch("");
-    onClearStudent?.();
-  };
+const clearStudentSearch = () => {
+  if (typeof onClearStudent === 'function') {
+    onClearStudent(); 
+  }
+  setStudentSelected(null);
+  setCareerSearch("");
+};
 
   if (studentSelected) {
     return (
@@ -105,68 +108,94 @@ export default function SearchStudent({
         <SAEButton
           variant="outlined"
           size="small"
-          onClick={clearStudentSearch}
+           onClick={clearStudentSearch}
           sx={{ mt: 2 }}
-          disabled={disabled}
         >
           Volver a buscar
         </SAEButton>
       </Box>
     );
   }
-
-  return (
-    <Stack
-      direction={{ xs: "column", sm: "row" }}
-      spacing={1.5}
-      alignItems={{ sm: "flex-start" }}
+  
+  return(
+    <Grid container
+      spacing={1}
+      alignItems={{ sm: "center" }}
     >
-      <SAETextField
-        label="Legajo"
-        value={legajo ?? ""}
-        onChange={(event) => onLegajoChange?.(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") handleStudentSearch();
-        }}
-        disabled={disabled || studentSearchLoading}
-        fullWidth
-      />
-      <Typography
-        sx={{
-          color: "text.secondary",
-          fontWeight: 700,
-          lineHeight: { sm: "56px" },
-        }}
-      >
-        @
-      </Typography>
-      <Autocomplete
-        options={CAREERS}
-        value={CAREERS.find((career) => career.value === careerSearch) ?? null}
-        onChange={(_event, career) => setCareerSearch(career?.value ?? "")}
-        getOptionLabel={(career) => career.label}
-        isOptionEqualToValue={(option, value) => option.value === value.value}
-        disabled={disabled || studentSearchLoading}
-        fullWidth
-        renderInput={(params) => <SAETextField {...params} label="Carrera" />}
-      />
-      <Stack direction="row" alignItems="center" sx={{ minHeight: 56 }}>
-        <Typography color="text.secondary" fontWeight={500} whiteSpace="nowrap">
+       <Grid size={{ xs:12, md: 3 }} >
+          <SAETextField
+            label="Legajo"
+            value={legajo ?? ""}
+            onChange={(event) => onLegajoChange?.(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") handleStudentSearch();
+            }}
+            disabled={disabled || studentSearchLoading}
+            fullWidth
+          />
+      </Grid>
+      <Grid size={{ xs: 12, md: 1 }} my={{xs:-1,md:2}} display={"flex"} justifyContent={"center"}>
+        <Typography
+          variant="subtitle2"
+          alignSelf={"center"}
+          sx={{
+
+            color: "text.secondary",
+            fontWeight: 700,
+            lineHeight: { sm: "56px" },
+          }}
+        > @
+        </Typography>
+      </Grid>
+      <Grid size={{ xs: 12, md: 4 }} >
+        <Autocomplete
+          options={CAREERS}
+          value={CAREERS.find((career) => career.value === careerSearch) ?? null}
+          onChange={(_event, career) => setCareerSearch(career?.value ?? "")}
+          getOptionLabel={(career) => career.label}
+          isOptionEqualToValue={(option, value) => option.value === value.value}
+          disabled={disabled || studentSearchLoading}
+          fullWidth
+          renderInput={(params) => <SAETextField {...params} label="Carrera" />}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 3 }} my={{xs:-1,md:2}} display={"flex"} justifyContent={"center"} >
+        <Typography 
+        alignSelf={"center"}
+            variant="subtitle1"
+            color="text.secondary" 
+            fontWeight={500}
+            whiteSpace="nowrap"
+            textAlign={"center"}
+         >
           .frc.utn.edu.ar
         </Typography>
-        {studentSearchLoading ? (
-          <CircularProgress size={24} sx={{ ml: 1 }} />
-        ) : (
+      </Grid>
+      <Grid size={{ xs: 12, md: 1 }} my={2}>
+        {studentSearchLoading && (<CircularProgress size={36} sx={{ ml: 1 }} />)}
+        {!studentSearchLoading && !isMobile &&(
           <IconButton
-            onClick={handleStudentSearch}
-            aria-label="Buscar alumno"
-            disabled={disabled}
-            variant="outlined"
-          >
-            <SearchIcon />
-          </IconButton>
+              onClick={handleStudentSearch}
+              aria-label="Buscar alumno"
+              disabled={disabled}
+              variant="outlined"
+              size="large"
+            >
+              <SearchIcon />
+            </IconButton>
         )}
-      </Stack>
-    </Stack>
+        {!studentSearchLoading && isMobile &&(
+          <SAEButton
+            variant="outlined"
+            onClick={handleStudentSearch}
+            fullWidth
+            disabled={disabled}
+          >
+           Buscar
+          </SAEButton>
+        )}
+      </Grid>
+    </Grid>
   );
+
 }

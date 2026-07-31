@@ -1,7 +1,7 @@
 import React, { useState,useCallback,useEffect } from "react";
 import { ObtenerPerfilXLegajo,ModificarPerfilEstudiante } from "../../../api/EstudianteService";
 import { listarDocumentacionXLegajo } from "../../../api/BecasService";
-import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
+import { mapEstudiante, mapResponseDocumento } from "../../../api/formatters/EstudianteFormatters";
 import {  useAuth, useNotification,ProfileContext } from "../sharedContext"; 
 
 import { cleanField,cleanNumericField,isEmpty,onlyDigits,sanitizeAddressPart,getInitials } from "../../../utils/text.utils.js";
@@ -44,12 +44,12 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
 
   useEffect(() => {
     const fetchDocumentos = async () => {
-      if (!loadDocuments || !user?.email) return;
+      if (!loadDocuments || !user?.legajo) return;
       setLoadingDocumentos(true);
 
       try {
-        const data = await listarDocumentacionXLegajo(user.email);
-        setDocumentosPerfil(Array.isArray(data) ? data : []);
+        const data = await listarDocumentacionXLegajo(user.legajo);
+        setDocumentosPerfil(data.map(mapResponseDocumento));
       } catch {
         setDocumentosPerfil([]);
       } finally {
@@ -58,7 +58,7 @@ export const ProfileContextProvider = ({ children, loadDocuments = false }) => {
     };
 
     fetchDocumentos();
-  }, [loadDocuments, user?.email]);
+  }, [loadDocuments, user?.legajo]);
 
   const handleChange = useCallback((field, value) => {
     setDatosPerfil((prev) => ({ ...prev, [field]: value }));

@@ -8,24 +8,27 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import LocalAirportIcon from '@mui/icons-material/LocalAirport';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import HomeIcon from "@mui/icons-material/Home";
+import LoginIcon from "@mui/icons-material/Login";
+import SchoolIcon from "@mui/icons-material/School";
 
 export const sharedMenu = [
   {
     label: "Inicio",
     path: "/",
-    icon: Diversity3Icon,
+    icon: HomeIcon,
     descripcion: "No debería mostrar esta descripcion.",
   },
   {
     label: "Estudiar en la UTN",
     path: "/JPA",
-    icon: Diversity3Icon,
+    icon: SchoolIcon,
     descripcion: "No debería mostrar esta descripcion.",
   },
   {
     label: "Iniciar Sesión",
     path: "/login",
-    icon: Diversity3Icon,
+    icon: LoginIcon,
     descripcion: "No debería mostrar esta descripcion.",
   },
 ];

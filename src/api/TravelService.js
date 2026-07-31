@@ -13,7 +13,12 @@ export function ObtenerViajesXLegajo(legajo) {
     'GET',
   );
 }
-
+export function ObtenerViajesXFecha(desde,hasta) {
+  return RequestAPI(
+    `/api/Viaje/ObtenerViajesXFecha/${encodeURIComponent(desde)}/${encodeURIComponent(hasta)}`,
+    'GET',
+  );
+}
 export function ObtenerViajesActivos() {
   return RequestAPI('/api/Viaje/ObtenerViajesActivo/', 'GET');
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -37,8 +38,9 @@ import { useHealth } from "../../context/employedContext";
 import { calendarDays } from "../../../utils/common/constants";
 
 // FORMULARIO DE HORARIOS
-function HorarioFormFields() {
+function HorarioFormFields({ fieldErrors = {}, onFieldChange } = {}) {
   const { form, handleChangeForm } = useHealth();
+  const handleFieldChange = onFieldChange ?? handleChangeForm;
   return (
     <Stack spacing={1}>
       <Grid container spacing={1}>
@@ -48,7 +50,8 @@ function HorarioFormFields() {
             value={form.dia}
             label="Día"
             fullWidth
-            onChange={(e) => handleChangeForm("dia", e.target.value)}
+            error={Boolean(fieldErrors.dia)}
+            onChange={(e) => handleFieldChange("dia", e.target.value)}
           >
             {calendarDays.map((d) => (
               <MenuItem key={d.value} value={d.value}>
@@ -61,22 +64,26 @@ function HorarioFormFields() {
           <SAETimeField
             label="Hora inicio"
             value={form.hora_inicio}
-            onChange={(value) => handleChangeForm("inicio", value)}
+            onChange={(value) => handleFieldChange("hora_inicio", value)}
             minTime="08:00"
             maxTime="24:00"
             size="big"
             fullWidth
+            error={Boolean(fieldErrors.hora_inicio)}
+            helperText={fieldErrors.hora_inicio}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }} m={0}>
           <SAETimeField
             label="Hora fin"
             value={form.hora_fin}
-            onChange={(value) => handleChangeForm("hora_fin", value)}
+            onChange={(value) => handleFieldChange("hora_fin", value)}
             minTime="08:00"
             maxTime="24:00"
             size="big"
             fullWidth
+            error={Boolean(fieldErrors.hora_fin)}
+            helperText={fieldErrors.hora_fin}
           />
         </Grid>
       </Grid>
@@ -92,7 +99,63 @@ function NuevoHorarioCard() {
     handleCreateHorario,
     setErrorHorario,
     setShowNuevoForm,
+    selectedEmploy,
+    form,
+    handleChangeForm,
   } = useHealth();
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const toMinutes = (time) => {
+    const [hours, minutes] = String(time).split(":").map(Number);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+    return hours * 60 + minutes;
+  };
+
+  const validateHorario = () => {
+    const errors = {};
+
+    if (!selectedEmploy) errors.general = "Seleccioná un empleado.";
+    if (form.dia === null || form.dia === undefined || form.dia === "") {
+      errors.dia = "Seleccioná un día.";
+    }
+    if (!form.hora_inicio) errors.hora_inicio = "Ingresá la hora de inicio.";
+    if (!form.hora_fin) {
+      errors.hora_fin = "Ingresá la hora de fin.";
+    } else {
+      const startMinutes = toMinutes(form.hora_inicio);
+      const endMinutes = toMinutes(form.hora_fin);
+
+      if (startMinutes !== null && endMinutes !== null && endMinutes <= startMinutes) {
+        errors.hora_fin = "La hora de fin debe ser posterior al inicio.";
+      }
+    }
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setErrorHorario(errors.general || "Revisá los campos marcados antes de guardar.");
+      return false;
+    }
+
+    setErrorHorario(null);
+    return true;
+  };
+
+  const handleHorarioFieldChange = (field, value) => {
+    setFieldErrors((previous) => ({ ...previous, [field]: "", general: "" }));
+    setErrorHorario(null);
+    handleChangeForm(field, value);
+  };
+
+  const handleCreateClick = () => {
+    if (!validateHorario()) return;
+    handleCreateHorario();
+  };
+
+  const handleCancelClick = () => {
+    setFieldErrors({});
+    setErrorHorario(null);
+    setShowNuevoForm(false);
+  };
 
   const createHeader = (
     <Box
@@ -134,7 +197,10 @@ function NuevoHorarioCard() {
             {errorHorario}
           </Alert>
         )}
-        <HorarioFormFields />
+        <HorarioFormFields
+          fieldErrors={fieldErrors}
+          onFieldChange={handleHorarioFieldChange}
+        />
         <Stack
           direction="row"
           spacing={1}
@@ -143,14 +209,14 @@ function NuevoHorarioCard() {
         >
           <SAEButton
             variant="outlined"
-            onClick={() => setShowNuevoForm(false)}
+            onClick={handleCancelClick}
             disabled={savingHorario}
           >
             Cancelar
           </SAEButton>
           <SAEButton
             variant="contained"
-            onClick={handleCreateHorario}
+            onClick={handleCreateClick}
             disabled={savingHorario}
             startIcon={
               savingHorario ? (

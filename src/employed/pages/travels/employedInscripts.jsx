@@ -646,13 +646,13 @@ function DocumentsDialog() {
 }
 function InscriptosCard({ datosEstudiante }) {
   const [loadingCard, setLoadingCard] = useState(false);
-  const [estudiante, SetDatosEstudiante] = useState(datosEstudiante);
+  const [estudiante, setDatosEstudiante] = useState(datosEstudiante);
 
   const { handleUpdateInscriptos, handleClickRemove, openSeeDocInscript } =
     useTravel();
   const handleInscriptosChange = async (field, value) => {
     const updatedStudent = { ...estudiante, [field]: value };
-    SetDatosEstudiante(updatedStudent);
+    setDatosEstudiante(updatedStudent);
     setLoadingCard(true);
     await handleUpdateInscriptos(updatedStudent);
     setLoadingCard(false);

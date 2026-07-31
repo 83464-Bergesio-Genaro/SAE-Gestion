@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback,useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ScholarshipsContext } from "../studentContext";
 import {
   AddCircleOutline,
@@ -24,25 +24,44 @@ import {
   CrearBecarioEconomica,
   CrearBecarioSAE,
   CrearBecarioInvestigacion,
-  CrearBecarioServicio
+  CrearBecarioServicio,
 } from "../../../api/BecasService";
 
 import { obtenerTiposDocumento } from "../../../api/HerramientasService";
 import { ObtenerPerfilXLegajo } from "../../../api/EstudianteService";
 import { mapEstudiante } from "../../../api/formatters/EstudianteFormatters";
-import { useAuth, useNotification } from "../../../shared/context/sharedContext";
+import {
+  useAuth,
+  useNotification,
+} from "../../../shared/context/sharedContext";
 
-import { SCHOLARSHIPS_REQUERID_DOCUMENTS,ECONOMIC_DOCUMENTS,ECONOMIC_OPTIONAL_DOCUMENTS } from "../../../utils/common/common.config.js";
-import { SCHOLARSHIP_STRINGS } from "../../../utils/strings/student.strings"; 
-import { SCHOLARSHIPS_STATES , SCHOLARSHIP_TYPE,MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB, DEFAULT_ACCEPTED_EXTENSIONS} from "../../../utils/common/constants.js";
-import { createPreviewState,isPdfDocument, buildDocumentName,
-    asignarArchivosADocumentos,
+import {
+  SCHOLARSHIPS_REQUERID_DOCUMENTS,
+  ECONOMIC_DOCUMENTS,
+  ECONOMIC_OPTIONAL_DOCUMENTS,
+} from "../../../utils/common/common.config.js";
+import { SCHOLARSHIP_STRINGS } from "../../../utils/strings/student.strings";
+import {
+  SCHOLARSHIPS_STATES,
+  SCHOLARSHIP_TYPE,
+  MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_MB,
+  DEFAULT_ACCEPTED_EXTENSIONS,
+} from "../../../utils/common/constants.js";
+import {
+  createPreviewState,
+  isPdfDocument,
+  buildDocumentName,
+  asignarArchivosADocumentos,
   asignarTiposADocumentos,
   getDocumentDisplayName,
   buildDocumentsFromConfig,
-  getDocumentKey
+  getDocumentKey,
 } from "../../../utils/documents.utils.js";
-import { getErrorMessage,obtenerLegajoDesdeEmail } from "../../../utils/util.jsx";
+import {
+  getErrorMessage,
+  obtenerLegajoDesdeEmail,
+} from "../../../utils/util.jsx";
 
 const isValidObjectResponse = (value) =>
   Boolean(value && typeof value === "object" && value.id);
@@ -70,67 +89,68 @@ function getEstadoBecaDesdeBecario(becario = {}) {
   if (!estaActivo) return SCHOLARSHIPS_STATES.RECHAZADO;
   if (anioBeca && anioActual > anioBeca) return SCHOLARSHIPS_STATES.FIN_BECADO;
 
-  if (aceptadoInicio && puedePagarle) return SCHOLARSHIPS_STATES.ACEPTADO_PAGADO;
+  if (aceptadoInicio && puedePagarle)
+    return SCHOLARSHIPS_STATES.ACEPTADO_PAGADO;
   if (aceptadoInicio) return SCHOLARSHIPS_STATES.ACEPTADO_INICIO;
 
   return SCHOLARSHIPS_STATES.SOLICITADO;
 }
 
 export function ScholarshipsProvider({ children }) {
-  const {setDialogOpen} = useNotification();
-    const isEconomicOptionalDocument = (documento) => documento.required === false;
-    const { showNotification} =useNotification();
-    const C = SCHOLARSHIP_STRINGS;
-    // Devuelve el icono visual para cada tipo de beca sin mezclar JSX dentro de la
-    // respuesta normalizada de la API.
-    const getBecaIcon = (tipoBeca) => {
+  const { setDialogOpen } = useNotification();
+  const isEconomicOptionalDocument = (documento) =>
+    documento.required === false;
+  const { showNotification } = useNotification();
+  const C = SCHOLARSHIP_STRINGS;
+  // Devuelve el icono visual para cada tipo de beca sin mezclar JSX dentro de la
+  // respuesta normalizada de la API.
+  const getBecaIcon = (tipoBeca) => {
     switch (tipoBeca) {
-        case SCHOLARSHIP_TYPE.ECONOMICA:
+      case SCHOLARSHIP_TYPE.ECONOMICA:
         return <AttachMoney fontSize="large" />;
-        case SCHOLARSHIP_TYPE.SERVICIO:
+      case SCHOLARSHIP_TYPE.SERVICIO:
         return <Diversity3 fontSize="large" />;
-        case SCHOLARSHIP_TYPE.INVESTIGACION:
+      case SCHOLARSHIP_TYPE.INVESTIGACION:
         return <School fontSize="large" />;
-        default:
+      default:
         return null;
     }
-    };
-const REQUIRED_PROFILE_FIELDS = [
-  ["legajo", "Legajo", (value) => String(value).trim() !== ""],
-  ["nombres", "Nombres", (value) => String(value).trim() !== ""],
-  ["apellidos", "Apellidos", (value) => String(value).trim() !== ""],
-  ["dni", "DNI", (value) => String(value).replace(/\D/g, "").length === 8],
-  ["cuil", "CUIL", (value) => String(value).replace(/\D/g, "").length === 11],
-  [
-    "fecha_nacimiento",
-    "Fecha de nacimiento",
-    (value) => String(value).trim() !== "",
-  ],
-  [
-    "email",
-    "Correo electrónico",
-    (value) => /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(String(value).trim()),
-  ],
-  [
-    "telefono",
-    "Teléfono",
-    (value) => String(value).replace(/\D/g, "").length === 12,
-  ],
-  [
-    "direccion",
-    "Dirección",
-    (value) => {
-      const parts = String(value).split(/\s+-\s+/);
-      return parts.length === 4 && parts.every((part) => part.trim() !== "");
-    },
-  ],
+  };
+  const REQUIRED_PROFILE_FIELDS = [
+    ["legajo", "Legajo", (value) => String(value).trim() !== ""],
+    ["nombres", "Nombres", (value) => String(value).trim() !== ""],
+    ["apellidos", "Apellidos", (value) => String(value).trim() !== ""],
+    ["dni", "DNI", (value) => String(value).replace(/\D/g, "").length === 8],
+    ["cuil", "CUIL", (value) => String(value).replace(/\D/g, "").length === 11],
+    [
+      "fecha_nacimiento",
+      "Fecha de nacimiento",
+      (value) => String(value).trim() !== "",
+    ],
+    [
+      "email",
+      "Correo electrónico",
+      (value) => /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(String(value).trim()),
+    ],
+    [
+      "telefono",
+      "Teléfono",
+      (value) => String(value).replace(/\D/g, "").length === 12,
+    ],
+    [
+      "direccion",
+      "Dirección",
+      (value) => {
+        const parts = String(value).split(/\s+-\s+/);
+        return parts.length === 4 && parts.every((part) => part.trim() !== "");
+      },
+    ],
   ];
   const getMissingProfileFields = (profile) =>
-      REQUIRED_PROFILE_FIELDS.filter(([field, , isValid]) => {
-          const value = profile?.[field];
-          return value === null || value === undefined || !isValid(value);
-      }).map(([, label]) => label);
-
+    REQUIRED_PROFILE_FIELDS.filter(([field, , isValid]) => {
+      const value = profile?.[field];
+      return value === null || value === undefined || !isValid(value);
+    }).map(([, label]) => label);
 
   const { user } = useAuth();
   const [perfilEstudiante, setPerfilEstudiante] = useState(null);
@@ -157,7 +177,6 @@ const REQUIRED_PROFILE_FIELDS = [
 
   const [openPopup, setOpenPopup] = useState(false);
   const [documentoAEliminar, setDocumentoAEliminar] = useState(null);
-
 
   const cargarPerfilEstudiante = useCallback(async () => {
     const legajo = user?.legajo ?? user?.email;
@@ -235,37 +254,41 @@ const REQUIRED_PROFILE_FIELDS = [
 
   // Cada endpoint devuelve una forma distinta. Aca se arma una lista unica para
   // renderizar las cards de "Mis Becas".
-  const normalizarBecas = useCallback((economica, servicio, investigacion) => {
-    return [
-      isValidObjectResponse(economica) && {
-        ...economica,
-        tipoBeca: SCHOLARSHIP_TYPE.ECONOMICA,
-        iconBeca: getBecaIcon(SCHOLARSHIP_TYPE.ECONOMICA),
-        fechaSolicitud: economica.becario?.fecha_solicitud,
-        estado: getEstadoBecaDesdeBecario(economica.becario),
-      },
-      isValidObjectResponse(servicio) && {
-        ...servicio,
-        tipoBeca: SCHOLARSHIP_TYPE.SERVICIO,
-        iconBeca: getBecaIcon(SCHOLARSHIP_TYPE.SERVICIO),
-        fechaSolicitud: servicio.becario?.fecha_solicitud,
-        estado: getEstadoBecaDesdeBecario(servicio.becario),
-        servicio:
-          servicio.servicio?.nombre ?? servicio.servicio ?? C.emptyValue,
-      },
-      isValidObjectResponse(investigacion) && {
-        ...investigacion,
-        tipoBeca: SCHOLARSHIP_TYPE.INVESTIGACION,
-        iconBeca: getBecaIcon(SCHOLARSHIP_TYPE.INVESTIGACION),
-        fechaSolicitud: investigacion.becario?.fecha_solicitud,
-        estado: getEstadoBecaDesdeBecario(investigacion.becario),
-        proyecto_investigacion:
-          investigacion.proyecto_investigacion?.nombre_proyecto_investigacion ??
-          investigacion.proyecto_investigacion?.centro_investigacion ??
-          C.emptyValue,
-      },
-    ].filter(Boolean);
-  }, [C]);
+  const normalizarBecas = useCallback(
+    (economica, servicio, investigacion) => {
+      return [
+        isValidObjectResponse(economica) && {
+          ...economica,
+          tipoBeca: SCHOLARSHIP_TYPE.ECONOMICA,
+          iconBeca: getBecaIcon(SCHOLARSHIP_TYPE.ECONOMICA),
+          fechaSolicitud: economica.becario?.fecha_solicitud,
+          estado: getEstadoBecaDesdeBecario(economica.becario),
+        },
+        isValidObjectResponse(servicio) && {
+          ...servicio,
+          tipoBeca: SCHOLARSHIP_TYPE.SERVICIO,
+          iconBeca: getBecaIcon(SCHOLARSHIP_TYPE.SERVICIO),
+          fechaSolicitud: servicio.becario?.fecha_solicitud,
+          estado: getEstadoBecaDesdeBecario(servicio.becario),
+          servicio:
+            servicio.servicio?.nombre ?? servicio.servicio ?? C.emptyValue,
+        },
+        isValidObjectResponse(investigacion) && {
+          ...investigacion,
+          tipoBeca: SCHOLARSHIP_TYPE.INVESTIGACION,
+          iconBeca: getBecaIcon(SCHOLARSHIP_TYPE.INVESTIGACION),
+          fechaSolicitud: investigacion.becario?.fecha_solicitud,
+          estado: getEstadoBecaDesdeBecario(investigacion.becario),
+          proyecto_investigacion:
+            investigacion.proyecto_investigacion
+              ?.nombre_proyecto_investigacion ??
+            investigacion.proyecto_investigacion?.centro_investigacion ??
+            C.emptyValue,
+        },
+      ].filter(Boolean);
+    },
+    [C],
+  );
 
   // Carga el becario base y las becas asociadas al usuario logueado.
   const cargarMisBecas = useCallback(
@@ -281,7 +304,7 @@ const REQUIRED_PROFILE_FIELDS = [
           setMisBecas([]);
           return;
         }
- 
+
         setBecarioActual(becario);
 
         const [economica, servicio, investigacion] = await Promise.all([
@@ -300,7 +323,7 @@ const REQUIRED_PROFILE_FIELDS = [
         if (showLoading) setLoadingScholarships(false);
       }
     },
-    [normalizarBecas, showNotification, user?.email,C],
+    [normalizarBecas, showNotification, user?.email, C],
   );
 
   // Carga directa desde "Mis Documentos". El formulario usa el mismo servicio,
@@ -348,9 +371,9 @@ const REQUIRED_PROFILE_FIELDS = [
         item.id_tipo_documento,
         archivoRenombrado,
       );
-      showNotification(C.uploadSuccess,"success");
+      showNotification(C.uploadSuccess, "success");
     } catch (error) {
-      showNotification("Error al subir el archivo: " +error,"error");
+      showNotification("Error al subir el archivo: " + error, "error");
     } finally {
       setLoadingDocuments(false);
     }
@@ -404,7 +427,9 @@ const REQUIRED_PROFILE_FIELDS = [
     showNotification(C.cbuSavedSuccess, "success");
   };
 
-  const hasEconomica = misBecas.some((b) => b.tipoBeca === SCHOLARSHIP_TYPE.ECONOMICA);
+  const hasEconomica = misBecas.some(
+    (b) => b.tipoBeca === SCHOLARSHIP_TYPE.ECONOMICA,
+  );
 
   // Abre el Dialog para solicitar una beca nueva.
   // Si ya existe Becario SAE, precarga sus datos; si no, usa datos del usuario logueado.
@@ -427,7 +452,7 @@ const REQUIRED_PROFILE_FIELDS = [
 
       await eliminarDocumentoEstudiante(item.id_archivo);
 
-      showNotification(C.docEliminado,"success");
+      showNotification(C.docEliminado, "success");
 
       setDocumentos((prev) =>
         prev.map((doc) =>
@@ -457,17 +482,17 @@ const REQUIRED_PROFILE_FIELDS = [
         ),
       );
     } catch (error) {
-      showNotification("Error al eliminar el documento: "+error, "error");
+      showNotification("Error al eliminar el documento: " + error, "error");
     } finally {
       setLoadingDocuments(false);
     }
   }
   const closePreview = () => {
-      setPreview((previous) => ({
-        ...previous,
-        open: false,
-        imageSrc: null, // Limpieza para liberar memoria
-      }));
+    setPreview((previous) => ({
+      ...previous,
+      open: false,
+      imageSrc: null, // Limpieza para liberar memoria
+    }));
   };
 
   // Descarga el archivo por id y delega la visualizacion al dialog compartido.
@@ -674,7 +699,8 @@ const REQUIRED_PROFILE_FIELDS = [
   const [documentosRequeridos, setDocumentosRequeridos] = useState([]);
 
   const [uploadingDocumentoId, setUploadingDocumentoId] = useState(null);
-  const [documentoEconomicoOpcionalId, setDocumentoEconomicoOpcionalId] = useState("");
+  const [documentoEconomicoOpcionalId, setDocumentoEconomicoOpcionalId] =
+    useState("");
 
   // Combos dependientes del tipo de beca. Se cargan al abrir el dialog para no
   // pedir datos mientras el formulario esta cerrado.
@@ -728,22 +754,22 @@ const REQUIRED_PROFILE_FIELDS = [
 
   // Los documentos economicos dependen del tipo seleccionado. Se reconstruyen
   // mezclando configuracion, tipos de documento y archivos ya subidos.
-useEffect(() => {
-  // Condición de salida para evitar ejecuciones innecesarias
-  if (!formBeca?.tipoBeca || !tiposDocumento) return;
+  useEffect(() => {
+    // Condición de salida para evitar ejecuciones innecesarias
+    if (!formBeca?.tipoBeca || !tiposDocumento) return;
 
-  setDocumentosEconomica((prev) =>
-    formBeca.tipoBeca === SCHOLARSHIP_TYPE.ECONOMICA
-      ? buildDocumentsFromConfig(
-          prev, // <-- Pasamos 'prev' en lugar de 'documentosEconomica'
-          tiposDocumento,
-          prev,
-          documentos,
-        )
-      : [],
-  );
-  // Eliminamos 'documentosEconomica' de las dependencias
-}, [formBeca.tipoBeca, tiposDocumento, documentos]); 
+    setDocumentosEconomica((prev) =>
+      formBeca.tipoBeca === SCHOLARSHIP_TYPE.ECONOMICA
+        ? buildDocumentsFromConfig(
+            prev, // <-- Pasamos 'prev' en lugar de 'documentosEconomica'
+            tiposDocumento,
+            prev,
+            documentos,
+          )
+        : [],
+    );
+    // Eliminamos 'documentosEconomica' de las dependencias
+  }, [formBeca.tipoBeca, tiposDocumento, documentos]);
 
   const documentosEconomicaVisibles = documentosEconomica.filter(
     (documento) =>
@@ -845,7 +871,10 @@ useEffect(() => {
     });
 
     if (!selectedDocument.id_tipo_documento) {
-      showNotification(C.documentTypeNotFound(selectedDocument.nombre), "error");
+      showNotification(
+        C.documentTypeNotFound(selectedDocument.nombre),
+        "error",
+      );
       e.target.value = "";
       return;
     }
@@ -1049,7 +1078,7 @@ useEffect(() => {
   // Flujo completo del boton Guardar: valida, crea/reutiliza becario, crea la
   // beca, sube pendientes, refresca Scholarships y cierra el dialog.
   const handleDialogSave = async () => {
-    if (!camposPerfilFaltantes?.length > 0) {
+    if (camposPerfilFaltantes.length > 0) {
       showNotification(
         `Completá tu perfil antes de solicitar una beca. Faltan: ${camposPerfilFaltantes.join(", ")}.`,
         "warning",
@@ -1075,34 +1104,66 @@ useEffect(() => {
     }
   };
 
-
   return (
     <ScholarshipsContext.Provider
       value={{
-    closePreview,perfilEstudiante,camposPerfilFaltantes,perfilIncompleto,
-    becarioActual,loadingScholarships,loadingDocuments,misBecas,documentos,documentosEconomica,preview,cbu,cbuGuardado,openPopup,documentoAEliminar,
-    cargarPerfilEstudiante,cargarTiposDocumento,subirDocumentoEstudiante,normalizarBecas,
-    getBecaIcon,cargarMisBecas,handleArchivoChange,setDocumentos,setDocumentosEconomica,handleCbuChange,handleGuardarCbu,
-    hasEconomica,handleAgregarBeca,handleDelete,handlePreview,DeleteDocument,ObtenerTipoDocumentos,ObtenerDocumentosEstudiante
-    ,setBecarioActual,setOpenPopup,
+        closePreview,
+        perfilEstudiante,
+        camposPerfilFaltantes,
+        perfilIncompleto,
+        becarioActual,
+        loadingScholarships,
+        loadingDocuments,
+        misBecas,
+        documentos,
+        documentosEconomica,
+        preview,
+        cbu,
+        cbuGuardado,
+        openPopup,
+        documentoAEliminar,
+        cargarPerfilEstudiante,
+        cargarTiposDocumento,
+        subirDocumentoEstudiante,
+        normalizarBecas,
+        getBecaIcon,
+        cargarMisBecas,
+        handleArchivoChange,
+        setDocumentos,
+        setDocumentosEconomica,
+        handleCbuChange,
+        handleGuardarCbu,
+        hasEconomica,
+        handleAgregarBeca,
+        handleDelete,
+        handlePreview,
+        DeleteDocument,
+        ObtenerTipoDocumentos,
+        ObtenerDocumentosEstudiante,
+        setBecarioActual,
+        setOpenPopup,
 
-    documentosEconomicosOpcionalesDisponibles,
-    handleAgregarDocumentoEconomico,handleChange,handleDocumentoChange,
-    handleDocumentoDelete,setDocumentoAEliminar,
-    proyectosRows,serviciosRows,
+        documentosEconomicosOpcionalesDisponibles,
+        handleAgregarDocumentoEconomico,
+        handleChange,
+        handleDocumentoChange,
+        handleDocumentoDelete,
+        setDocumentoAEliminar,
+        proyectosRows,
+        serviciosRows,
 
-    setFormBeca,
-      handleClose,
-      saving,
-      datosPerfil,
-      formBeca,
-      documentosRequeridos,
-      setDocumentosRequeridos,
-      documentosEconomicaVisibles,
-      handleDialogSave,
-      handleDocumentoEconomicoDelete,
-      uploadingDocumentoId,
-    }}
+        setFormBeca,
+        handleClose,
+        saving,
+        datosPerfil,
+        formBeca,
+        documentosRequeridos,
+        setDocumentosRequeridos,
+        documentosEconomicaVisibles,
+        handleDialogSave,
+        handleDocumentoEconomicoDelete,
+        uploadingDocumentoId,
+      }}
     >
       {children}
     </ScholarshipsContext.Provider>

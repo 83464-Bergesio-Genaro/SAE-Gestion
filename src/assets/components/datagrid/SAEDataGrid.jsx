@@ -70,7 +70,7 @@ export default function SAEDataGrid({
       >
         <Stack
           direction="row"
-          overflow={{ xs: "scroll", md: "hidden" }}
+          overflow={{ xs: "scroll", sm: "hidden" }}
           spacing={0}
         >
           {Object.entries(sectionConfig).map(([key, section]) => (
@@ -201,6 +201,7 @@ export default function SAEDataGrid({
             pageSizeOptions={[5, 10, 25]}
             initialState={{
               pagination: { paginationModel: { pageSize: 5 } },
+              ...currentConfig.initialState,
             }}
             localeText={{ noRowsLabel: "No hay registros activos" }}
             sx={{ borderRadius: 0, border: "none" }}

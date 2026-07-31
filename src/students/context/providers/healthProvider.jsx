@@ -82,11 +82,13 @@ export const HealthUsersProvider = ({ children }) => {
   const [usuarioSelected, setUsuarioSelected] = useState(null);
 
   const openCreateTurnos = useCallback(
-    (legajo = null, id_especialidad = null, diasYHorarios = null) => {
+    (legajo = null, especialidad = null) => {
+      const diasYHorarios = especialidad?.diasYHorarios ?? [];
+
       //Solo realiza una operacion si existen estos valores
       if (
         legajo &&
-        id_especialidad != null &&
+        especialidad?.id_especialidad != null &&
         diasYHorarios &&
         diasYHorarios.length > 0
       ) {
@@ -105,10 +107,14 @@ export const HealthUsersProvider = ({ children }) => {
           asunto: "",
           id_estado_turno: 0,
           estado: "PENDIENTE",
-          id_especialidad: id_especialidad,
-          horarios_disponibles: diasYHorarios[0],
+          id_especialidad: especialidad.id_especialidad,
+          nombre_especialidad: especialidad.nombre_especialidad,
+          descripcion_especialidad: especialidad.descripcion_especialidad,
+          especialista_disponible: especialidad.especialista,
+          horarios_disponibles: diasYHorarios,
           dia_selecionado: diasYHorarios[0].dia,
           horario_disponible: diasYHorarios[0].hora_inicio,
+          disponibilidades: [],
         });
       }
     },
@@ -157,7 +163,13 @@ export const HealthUsersProvider = ({ children }) => {
   }, [fetchTurnosEstudiante]);
 
   const turnsColumns = useMemo(() => {
-    return generateColumns(EMPTY_TURNO_PACIENTE, null);
+    return generateColumns(EMPTY_TURNO_PACIENTE, null, {
+      estado: {
+        flex: 0.8,
+        minWidth: 140,
+        maxWidth: 180,
+      },
+    });
   }, []);
 
   const [especialidadesActivas, setEspecialidadesActivas] = useState([]);
@@ -171,6 +183,14 @@ export const HealthUsersProvider = ({ children }) => {
         setDialogSaving(false);
         return;
       }
+      if (
+        dialogMode === "create" &&
+        (!dialogData.disponibilidades || dialogData.disponibilidades.length === 0)
+      ) {
+        setDialogError("Agrega al menos una disponibilidad");
+        setDialogSaving(false);
+        return;
+      }
       if (dialogData.id_estado_turno === 1) {
         setDialogError("Faltan valores");
         setDialogSaving(false);
@@ -179,22 +199,27 @@ export const HealthUsersProvider = ({ children }) => {
 
       const especialidad =
         especialidadesActivas?.find(
-          (esp) => esp.id === dialogData?.id_especialidad,
-        )?.nombre ?? "Especialidad no Valida";
-      const dia_selec =
-        calendarDays?.find(
-          (di) => di.value === Number(dialogData?.dia_selecionado),
-        )?.label ?? "lunes";
+          (esp) => Number(esp.id) === Number(dialogData?.id_especialidad),
+        )?.nombre ??
+        dialogData.nombre_especialidad ??
+        "Especialidad no valida";
+      const disponibilidades =
+        dialogData.disponibilidades?.map((disponibilidad) => {
+          const dia =
+            calendarDays?.find(
+              (di) => di.value === Number(disponibilidad.dia),
+            )?.label ?? "Dia no asignado";
+
+          return `${dia} ${disponibilidad.hora}`;
+        }) ?? [];
 
       const id_nuevo = dialogData.id === "" ? 0 : Number(dialogData.id);
       const asunto =
         especialidad +
         ": " +
         dialogData.asunto +
-        " tiene disponible a las " +
-        dialogData.horario_disponible +
-        " del " +
-        dia_selec;
+        ". Disponibilidad: " +
+        disponibilidades.join("; ");
       const cuil_medico =
         dialogData.cuil_medico === null || dialogData.cuil_medico.trim() === ""
           ? null

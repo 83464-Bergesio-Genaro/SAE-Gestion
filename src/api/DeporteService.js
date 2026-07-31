@@ -1,5 +1,5 @@
 import { apiUploadFile, apiDownloadDocument, RequestAPI } from './apiClient';
-import { mapHorarios } from './formatters/DeportesFormatters';
+import { mapHorarios, mapTorneo } from './formatters/DeportesFormatters';
 
 // DOCENTES DEPORTIVOS
 export async function obtenerDocentesDeportivos() {
@@ -128,21 +128,27 @@ export async function eliminarHorarioDeportivo(id) {
 
 // TORNEOS
 export async function obtenerTorneosDeportivos() {
-  return RequestAPI('/api/Deporte/ObtenerTorneosDeportivos/', 'GET');
+  const torneos = await RequestAPI(
+    '/api/Deporte/ObtenerTorneosDeportivos/',
+    'GET',
+  );
+  return Array.isArray(torneos) ? torneos.map(mapTorneo) : [];
 }
 
 export async function obtenerTorneoXId(id) {
-  return RequestAPI(
+  const torneo = await RequestAPI(
     '/api/Deporte/ObtenerTorneosXId/' + encodeURIComponent(id),
     'GET',
   );
+  return torneo ? mapTorneo(torneo) : torneo;
 }
 
 export async function obtenerTorneosXDeporte(id_deporte) {
-  return RequestAPI(
+  const torneos = await RequestAPI(
     '/api/Deporte/ObtenerTorneosXDeporte/' + encodeURIComponent(id_deporte),
     'GET',
   );
+  return Array.isArray(torneos) ? torneos.map(mapTorneo) : [];
 }
 
 export async function crearTorneo(body) {

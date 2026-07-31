@@ -3,6 +3,9 @@
   box-sizing: border-box;
   font-family: var(--font);
 }
+input::-ms-reveal {
+    display: none;
+}
 body {
   width: 100%;
   margin: 0;

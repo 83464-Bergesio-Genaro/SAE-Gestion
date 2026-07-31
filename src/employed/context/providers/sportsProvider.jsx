@@ -18,7 +18,11 @@ import { formatHeader } from "../../../utils/datagrid.utils.jsx";
 import { useNotification } from "../../../shared/context/sharedContext";
 import { EMPTY_COMPLETE_SCHEDULE } from "../../../utils/common/common.config.js";
 import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings.js";
-import { formatDate, toApiDateTime } from "../../../utils/date.utils.js";
+import {
+  formatDate,
+  normalizeDateInput,
+  toApiDateTime,
+} from "../../../utils/date.utils.js";
 
 //Luis me gano, lo voy a dejar asi hasta que nos de ganas de hacerlo de 0
 const generateSportsColumns = (
@@ -186,7 +190,7 @@ export function SportsProvider({ children, autoLoad = true }) {
         nombres: x.nombres,
         apellidos: x.apellidos,
         activo: x.activo,
-        fecha_nacimiento: toApiDateTime(x.fecha_nacimiento),
+        fecha_nacimiento: normalizeDateInput(x.fecha_nacimiento),
       }),
     [open],
   );
@@ -207,7 +211,7 @@ export function SportsProvider({ children, autoLoad = true }) {
         id: x.id,
         legajo: x.legajo,
         habilitado_deportado: x.habilitado_deportado,
-        vencimiento_ficha: toApiDateTime(x.vencimiento_ficha),
+        vencimiento_ficha: normalizeDateInput(x.vencimiento_ficha),
         habilitado_deporte: x.habilitado_deporte,
       }),
     [open],

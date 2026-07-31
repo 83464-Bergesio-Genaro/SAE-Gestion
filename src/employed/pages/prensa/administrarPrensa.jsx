@@ -24,7 +24,7 @@ import {
   CircularProgress,
   Pagination,
 } from "@mui/material";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
@@ -160,6 +160,72 @@ function NuevaPublicacionDialog() {
   const nuevaData = dialogData;
   const saving = dialogSaving;
   const isEdit = dialogMode === "edit";
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  useEffect(() => {
+    if (open) {
+      setFieldErrors({});
+    }
+  }, [open, dialogMode]);
+
+  const isBlank = (value) => String(value ?? "").trim() === "";
+
+  const clearFieldError = (field) => {
+    setFieldErrors((previous) =>
+      previous[field] ? { ...previous, [field]: undefined } : previous,
+    );
+  };
+
+  const handlePublicationFieldChange = (field, value) => {
+    clearFieldError(field);
+    setDialogError("");
+    handleDataChange(field, value);
+  };
+
+  const validatePublicationDialog = () => {
+    const errors = {};
+
+    if (isBlank(nuevaData.titulo_publicacion)) {
+      errors.titulo_publicacion = PSN.validationTitleRequired;
+    }
+    if (isBlank(nuevaData.descripcion)) {
+      errors.descripcion = PSN.validationDescriptionRequired;
+    }
+    if (isBlank(nuevaData.fecha_inicio)) {
+      errors.fecha_inicio = PSN.validationStartDateRequired;
+    }
+    if (isBlank(nuevaData.fecha_vigencia)) {
+      errors.fecha_vigencia = PSN.validationEndDateRequired;
+    } else if (
+      !isBlank(nuevaData.fecha_inicio) &&
+      nuevaData.fecha_vigencia < nuevaData.fecha_inicio
+    ) {
+      errors.fecha_vigencia = PSN.validationEndDateAfterStart;
+    }
+    if (
+      !isEdit &&
+      ((docMode === "subir" && !archivo) ||
+        (docMode === "existente" && !docSeleccionado))
+    ) {
+      errors.documento = PSN.validationDocumentRequired;
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setDialogError(PSN.validationFormError);
+      return false;
+    }
+
+    setDialogError("");
+    return true;
+  };
+
+  const handleSaveClick = () => {
+    if (!validatePublicationDialog()) return;
+
+    handleSavePublication();
+  };
 
   return (
     <>
@@ -202,16 +268,23 @@ function NuevaPublicacionDialog() {
                 label={PSN.fieldTitle}
                 value={nuevaData.titulo_publicacion}
                 onChange={(event) =>
-                  handleDataChange("titulo_publicacion", event.target.value)
+                  handlePublicationFieldChange(
+                    "titulo_publicacion",
+                    event.target.value,
+                  )
                 }
+                error={Boolean(fieldErrors.titulo_publicacion)}
+                helperText={fieldErrors.titulo_publicacion ?? ""}
                 fullWidth
               />
               <SAETextField
                 label={PSN.fieldDescription}
                 value={nuevaData.descripcion}
                 onChange={(event) =>
-                  handleDataChange("descripcion", event.target.value)
+                  handlePublicationFieldChange("descripcion", event.target.value)
                 }
+                error={Boolean(fieldErrors.descripcion)}
+                helperText={fieldErrors.descripcion ?? ""}
                 multiline
                 rows={3}
                 fullWidth
@@ -226,8 +299,13 @@ function NuevaPublicacionDialog() {
                   type="date"
                   value={nuevaData.fecha_inicio}
                   onChange={(event) =>
-                    handleDataChange("fecha_inicio", event.target.value)
+                    handlePublicationFieldChange(
+                      "fecha_inicio",
+                      event.target.value,
+                    )
                   }
+                  error={Boolean(fieldErrors.fecha_inicio)}
+                  helperText={fieldErrors.fecha_inicio ?? ""}
                   slotProps={{ inputLabel: { shrink: true } }}
                   fullWidth
                 />
@@ -236,8 +314,13 @@ function NuevaPublicacionDialog() {
                   type="date"
                   value={nuevaData.fecha_vigencia}
                   onChange={(event) =>
-                    handleDataChange("fecha_vigencia", event.target.value)
+                    handlePublicationFieldChange(
+                      "fecha_vigencia",
+                      event.target.value,
+                    )
                   }
+                  error={Boolean(fieldErrors.fecha_vigencia)}
+                  helperText={fieldErrors.fecha_vigencia ?? ""}
                   slotProps={{ inputLabel: { shrink: true } }}
                   fullWidth
                 />
@@ -302,9 +385,11 @@ function NuevaPublicacionDialog() {
                   <input
                     type="file"
                     hidden
-                    onChange={(event) =>
-                      setArchivo(event.target.files?.[0] || null)
-                    }
+                    onChange={(event) => {
+                      clearFieldError("documento");
+                      setDialogError("");
+                      setArchivo(event.target.files?.[0] || null);
+                    }}
                   />
                 </SAEButton>
               ) : (
@@ -364,7 +449,11 @@ function NuevaPublicacionDialog() {
                               key={document.id}
                               hover
                               selected={docSeleccionado === document.id}
-                              onClick={() => setDocSeleccionado(document.id)}
+                              onClick={() => {
+                                clearFieldError("documento");
+                                setDialogError("");
+                                setDocSeleccionado(document.id);
+                              }}
                               sx={{ cursor: "pointer" }}
                             >
                               <TableCell padding="checkbox">
@@ -422,6 +511,9 @@ function NuevaPublicacionDialog() {
                   )}
                 </Box>
               )}
+              {fieldErrors.documento && (
+                <Alert severity="error">{fieldErrors.documento}</Alert>
+              )}
             </DialogContent>
 
             <DialogActions>
@@ -434,7 +526,7 @@ function NuevaPublicacionDialog() {
               </SAEButton>
               <SAEButton
                 variant="contained"
-                onClick={handleSavePublication}
+                onClick={handleSaveClick}
                 disabled={saving}
               >
                 {saving ? PSN.saving : PSN.saveButton}

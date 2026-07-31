@@ -1,62 +1,62 @@
 export const EMPTY_BUSSINESS = {
-    id: "-1",
-    nombre: "",
-    contacto: "",
-    email: "",
-    cuit:"",
-    cbu:"",
-    activo:true
-}
-export const EMPTY_VIAJES ={
-    id: "-1",
-    nombre: "",
-    fecha_inicio: "",
-    fecha_fin: "",
-    seguro: false,
-    origen: "",
-    destino: "",
-    cantidad_personas: 0,
-    nombre_empresa:"",
-    costo_aproximado: 0,
-}
-export const EMPTY_VIAJES_FORM ={
-    id: "-1",
-    nombre: "",
-    fecha_inicio: "",
-    fecha_fin: "",
-    seguro: false,
-    origen: "",
-    destino: "",
-    cantidad_personas: 0,
-    id_empresa_viaje:-1,
-    nombre_empresa:"",
-    costo_aproximado: 0,
-    motivo:""
-}
+  id: "-1",
+  nombre: "",
+  contacto: "",
+  email: "",
+  cuit: "",
+  cbu: "",
+  activo: true,
+};
+export const EMPTY_VIAJES = {
+  id: "-1",
+  nombre: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  seguro: false,
+  origen: "",
+  destino: "",
+  cantidad_personas: 0,
+  nombre_empresa: "",
+  costo_aproximado: 0,
+};
+export const EMPTY_VIAJES_FORM = {
+  id: "-1",
+  nombre: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  seguro: false,
+  origen: "",
+  destino: "",
+  cantidad_personas: 0,
+  id_empresa_viaje: -1,
+  nombre_empresa: "",
+  costo_aproximado: 0,
+  motivo: "",
+};
 export const EMPTY_DOCUMENTACION_VIAJE = {
-    id: "-1",
-    nombre: "",
-    datos:"",
-    ruta:"",
-}
+  id: "-1",
+  nombre: "",
+  datos: "",
+  ruta: "",
+};
 
 export const EMPTY_DOCUMENTACION_ESTUDIANTE = {
-    id: "-1",
-    nombre: "",
-    datos:"",
-    ruta:"",
-}
+  id: "-1",
+  nombre: "",
+  datos: "",
+  ruta: "",
+};
 // ------------------------- DEPORTES -------------------------- //
 export const EMPTY_TOURNAMENT = {
   nombre_torneo: "",
   fecha_inicio: "",
   fecha_fin: "",
-  fecha_limite_inscripcion:"",
-  activo:"",
-  nombre_deporte:"",
-  docente_responsable:"",
-  cupo_jugadores:""
-}
+  fecha_limite_inscripcion: "",
+  activo: "",
+  nombre_deporte: "",
+  docente_responsable: "",
+  cupo_jugadores: "",
+};
 export const EMPTY_TOURNAMENT_FORM = {
   id: 0,
   nombre_torneo: "",
@@ -113,12 +113,12 @@ export const EMPTY_TURNO = {
 //DEBE SER IGUAL LAS COLUMNAS QUE LAS FILAS
 export const EMPTY_TURNO_PACIENTE = {
   id: 0,
+  estado: "",
+  asunto: "",
   especialista: "",
   fecha_solicitud: "",
   fecha_atencion: "",
   hora_atencion: "",
-  asunto: "",
-  estado: "",
 };
 
 export const EMPTY_ESPECIALIDAD = {
@@ -543,7 +543,7 @@ export const ECONOMIC_OPTIONAL_DOCUMENTS = [
 ];
 export const TRAVEL_REQUIRED_DOCUMENTS = [
   {
-    id_tipo_documento: null,
+    id_tipo_documento: 1,
     nombre: "Certificado de Alumno Regular",
     descripcion:
       "Certificado vigente que acredita tu condición de estudiante regular.",
@@ -552,11 +552,11 @@ export const TRAVEL_REQUIRED_DOCUMENTS = [
     archivoNombre: "",
     formatoNombre: "{legajo}_AlumnoRegular",
     id_archivo: null,
-    extension: null,
+    extension: ".pdf",
     required: true,
   },
   {
-    id_tipo_documento: null,
+    id_tipo_documento: 2,
     nombre: "Fotocopia Documento",
     descripcion:
       "Copia legible del frente y dorso de tu DNI en un único archivo.",
@@ -565,11 +565,11 @@ export const TRAVEL_REQUIRED_DOCUMENTS = [
     archivoNombre: "",
     formatoNombre: "{legajo}_DNI",
     id_archivo: null,
-    extension: null,
+    extension:".pdf",
     required: true,
   },
   {
-    id_tipo_documento: null,
+    id_tipo_documento:13,
     nombre: "Declaracion Jurada",
     descripcion:
       "Certificadofirmado en el cual establece un heredero a tu fortuna.",
@@ -578,7 +578,7 @@ export const TRAVEL_REQUIRED_DOCUMENTS = [
     archivoNombre: "",
     formatoNombre: "{idViaje}_{legajo}_DDJJ",
     id_archivo: null,
-    extension: null,
+    extension: ".pdf",
     required: true,
   },
 ];

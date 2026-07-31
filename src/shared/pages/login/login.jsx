@@ -142,11 +142,11 @@ export default function Login() {
         height: "100%",
         mt:"-15px",
         mb:"-20px",
-        minHeight:"88vh",
+        minHeight:{xs:"75vh", md:"88vh"},
         display: "flex", 
         flexDirection: "column",
         justifyContent: "center",
-        pb: { xs: 4, md: 3 },
+        pb: { xs: 4, md: 6 },
         background:"var(--gradient)"
     }}>
       { user && !isLoading && !normalizarOpen && (
@@ -173,7 +173,7 @@ export default function Login() {
             onClick={logout}
             sx={{ minWidth: 150 }}
           >
-            Cerrar Sesión
+            {C.closeSession}
           </SAEButton>
         </Paper>
       </Box>
@@ -186,7 +186,7 @@ export default function Login() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: { xs: 130, md: 180 },
+          height: { xs:130, md: 130,lg: 180 },
           mt: { xs: 2, md: 3 },
           mb: { xs: 1, md: 2 },
           position: "relative",
@@ -199,8 +199,8 @@ export default function Login() {
           alt=""
           sx={{
             position: "absolute",
-            width: { xs: 130, md: 180 },
-            height: { xs: 130, md: 180 },
+            width: { xs: 130, md: 140 ,lg:180},
+            height: { xs: 130, md: 140,lg:180 },
             opacity: 0,
             animation: "fadeInBack 0.8s ease-out 0.1s forwards",
             "@keyframes fadeInBack": {
@@ -216,8 +216,8 @@ export default function Login() {
           alt="UTN Logo"
           sx={{
             position: "absolute",
-            width: { xs: 85, md: 115 },
-            height: { xs: 85, md: 115 },
+            width: { xs: 85, md: 105,lg:115 },
+            height: { xs: 85, md: 105,lg:115 },
             opacity: 0,
             animation:
               "spinIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards",

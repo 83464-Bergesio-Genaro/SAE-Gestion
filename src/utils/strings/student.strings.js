@@ -3,20 +3,22 @@ import Science from "@mui/icons-material/Science";
 import SettingsAccessibility from "@mui/icons-material/SettingsAccessibility";
 
 export const MAIN_STRINGS = {
-  headerTitle:"Pantalla Principal",
-  headerDescription:"Bienvenido ",
-  panelTitle:"Tú Gestión",
-  panelDescription:"Administra tu vida estudiantil desde un solo lugar"
-}
+  headerTitle: "Pantalla Principal",
+  headerDescription: "Bienvenido ",
+  panelTitle: "Tú Gestión",
+  panelDescription: "Administra tu vida estudiantil desde un solo lugar",
+};
 
 export const SCHOLARSHIP_STRINGS = {
   bigTitle: "Becas",
   bigSubtitle: "Todas las becas en un solo lugar",
   title: "Administrar Becas",
 
-  documentationTitle: "Mis Becas",
-  documentationSubtitle:
+  scholarshipTitle: "Mis Becas",
+  scholarshipSubtitle:
     "Aquí podrás ver las becas a las que estás inscripto, el estado de cada una y la documentación requerida para cada una.",
+  documentationSubtitle:
+    "En esta sección podés consultar y cargar la documentación requerida para participar en deportes.",
   cardSolicitarTitle: "Solicitar Beca",
   cardSolicitarSubtitle: "Solicita una nueva beca",
   alquilarTitle: "Alquila?",
@@ -45,8 +47,7 @@ export const SCHOLARSHIP_STRINGS = {
     `No se encontro el tipo de documento: ${documentName}`,
   uploadSuccess: "Archivo subido con exito",
   uploadError: "Error al subir el archivo",
-  createEconomicScholarshipSuccess:
-    "Se creo la beca economica correctamente",
+  createEconomicScholarshipSuccess: "Se creo la beca economica correctamente",
   createInvestigationScholarshipSuccess:
     "Se creo la beca de investigacion correctamente",
   createServiceScholarshipSuccess: "Se creo la beca de servicio correctamente",
@@ -116,11 +117,11 @@ export const SPORTS_STRINGS = {
 
   documentationTitle: "Documentación",
   documentationSubtitle:
-    "Para participar en actividades deportivas, debés completar lasiguiente documentación.",
+    "En esta sección podés consultar y cargar la documentación requerida para participar en deportes.",
 
   sportsTitle: "Deportes",
   sportsSubTitle: "Listado de deportes a los que te podes inscribir",
- 
+
   tournamnetsTitle: "Torneos",
   tournamnetsSubTitle: "Listado de torneos disponibles",
 
@@ -157,164 +158,191 @@ export const SPORTS_STRINGS = {
   deleteDocButton: "Eliminar",
 };
 export const CONSULTATIONS_STRINGS = {
-  headerTitle:"Consultas SAE",
-  headerDescription:"Encontrá respuestas rápidas o escribinos para recibir ayuda personalizada.",
-  linktreeTitle:"Links frecuentes",
-  linktreeDescription:"Accesos rápidos a recursos útiles de SAE.",
-  linktreeNoData:"No hay links frecuentes disponibles.",
-  faqsTitle:"Preguntas frecuentes",
-  faqsDescription:"Respuestas rápidas",
-  moreFaqsTitle:"Más respuestas rápidas",
-  moreFaqsDescription:"Revisá estas preguntas antes de enviar una consulta.",
-  sendMailTitle:"Enviar una consulta",
-  emailClaration:"Tu consulta se enviará por correo a ",
-  formNameLabel:"Nombre",
-  formMailLabel:"Correo",
-  formSubjectLabel:"Asunto",
-  formQuestionLabel:"Consulta",
-  sendButton:"Enviar consulta",
+  headerTitle: "Consultas SAE",
+  headerDescription:
+    "Encontrá respuestas rápidas o escribinos para recibir ayuda personalizada.",
+  linktreeTitle: "Links frecuentes",
+  linktreeDescription: "Accesos rápidos a recursos útiles de SAE.",
+  linktreeNoData: "No hay links frecuentes disponibles.",
+  faqsTitle: "Preguntas frecuentes",
+  faqsDescription: "Respuestas rápidas",
+  moreFaqsTitle: "Más respuestas rápidas",
+  moreFaqsDescription: "Revisá estas preguntas antes de enviar una consulta.",
+  sendMailTitle: "Enviar una consulta",
+  emailClaration: "Tu consulta se enviará por correo a ",
+  formNameLabel: "Nombre",
+  formMailLabel: "Correo",
+  formSubjectLabel: "Asunto",
+  formQuestionLabel: "Consulta",
+  sendButton: "Enviar consulta",
   sendingButton: "Enviando...",
   //Provider
-  errorURL:"Este link no tiene hipervínculo configurado",
-  errorCount:"Error al contar visualización del link: ",
-  errorValidateSubmit:"Es necesario que todos los campos sean válidos",
-  errorSubmit:"No se pudo enviar la consulta. Intentá nuevamente.",
-  msgSubmit:"Consulta enviada con éxito."
-
-}
+  errorURL: "Este link no tiene hipervínculo configurado",
+  errorCount: "Error al contar visualización del link: ",
+  errorValidateSubmit: "Es necesario que todos los campos sean válidos",
+  errorSubmit: "No se pudo enviar la consulta. Intentá nuevamente.",
+  msgSubmit: "Consulta enviada con éxito.",
+};
 export const HEALTH_STRINGS = {
-  headerTitle:"Salud",
-  headerDescription:"Permite sacar turnos médicos y ver los cursos disponibles",
+  headerTitle: "Salud",
+  headerDescription:
+    "Permite sacar turnos médicos y ver los cursos disponibles",
   servicesTitle: "Servicios para Alumnos",
-  servicesDescription: "Especialidades médicas disponibles para solicitar turnos",
-  servicesCardSche:"Horarios de Atención:",
-  servicesNoDay:"Día no asignado",
-  servicesButton:"Pedir Turno",
-  activeTurnsTitle:"Turnos Activos",
-  activeTurnsDescription:"Podrás ver aquellos turnos que tengas activos en estos días.",
+  servicesDescription:
+    "Especialidades médicas disponibles para solicitar turnos",
+  servicesCardSche: "Horarios de Atención:",
+  servicesNoDay: "Día no asignado",
+  servicesButton: "Pedir Turno",
+  activeTurnsTitle: "Turnos Activos",
+  activeTurnsDescription:
+    "Podrás ver aquellos turnos que tengas activos en estos días.",
+  activeTurnsReminder:
+    "Recorda que los turnos pueden cambiar de horario sin previo aviso.",
   noActiveTurns: "No hay turnos activos",
-  turnsCardPacient:"Paciente: ",
-  turnsCardSuject:"Asunto: ",
-  turnsCardMedic:"Atiende: ",
+  turnsCardPacient: "Paciente: ",
+  turnsCardSuject: "Asunto: ",
+  turnsCardMedic: "Atiende: ",
   noNameTurn: "Error recuperando el nombre",
-  noSubject:  "Turno sin Asunto",
-  noMedic:"Sin médico asignado",
-  noDate:"Fecha sin Asignar",
-  noSchedule:"Sin Horario",
-  showTurn:"Ver datos turno",
+  noSubject: "Turno sin Asunto",
+  noMedic: "Sin Asignar",
+  noDate: "Sin Asignar",
+  noSchedule: "Sin Asignar",
+  showTurn: "Ver datos turno",
   deleteTurn: "Eliminar Turno",
-  courseTitle:"Cursos y Capacitaciones",
+  courseTitle: "Cursos y Capacitaciones",
   courseDescription: "Descubrí que lo primero es la salud",
-  noCourses:"No hay cursos actualmente activos",
-  available:"Vacantes",
-  courseTeacher:"Docente: ",
-  courseStart:"Desde el: 📅",
-  courseEnd:" hasta el: ",
+  noCourses: "No hay cursos actualmente activos",
+  available: "Vacantes",
+  courseTeacher: "Docente: ",
+  courseStart: "Desde el: 📅",
+  courseEnd: " hasta el: ",
   turnsHistoryTitle: "Histórico de Turnos",
-  turnsHistoryDescription:"Turnos cancelados o finalizados",
-  noRegisters:"Sin Registros",
-  cancelTurnsTitle:"Turnos Cancelados",
-  realizedTurnsTitle:"Turnos Finalizados",
-  dialogSubtitle:"¡ATENCIÓN!",
-  creationAclaration:"Una vez generado el turno no podrá ser modificado.En caso de equivocación debera eliminarlo y despues volverlo a crear.",
+  turnsHistoryDescription: "Turnos cancelados o finalizados",
+  noRegisters: "Sin Registros",
+  cancelTurnsTitle: "Turnos Cancelados",
+  cancelTurnTitle: "Cancelar turno",
+  cancelTurnSummary: "Turno a cancelar",
+  confirmCancelTurn: "Confirmar cancelacion",
+  realizedTurnsTitle: "Turnos Finalizados",
+  requestTurnTitle: "Solicitar turno",
+  turnCancellationDisclaimer:
+    "La solicitud queda sujeta a confirmacion del area de salud. El turno puede ser cancelado o cambiado de horario segun disponibilidad del especialista.",
+  dialogSubtitle: "¡ATENCIÓN!",
+  creationAclaration:
+    "Una vez generado el turno no podrá ser modificado.En caso de equivocación debera eliminarlo y despues volverlo a crear.",
   yourData: "Sus datos",
-  youtID:"Tu legajo:",
-  solicitudDate:"Fecha de Solicitud",
-  availability:"Disponibilidad",
-  day:"Dia",
-  subject:"Asunto:",
-  estimateSchedule:"Hora Aproximada",
-  seeMedicAvaila:"Revisar los horarios de inicio y fin del especialista",
-  yourSympthoms:"Explique su dolencia",
-  deleteAclaration:"Esta por cancelar el turno, toda la informacion que se haya utilizado en este turno se perdera como tambien la disponibilidad.",
-  dialogIdTurn:"ID Turno",
-  dialogStudentId:"Legajo Estudiante",
+  youtID: "Tu legajo:",
+  solicitudDate: "Fecha de Solicitud",
+  availability: "Disponibilidad",
+  selectedSpecialty: "Especialidad seleccionada",
+  specialtySchedules: "Horarios de la especialidad",
+  availabilityHint:
+    "Agrega uno o mas dias y horarios en los que podrias asistir.",
+  addAvailability: "Agregar disponibilidad",
+  selectedAvailability: "Disponibilidad cargada",
+  noAvailability: "Todavia no agregaste disponibilidad",
+  availabilityRequired: "Agrega al menos una disponibilidad.",
+  day: "Dia",
+  subject: "Asunto:",
+  estimateSchedule: "Hora Aproximada",
+  seeMedicAvaila: "Revisar los horarios de inicio y fin del especialista",
+  yourSympthoms: "Explique su dolencia",
+  deleteAclaration:
+    "Esta por cancelar el turno, toda la informacion que se haya utilizado en este turno se perdera como tambien la disponibilidad.",
+  dialogIdTurn: "ID Turno",
+  dialogStudentId: "Legajo Estudiante",
   dialogDate: "Fecha de Atención",
-  dialogSchedule:"Horario de Atención",
-  close:"Cerrar",
-  delete:"Eliminar",
-  create:"Crear"
-}
+  dialogSchedule: "Horario de Atención",
+  close: "Cerrar",
+  delete: "Eliminar",
+  create: "Crear",
+};
 export const PROFILE_STRINGS = {
-  myProfileTitle:"Mi Perfil",
-  myProfileSubtitle:"Información personal y de contacto",
-  personalInfoTitle:"Información Personal",
+  myProfileTitle: "Mi Perfil",
+  myProfileSubtitle: "Información personal y de contacto",
+  personalInfoTitle: "Información Personal",
   personalInfoID: "Legajo",
 
-  personalInfoNames:"Nombres",
-  nameRequired:"El nombre es obligatorio",
+  personalInfoNames: "Nombres",
+  nameRequired: "El nombre es obligatorio",
 
-  personalInfoLastNames:"Apellidos",
-  lastNameRequired:"El apellido es obligatorio",
+  personalInfoLastNames: "Apellidos",
+  lastNameRequired: "El apellido es obligatorio",
 
-  personalInfoDNI:"DNI",
+  personalInfoDNI: "DNI",
   DNIRequired: "El DNI debe tener 8 dígitos",
 
-  personalInfoCUIL:"CUIL",
-  CUILRequired: "El CUIL debe tener 11 dígitos" ,
+  personalInfoCUIL: "CUIL",
+  CUILRequired: "El CUIL debe tener 11 dígitos",
 
-  personalInfoBirth:"Fecha de Nacimiento",
-  birthDateRequired:"La fecha de nacimiento es obligatoria",
+  personalInfoBirth: "Fecha de Nacimiento",
+  birthDateRequired: "La fecha de nacimiento es obligatoria",
 
-  contactInfoTitle:"Información de contacto",
-  
-  contactInfoEmail:"Correo Electrónico",
-  emailRequired:"Ingresá un correo válido. Ejemplo: nombre@dominio.com",
+  contactInfoTitle: "Información de contacto",
 
-  contactInfoPhone:"Teléfono",
-  phoneRequired:"Completá el teléfono con el formato +54 351 123-4567",
+  contactInfoEmail: "Correo Electrónico",
+  emailRequired: "Ingresá un correo válido. Ejemplo: nombre@dominio.com",
 
-  contactInfoProvince:"Provincia",
-  provinceRequired:"La provincia es obligatoria",
+  contactInfoPhone: "Teléfono",
+  phoneRequired: "Completá el teléfono con el formato +54 351 123-4567",
 
-  contactInfoCity:"Ciudad / Localidad",
-  cityRequired:"La ciudad/localidad es obligatoria",
+  contactInfoProvince: "Provincia",
+  provinceRequired: "La provincia es obligatoria",
 
-  contactInfoStreet:"Nombre de la calle",
-  streetRequired:"La calle es obligatoria",
+  contactInfoCity: "Ciudad / Localidad",
+  cityRequired: "La ciudad/localidad es obligatoria",
 
-  contactInfoNumber:"Altura",
-  numberRequired:"La altura es obligatoria",
+  contactInfoStreet: "Nombre de la calle",
+  streetRequired: "La calle es obligatoria",
 
-  missingSubtitle:"¡ATENCIÓN!",
-  missingOneField:"Falta completar el campo: ",
-  missingMultipleFields:"Faltan completar los campos: ",
+  contactInfoNumber: "Altura",
+  numberRequired: "La altura es obligatoria",
 
-  myDocumentsTitle:"Mis documentos",
-  myDocumentsSubtitle:"Archivos presentados en los distintos servicios",
-  myDocumentsNoData:"Todavía no hay documentos subidos",
+  missingSubtitle: "¡ATENCIÓN!",
+  missingOneField: "Falta completar el campo: ",
+  missingMultipleFields: "Faltan completar los campos: ",
 
-  saveChangesButton:"Guardar Cambios",
+  myDocumentsTitle: "Mis documentos",
+  myDocumentsSubtitle: "Archivos presentados en los distintos servicios",
+  myDocumentsNoData: "Todavía no hay documentos subidos",
+
+  saveChangesButton: "Guardar Cambios",
 
   //Provider:
-  missingFieldMessage:"Completá todos los campos. Faltan: ",
-  completeAdressMessage:"Completá provincia, ciudad/localidad, calle y altura.",
+  missingFieldMessage: "Completá todos los campos. Faltan: ",
+  completeAdressMessage:
+    "Completá provincia, ciudad/localidad, calle y altura.",
 
-  savedProfile:"Sus datos fueron modificados correctamente!",
-  errorProfile:"Ocurrio un error al modificar sus datos"
-
-
-}
+  savedProfile: "Sus datos fueron modificados correctamente!",
+  errorProfile: "Ocurrio un error al modificar sus datos",
+};
 export const TRIPS_STRINGS = {
-  headerTitle:"Viajes",
-  headerDescription:"Experimenta aventuras con nuestra universidad",
+  headerTitle: "Viajes",
+  headerDescription: "Experimenta aventuras con nuestra universidad",
 
-  documentationTitle:"Documentación pendiente",
-  documentationAclaration:"Para confirmar tu participación en el viaje, verificá que toda la documentación requerida haya sido presentada.",
+  documentationTitle: "Documentación pendiente",
+  documentationAclaration:
+    "Para confirmar tu participación en el viaje, verificá que toda la documentación requerida haya sido presentada.",
 
-  documentationButton:"Revisar documentación",
+  documentationButton: "Revisar documentación",
   travelCardMessage: "Conoce mas de este viaje →",
 
   myDocumentTitle:"Tu Documentación",
+  deleteDocTitle: "Eliminar Documento",
+    deleteDocMessage: (nombreDoc) =>
+    `¿Estás seguro de que deseas eliminar ${nombreDoc}?`,
+  deleteDocButton: "Eliminar",
+  docEliminado: "Documento eliminado con éxito",
+  docEliminadoError: "Error al eliminar el documento",
 
-  faqsTitle:"Más respuestas rápidas",
-  faqsDescription:"Revisá estas preguntas antes de enviar una consulta.",
+  faqsTitle: "Más respuestas rápidas",
+  faqsDescription: "Revisá estas preguntas antes de enviar una consulta.",
 
   //Provider
-  errorLoadingDocuments:"No se pudo cargar el documento",
+  errorLoadingDocuments: "No se pudo cargar el documento",
   errorExtensionMsg: "Solo se permiten archivos: ",
-  errorMaxMBMsg:"El archivo no puede superar los ",
+  errorMaxMBMsg: "El archivo no puede superar los ",
 
-  savedFile:"Archivo subido con éxito",
-  errorFile:"Error al subir el archivo:"
-}
+  savedFile: "Archivo subido con éxito",
+  errorFile: "Error al subir el archivo:",
+};

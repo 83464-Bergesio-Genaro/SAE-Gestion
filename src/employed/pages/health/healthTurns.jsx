@@ -45,7 +45,7 @@ import SAEDataGrid from "../../../assets/components/datagrid/SAEDataGrid";
 import { HealthUsersProvider } from "../../context/providers/healthProvider";
 import { useNotification } from "../../../shared/context/sharedContext";
 import { useHealth } from "../../context/employedContext";
-import { formatDate } from "../../../utils/date.utils";
+import { formatDate, toTimeInput } from "../../../utils/date.utils";
 import { carreras } from "../../../utils/common/constants";
 import { HEALTH_STRING } from "../../../utils/strings/employed.strings";
 
@@ -58,6 +58,10 @@ const PALETTE = [
   "#6FA958", //Finalizado
   "#FF8E2C", //Reprogramado
 ];
+
+const getTurnStatusColor = (statusId) => PALETTE[Number(statusId)] ?? PALETTE[0];
+
+const getTurnStatusTextColor = () => "white";
 
 export function TurnGrid() {
   const {
@@ -81,7 +85,7 @@ export function TurnGrid() {
     openShowNoActivos,
     // Personal y estados
     personal,
-    estadosTurno
+    estadosTurno,
   } = useHealth();
 
   const {
@@ -104,13 +108,16 @@ export function TurnGrid() {
       inactiveTurns: {
         key: "inactiveTurns",
         title:
-          inactiveTurnsType === "cancelados"
-            ? C.turnsCancel
-            : C.turnsFinish,
+          inactiveTurnsType === "cancelados" ? C.turnsCancel : C.turnsFinish,
         icon: CalendarMonthIcon,
         rows: noActivosRows,
         columns: noActivosColumns,
         loading: loadingNoActivos,
+        initialState: {
+          sorting: {
+            sortModel: [{ field: "fecha_atencion", sort: "desc" }],
+          },
+        },
       },
     }),
     [inactiveTurnsType, loadingNoActivos, noActivosColumns, noActivosRows],
@@ -127,10 +134,8 @@ export function TurnGrid() {
   };
 
   const dialogStatus = Number(dialogData?.id_estado_turno ?? 0);
-  const dialogStatusColor = PALETTE[dialogStatus] ?? PALETTE[0];
-  const dialogStatusTextColor = [3, 4, 5].includes(dialogStatus)
-    ? "#14325c"
-    : "white";
+  const dialogStatusColor = getTurnStatusColor(dialogStatus);
+  const dialogStatusTextColor = getTurnStatusTextColor(dialogStatus);
 
   const handlePatientSearch = () => {
     const studentId = String(dialogData.legajo ?? "")
@@ -193,7 +198,7 @@ export function TurnGrid() {
                     {/* <DashboardIcon sx={{ fontSize: 32 }} /> */}
                     <Box>
                       <Typography variant="h4" fontWeight={700}>
-                       {C.turnsCreation}
+                        {C.turnsCreation}
                       </Typography>
                     </Box>
                   </Stack>
@@ -210,7 +215,6 @@ export function TurnGrid() {
                     }}
                   >
                     {C.turnsCreationButton}
-                    
                   </SAEButton>
                 </Stack>
               </Box>
@@ -276,8 +280,11 @@ export function TurnGrid() {
           <Dialog
             open={dialogOpen}
             onClose={closeDialog}
-            maxWidth="sm"
+            maxWidth="md"
             fullWidth
+            PaperProps={{
+              sx: { width: "min(900px, calc(100% - 32px))" },
+            }}
           >
             <DialogTitle
               sx={{
@@ -294,7 +301,7 @@ export function TurnGrid() {
                 component="span"
                 sx={{ fontWeight: "bold" }}
               >
-                {dialogMode === "create" ? C.turnsCreation: C.turnsEdit}
+                {dialogMode === "create" ? C.turnsCreation : C.turnsEdit}
               </Typography>
               <IconButton onClick={closeDialog} size="small" color="inherit">
                 <CloseIcon />
@@ -399,7 +406,7 @@ export function TurnGrid() {
                             }}
                           >
                             <Typography variant="subtitle1" fontWeight="bold">
-                             {C.turnsUser}
+                              {C.turnsUser}
                             </Typography>
                             {/* Reemplazá esto con los campos reales de tu objeto "usuarioSelected" */}
                             <Typography variant="body1">
@@ -421,7 +428,7 @@ export function TurnGrid() {
                     )}
                     {dialogMode === "edit" && (
                       <>
-                        <Grid size={{ xs: 12, md: 3 }} m={0}>
+                        <Grid size={{ xs: 12, md: 2 }} m={0}>
                           <SAETextField
                             label={C.turnsId}
                             type="number"
@@ -433,7 +440,7 @@ export function TurnGrid() {
                             disabled={true}
                           />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 9 }} m={0}>
+                        <Grid size={{ xs: 12, md: 4 }} m={0}>
                           <SAETextField
                             label={C.turnsPacientName}
                             value={dialogData.paciente}
@@ -444,7 +451,7 @@ export function TurnGrid() {
                             disabled={true}
                           />
                         </Grid>
-                        <Grid size={{ xs: 12 }} m={0}>
+                        <Grid size={{ xs: 12, md: 5 }} m={0}>
                           <SAETextField
                             label={C.turnsUserId}
                             value={dialogData.legajo}
@@ -592,6 +599,57 @@ export function TurnGrid() {
                             }}
                           />
                         )}
+                        renderValue={(value) =>
+                          value ? (
+                            <Chip
+                              label={value.estado_turno}
+                              sx={{
+                                bgcolor: getTurnStatusColor(
+                                  value.id_estado_turno,
+                                ),
+                                color: getTurnStatusTextColor(
+                                  value.id_estado_turno,
+                                ),
+                                fontSize: "1rem",
+                                fontWeight: 800,
+                                height: 40,
+                                px: 1,
+                                borderRadius: 2,
+                                minWidth: 150,
+                                "& .MuiChip-label": {
+                                  px: 1.5,
+                                },
+                              }}
+                            />
+                          ) : null
+                        }
+                        renderOption={(props, option) => {
+                          const { key, ...optionProps } = props;
+
+                          return (
+                            <Box component="li" key={key} {...optionProps}>
+                              <Chip
+                                label={option.estado_turno}
+                                sx={{
+                                  bgcolor: getTurnStatusColor(
+                                    option.id_estado_turno,
+                                  ),
+                                  color: getTurnStatusTextColor(
+                                    option.id_estado_turno,
+                                  ),
+                                  fontWeight: 800,
+                                  height: 34,
+                                  minWidth: 130,
+                                  justifyContent: "center",
+                                  "& .MuiChip-label": {
+                                    width: "100%",
+                                    textAlign: "center",
+                                  },
+                                }}
+                              />
+                            </Box>
+                          );
+                        }}
                       />
                     </Grid>
                   </Grid>
@@ -779,14 +837,24 @@ function TurnList({
           sx={{
             display: "flex",
             gap: 2,
-            overflowX: "auto", // Permite el scroll horizontal
+            overflowX: "auto",
+            maxHeight: { xs: 430, md: 470 },
             //Solo los estados a pendiente y a reprogramar tienen esta altura minima
             minHeight: estadoActual === 0 || estadoActual === 5 ? 250 : "none",
             paddingX: 1,
-            whiteSpace: "nowrap",
+            paddingY: 0.5,
+            pr: 1.5,
+            scrollbarColor: "rgba(21, 61, 113, 0.45) rgba(21, 61, 113, 0.08)",
             // Opcional: Ocultar o estilizar la barra de scroll
-            "&::-webkit-scrollbar": { height: "6px" },
-            "&::-webkit-scrollbar-thumb": { borderRadius: "4px" },
+            "&::-webkit-scrollbar": { height: "6px", width: "8px" },
+            "&::-webkit-scrollbar-track": {
+              bgcolor: "rgba(21, 61, 113, 0.08)",
+              borderRadius: "4px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              bgcolor: "rgba(21, 61, 113, 0.45)",
+              borderRadius: "4px",
+            },
           }}
         >
           {loadingTurnos && listadoTurnos && (
@@ -830,16 +898,33 @@ function TurnList({
                       direction="row"
                       justifyContent="space-between"
                       alignItems="center"
-                      mb={1.5}
+                      mb={1.0}
                     >
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight="bold"
-                        noWrap
-                        sx={{ maxWidth: "140px" }}
-                      >
-                        {formatDate(turno.fecha_solicitud,"short") || C.turnsNoDate}
-                      </Typography>
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#6f8099",
+                            fontWeight: 800,
+                            letterSpacing: "0.02em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Fecha solicitud
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            color: "#153b6f",
+                            fontWeight: 800,
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {formatDate(turno.fecha_solicitud, "short") ||
+                            C.turnsNoDate}
+                        </Typography>
+                      </Box>
+
                       <Chip
                         label={turno.estado || C.turnsNoState}
                         size="small"
@@ -856,33 +941,90 @@ function TurnList({
 
                     {/* Datos Mínimos: Fecha y Hora */}
                     <Stack spacing={1} mt={1.5}>
-                      <Typography variant="body2" sx={{ maxWidth: "140px" }}>
-                        <strong>{"Solicitante: "}</strong>
-                        {turno.paciente || C.turnsNoName}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{ maxWidth: "140px" }}
-                      >
-                        <strong>{"Asunto: "}</strong>
-                        {turno.asunto ||C.turnsNoSubject}
-                      </Typography>
-                      <Typography variant="body2" sx={{ maxWidth: "140px" }}>
-                        <strong>{"Atiende: "}</strong>
-                        {turno.especialista || C.turnsNoMedic}
-                      </Typography>
+                      <Stack spacing={0.25}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#6f8099",
+                            fontWeight: 800,
+                            letterSpacing: "0.02em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Solicitante
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "var(--primary)",
+                            fontWeight: 600,
+                            whiteSpace: "normal",
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {turno.paciente || C.turnsNoName}
+                        </Typography>
+                      </Stack>
+                      <Stack spacing={0.25}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#6f8099",
+                            fontWeight: 800,
+                            letterSpacing: "0.02em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Atiende
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "var(--primary)",
+                            fontWeight: 600,
+                            whiteSpace: "normal",
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {turno.especialista || C.turnsNoMedic}
+                        </Typography>
+                      </Stack>
+                      <Stack spacing={0.25}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#6f8099",
+                            fontWeight: 800,
+                            letterSpacing: "0.02em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Asunto
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "var(--primary)",
+                            display: "-webkit-box",
+                            fontWeight: 600,
+                            overflow: "hidden",
+                            overflowWrap: "anywhere",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                          }}
+                        >
+                          {turno.asunto || C.turnsNoSubject}
+                        </Typography>
+                      </Stack>
                       <Stack direction="row" alignItems="center" gap={1}>
                         <CalendarMonthIcon fontSize="small" color="action" />
                         <Typography variant="body2" color="text.secondary">
-                          {turno.fecha_atencion || C.turnsNoAppointment}
+                          {formatDate(turno.fecha_atencion, "short") ||
+                            C.turnsNoAppointment}
                         </Typography>
-                      </Stack>
-
-                      <Stack direction="row" alignItems="center" gap={1}>
                         <AccessTimeIcon fontSize="small" color="action" />
                         <Typography variant="body2" color="text.secondary">
-                          {turno.hora_atencion || C.turnsNoHour}
+                          {toTimeInput(turno.hora_atencion) || C.turnsNoHour}
                         </Typography>
                       </Stack>
                     </Stack>

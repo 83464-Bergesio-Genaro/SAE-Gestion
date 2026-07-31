@@ -1,15 +1,17 @@
 import { useState,useEffect,useCallback } from "react";
 import { TravelContext } from "../studentContext";
 import { DescargarDocumentacionXId, ObtenerViajesXLegajo } from "../../../api/TravelService";
+import { eliminarDocumentoEstudiante, listarDocumentacionXLegajo } from "../../../api/BecasService";
+import { crearDocumentoEstudiante } from "../../../api/DeporteService";
 import { mapViajes } from "../../../api/formatters/ViajeFormatter";
 import { useAuth, useNotification } from "../../../shared/context/sharedContext";
-import { crearDocumentoEstudiante } from "../../../api/DeporteService";
 
 import { MAX_FILE_SIZE_BYTES,MAX_FILE_SIZE_MB } from "../../../utils/common/constants.js";
 import { TRIPS_STRINGS } from "../../../utils/strings/student.strings.js";
 import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/common/common.config.js";
 
 import { buildDocumentName, createPreviewState,isPdfDocument} from "../../../utils/documents.utils.js";
+import { mapResponseDocumento } from "../../../api/formatters/EstudianteFormatters.js";
 const C = TRIPS_STRINGS;
 
 export const TravelProvider = ({ children }) => {
@@ -23,6 +25,55 @@ export const TravelProvider = ({ children }) => {
         imageSrc: null, // Limpieza para liberar memoria
       }));
   };
+
+const mergeDocuments = (requiredDocs, profileDocs) => {
+  return requiredDocs.map((reqDoc) => {
+    // Buscar el documento correspondiente en la data del perfil
+    const uploadedDoc = profileDocs.find(
+      (pDoc) => pDoc.id_tipo_documento === reqDoc.id_tipo_documento
+    );
+    // Si existe en el perfil, fusionamos los datos; si no, mantenemos el estado base
+    if (uploadedDoc) {
+      
+      return {
+        ...reqDoc, // Mantiene nombre, descripción, template, required, etc.
+        subido: true, // Marca como subido
+        archivo: uploadedDoc.archivo, // URL o blob del archivo
+        nombre_documento: uploadedDoc.nombre_documento || reqDoc.archivoNombre,
+        id_archivo: uploadedDoc.id, // ID necesario para borrar
+        fechaSubida: uploadedDoc.fecha_subida,
+      };
+    }
+
+    // Si no está subido, devuelve el objeto base (subido: false)
+    return reqDoc;
+  });
+};
+
+  const [loadingDocumentos, setLoadingDocumentos] = useState(false);
+  const [documentosParaMostrar, setDocumentosParaMostrar] = useState(TRAVEL_REQUIRED_DOCUMENTS);
+
+  const fetchDocumentos =  useCallback(async () => {
+      setLoadingDocumentos(true);
+      try {
+        const data = await listarDocumentacionXLegajo(user.legajo);
+        const perfilDocs = data.map(mapResponseDocumento);
+        const listaActualizada = mergeDocuments(TRAVEL_REQUIRED_DOCUMENTS, perfilDocs);
+
+        setDocumentosParaMostrar(listaActualizada,perfilDocs);
+
+      } catch (error) {
+        console.error("Error cargando documentos:", error);
+        // En caso de error, mostramos la lista base (todos como "no subidos")
+        setDocumentosParaMostrar(TRAVEL_REQUIRED_DOCUMENTS);
+
+      } finally {
+        setLoadingDocumentos(false);
+      }
+    }, [user?.legajo]);
+  useEffect(() => {
+    fetchDocumentos();
+  }, [fetchDocumentos]);
 
     const closeDeleteDialog = () => setOpenPopup(false);
 
@@ -79,25 +130,27 @@ export const TravelProvider = ({ children }) => {
         }
     };
 
-  const [documentos, setDocumentos] = useState(() =>
-    TRAVEL_REQUIRED_DOCUMENTS.map((documento) => ({ ...documento })),
-  );
+
   const [loadingDocuments, setLoadingDocuments] = useState(true);
 
  const handleArchivoChange = async (event, item) => {
-     const file = event.target.files?.[0];
-     if (!file) return;
- 
-     const extension = `.${file.name.split(".").pop().toLowerCase()}`;
-     const allowedExtensions = (item.extension ?? "")
-       .split(",")
-       .map((value) => value.trim().toLowerCase());
- 
-     if (!allowedExtensions.includes(extension)) {
-       showNotification(`${C.errorExtensionMsg} ${item.extension}`, "warning");
-       event.target.value = "";
-       return;
-     }
+     const file = event.target.files[0];
+      if (!file) return;
+
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      const allowedExtensions = TRAVEL_REQUIRED_DOCUMENTS.map((doc) => 
+        doc.extension.replace(/^\.+/, "").toLowerCase()
+      );
+
+      if (!allowedExtensions.includes(fileExt)) {
+        // 2. Mostrar mensaje legible (usando .join)
+        showNotification(
+          `${C.errorExtensionMsg} Extensiones permitidas: ${allowedExtensions.join(", ")}`, 
+          "warning"
+        );
+        event.target.value = "";
+        return;
+      }
  
      if (file.size > MAX_FILE_SIZE_BYTES) {
        showNotification(
@@ -111,7 +164,7 @@ export const TravelProvider = ({ children }) => {
      const fileName = buildDocumentName(
        item.formatoNombre,
        { legajo: user.legajo },
-       extension,
+       fileExt,
      );
      const renamedFile = new File([file], fileName, {
        type: file.type,
@@ -120,23 +173,11 @@ export const TravelProvider = ({ children }) => {
  
      try {
        setLoadingDocuments(true);
-       const savedFile = await crearDocumentoEstudiante(
+        await crearDocumentoEstudiante(
          item.id_tipo_documento,
          renamedFile,
        );
-       setDocumentos((previous) =>
-         previous.map((documento) =>
-           Number(documento.id_tipo_documento) === Number(item.id_tipo_documento)
-             ? {
-                 ...documento,
-                 archivo: savedFile,
-                 archivoNombre: savedFile.nombre_documento,
-                 subido: true,
-                 id_archivo: savedFile.id,
-               }
-             : documento,
-         ),
-       );
+      fetchDocumentos();
        showNotification(C.savedFile);
      } catch (error) {
        console.error("Error al subir el archivo:", error);
@@ -151,16 +192,32 @@ export const TravelProvider = ({ children }) => {
         setOpenPopup(true);
     };
 
+  const handleDelete = async (item) => {
+      try {
+        setOpenPopup(false);
+        setLoadingDocuments(true);
+        await eliminarDocumentoEstudiante(item.id_archivo);
 
+        fetchDocumentos();
+        showNotification(C.docEliminado,"success");
+      } catch (error) {
+        console.error("Error al eliminar el documento:", error);
+        showNotification(C.docEliminadoError, "error");
+      } finally {
+        setLoadingDocuments(false);
+      }
+    };
     return (
     <TravelContext.Provider
         value={{
             travelsLegajo,loadingTravel,fetchTravelsLegajo,
             TRAVEL_REQUIRED_DOCUMENTS,
             handlePreview,preview,setPreview,openPopup,setOpenPopup,
-            documentoAEliminar,setDocumentoAEliminar,
+            documentoAEliminar,setDocumentoAEliminar,requestDeleteDocument,handleDelete,
             closePreview,closeDeleteDialog,
-            handleArchivoChange,documentos,loadingDocuments,requestDeleteDocument
+            handleArchivoChange,loadingDocuments,
+
+            loadingDocumentos,documentosParaMostrar
         }}
     >
         {children}

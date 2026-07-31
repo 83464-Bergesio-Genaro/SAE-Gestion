@@ -360,7 +360,7 @@ export function SportsProvider({ children }) {
   );
   const tournamentsColumns = useMemo(() => {
     return generateColumns(EMPTY_TOURNAMENT, []);
-  }, [ ]); 
+  }, []);
 
   return (
     <SportsContext.Provider

@@ -16,6 +16,7 @@ import {
 
 import { AddCircleOutline } from "@mui/icons-material";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 import { SCHOLARSHIP_STRINGS } from "../../../utils/strings/student.strings";
 import {

@@ -53,8 +53,13 @@ function getSessionToken() {
 
 export function resolveApiUrl(endpoint) {
   if (/^https?:\/\//i.test(endpoint)) return endpoint;
+
   const baseUrl = appConfig.apiUrl.replace(/\/$/, "");
-  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
+  const path = endpoint.startsWith("/")
+    ? endpoint
+    : `/${endpoint}`;
+
   return `${baseUrl}${path}`;
 }
 
@@ -123,10 +128,13 @@ export async function apiRequest(
   const isFormData = body instanceof FormData;
   const authorizationToken = token ?? (auth ? getSessionToken() : null);
 
+  console.log("Prueba para saltearnos el CORS");
   // Opción 3: Limpiamos customHeaders para evitar que valores 'undefined' rompan la petición
   const cleanCustomHeaders = Object.fromEntries(
     Object.entries(customHeaders).filter((entry) => entry[1] != null)
   );
+  console.log("BASE: ",appConfig.apiUrl);
+  console.log("Endpoint:",resolveApiUrl(endpoint));
   const headers = {
     // SÓLO agrega la cabecera si warning es true Y la URL de destino NO es localhost
     ...(warning && !resolveApiUrl(endpoint).includes("localhost") 
@@ -140,8 +148,8 @@ export async function apiRequest(
       : {}),
     ...cleanCustomHeaders, // Aplicamos las cabeceras externas ya saneadas
   };
+  console.log("Solicitud", method, headers, signal,body);
 
-  // Opción 4: Agregamos 'mode: "cors"' explícitamente al fetch
   const response = await fetch(resolveApiUrl(endpoint), {
     method,
     headers,
@@ -150,7 +158,7 @@ export async function apiRequest(
     body:
       body == null ? undefined : isFormData ? body : JSON.stringify(body),
   });
-
+  console.log("Respuesta",response);
   if (!response.ok) {
     const errorData = await parseErrorResponse(response);
 

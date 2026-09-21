@@ -225,7 +225,13 @@ function DialogPurchase({ dateRange }) {
   const showPurchaseForm = dialogType === "purchases";
   const showDocumentsForm = dialogMode === "create" || isDocsDialog;
   const { empleados, loadingEmpleados } = useEmploy();
-  const [fieldErrors, setFieldErrors] = useState({});
+  const validationKey = `${dialogType}-${dialogMode}-${dialogOpen}`;
+  const [fieldValidation, setFieldValidation] = useState({
+    key: validationKey,
+    errors: {},
+  });
+  const fieldErrors =
+    fieldValidation.key === validationKey ? fieldValidation.errors : {};
 
   const {
     isPurchaseDataComplete,
@@ -253,12 +259,6 @@ function DialogPurchase({ dateRange }) {
       ) || null,
     [dialogData.id_usuario, empleados],
   );
-
-  useEffect(() => {
-    if (dialogOpen && ["purchases", "docs"].includes(dialogType)) {
-      setFieldErrors({});
-    }
-  }, [dialogOpen, dialogType, dialogMode]);
 
   const isBlank = (value) => String(value ?? "").trim() === "";
   const isValidCurrency = (value) => {
@@ -331,7 +331,10 @@ function DialogPurchase({ dateRange }) {
       }
     }
 
-    setFieldErrors(errors);
+    setFieldValidation({
+      key: validationKey,
+      errors,
+    });
 
     if (errors.facturas_documentos) {
       setDialogError(errors.facturas_documentos);
@@ -349,9 +352,17 @@ function DialogPurchase({ dateRange }) {
   };
 
   const clearFieldError = (field) => {
-    setFieldErrors((previous) =>
-      previous[field] ? { ...previous, [field]: undefined } : previous,
-    );
+    setFieldValidation((previous) => {
+      const previousErrors =
+        previous.key === validationKey ? previous.errors : {};
+
+      return previousErrors[field]
+        ? {
+            key: validationKey,
+            errors: { ...previousErrors, [field]: undefined },
+          }
+        : previous;
+    });
   };
 
   const handlePurchaseFieldChange = (field, value) => {
@@ -758,12 +769,14 @@ function DialogPurchase({ dateRange }) {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={18} color="inherit" />
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
                 ) : (
                   <SaveOutlinedIcon />
                 )
               }
             >
-              {COMPRAS_STRINGS.save}
+              {dialogMode === "create" ? "Crear" : COMPRAS_STRINGS.save}
             </SAEButton>
           )}
         </DialogActions>
@@ -777,7 +790,11 @@ function DialogPurchase({ dateRange }) {
           </Alert>
         </DialogContent>
         <DialogActions>
-          <SAEButton variant="outlined" onClick={() => setWarningOpen(false)}>
+          <SAEButton
+            variant="outlined"
+            onClick={() => setWarningOpen(false)}
+            startIcon={<CloseIcon />}
+          >
             {COMPRAS_STRINGS.back}
           </SAEButton>
           <SAEButton

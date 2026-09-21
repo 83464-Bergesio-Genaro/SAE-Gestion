@@ -27,7 +27,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonIcon from "@mui/icons-material/Person";
@@ -247,6 +247,7 @@ function NuevoHorarioCard() {
             variant="outlined"
             onClick={handleCancelClick}
             disabled={savingHorario}
+            startIcon={<CloseIcon />}
           >
             Cancelar
           </SAEButton>
@@ -390,6 +391,7 @@ function HorarioCard({ horario }) {
                 variant="outlined"
                 onClick={() => setDeleteId(horario.id)}
                 disabled={!isDeleting}
+                startIcon={<CloseIcon />}
               >
                 Cancelar
               </SAEButton>
@@ -627,6 +629,7 @@ function HorarioCard({ horario }) {
             variant="outlined"
             onClick={handleCancelHorario}
             disabled={savingHorario}
+            startIcon={<CloseIcon />}
           >
             Cancelar
           </SAEButton>
@@ -638,11 +641,11 @@ function HorarioCard({ horario }) {
               savingHorario ? (
                 <CircularProgress size={14} color="inherit" />
               ) : (
-                <CheckIcon />
+                <SaveOutlinedIcon />
               )
             }
           >
-            Guardar cambios
+            Guardar
           </SAEButton>
         </Stack>
       </CardContent>
@@ -817,7 +820,11 @@ export default function GestionarHorariosDialog({ open }) {
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <SAEButton variant="outlined" onClick={handleClose}>
+        <SAEButton
+          variant="outlined"
+          onClick={handleClose}
+          startIcon={<CloseIcon />}
+        >
           Cerrar
         </SAEButton>
       </DialogActions>

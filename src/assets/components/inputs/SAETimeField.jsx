@@ -27,6 +27,7 @@ export default function SAETimeField({
   error = false,
   helperText = "",
   timeStepsMinutes = 15, //Minutos
+  required = false,
 }) {
   const textFieldSize = size === "big" ? "medium" : size;
 
@@ -56,6 +57,7 @@ export default function SAETimeField({
           textField: {
             size: textFieldSize,
             fullWidth,
+            required,
             error,
             helperText,
             sx: fullWidth ? undefined : { width },

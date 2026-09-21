@@ -17,7 +17,7 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
-import SaveIcon from "@mui/icons-material/Save";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 
 import SAEButton from "../../../assets/components/buttons/SAEButton";
@@ -413,7 +413,12 @@ export default function TorneoFormDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <SAEButton variant="outlined" onClick={onClose} disabled={saving}>
+        <SAEButton
+          variant="outlined"
+          onClick={onClose}
+          disabled={saving}
+          startIcon={<CloseIcon />}
+        >
           {C.cancel}
         </SAEButton>
         <SAEButton
@@ -421,14 +426,16 @@ export default function TorneoFormDialog({
           startIcon={
             saving ? (
               <CircularProgress size={18} color="inherit" />
+            ) : !isEdit ? (
+              <AddIcon />
             ) : (
-              <SaveIcon />
+              <SaveOutlinedIcon />
             )
           }
           onClick={handleSave}
           disabled={saving}
         >
-          {isEdit ? C.save : C.tournamenteCreate}
+          {isEdit ? C.save : C.create}
         </SAEButton>
       </DialogActions>
     </Dialog>

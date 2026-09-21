@@ -40,7 +40,10 @@ import {
 } from "../../../utils/common/common.config.js";
 import { USER_STRINGS } from "../../../utils/strings/employed.strings.js";
 import { isEmpty } from "../../../utils/text.utils.js";
-import { isTimeAfter } from "../../../utils/validation.utils.js";
+import {
+  isTimeAfter,
+  validateNombreApellido,
+} from "../../../utils/validation.utils.js";
 
 const C = USER_STRINGS;
 
@@ -101,14 +104,18 @@ export const AdminUsersProvider = ({ children }) => {
         return dialogMode === "edit" && isEmpty(value) ? C.validationID : "";
       case field === "legajo":
         return isEmpty(value) ? C.validationStudentID : "";
+      case field === "nombre_carrera":
+        return isEmpty(value) ? C.validationDegree : "";
+      case field === "nombres":
+        return validateNombreApellido(String(value ?? ""), "El nombre") ?? "";
+      case field === "apellidos":
+        return validateNombreApellido(String(value ?? ""), "El apellido") ?? "";
       case field.includes("nombre") || field.includes("apellido"):
         return isEmpty(value) ? C.validationNames : "";
       case field === "activo":
         return isEmpty(value) ? C.validationActive : "";
       case field === "id_perfil":
         return isPositiveNumber(value) ? "" : C.validationProfile;
-      case field === "nombre_carrera":
-        return isEmpty(value) ? C.validationDegree : "";
       case field === "id_especialidad":
         return isPositiveNumber(value) ? "" : C.validationDegree;
       case field === "id_carrera":
@@ -347,6 +354,7 @@ export const AdminUsersProvider = ({ children }) => {
   }, [fetchUsuariosXLegajo]);
 
   const openCreateUsuarios = useCallback(() => {
+    resetValidation();
     openDialog("usuarios", "create", {
       id: "",
       legajo: "",

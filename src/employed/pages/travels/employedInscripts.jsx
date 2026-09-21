@@ -435,6 +435,7 @@ function InscriptDeleteDialog() {
           variant="outlined"
           onClick={closeDialog}
           disabled={dialogSaving}
+          startIcon={<CloseIcon />}
         >
           {C.cancel}
         </SAEButton>
@@ -607,7 +608,11 @@ function DocumentsDialog() {
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <SAEButton variant="outlined" onClick={handleClose}>
+          <SAEButton
+            variant="outlined"
+            onClick={handleClose}
+            startIcon={<CloseIcon />}
+          >
            {C.travelClose}
           </SAEButton>
         </DialogActions>
@@ -629,6 +634,7 @@ function DocumentsDialog() {
             onClick={() => setOpenPopup(false)}
             autoFocus
             color="outlined"
+            startIcon={<CloseIcon />}
           >
             {C.cancel}
           </SAEButton>

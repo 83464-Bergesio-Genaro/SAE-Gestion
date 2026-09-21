@@ -11,6 +11,8 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import SAETimeField from "../../../assets/components/inputs/SAETimeField";
@@ -23,6 +25,7 @@ import {
   isValidEmail,
   isValidMinLengthPhone,
   isValidPhone,
+  isValidText,
 } from "../../../utils/validation.utils";
 import { isEmpty, onlyDigits } from "../../../utils/text.utils";
 
@@ -52,7 +55,8 @@ export default function DialogServicios() {
   const validateField = (field, value, data = dialogData) => {
     switch (field) {
       case "nombre":
-        return isEmpty(value) ? BS.validationName : "";
+        if (isEmpty(value)) return BS.validationName;
+        return isValidText(value) ? "" : BS.validationNameFormat;
       case "nro_telefono":
         if (isEmpty(value)) return BS.validationPhoneRequired;
         return isValidPhone(value) ? "" : BS.validationPhoneFormat;
@@ -258,6 +262,7 @@ export default function DialogServicios() {
           variant="outlined"
           onClick={handleClose}
           disabled={dialogSaving}
+          startIcon={<CloseIcon />}
         >
           {BS.cancel}
         </SAEButton>
@@ -266,10 +271,16 @@ export default function DialogServicios() {
           onClick={handleSave}
           disabled={dialogSaving}
           startIcon={
-            dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
+            dialogSaving ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : dialogMode === "create" ? (
+              <AddIcon />
+            ) : (
+              <SaveOutlinedIcon />
+            )
           }
         >
-          {dialogSaving ? BS.saving : BS.save}
+          {dialogSaving ? BS.saving : dialogMode === "create" ? "Crear" : BS.save}
         </SAEButton>
       </DialogActions>
     </Dialog>

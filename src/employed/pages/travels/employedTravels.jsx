@@ -24,6 +24,8 @@ import {
 } from "@mui/material";
 
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import BusinessIcon from "@mui/icons-material/Business";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LocalAirportIcon from "@mui/icons-material/LocalAirport";
@@ -349,24 +351,26 @@ function BussinessDialog() {
             </Alert>
           )}
           <Grid container spacing={1}>
-            <Grid size={{ xs: 12, md: 3 }} m={0}>
-              <SAETextField
-                label={C.travelID}
-                type="number"
-                fullWidth
-                value={dialogData.id||""}
-                onChange={(e) => handleDataChange("id", e.target.value,
-                     {
-                        setTouched: setTouchedFields,
-                        setErrors: setFieldErrors,
-                        validateFn: validateField
-                      })}
-                disabled={true}
-                error={Boolean(fieldErrors.id)}
-                helperText={fieldErrors.id}         
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 9 }} m={0}>
+            {dialogMode === "edit" && (
+              <Grid size={{ xs: 12, md: 3 }} m={0}>
+                <SAETextField
+                  label={C.travelID}
+                  type="number"
+                  fullWidth
+                  value={dialogData.id||""}
+                  onChange={(e) => handleDataChange("id", e.target.value,
+                       {
+                          setTouched: setTouchedFields,
+                          setErrors: setFieldErrors,
+                          validateFn: validateField
+                        })}
+                  disabled={true}
+                  error={Boolean(fieldErrors.id)}
+                  helperText={fieldErrors.id}
+                />
+              </Grid>
+            )}
+            <Grid size={{ xs: 12, md: dialogMode === "edit" ? 9 : 12 }} m={0}>
               <SAETextField
                 label={C.businessName}
                 value={dialogData.nombre}
@@ -376,6 +380,7 @@ function BussinessDialog() {
                         setErrors: setFieldErrors,
                         validateFn: validateField
                       })}
+                required
                 fullWidth
                 error={Boolean(fieldErrors.nombre)}
                 helperText={fieldErrors.nombre}                
@@ -395,6 +400,7 @@ function BussinessDialog() {
                 }
                 error={Boolean(fieldErrors.contacto)}
                 helperText={fieldErrors.contacto}
+                required
                 fullWidth
               />
             </Grid>
@@ -410,6 +416,7 @@ function BussinessDialog() {
                       })}
                 error={Boolean(fieldErrors.email)}
                 helperText={fieldErrors.email}
+                required
                 fullWidth
               />
             </Grid>
@@ -427,6 +434,7 @@ function BussinessDialog() {
                 }
                 error={Boolean(fieldErrors.cuit)}
                 helperText={fieldErrors.cuit}
+                required
                 fullWidth
               />
             </Grid>
@@ -444,6 +452,7 @@ function BussinessDialog() {
                 }
                 error={Boolean(fieldErrors.cbu)}
                 helperText={fieldErrors.cbu}
+                required
                 fullWidth
               />
             </Grid>
@@ -478,6 +487,7 @@ function BussinessDialog() {
           variant="outlined"
           onClick={handleClose}
           disabled={dialogSaving}
+          startIcon={<CloseIcon />}
         >
           {C.cancel}
         </SAEButton>
@@ -486,7 +496,13 @@ function BussinessDialog() {
           onClick={handleBussinessSave}
           disabled={dialogSaving}
           startIcon={
-            dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
+            dialogSaving ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : dialogMode === "create" ? (
+              <AddIcon />
+            ) : (
+              <SaveOutlinedIcon />
+            )
           }
         >
           {dialogMode === "create"
@@ -602,24 +618,26 @@ function TravelsDialog() {
             </Alert>
           )}
           <Grid container spacing={1}>
-            <Grid size={{ xs: 12, md: 2 }} m={0}>
-              <SAETextField
-                label={C.travelID}
-                type="number"
-                fullWidth
-                value={dialogData.id}
-                onChange={(e) => handleDialogChange("id", e.target.value,
-                     {
-                        setTouched: setTouchedFields,
-                        setErrors: setFieldErrors,
-                        validateFn: validateField
-                      })}
-                disabled={true}
-                error={Boolean(fieldErrors.id)}
-                helperText={fieldErrors.id}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 8 }} m={0}>
+            {dialogMode === "edit" && (
+              <Grid size={{ xs: 12, md: 2 }} m={0}>
+                <SAETextField
+                  label={C.travelID}
+                  type="number"
+                  fullWidth
+                  value={dialogData.id}
+                  onChange={(e) => handleDialogChange("id", e.target.value,
+                       {
+                          setTouched: setTouchedFields,
+                          setErrors: setFieldErrors,
+                          validateFn: validateField
+                        })}
+                  disabled={true}
+                  error={Boolean(fieldErrors.id)}
+                  helperText={fieldErrors.id}
+                />
+              </Grid>
+            )}
+            <Grid size={{ xs: 12, md: dialogMode === "edit" ? 8 : 10 }} m={0}>
               <SAETextField
                 label={C.travelName}
                 value={dialogData.nombre}
@@ -629,6 +647,7 @@ function TravelsDialog() {
                         setErrors: setFieldErrors,
                         validateFn: validateField
                       })}
+                required
                 fullWidth
                 error={Boolean(fieldErrors.nombre)}
                 helperText={fieldErrors.nombre}
@@ -650,6 +669,7 @@ function TravelsDialog() {
                 }
                 error={Boolean(fieldErrors.cantidad_personas)}
                 helperText={fieldErrors.cantidad_personas}
+                required
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }} my={1}>
@@ -666,6 +686,7 @@ function TravelsDialog() {
                       })
                 }
                 fullWidth
+                required
                 slotProps={{ inputLabel: { shrink: true } }}
                 error={Boolean(fieldErrors.fecha_inicio)}
                 helperText={fieldErrors.fecha_inicio}
@@ -685,6 +706,7 @@ function TravelsDialog() {
                       })
                 }
                 fullWidth
+                required
                 slotProps={{
                   inputLabel: { shrink: true },
                   htmlInput: { min: dialogData.fecha_inicio || undefined },
@@ -707,6 +729,7 @@ function TravelsDialog() {
                   handleAddressChange(0, e.target.value, "origen")
                 }
                 InputLabelProps={{ shrink: true }}
+                required
                 slotProps={{ htmlInput: { maxLength: 50 } }}
                 error={Boolean(fieldErrors.origen)}
                 helperText={fieldErrors.origen}
@@ -721,6 +744,7 @@ function TravelsDialog() {
                   handleAddressChange(1, e.target.value, "origen")
                 }
                 InputLabelProps={{ shrink: true }}
+                required
                 slotProps={{ htmlInput: { maxLength: 60 } }}
               />
             </Grid>
@@ -733,6 +757,7 @@ function TravelsDialog() {
                   handleAddressChange(2, e.target.value, "origen")
                 }
                 InputLabelProps={{ shrink: true }}
+                required
                 slotProps={{ htmlInput: { maxLength: 80 } }}
               />
             </Grid>
@@ -750,6 +775,7 @@ function TravelsDialog() {
                   handleAddressChange(0, e.target.value, "destino")
                 }
                 InputLabelProps={{ shrink: true }}
+                required
                 slotProps={{ htmlInput: { maxLength: 50 } }}
                 error={Boolean(fieldErrors.destino)}
                 helperText={fieldErrors.destino}
@@ -764,6 +790,7 @@ function TravelsDialog() {
                   handleAddressChange(1, e.target.value, "destino")
                 }
                 InputLabelProps={{ shrink: true }}
+                required
                 slotProps={{ htmlInput: { maxLength: 60 } }}
               />
             </Grid>
@@ -776,6 +803,7 @@ function TravelsDialog() {
                   handleAddressChange(2, e.target.value, "destino")
                 }
                 InputLabelProps={{ shrink: true }}
+                required
                 slotProps={{ htmlInput: { maxLength: 80 } }}
               />
             </Grid>
@@ -814,6 +842,7 @@ function TravelsDialog() {
                   <TextField
                     {...params}
                     label={C.travelBusiness}
+                    required
                     inputProps={{
                       ...params.inputProps,
                       readOnly: true,
@@ -861,6 +890,7 @@ function TravelsDialog() {
                     placeholder: "9.999.999,99",
                   },
                 }}
+                required
                 error={Boolean(fieldErrors.costo_aproximado)}
                 helperText={fieldErrors.costo_aproximado}
               />
@@ -897,6 +927,7 @@ function TravelsDialog() {
                         validateFn: validateField
                       })}
                 fullWidth
+                required
                 rows={2}
                 multiline
                 error={Boolean(fieldErrors.motivo)}
@@ -911,6 +942,7 @@ function TravelsDialog() {
           variant="outlined"
           onClick={handleClose}
           disabled={dialogSaving}
+          startIcon={<CloseIcon />}
         >
           {C.cancel}
         </SAEButton>
@@ -919,7 +951,13 @@ function TravelsDialog() {
           onClick={handleTravelSave}
           disabled={dialogSaving}
           startIcon={
-            dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
+            dialogSaving ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : dialogMode === "create" ? (
+              <AddIcon />
+            ) : (
+              <SaveOutlinedIcon />
+            )
           }
         >
           {dialogMode === "create"
@@ -1154,7 +1192,11 @@ function DocumentsDialog() {
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <SAEButton variant="outlined" onClick={closeDialog}>
+          <SAEButton
+            variant="outlined"
+            onClick={closeDialog}
+            startIcon={<CloseIcon />}
+          >
             {C.travelClose}
           </SAEButton>
         </DialogActions>
@@ -1176,6 +1218,7 @@ function DocumentsDialog() {
             onClick={() => setOpenPopup(false)}
             autoFocus
             color="outlined"
+            startIcon={<CloseIcon />}
           >
             {C.cancel}
           </SAEButton>

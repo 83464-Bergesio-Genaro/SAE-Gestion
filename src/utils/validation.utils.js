@@ -64,6 +64,19 @@ export const isValidCuit = (value = "") => {
   return checkDigit === Number(digits[10]);
 };
 
+export const isValidText = (value = "") => {
+  const text = String(value ?? "").trim();
+  const allowedSpecialChars = `.,;:()"'°ºª&/_+#-`;
+
+  return (
+    /\p{L}/u.test(text) &&
+    /^[\p{L}\p{N}\s.,;:()"'°ºª&/_+#-]+$/u.test(text) &&
+    !new RegExp(`[${allowedSpecialChars.replace("-", "\\-")}]{2,}`, "u").test(
+      text,
+    )
+  );
+};
+
 export const hasRealDocumentName = (value) => {
   if (!value) return false;
 
@@ -167,7 +180,9 @@ export function validateDeportista(data, mode) {
   if (mode === "create") {
     if (!data.legajo.toString().trim()) {
       errors.legajo = "El legajo es obligatorio";
-    } 
+    } else if (!String(data.nombre_deportista ?? "").trim()) {
+      errors.legajo = "Seleccioná un alumno mediante el buscador";
+    }
     /*else if (!/^[a-zA-Z0-9]+$/.test(data.legajo.toString().trim())) {
       errors.legajo = "El legajo solo puede contener letras y números";
     }*/

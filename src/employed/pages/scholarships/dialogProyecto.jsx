@@ -14,6 +14,8 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
 import { useScholarships } from "../../context/employedContext";
@@ -21,6 +23,7 @@ import { useNotification } from "../../../shared/context/sharedContext";
 import { getDialogTitle } from "../../../utils/util";
 import { BECAS_STRINGS } from "../../../utils/strings/employed.strings";
 import { isEmpty } from "../../../utils/text.utils";
+import { isValidText } from "../../../utils/validation.utils";
 
 const BS = BECAS_STRINGS.projectDialog;
 
@@ -46,9 +49,11 @@ export default function DialogProyecto() {
   const validateField = (field, value) => {
     switch (field) {
       case "nombre_proyecto_investigacion":
-        return isEmpty(value) ? BS.validationName : "";
+        if (isEmpty(value)) return BS.validationName;
+        return isValidText(value) ? "" : BS.validationNameFormat;
       case "centro_investigacion":
-        return isEmpty(value) ? BS.validationResearchCenter : "";
+        if (isEmpty(value)) return BS.validationResearchCenter;
+        return isValidText(value) ? "" : BS.validationResearchCenterFormat;
       default:
         return "";
     }
@@ -172,6 +177,7 @@ export default function DialogProyecto() {
           variant="outlined"
           onClick={handleClose}
           disabled={dialogSaving}
+          startIcon={<CloseIcon />}
         >
           {BS.cancel}
         </SAEButton>
@@ -180,10 +186,16 @@ export default function DialogProyecto() {
           onClick={handleSave}
           disabled={dialogSaving}
           startIcon={
-            dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
+            dialogSaving ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : dialogMode === "create" ? (
+              <AddIcon />
+            ) : (
+              <SaveOutlinedIcon />
+            )
           }
         >
-          {dialogSaving ? BS.saving : BS.save}
+          {dialogSaving ? BS.saving : dialogMode === "create" ? "Crear" : BS.save}
         </SAEButton>
       </DialogActions>
     </Dialog>

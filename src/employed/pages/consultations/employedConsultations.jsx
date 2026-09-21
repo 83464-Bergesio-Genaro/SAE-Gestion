@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -22,6 +22,8 @@ import {
   ListItemText,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 
 import SAETextField from "../../../assets/components/inputs/SAETextField";
@@ -176,13 +178,13 @@ function DialogConsultation() {
     handleLinksFrecuenteDelete,
     linksFrecuentesIcons,
   } = useConsultations();
-  const [fieldErrors, setFieldErrors] = useState({});
-
-  useEffect(() => {
-    if (dialogOpen && dialogType === "linkFrecuentes") {
-      setFieldErrors({});
-    }
-  }, [dialogOpen, dialogType, dialogMode]);
+  const validationKey = `${dialogType}-${dialogMode}-${dialogOpen}`;
+  const [fieldValidation, setFieldValidation] = useState({
+    key: validationKey,
+    errors: {},
+  });
+  const fieldErrors =
+    fieldValidation.key === validationKey ? fieldValidation.errors : {};
 
   const selectedDialogIcon = useMemo(() => {
     const iconIndex = Number(dialogData?.id_index_ico) || 0;
@@ -193,11 +195,16 @@ function DialogConsultation() {
   }, [dialogData?.id_index_ico, linksFrecuentesIcons]);
 
   const SelectedDialogIcon = selectedDialogIcon.icon;
+  const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
+
   const handleLinkFieldChange = (field, value) => {
     handleDataChange(field, value);
-    setFieldErrors((previous) => ({
-      ...previous,
-      [field]: validateLinkField(field, value),
+    setFieldValidation((previous) => ({
+      key: validationKey,
+      errors: {
+        ...(previous.key === validationKey ? previous.errors : {}),
+        [field]: validateLinkField(field, value),
+      },
     }));
   };
 
@@ -209,14 +216,17 @@ function DialogConsultation() {
       return result;
     }, {});
 
-    setFieldErrors(errors);
+    setFieldValidation({
+      key: validationKey,
+      errors,
+    });
 
     return Object.keys(errors).length === 0;
   };
 
   const handleSaveLinkFrecuente = () => {
     if (!validateLinkDialog()) {
-      setDialogError(C.errorSaving);
+      setDialogError("");
       return;
     }
 
@@ -274,7 +284,7 @@ function DialogConsultation() {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
+              {dialogError && !hasFieldErrors && (
                 <Alert severity="error" onClose={() => setDialogError("")}>
                   {dialogError}
                 </Alert>
@@ -301,6 +311,7 @@ function DialogConsultation() {
                         }
                         error={Boolean(fieldErrors.titulo)}
                         helperText={fieldErrors.titulo ?? ""}
+                        required
                         fullWidth
                       />
                     </Grid>
@@ -313,11 +324,12 @@ function DialogConsultation() {
                         }
                         error={Boolean(fieldErrors.hipervinculo)}
                         helperText={fieldErrors.hipervinculo ?? ""}
+                        required
                         fullWidth
                       />
                     </Grid>                    
                     <Grid size={{ xs: 12}} m={0}>
-                      <FormControl fullWidth>
+                      <FormControl fullWidth required>
                         <InputLabel id="link-frecuente-icon-label">
                           {C.formIcon}
                         </InputLabel>
@@ -429,6 +441,7 @@ function DialogConsultation() {
               variant="outlined"
               onClick={closeDialog}
               disabled={dialogSaving}
+              startIcon={<CloseIcon />}
             >
               {C.cancel}
             </SAEButton>
@@ -440,7 +453,11 @@ function DialogConsultation() {
               startIcon={
                 dialogSaving ? (
                   <CircularProgress size={16} color="inherit" />
-                ) : null
+                ) : dialogMode === "create" ? (
+                  <AddIcon />
+                ) : (
+                  <SaveOutlinedIcon />
+                )
               }
             >
               {dialogMode === "create"

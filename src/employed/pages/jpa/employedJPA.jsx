@@ -17,7 +17,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import GroupsIcon from "@mui/icons-material/Groups";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import HeaderPageEmployed from "../../../assets/components/headerPage/headerPageEmployed.jsx"; 
@@ -217,6 +217,7 @@ function DialogJpa() {
     error: Boolean(fieldErrors[field]),
     helperText: fieldErrors[field] ?? "",
   });
+  const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
 
   // Configuración del diálogo de eliminación según el tipo de entidad seleccionado.
   // Cada clave debe coincidir con el valor guardado en `dialogType`.
@@ -288,7 +289,7 @@ function DialogJpa() {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
+              {dialogError && !hasFieldErrors && (
                 <Alert severity="error" onClose={() => setDialogError("")}>
                   {dialogError}
                 </Alert>
@@ -306,17 +307,19 @@ function DialogJpa() {
               ) : (
                 <>
                   <Grid container spacing={1}>
-                    <Grid size={{ xs: 12, md: 3 }} m={0}>
-                      <SAETextField
-                        label={C.eventID}
-                        type="number"
-                        fullWidth
-                        value={dialogData.id}
-                        onChange={(e) => handleValidatedDataChange("id", e.target.value)}
-                        disabled={true}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 9 }} m={0}>
+                    {dialogMode === "edit" && (
+                      <Grid size={{ xs: 12, md: 3 }} m={0}>
+                        <SAETextField
+                          label={C.eventID}
+                          type="number"
+                          fullWidth
+                          value={dialogData.id}
+                          onChange={(e) => handleValidatedDataChange("id", e.target.value)}
+                          disabled={true}
+                        />
+                      </Grid>
+                    )}
+                    <Grid size={{ xs: 12, md: dialogMode === "edit" ? 9 : 12 }} m={0}>
                       <SAETextField
                         label={C.eventManager}
                         value={dialogData.encargado}
@@ -324,6 +327,7 @@ function DialogJpa() {
                           handleValidatedDataChange("encargado", e.target.value)
                         }
                         {...fieldProps("encargado")}
+                        required
                         fullWidth
                       />
                     </Grid>
@@ -336,6 +340,7 @@ function DialogJpa() {
                       handleValidatedDataChange("nombre_evento", e.target.value)
                     }
                     {...fieldProps("nombre_evento")}
+                    required
                     fullWidth
                   />
                   <SAETextField
@@ -343,6 +348,7 @@ function DialogJpa() {
                     value={dialogData.lugar}
                     onChange={(e) => handleValidatedDataChange("lugar", e.target.value)}
                     {...fieldProps("lugar")}
+                    required
                     fullWidth
                   />
                   {/* Es la grilla de url que se usan comunmente en nuestra facultad */}
@@ -356,6 +362,7 @@ function DialogJpa() {
                       handleValidatedDataChange("fecha_evento", e.target.value)
                     }
                     {...fieldProps("fecha_evento")}
+                    required
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
@@ -370,6 +377,7 @@ function DialogJpa() {
                           handleValidatedDataChange("horario_inicio", value)
                         }
                         {...fieldProps("horario_inicio")}
+                        required
                         minTime="08:00"
                         maxTime="24:00"
                         size="big"
@@ -386,6 +394,7 @@ function DialogJpa() {
                           handleValidatedDataChange("horario_fin", value)
                         }
                         {...fieldProps("horario_fin")}
+                        required
                         minTime="08:00"
                         maxTime="24:00"
                         size="big"
@@ -416,7 +425,7 @@ function DialogJpa() {
                 ) : dialogMode === "create" ? (
                   <AddIcon />
                 ) : (
-                  <EditIcon />
+                  <SaveOutlinedIcon />
                 )
               }
             >
@@ -452,7 +461,7 @@ function DialogJpa() {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
+              {dialogError && !hasFieldErrors && (
                 <Alert severity="error" onClose={() => setDialogError("")}>
                   {dialogError}
                 </Alert>
@@ -470,17 +479,19 @@ function DialogJpa() {
               ) : (
                 <>
                   <Grid container spacing={1}>
-                    <Grid size={{ xs: 12, md: 3 }} m={0}>
-                      <SAETextField
-                        label={C.eventID}
-                        type="number"
-                        fullWidth
-                        value={dialogData.id}
-                        onChange={(e) => handleValidatedDataChange("id", e.target.value)}
-                        disabled={true}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 9 }} m={0}>
+                    {dialogMode === "edit" && (
+                      <Grid size={{ xs: 12, md: 3 }} m={0}>
+                        <SAETextField
+                          label={C.eventID}
+                          type="number"
+                          fullWidth
+                          value={dialogData.id}
+                          onChange={(e) => handleValidatedDataChange("id", e.target.value)}
+                          disabled={true}
+                        />
+                      </Grid>
+                    )}
+                    <Grid size={{ xs: 12, md: dialogMode === "edit" ? 9 : 12 }} m={0}>
                       <SAETextField
                         label={C.eventManager}
                         value={dialogData.encargado}
@@ -488,6 +499,7 @@ function DialogJpa() {
                           handleValidatedDataChange("encargado", e.target.value)
                         }
                         {...fieldProps("encargado")}
+                        required
                         fullWidth
                       />
                     </Grid>
@@ -500,6 +512,7 @@ function DialogJpa() {
                       handleValidatedDataChange("nombre_evento", e.target.value)
                     }
                     {...fieldProps("nombre_evento")}
+                    required
                     fullWidth
                   />
                   <SAETextField
@@ -507,6 +520,7 @@ function DialogJpa() {
                     value={dialogData.lugar}
                     onChange={(e) => handleValidatedDataChange("lugar", e.target.value)}
                     {...fieldProps("lugar")}
+                    required
                     fullWidth
                   />
                   {/* Es la grilla de url que se usan comunmente en nuestra facultad */}
@@ -520,6 +534,7 @@ function DialogJpa() {
                       handleValidatedDataChange("fecha_evento", e.target.value)
                     }
                     {...fieldProps("fecha_evento")}
+                    required
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
@@ -534,6 +549,7 @@ function DialogJpa() {
                           handleValidatedDataChange("horario_inicio", value)
                         }
                         {...fieldProps("horario_inicio")}
+                        required
                         minTime="08:00"
                         maxTime="24:00"
                         size="big"
@@ -550,6 +566,7 @@ function DialogJpa() {
                           handleValidatedDataChange("horario_fin", value)
                         }
                         {...fieldProps("horario_fin")}
+                        required
                         minTime="08:00"
                         maxTime="24:00"
                         size="big"
@@ -580,7 +597,7 @@ function DialogJpa() {
                 ) : dialogMode === "create" ? (
                   <AddIcon />
                 ) : (
-                  <EditIcon />
+                  <SaveOutlinedIcon />
                 )
               }
             >
@@ -616,7 +633,7 @@ function DialogJpa() {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
+              {dialogError && !hasFieldErrors && (
                 <Alert severity="error" onClose={() => setDialogError("")}>
                   {dialogError}
                 </Alert>
@@ -634,17 +651,19 @@ function DialogJpa() {
               ) : (
                 <>
                   <Grid container spacing={1}>
-                    <Grid size={{ xs: 12, md: 3 }} m={0}>
-                      <SAETextField
-                        label={C.eventID}
-                        type="number"
-                        fullWidth
-                        value={dialogData.id}
-                        onChange={(e) => handleValidatedDataChange("id", e.target.value)}
-                        disabled={true}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 9 }} m={0}>
+                    {dialogMode === "edit" && (
+                      <Grid size={{ xs: 12, md: 3 }} m={0}>
+                        <SAETextField
+                          label={C.eventID}
+                          type="number"
+                          fullWidth
+                          value={dialogData.id}
+                          onChange={(e) => handleValidatedDataChange("id", e.target.value)}
+                          disabled={true}
+                        />
+                      </Grid>
+                    )}
+                    <Grid size={{ xs: 12, md: dialogMode === "edit" ? 9 : 12 }} m={0}>
                       <SAETextField
                         label={C.standExpo}
                         value={dialogData.expositor}
@@ -652,6 +671,7 @@ function DialogJpa() {
                           handleValidatedDataChange("expositor", e.target.value)
                         }
                         {...fieldProps("expositor")}
+                        required
                         fullWidth
                       />
                     </Grid>
@@ -664,6 +684,7 @@ function DialogJpa() {
                       handleValidatedDataChange("nombre_stand", e.target.value)
                     }
                     {...fieldProps("nombre_stand")}
+                    required
                     fullWidth
                   />
                   <SAETextField
@@ -673,6 +694,7 @@ function DialogJpa() {
                       handleValidatedDataChange("ubicacion", e.target.value)
                     }
                     {...fieldProps("ubicacion")}
+                    required
                     fullWidth
                   />
                   <Grid container spacing={1}>
@@ -686,6 +708,7 @@ function DialogJpa() {
                           handleValidatedDataChange("horario_inicio", value)
                         }
                         {...fieldProps("horario_inicio")}
+                        required
                         minTime="08:00"
                         maxTime="24:00"
                         size="big"
@@ -702,6 +725,7 @@ function DialogJpa() {
                           handleValidatedDataChange("horario_fin", value)
                         }
                         {...fieldProps("horario_fin")}
+                        required
                         minTime="08:00"
                         maxTime="24:00"
                         size="big"
@@ -732,7 +756,7 @@ function DialogJpa() {
                 ) : dialogMode === "create" ? (
                   <AddIcon />
                 ) : (
-                  <EditIcon />
+                  <SaveOutlinedIcon />
                 )
               }
             >
@@ -768,7 +792,7 @@ function DialogJpa() {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
+              {dialogError && !hasFieldErrors && (
                 <Alert severity="error" onClose={() => setDialogError("")}>
                   {dialogError}
                 </Alert>
@@ -786,17 +810,19 @@ function DialogJpa() {
               ) : (
                 <>
                   <Grid container spacing={1}>
-                    <Grid size={{ xs: 12, md: 3 }} m={0}>
-                      <SAETextField
-                        label={C.eventID}
-                        type="number"
-                        fullWidth
-                        value={dialogData.id}
-                        onChange={(e) => handleValidatedDataChange("id", e.target.value)}
-                        disabled={true}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 9 }} m={0}>
+                    {dialogMode === "edit" && (
+                      <Grid size={{ xs: 12, md: 3 }} m={0}>
+                        <SAETextField
+                          label={C.eventID}
+                          type="number"
+                          fullWidth
+                          value={dialogData.id}
+                          onChange={(e) => handleValidatedDataChange("id", e.target.value)}
+                          disabled={true}
+                        />
+                      </Grid>
+                    )}
+                    <Grid size={{ xs: 12, md: dialogMode === "edit" ? 9 : 12 }} m={0}>
                       <SAETextField
                         label={C.interestName}
                         value={dialogData.nombre_interesado}
@@ -804,6 +830,7 @@ function DialogJpa() {
                           handleValidatedDataChange("nombre_interesado", e.target.value)
                         }
                         {...fieldProps("nombre_interesado")}
+                        required
                         fullWidth
                       />
                     </Grid>
@@ -815,6 +842,7 @@ function DialogJpa() {
                       handleValidatedDataChange("contacto", e.target.value)
                     }
                     {...fieldProps("contacto")}
+                    required
                     fullWidth
                   />
                   <SAETextField
@@ -822,6 +850,7 @@ function DialogJpa() {
                     value={dialogData.email}
                     onChange={(e) => handleValidatedDataChange("email", e.target.value)}
                     {...fieldProps("email")}
+                    required
                     fullWidth
                   />
                 </>
@@ -847,7 +876,7 @@ function DialogJpa() {
                 ) : dialogMode === "create" ? (
                   <AddIcon />
                 ) : (
-                  <EditIcon />
+                  <SaveOutlinedIcon />
                 )
               }
             >

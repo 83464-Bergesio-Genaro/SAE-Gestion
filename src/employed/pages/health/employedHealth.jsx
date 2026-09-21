@@ -31,7 +31,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 //COMPONENTES
@@ -277,6 +277,7 @@ function DialogHealth() {
     handleCursoSave,
   } = useHealth();
   const [fieldErrors, setFieldErrors] = useState({});
+  const hasFieldErrors = Object.values(fieldErrors).some(Boolean);
 
   useEffect(() => {
     if (dialogOpen) {
@@ -362,7 +363,7 @@ function DialogHealth() {
 
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
-      setDialogError(C.validationFormError);
+      setDialogError("");
       return false;
     }
 
@@ -426,24 +427,26 @@ function DialogHealth() {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
+              {dialogError && !hasFieldErrors && (
                 <Alert severity="error" onClose={() => setDialogError("")}>
                   {dialogError}
                 </Alert>
               )}
               <>
                 <Grid container spacing={1}>
-                  <Grid size={{ xs: 12, md: 3 }} m={0}>
-                    <SAETextField
-                      label={C.formId}
-                      type="number"
-                      fullWidth
-                      value={dialogData.id}
-                      onChange={(e) => handleFieldChange("id", e.target.value)}
-                      disabled={true}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 9 }} m={0}>
+                  {dialogMode === "edit" && (
+                    <Grid size={{ xs: 12, md: 3 }} m={0}>
+                      <SAETextField
+                        label={C.formId}
+                        type="number"
+                        fullWidth
+                        value={dialogData.id}
+                        onChange={(e) => handleFieldChange("id", e.target.value)}
+                        disabled={true}
+                      />
+                    </Grid>
+                  )}
+                  <Grid size={{ xs: 12, md: dialogMode === "edit" ? 9 : 12 }} m={0}>
                     <SAETextField
                       label={C.formCompleteName}
                       value={dialogData.nombre}
@@ -513,7 +516,7 @@ function DialogHealth() {
                 ) : dialogMode === "create" ? (
                   <AddIcon />
                 ) : (
-                  <EditIcon />
+                  <SaveOutlinedIcon />
                 )
               }
             >
@@ -554,7 +557,7 @@ function DialogHealth() {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
+              {dialogError && !hasFieldErrors && (
                 <Alert severity="error" onClose={() => setDialogError("")}>
                   {dialogError}
                 </Alert>
@@ -797,7 +800,7 @@ function DialogHealth() {
                 ) : dialogMode === "create" ? (
                   <AddIcon />
                 ) : (
-                  <EditIcon />
+                  <SaveOutlinedIcon />
                 )
               }
             >
@@ -833,23 +836,25 @@ function DialogHealth() {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              {dialogError && (
+              {dialogError && !hasFieldErrors && (
                 <Alert severity="error" onClose={() => setDialogError("")}>
                   {dialogError}
                 </Alert>
               )}
               <Grid container spacing={1}>
-                    <Grid size={{ xs: 12, md: 3 }} m={0}>
-                      <SAETextField
-                        label={C.courseId}
-                        type="number"
-                        fullWidth
-                        value={dialogData.id}
-                        onChange={(e) => handleFieldChange("id", e.target.value)}
-                        disabled={true}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 3 }} m={0}>
+                    {dialogMode === "edit" && (
+                      <Grid size={{ xs: 12, md: 3 }} m={0}>
+                        <SAETextField
+                          label={C.courseId}
+                          type="number"
+                          fullWidth
+                          value={dialogData.id}
+                          onChange={(e) => handleFieldChange("id", e.target.value)}
+                          disabled={true}
+                        />
+                      </Grid>
+                    )}
+                    <Grid size={{ xs: 12, md: dialogMode === "edit" ? 3 : 4 }} m={0}>
                       <SAETextField
                         label={C.courseCapacity}
                         type="number"
@@ -863,7 +868,7 @@ function DialogHealth() {
                         helperText={fieldErrors.cupo_maximo}
                       />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }} m={0}>
+                    <Grid size={{ xs: 12, md: dialogMode === "edit" ? 6 : 8 }} m={0}>
                       <SAETextField
                         label={C.courseName}
                         value={dialogData.nombre_curso}
@@ -957,7 +962,7 @@ function DialogHealth() {
                 ) : dialogMode === "create" ? (
                   <AddIcon />
                 ) : (
-                  <EditIcon />
+                  <SaveOutlinedIcon />
                 )
               }
             >

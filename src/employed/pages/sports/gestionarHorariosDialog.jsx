@@ -29,7 +29,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PlaceIcon from "@mui/icons-material/Place";
@@ -125,10 +125,11 @@ function HorarioFormFields({
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 12, sm: 4 }}>
-        <FormControl size="small" fullWidth error={Boolean(errors.dia)}>
+        <FormControl size="small" fullWidth required error={Boolean(errors.dia)}>
           <InputLabel>Día</InputLabel>
           <Select
             value={form.dia}
+            required
             label="Día"
             onChange={(e) => onChange("dia", e.target.value)}
           >
@@ -148,6 +149,7 @@ function HorarioFormFields({
           onChange={(v) => onChange("hora_inicio", v)}
           minTime="12:00"
           maxTime="22:00"
+          required
           fullWidth
           error={Boolean(errors.hora_inicio)}
           helperText={errors.hora_inicio ?? ""}
@@ -160,6 +162,7 @@ function HorarioFormFields({
           onChange={(v) => onChange("hora_fin", v)}
           minTime="12:00"
           maxTime="22:00"
+          required
           fullWidth
           error={Boolean(errors.hora_fin)}
           helperText={errors.hora_fin ?? ""}
@@ -169,12 +172,14 @@ function HorarioFormFields({
         <FormControl
           size="small"
           fullWidth
+          required
           error={Boolean(errors.id_espacio_deportivo)}
         >
           <InputLabel>{C.schedulePlace}</InputLabel>
           <Select
             value={form.id_espacio_deportivo}
             label={C.schedulePlace}
+            required
             onChange={(e) => onChange("id_espacio_deportivo", e.target.value)}
           >
             <MenuItem value="">
@@ -195,12 +200,14 @@ function HorarioFormFields({
         <FormControl
           size="small"
           fullWidth
+          required
           error={Boolean(errors.cuil_docente)}
         >
           <InputLabel>{C.scheduleTeacher}</InputLabel>
           <Select
             value={form.cuil_docente}
             label={C.scheduleTeacher}
+            required
             onChange={(e) => onChange("cuil_docente", e.target.value)}
           >
             <MenuItem value="">
@@ -426,6 +433,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
                 variant="outlined"
                 onClick={() => setConfirmDelete(false)}
                 disabled={deleting}
+                startIcon={<CloseIcon />}
               >
                 {C.cancel}
               </SAEButton>
@@ -674,6 +682,7 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
             variant="outlined"
             onClick={handleCancel}
             disabled={saving}
+            startIcon={<CloseIcon />}
           >
             {C.cancel}
           </SAEButton>
@@ -685,11 +694,11 @@ function HorarioCard({ horario, espacios, docentes, onSaved, onDeleted }) {
               saving ? (
                 <CircularProgress size={14} color="inherit" />
               ) : (
-                <CheckIcon />
+                <SaveOutlinedIcon />
               )
             }
           >
-            {C.saveChanges}
+            {C.save}
           </SAEButton>
         </Stack>
       </CardContent>
@@ -830,7 +839,12 @@ function NuevoHorarioCard({
           justifyContent="flex-end"
           sx={{ mt: 2 }}
         >
-          <SAEButton variant="outlined" onClick={onCancel} disabled={saving}>
+          <SAEButton
+            variant="outlined"
+            onClick={onCancel}
+            disabled={saving}
+            startIcon={<CloseIcon />}
+          >
             {C.cancel}
           </SAEButton>
           <SAEButton
@@ -989,6 +1003,7 @@ export default function GestionarHorariosDialog({ open, onClose }) {
                   label={C.scheduleSportSelection}
                   size="small"
                   placeholder={C.scheduleSportPH}
+                  required
                 />
               )}
               isOptionEqualToValue={(opt, val) => opt.id === val.id}
@@ -1090,7 +1105,11 @@ export default function GestionarHorariosDialog({ open, onClose }) {
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <SAEButton variant="outlined" onClick={handleClose}>
+        <SAEButton
+          variant="outlined"
+          onClick={handleClose}
+          startIcon={<CloseIcon />}
+        >
           {C.close}
         </SAEButton>
       </DialogActions>

@@ -124,7 +124,7 @@ export const HEALTH_STRING = {
   ourScheduleDescription: "Nuestros Horarios",
   ourScheduleButton: "Gestionar Horarios",
 
-  specialityCreate: "Nuevo Especialidad",
+  specialityCreate: "Nueva Especialidad",
   specialityUpdate: "Editar Especialidad",
   formId: "ID",
   formCompleteName: "Nombre Completo",
@@ -137,7 +137,7 @@ export const HEALTH_STRING = {
   save: "Guardar",
   delete: "Eliminar",
 
-  employCreate: "Nuevo Empleado",
+  employCreate: "Nuevo Personal médico",
   employEdit: "Editar Empleado",
   employFault: "Registrar Falta",
   employHistoryFault: "Faltas Previas",
@@ -233,6 +233,8 @@ export const JPA_STRINGS = {
   eventDeleteConfirm: "Está seguro que quiere eliminar el evento:",
   eventID: "ID",
   eventName: "Nombre del Evento",
+  eventNameFormat:
+    "El nombre del evento debe contener texto y no solo números o caracteres especiales",
   eventManager: "Encargado",
   eventURL: "URL Maps",
   eventeDate: "Fecha del Evento",
@@ -241,8 +243,14 @@ export const JPA_STRINGS = {
 
   standDeleteConfirm: "Está seguro que quiere eliminar el stand:",
   standName: "Nombre del Stand",
+  standNameFormat:
+    "El nombre del stand debe contener texto y no solo números o caracteres especiales",
   standExpo: "Expositor",
+  standExpoFormat:
+    "El expositor debe contener texto y no solo números o caracteres especiales",
   standUbi: "Ubicación en la facultad",
+  standUbiFormat:
+    "La ubicación debe contener texto y no solo números o caracteres especiales",
 
   interestDeleteConfirm: "Está seguro que quiere eliminar el interesado:",
   interestName: "Nombre del Interesado",
@@ -489,6 +497,8 @@ export const TRAVEL_STRINGS = {
 
   validationID: "ID no encontrado",
   validationName: "Ingresá un nombre para esta empresa",
+  validationNameFormat:
+    "El nombre de la empresa debe contener texto y no solo números o caracteres especiales",
   validationPhone: "El teléfono debe contener 12 dígitos Ej:(54 355 222 4924)",
   validationActive: "Error al leer este campo",
   validationEmail: "Escriba un correo electrónico válido",
@@ -496,6 +506,9 @@ export const TRAVEL_STRINGS = {
   validationCBU: "Ingrese un CBU válido",
 
   validationDate: "Ingresá una fecha válida",
+  validationTravelName: "Ingresá el nombre del viaje",
+  validationTravelNameFormat:
+    "El nombre del viaje debe contener texto y no solo números o caracteres especiales",
   validationTravelEndAfterStart:
     "La fecha de vuelta debe ser igual o posterior a la fecha de inicio",
   validationPlace: "Todos los campos son obligatorios",
@@ -809,6 +822,8 @@ export const PRENSA_STRINGS = {
     saving: "Guardando...",
     saveButton: "Guardar",
     validationTitleRequired: "Ingresá el título.",
+    validationTitleFormat:
+      "El título debe contener texto y no solo números o caracteres especiales.",
     validationDescriptionRequired: "Ingresá la descripción.",
     validationStartDateRequired: "Ingresá la fecha de inicio.",
     validationEndDateRequired: "Ingresá la fecha de vigencia.",
@@ -908,6 +923,8 @@ export const BECAS_STRINGS = {
     fieldClosingTime: "Horario Atención Final",
 
     validationName: "Ingresá el nombre del servicio",
+    validationNameFormat:
+      "El nombre del servicio debe contener texto y no solo números o caracteres especiales",
     validationPhoneRequired: "Ingresá el teléfono",
     validationPhoneFormat: "Ingresá un teléfono válido de 10 dígitos",
     validationInternalPhone: "Ingresá un interno válido",
@@ -935,7 +952,11 @@ export const BECAS_STRINGS = {
     fieldResearchCenter: "Centro de Investigación",
 
     validationName: "Ingresá el nombre del proyecto",
+    validationNameFormat:
+      "El nombre del proyecto debe contener texto y no solo números o caracteres especiales",
     validationResearchCenter: "Ingresá el centro de investigación",
+    validationResearchCenterFormat:
+      "El centro de investigación debe contener texto y no solo números o caracteres especiales",
 
     cancel: "Cancelar",
     save: "Guardar",

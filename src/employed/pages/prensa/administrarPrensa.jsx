@@ -43,9 +43,11 @@ import { usePress } from "../../context/employedContext";
 import { PressProvider } from "../../context/providers/pressProvider";
 import SAEPage from "../../../assets/components/page/SAEPage";
 import SAEDeleteDialog from "../../../assets/components/popUp/SAEDeleteDialog";
+import AddIcon from "@mui/icons-material/Add";
 import { PRENSA_STRINGS } from "../../../utils/strings/employed.strings";
 import { getTipoDocumento } from "../../../utils/documents.utils";
 import { getPrioridadOptions } from "../../../utils/datagrid.utils.jsx";
+import { isValidText } from "../../../utils/validation.utils";
 
 const PSN = PRENSA_STRINGS.nueva;
 const C = PRENSA_STRINGS;
@@ -187,6 +189,8 @@ function NuevaPublicacionDialog() {
 
     if (isBlank(nuevaData.titulo_publicacion)) {
       errors.titulo_publicacion = PSN.validationTitleRequired;
+    } else if (!isValidText(nuevaData.titulo_publicacion)) {
+      errors.titulo_publicacion = PSN.validationTitleFormat;
     }
     if (isBlank(nuevaData.descripcion)) {
       errors.descripcion = PSN.validationDescriptionRequired;
@@ -521,6 +525,7 @@ function NuevaPublicacionDialog() {
                 variant="outlined"
                 onClick={closeDialog}
                 disabled={saving}
+                startIcon={<CloseIcon />}
               >
                 Cancelar
               </SAEButton>
@@ -528,8 +533,11 @@ function NuevaPublicacionDialog() {
                 variant="contained"
                 onClick={handleSaveClick}
                 disabled={saving}
+                startIcon={
+                  saving ? <CircularProgress size={16} color="inherit" /> : <AddIcon />
+                }
               >
-                {saving ? PSN.saving : PSN.saveButton}
+                {saving ? PSN.saving : "Crear"}
               </SAEButton>
             </DialogActions>
           </>

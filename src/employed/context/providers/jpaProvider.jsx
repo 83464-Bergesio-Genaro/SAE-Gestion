@@ -28,7 +28,9 @@ import { isEmpty } from "../../../utils/text.utils.js";
 import {
   isTimeAfter,
   isValidEmail,
+  isValidText,
   isValidMinLengthPhone,
+  validateNombreApellido,
 } from "../../../utils/validation.utils.js";
 
 import { useNotification } from "../../../shared/context/sharedContext";
@@ -60,14 +62,25 @@ export function JPAProvider({ children }) {
 
     switch (field) {
       case "encargado":
+        if (isEmpty(value)) return requiredMessage;
+        return validateNombreApellido(value, C.eventManager) ?? "";
       case "nombre_evento":
+        if (isEmpty(value)) return requiredMessage;
+        return isValidText(value) ? "" : C.eventNameFormat;
       case "lugar":
       case "fecha_evento":
       case "nombre_stand":
+        if (isEmpty(value)) return requiredMessage;
+        return isValidText(value) ? "" : C.standNameFormat;
       case "expositor":
+        if (isEmpty(value)) return requiredMessage;
+        return isValidText(value) ? "" : C.standExpoFormat;
       case "ubicacion":
+        if (isEmpty(value)) return requiredMessage;
+        return isValidText(value) ? "" : C.standUbiFormat;
       case "nombre_interesado":
-        return isEmpty(value) ? requiredMessage : "";
+        if (isEmpty(value)) return requiredMessage;
+        return validateNombreApellido(value, C.interestName) ?? "";
 
       case "horario_inicio":
         return isEmpty(value) ? "Ingresá la hora de inicio." : "";

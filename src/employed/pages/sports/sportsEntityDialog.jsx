@@ -18,6 +18,8 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
@@ -29,6 +31,13 @@ import { SPORTS_STRINGS } from "../../../utils/strings/employed.strings";
 import { useEffect } from "react";
 
 const C = SPORTS_STRINGS;
+const getStudentName = (student = {}) =>
+  student.nombre_usuario ??
+  student.nombre_becario ??
+  student.nombre ??
+  student.Nombre ??
+  "";
+
 const getDialogTitle = (type, mode) => {
   const action = mode === "create" ? "Nuevo" : "Editar";
 
@@ -65,10 +74,12 @@ export default function SportsEntityDialog() {
 
   const handleStudentSelect = (student) => {
     handleDialogChange("legajo", student.legajo);
+    handleDialogChange("nombre_deportista", getStudentName(student));
   };
 
   const handleStudentClear = () => {
     handleDialogChange("legajo", "");
+    handleDialogChange("nombre_deportista", "");
   };
   const deporteId = dialogData?.id ?? dialogData?.id_deporte ?? null;
 
@@ -106,6 +117,7 @@ export default function SportsEntityDialog() {
                 value={dialogData.cuil ?? ""}
                 onChange={(e) => handleDialogChange("cuil", e.target.value)}
                 disabled={dialogMode === "edit"}
+                required={dialogMode === "create"}
                 fullWidth
                 error={Boolean(dialogFieldErrors.cuil)}
                 helperText={dialogFieldErrors.cuil}
@@ -114,6 +126,7 @@ export default function SportsEntityDialog() {
                 label={C.names}
                 value={dialogData.nombres ?? ""}
                 onChange={(e) => handleDialogChange("nombres", e.target.value)}
+                required
                 fullWidth
                 error={Boolean(dialogFieldErrors.nombres)}
                 helperText={dialogFieldErrors.nombres}
@@ -124,6 +137,7 @@ export default function SportsEntityDialog() {
                 onChange={(e) =>
                   handleDialogChange("apellidos", e.target.value)
                 }
+                required
                 fullWidth
                 error={Boolean(dialogFieldErrors.apellidos)}
                 helperText={dialogFieldErrors.apellidos}
@@ -135,6 +149,7 @@ export default function SportsEntityDialog() {
                 onChange={(e) =>
                   handleDialogChange("fecha_nacimiento", e.target.value)
                 }
+                required
                 fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
                 error={Boolean(dialogFieldErrors.fecha_nacimiento)}
@@ -159,6 +174,7 @@ export default function SportsEntityDialog() {
                 label={C.sportPlaceName}
                 value={dialogData.nombre ?? ""}
                 onChange={(e) => handleDialogChange("nombre", e.target.value)}
+                required
                 fullWidth
                 error={Boolean(dialogFieldErrors.nombre)}
                 helperText={dialogFieldErrors.nombre}
@@ -169,6 +185,7 @@ export default function SportsEntityDialog() {
                 onChange={(e) =>
                   handleDialogChange("domicilio", e.target.value)
                 }
+                required
                 fullWidth
                 error={Boolean(dialogFieldErrors.domicilio)}
                 helperText={dialogFieldErrors.domicilio}
@@ -199,15 +216,17 @@ export default function SportsEntityDialog() {
               {dialogMode === "create" ? (
                 <SearchStudent
                   legajo={dialogData.legajo ?? ""}
-                  onLegajoChange={(value) =>
-                    handleDialogChange("legajo", value)
-                  }
+                  onLegajoChange={(value) => {
+                    handleDialogChange("legajo", value);
+                    handleDialogChange("nombre_deportista", "");
+                  }}
                   onSelectStudent={handleStudentSelect}
                   onClearStudent={handleStudentClear}
                   onSearchStudent={buscarAlumnoPorLegajo}
                   onError={setDialogError}
                   showValidationErrors={Boolean(dialogFieldErrors.legajo)}
                   legajoError={dialogFieldErrors.legajo}
+                  required
                 />
               ) : (
                 <>
@@ -215,6 +234,7 @@ export default function SportsEntityDialog() {
                     label={C.studentID}
                     value={dialogData.legajo ?? ""}
                     disabled
+                    required
                     fullWidth
                     error={Boolean(dialogFieldErrors.legajo)}
                     helperText={dialogFieldErrors.legajo}
@@ -226,6 +246,7 @@ export default function SportsEntityDialog() {
                     onChange={(e) =>
                       handleDialogChange("vencimiento_ficha", e.target.value)
                     }
+                    required
                     fullWidth
                     slotProps={{ inputLabel: { shrink: true } }}
                     error={Boolean(dialogFieldErrors.vencimiento_ficha)}
@@ -259,6 +280,7 @@ export default function SportsEntityDialog() {
                 label={C.name}
                 value={dialogData.nombre ?? ""}
                 onChange={(e) => handleDialogChange("nombre", e.target.value)}
+                required
                 fullWidth
                 error={Boolean(dialogFieldErrors.nombre)}
                 helperText={dialogFieldErrors.nombre}
@@ -331,6 +353,7 @@ export default function SportsEntityDialog() {
           variant="outlined"
           onClick={closeDialog}
           disabled={dialogSaving}
+          startIcon={<CloseIcon />}
         >
           {C.cancel}
         </SAEButton>
@@ -339,7 +362,13 @@ export default function SportsEntityDialog() {
           onClick={handleDialogSave}
           disabled={dialogSaving}
           startIcon={
-            dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
+            dialogSaving ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : dialogMode === "create" ? (
+              <AddIcon />
+            ) : (
+              <SaveOutlinedIcon />
+            )
           }
         >
           {dialogMode === "create" ? C.create : C.save}

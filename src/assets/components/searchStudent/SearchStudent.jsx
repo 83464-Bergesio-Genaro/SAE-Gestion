@@ -33,11 +33,13 @@ export default function SearchStudent({
   showValidationErrors = false,
   legajoError = "Ingresá un legajo para buscar",
   careerError = "Seleccioná una carrera para buscar",
+  required = false,
 }) {
   const isMobile = useMediaQuery("(max-width:932px)");
   const [careerSearch, setCareerSearch] = useState("");
   const [studentSearchLoading, setStudentSearchLoading] = useState(false);
   const [studentSelected, setStudentSelected] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     if (!legajo) {
@@ -49,18 +51,24 @@ export default function SearchStudent({
     const studentId = String(legajo ?? "")
       .trim()
       .split("@")[0];
+    const errors = {};
 
     if (!studentId) {
-      onError?.("Ingresá un legajo para buscar");
-      return;
+      errors.legajo = legajoError;
     }
 
     if (!careerSearch) {
-      onError?.("Seleccioná una carrera para buscar");
+      errors.career = careerError;
+    }
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      onError?.("");
       return;
     }
 
     try {
+      onError?.("");
       setStudentSearchLoading(true);
       setStudentSelected(null);
 
@@ -87,7 +95,15 @@ export default function SearchStudent({
     }
     setStudentSelected(null);
     setCareerSearch("");
+    setFieldErrors({});
+    onError?.("");
   };
+
+  const legajoFieldError =
+    fieldErrors.legajo || (showValidationErrors ? legajoError : "");
+  const careerFieldError =
+    fieldErrors.career ||
+    (showValidationErrors && !careerSearch ? careerError : "");
 
   if (studentSelected) {
     return (
@@ -126,17 +142,18 @@ export default function SearchStudent({
         <SAETextField
           label="Legajo"
           value={legajo ?? ""}
-          onChange={(event) => onLegajoChange?.(event.target.value)}
+          onChange={(event) => {
+            setFieldErrors((previous) => ({ ...previous, legajo: "" }));
+            onError?.("");
+            onLegajoChange?.(event.target.value);
+          }}
           onKeyDown={(event) => {
             if (event.key === "Enter") handleStudentSearch();
           }}
+          required={required}
           disabled={disabled || studentSearchLoading}
-          error={showValidationErrors && !String(legajo ?? "").trim()}
-          helperText={
-            showValidationErrors && !String(legajo ?? "").trim()
-              ? legajoError
-              : ""
-          }
+          error={Boolean(legajoFieldError)}
+          helperText={legajoFieldError}
           fullWidth
         />
       </Grid>
@@ -165,7 +182,11 @@ export default function SearchStudent({
           value={
             CAREERS.find((career) => career.value === careerSearch) ?? null
           }
-          onChange={(_event, career) => setCareerSearch(career?.value ?? "")}
+          onChange={(_event, career) => {
+            setFieldErrors((previous) => ({ ...previous, career: "" }));
+            onError?.("");
+            setCareerSearch(career?.value ?? "");
+          }}
           getOptionLabel={(career) => career.label}
           isOptionEqualToValue={(option, value) => option.value === value.value}
           disabled={disabled || studentSearchLoading}
@@ -174,10 +195,9 @@ export default function SearchStudent({
             <SAETextField
               {...params}
               label="Carrera"
-              error={showValidationErrors && !careerSearch}
-              helperText={
-                showValidationErrors && !careerSearch ? careerError : ""
-              }
+              required={required}
+              error={Boolean(careerFieldError)}
+              helperText={careerFieldError}
             />
           )}
         />

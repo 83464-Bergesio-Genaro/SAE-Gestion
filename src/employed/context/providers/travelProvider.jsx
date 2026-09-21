@@ -28,7 +28,7 @@ import { TRAVEL_STRINGS } from "../../../utils/strings/employed.strings.js";
 import { EMPTY_DOCUMENTACION_ESTUDIANTE,EMPTY_DOCUMENTACION_VIAJE,EMPTY_VIAJES_FORM,EMPTY_VIAJES,EMPTY_BUSSINESS } from "../../../utils/common/common.config.js";
 import { formatDate, toApiDateTime } from "../../../utils/date.utils.js";
 import { buildDownloadFileName } from "../../../utils/documents.utils.js";
-import { isValidCbu, isValidCuit, isValidEmail, isValidPhone } from "../../../utils/validation.utils.js";
+import { isValidCbu, isValidCuit, isValidEmail, isValidPhone, isValidText } from "../../../utils/validation.utils.js";
  
 const C = TRAVEL_STRINGS;
 const checkAndCleanDialogData = (data) => cleanObjectFields(data);
@@ -82,7 +82,14 @@ export function TravelProvider({ children }){
             case field === "id":
                 return dialogMode === "edit" && isEmpty(value) ? C.validationID:"";
            case field === "nombre":
-                return isEmpty(value)? C.validationName:"";
+                if (isEmpty(value)) {
+                    return dialogType === "travels" ? C.validationTravelName : C.validationName;
+                }
+                return isValidText(value)
+                    ? ""
+                    : dialogType === "travels"
+                      ? C.validationTravelNameFormat
+                      : C.validationNameFormat;
             case field === "contacto":
                 return isEmpty(value) || !isValidPhone(value) ? C.validationPhone : "";                   
             case field === "activo":

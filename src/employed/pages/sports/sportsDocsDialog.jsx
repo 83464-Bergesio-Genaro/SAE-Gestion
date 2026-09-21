@@ -160,6 +160,7 @@ export default function SportsDocsDialog() {
           <SAEButton
             variant="outlined"
             onClick={() => setDocsDialogOpen(false)}
+            startIcon={<CloseIcon />}
           >
             {C.close}
           </SAEButton>

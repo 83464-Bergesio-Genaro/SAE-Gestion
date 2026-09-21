@@ -21,6 +21,8 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import SAETextField from "../../../assets/components/inputs/SAETextField";
@@ -904,6 +906,7 @@ export default function DialogBecas() {
             variant="outlined"
             onClick={closeDialog}
             disabled={dialogSaving}
+            startIcon={<CloseIcon />}
           >
             {BS.cancel}
           </SAEButton>
@@ -914,11 +917,15 @@ export default function DialogBecas() {
             startIcon={
               dialogSaving ? (
                 <CircularProgress size={16} color="inherit" />
-              ) : null
+              ) : dialogMode === "create" ? (
+                <AddIcon />
+              ) : (
+                <SaveOutlinedIcon />
+              )
             }
           >
             {" "}
-            {dialogSaving ? BS.saving : BS.save}
+            {dialogSaving ? BS.saving : dialogMode === "create" ? "Crear" : BS.save}
           </SAEButton>
         </DialogActions>
       </Dialog>

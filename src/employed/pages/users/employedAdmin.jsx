@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import ScheduleIcon from "@mui/icons-material/Schedule";
@@ -339,6 +340,7 @@ function EmpleadosDialog() {
                 fullWidth
                 error={Boolean(fieldErrors.nombres)}
                 helperText={fieldErrors.nombres ?? ""}
+                required
               />
               <SAETextField
                 label={C.employLastName || ""}
@@ -353,6 +355,7 @@ function EmpleadosDialog() {
                 fullWidth
                 error={Boolean(fieldErrors.apellidos)}
                 helperText={fieldErrors.apellidos ?? ""}
+                required
               />
               <SAETextField
                 label={C.employUserName || ""}
@@ -367,6 +370,7 @@ function EmpleadosDialog() {
                 fullWidth
                 error={Boolean(fieldErrors.nombre_usuario)}
                 helperText={fieldErrors.nombre_usuario ?? ""}
+                required
               />
             </>
           )}
@@ -385,6 +389,7 @@ function EmpleadosDialog() {
             fullWidth
             error={Boolean(fieldErrors.legajo)}
             helperText={fieldErrors.legajo ?? C.employLegajoHelper ?? ""}
+            required
           />
 
           <Autocomplete
@@ -413,6 +418,7 @@ function EmpleadosDialog() {
                 }}
                 error={Boolean(fieldErrors.id_perfil)}
                 helperText={fieldErrors.id_perfil ?? ""}
+                required
               />
             )}
           />
@@ -445,6 +451,7 @@ function EmpleadosDialog() {
           variant="outlined"
           onClick={closeDialog}
           disabled={dialogSaving}
+          startIcon={<CloseIcon />}
         >
           {C.cancel}
         </SAEButton>
@@ -453,7 +460,13 @@ function EmpleadosDialog() {
           onClick={handleEmpleadosSave}
           disabled={dialogSaving}
           startIcon={
-            dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
+            dialogSaving ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : dialogMode === "create" ? (
+              <AddIcon />
+            ) : (
+              <SaveOutlinedIcon />
+            )
           }
         >
           {dialogMode === "create" ? C.create : C.save}
@@ -549,6 +562,7 @@ function UsuariosDialog() {
                 fullWidth
                 error={Boolean(fieldErrors.legajo)}
                 helperText={fieldErrors.legajo ?? ""}
+                required
               />
             </Grid>
             <Grid
@@ -637,6 +651,7 @@ function UsuariosDialog() {
                       fieldErrors.id_especialidad ??
                       ""
                     }
+                    required
                   />
                 )}
               />
@@ -675,6 +690,7 @@ function UsuariosDialog() {
             fullWidth
             error={Boolean(fieldErrors.nombres)}
             helperText={fieldErrors.nombres ?? ""}
+            required
           />
           <SAETextField
             label={C.employLastName}
@@ -689,6 +705,7 @@ function UsuariosDialog() {
             fullWidth
             error={Boolean(fieldErrors.apellidos)}
             helperText={fieldErrors.apellidos ?? ""}
+            required
           />
         </Stack>
       </DialogContent>
@@ -698,6 +715,7 @@ function UsuariosDialog() {
           variant="outlined"
           onClick={closeDialog}
           disabled={dialogSaving}
+          startIcon={<CloseIcon />}
         >
           {C.cancel}
         </SAEButton>
@@ -706,7 +724,13 @@ function UsuariosDialog() {
           onClick={() => handleUsuariosSave()}
           disabled={dialogSaving}
           startIcon={
-            dialogSaving ? <CircularProgress size={16} color="inherit" /> : null
+            dialogSaving ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : dialogMode === "create" ? (
+              <AddIcon />
+            ) : (
+              <SaveOutlinedIcon />
+            )
           }
         >
           {dialogMode === "create" ? C.create : C.save}

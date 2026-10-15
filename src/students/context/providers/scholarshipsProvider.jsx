@@ -571,11 +571,12 @@ export function ScholarshipsProvider({ children }) {
         setDocumentosEconomica((prev) =>
           asignarArchivosADocumentos(prev, data),
         );
-      } catch (error) {
-        console.error("Error al obtener documentos del estudiante", error);
+      } catch {
+        //console.error("Error al obtener documentos del estudiante", error);
+        showNotification("Error al obtener documentos del estudiante", "error")
       }
     },
-    [user?.email],
+    [user?.email,showNotification],
   );
 
   // Carga inicial: becario/becas, tipos de documento y archivos del estudiante.

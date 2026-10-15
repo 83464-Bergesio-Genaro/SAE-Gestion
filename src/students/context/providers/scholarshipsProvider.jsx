@@ -935,7 +935,8 @@ export function ScholarshipsProvider({ children }) {
   // base; si no, limpia el estado local.
   const handleDocumentoDelete = (item, setDocumentos) => {
     if (item.id_archivo) {
-      documentoAEliminar?.(item);
+      setDocumentoAEliminar(item);
+      setOpenPopup(true);
       return;
     }
 
@@ -944,7 +945,8 @@ export function ScholarshipsProvider({ children }) {
 
   const handleDocumentoEconomicoDelete = (item) => {
     if (item.id_archivo) {
-      documentoAEliminar?.(item);
+      setDocumentoAEliminar(item);
+      setOpenPopup(true);
       return;
     }
 

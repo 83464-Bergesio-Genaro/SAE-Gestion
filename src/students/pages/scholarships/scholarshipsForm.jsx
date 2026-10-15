@@ -39,7 +39,6 @@ import {
 
 import {
   getDocumentKey,
-  hasDocumentFile,
 } from "../../../utils/documents.utils";
 import { useScholarships } from "../../context/studentContext";
 import { ProfileContextProvider } from "../../../shared/context/providers/profileProvider";
@@ -47,7 +46,7 @@ import { ProfileContextProvider } from "../../../shared/context/providers/profil
 const C = SCHOLARSHIP_STRINGS;
 const D = PROFILE_STRINGS;
 
-const isEconomicOptionalDocument = (documento) => documento.required === false;
+//const isEconomicOptionalDocument = (documento) => documento.required === false;
 
 export default function ScholarshipsForm() {
   return (
@@ -100,6 +99,8 @@ export function ScholarshipsContent() {
     setDocumentosEconomica,
     handleDialogSave,
     saving,
+    documentoAEliminar,
+    loadingDocuments
   } = useScholarships(); //Esto en teoria lo llamamos desde dentro del provider de becas
 
   const isSaving = dialogSaving || saving;
@@ -171,28 +172,6 @@ export function ScholarshipsContent() {
             sx={{ fontWeight: 700 }}
           />
         </Divider>
-        {/* 
-        <Grid container spacing={2}>
-          {PERSONAL_FIELDS.map((field) => (
-            <Grid key={field.name} size={{ xs: 12, sm: 6, md: field.md ?? 6 }}>
-              <SAETextField
-                fullWidth
-                label={field.label}
-                name={field.name}
-                disabled
-                type={field.type}
-                InputLabelProps={field.InputLabelProps}
-                value={datosPerfil[field.name] ?? ""}
-                sx={{
-                  "& .MuiInputBase-input.Mui-disabled": {
-                    WebkitTextFillColor: "rgba(0, 0, 0, 0.75)",
-                    textOverflow: "ellipsis",
-                  },
-                }}
-              />
-            </Grid>
-          ))}
-        </Grid> */}
 
         <Grid container spacing={{ xs: 1.5, sm: 2 }} mb={{ xs: 3, md: 4 }}>
           <Grid size={{ xs: 12, md: 4 }}>
@@ -542,6 +521,7 @@ export function ScholarshipsContent() {
                   }
                   deleteDisabled={!item.subido}
                   showRequirement
+                  isDeleting={documentoAEliminar === item && loadingDocuments}
                 />
               </Grid>
             ))}
@@ -618,13 +598,13 @@ export function ScholarshipsContent() {
                     )
                   }
                   onDelete={handleDocumentoEconomicoDelete}
+                  
                   uploadDisabled={
                     item.subido || uploadingDocumentoId === getDocumentKey(item)
                   }
-                  deleteDisabled={
-                    !isEconomicOptionalDocument(item) && !hasDocumentFile(item)
-                  }
+                  deleteDisabled={!item.subido}
                   showRequirement
+                  isDeleting={documentoAEliminar === item && loadingDocuments}
                 />
               </Grid>
             ))}

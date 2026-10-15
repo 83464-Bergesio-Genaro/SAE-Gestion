@@ -1,5 +1,6 @@
 import {
   Card,
+  CardContent,
   Grid,
   Stack,
 } from "@mui/material";
@@ -91,15 +92,11 @@ function StudentSportsContent() {
         </Card>
       ) : null}
 
-<TitleBox
+      <TitleBox
         title={C.documentationTitle}
         description={C.documentationSubtitle}
-      />
-      {loadingDocuments ? (
-        <Stack alignItems="center" sx={{ py: 5 }}>
-          <SAESpinner size="S" />
-        </Stack>
-      ) : (
+      /> 
+
         <Grid container spacing={3} sx={{ mt: 1 }}>
           {documentos.map((item) => (
             <Grid
@@ -108,20 +105,21 @@ function StudentSportsContent() {
               sx={{ justifyContent: "center", alignItems: "center" }}
             >
               <DocumentCard
-                documento={item}
-                onPreview={handlePreview}
-                onFileChange={handleArchivoChange}
-                onDelete={requestDeleteDocument}
-                uploadDisabled={item.subido}
-                deleteDisabled={!item.subido}
-                notUploadedLabel={C.docStateNotUploaded}
-                uploadedLabel={C.docStataUplodaded}
-                showRequirement
-              />
+                  documento={item}
+                  onPreview={handlePreview}
+                  onFileChange={handleArchivoChange}
+                  onDelete={requestDeleteDocument}
+                  uploadDisabled={item.subido}
+                  deleteDisabled={!item.subido}
+                  notUploadedLabel={C.docStateNotUploaded}
+                  uploadedLabel={C.docStataUplodaded}
+                  showRequirement
+                  isDeleting={documentoAEliminar === item && loadingDocuments}
+                />   
             </Grid>
           ))}
         </Grid>
-      )}
+
 
       <TitleBox
         title={C.tournamnetsTitle}

@@ -217,17 +217,6 @@ function ScheduleFilters({
 }) {
   return (
     <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
-      {/* <Typography
-        variant="subtitle2"
-        sx={{
-          mb: 1,
-          color: "#5a6f8f",
-          fontWeight: 600,
-          fontSize: "0.75rem",
-        }}
-      >
-        {C.scheduleFilter}
-      </Typography> */}
 
       <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
         <Chip
@@ -476,7 +465,6 @@ function TimeColumn({ hourLabels }) {
 function DayColumn({
   activeEventId,
   colorBySportId,
-  day,
   events,
   hourLineOffsets,
   onEventActivate,

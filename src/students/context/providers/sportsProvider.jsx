@@ -147,10 +147,11 @@ export function SportsProvider({ children }) {
         ),
       );
       showNotification("Archivo subido con éxito");
-    } catch (error) {
-      console.error("Error al subir el archivo:", error);
+    } catch {
+      //console.error("Error al subir el archivo:", error);
       showNotification("Error al subir el archivo", "error");
     } finally {
+      setDocumentoAEliminar(null);
       setLoadingDocuments(false);
       event.target.value = "";
     }
@@ -181,8 +182,7 @@ export function SportsProvider({ children }) {
       );
       showNotification(C.docEliminado,"success");
     } catch (error) {
-      console.error("Error al eliminar el documento:", error);
-      showNotification(C.docEliminadoError, "error");
+      showNotification(C.docEliminadoError||error, "error");
     } finally {
       setLoadingDocuments(false);
     }
@@ -202,12 +202,11 @@ export function SportsProvider({ children }) {
           setTorneoDeportista([]);
           return;
         }
-
         const tournaments = await obtenerTorneosXDeportista(sportsman.id);
         setTorneoDeportista(Array.isArray(tournaments) ? tournaments : []);
       } catch (error) {
-        console.error("Error al cargar torneos:", error);
-        showNotification(C.erroLoadTournaments, "error");
+        //console.error("Error al cargar torneos:", error);
+        showNotification(C.erroLoadTournaments||error, "error");
       } finally {
         setLoadingTournaments(false);
       }
@@ -265,8 +264,8 @@ export function SportsProvider({ children }) {
       setLoadingSports(false);
       await loadTournamentsForSportsman(currentSportsman);
     } catch (error) {
-      console.error("Error al manejar la inscripción:", error);
-      showNotification(C.errorHandleSucscription, "error");
+      //console.error("Error al manejar la inscripción:", error);
+      showNotification(C.errorHandleSucscription||error, "error");
     } finally {
       setLoadingSports(false);
     }
@@ -298,9 +297,6 @@ export function SportsProvider({ children }) {
               : { ...documento };
           });
 
-          //console.log("[DeportesDocumentos] Tipos filtrados:", typedDocuments);
-          
-
           const uploadedDocuments = await listarDocumentacionXLegajo(
             user.legajo,
           );
@@ -326,8 +322,8 @@ export function SportsProvider({ children }) {
           setDocumentos(documentsWithUploads);
           
         } catch (error) {
-          console.error("Error al cargar documentos deportivos:", error);
-          showNotification(C.errotLoadDocumentsType, "error");
+          //console.error("Error al cargar documentos deportivos:", error);
+          showNotification(C.errotLoadDocumentsType||error, "error");
         } finally {
           setLoadingDocuments(false);
         }
@@ -340,8 +336,8 @@ export function SportsProvider({ children }) {
           if (sportsman) await loadSportsmanSchedules(sportsman);
           await loadTournamentsForSportsman(sportsman);
         } catch (error) {
-          console.error("Error al cargar torneos del estudiante:", error);
-          showNotification(C.errorLoadSports, "error");
+          //console.error("Error al cargar torneos del estudiante:", error);
+          showNotification(C.errorLoadSports||error, "error");
         } finally {
           setLoadingSports(false);
         }

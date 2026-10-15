@@ -208,8 +208,8 @@ export const TravelProvider = ({ children }) => {
       fetchDocumentos();
       showNotification(C.docEliminado, "success");
     } catch (error) {
-      console.error("Error al eliminar el documento:", error);
-      showNotification(C.docEliminadoError, "error");
+      //console.error("Error al eliminar el documento:", error);
+      showNotification(C.docEliminadoError||error, "error");
     } finally {
       setLoadingDocuments(false);
       setDocumentoAEliminar(null);

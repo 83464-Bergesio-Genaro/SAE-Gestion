@@ -285,8 +285,11 @@ export default function SportsEntityDialog() {
                 fullWidth
                 error={Boolean(dialogFieldErrors.nombre)}
                 helperText={dialogFieldErrors.nombre}
+                disabled={dialogMode==="show"}
               />
-              <Grid size={{ xs: 12 }} m={1}>
+              {dialogMode === "show" && (
+                <>
+                  <Grid size={{ xs: 12 }} m={1}>
                 <Divider textAlign="center">
                   <Chip label={C.inscriptsList}></Chip>
                 </Divider>
@@ -331,20 +334,24 @@ export default function SportsEntityDialog() {
                     </ListItem>
                   ))}
                 </List>
-                
+                )}
+                </>
               )}
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={Boolean(dialogData.activo)}
-                    onChange={(e) =>
-                      handleDialogChange("activo", e.target.checked)
-                    }
-                    color="primary"
-                  />
-                }
-                label={C.active}
-              />
+              {dialogMode === "edit" && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(dialogData.activo)}
+                      onChange={(e) =>
+                        handleDialogChange("activo", e.target.checked)
+                      }
+                      color="primary"
+                    />
+                  }
+                  label={C.active}
+                />
+              )}
+
             </>
           )}
         </Stack>
@@ -356,24 +363,27 @@ export default function SportsEntityDialog() {
           disabled={dialogSaving}
           startIcon={<CloseIcon />}
         >
-          {C.cancel}
+          {dialogMode === "show"? C.close:C.cancel}
         </SAEButton>
-        <SAEButton
-          variant="contained"
-          onClick={handleDialogSave}
-          disabled={dialogSaving}
-          startIcon={
-            dialogSaving ? (
-              <CircularProgress size={16} color="inherit" />
-            ) : dialogMode === "create" ? (
-              <AddIcon />
-            ) : (
-              <SaveOutlinedIcon />
-            )
-          }
-        >
-          {dialogMode === "create" ? C.create : C.save}
-        </SAEButton>
+          {dialogMode === "edit" && (
+          <SAEButton
+            variant="contained"
+            onClick={handleDialogSave}
+            disabled={dialogSaving}
+            startIcon={
+              dialogSaving ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : dialogMode === "create" ? (
+                <AddIcon />
+              ) : (
+                <SaveOutlinedIcon />
+              )
+            }
+          >
+            {dialogMode === "create" ? C.create : C.save}
+          </SAEButton>
+        )}
+
       </DialogActions>
     </Dialog>
   );

@@ -8,7 +8,9 @@ import {
   Typography,
 } from "@mui/material";
 import { Delete, FileUpload, OpenInNew } from "@mui/icons-material";
+import SAESpinner from "../../../assets/components/spinner/SAESpinner";
 import SAEButton from "../buttons/SAEButton";
+import { useState } from "react";
 
 const getDocumentPreviewId = (documento) =>
   documento?.id_archivo ??
@@ -40,7 +42,28 @@ export default function DocumentCard({
   getDocumentName,
   getDocumentId,
   onDeleteDocument,
+  isDeleting = false,//Esto es para mostrar el spinner
 }) {
+  const [isUploading,setUploading] = useState(false);
+  const isLoading = isUploading || isDeleting;
+  const handleFileChange = async (onChange,event, documento) => {
+    setUploading(true);
+    try {
+      await onChange?.(event, documento);
+    } finally {
+      setUploading(false);
+    }
+    
+  };
+  const handleDelete = async (onDeleteFile,documento) => {
+    setUploading(true);
+    try {
+      await onDeleteFile?.(documento);
+    } finally {
+      setUploading(false);
+    }    
+  }
+
   const previewId = getDocumentPreviewId(documento);
   const displayName = getDocumentDisplayName(documento);
   const handlesMultipleDocuments =
@@ -78,6 +101,7 @@ export default function DocumentCard({
         },
       }}
     >
+
       <CardContent
         sx={{
           p: { xs: 2, sm: 3 },
@@ -87,7 +111,13 @@ export default function DocumentCard({
           flexDirection: "column",
         }}
       >
-        <Stack sx={{ flexGrow: 1, gap: 1.25 }}>
+        {isLoading && (
+          <Stack alignItems="center" sx={{ py: 5 }}>
+            <SAESpinner size="S" />
+          </Stack>
+        )}
+        {!isLoading && (
+          <Stack sx={{ flexGrow: 1, gap: 1.25 }}>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -199,7 +229,7 @@ export default function DocumentCard({
                       <IconButton
                         size="small"
                         color="error"
-                        onClick={() => onDeleteDocument?.(index, document)}
+                        onClick={() => handleFileChange(onDeleteDocument,index, document)}
                         aria-label={`Eliminar ${name}`}
                       >
                         <Delete fontSize="small" />
@@ -238,7 +268,7 @@ export default function DocumentCard({
                   hidden
                   accept={documento.extension}
                   multiple={Boolean(documento.multiple)}
-                  onChange={(event) => onFileChange?.(event, documento)}
+                  onChange={(event) => handleFileChange(onFileChange,event, documento)}
                 />
               </SAEButton>
               <IconButton
@@ -255,7 +285,7 @@ export default function DocumentCard({
                   hidden
                   accept={documento.extension}
                   multiple={Boolean(documento.multiple)}
-                  onChange={(event) => onFileChange?.(event, documento)}
+                  onChange={(event) => handleFileChange(onFileChange,event, documento)}
                 />
               </IconButton>
 
@@ -266,7 +296,7 @@ export default function DocumentCard({
                     color="error"
                     startIcon={<Delete />}
                     disabled={deleteDisabled}
-                    onClick={() => onDelete?.(documento)}
+                    onClick={() => handleDelete(onDelete,documento)}
                     sx={{ display: { xs: "inline-flex", sm: "none" } }}
                   >
                     Eliminar
@@ -275,7 +305,7 @@ export default function DocumentCard({
                     size="small"
                     color="error"
                     disabled={deleteDisabled}
-                    onClick={() => onDelete?.(documento)}
+                    onClick={() => handleDelete(onDelete,documento)}
                     sx={{ display: { xs: "none", sm: "inline-flex" } }}
                     aria-label="Eliminar documento"
                   >
@@ -286,6 +316,8 @@ export default function DocumentCard({
             </Box>
           )}
         </Stack>
+        )}
+        
       </CardContent>
     </Card>
   );

@@ -406,12 +406,8 @@ function ScholarshipsContent() {
       )}
       {/* Sección: Mis Documentos */}
       <Box sx={{ mt: 4, position: "relative" }}>
-        {loadingDocuments && (
-          <Stack alignItems="center" sx={{ py: 5 }}>
-            <SAESpinner size="S" />
-          </Stack>
-        )}
-        {!loadingDocuments && !loadingScholarships && perfilIncompleto && (
+
+        {!loadingScholarships && perfilIncompleto && (
           <Box
             role="alert"
             aria-live="polite"
@@ -437,7 +433,7 @@ function ScholarshipsContent() {
         <Grid
           container
           spacing={2.5}
-          sx={{ mt: 1, display: loadingDocuments ? "none" : "flex" }}
+          sx={{ mt: 1, display:  "flex" }}
         >
           {documentos.map((item) => (
             <Grid
@@ -456,85 +452,15 @@ function ScholarshipsContent() {
                 uploadDisabled={item.subido}
                 deleteDisabled={!item.subido}
                 showRequirement
+                isDeleting={documentoAEliminar === item && loadingDocuments}
               />
             </Grid>
           ))}
 
-          {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Card
-              sx={{
-                width: "100%",
-                minWidth: 0,
-                height: "100%",
-                display: "flex",
-                maxWidth: 357,
-                borderRadius: 6,
-                mx: { xs: "auto", sm: 0 },
-                flexDirection: "column",
-                boxShadow: "0 18px 45px rgba(21, 61, 113, 0.12)",
-                border: "1px solid rgba(17, 53, 101, 0.08)",
-                transition:
-                  "background-color 0.25s ease, border-color 0.25s ease",
-
-                "&:hover": {
-                  backgroundColor: "#f1f5fb", // un tono más oscuro que el fondo actual
-                  borderColor: "rgba(17, 53, 101, 0.2)",
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  p: 3,
-                  display: "flex",
-                  flexDirection: "column",
-                  flexGrow: 1,
-                }}
-              >
-                <Stack sx={{ minHeight: 180, flexGrow: 1 }}>
-                  <Typography variant="h6">
-                    <strong>{C.cbuTitle}</strong>
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 2 }}
-                  >
-                    {C.cbuDescription}
-                  </Typography>
-
-                  <SAETextField
-                    fullWidth
-                    label={C.cbuLabel}
-                    value={cbu}
-                    onChange={handleCbuChange}
-                    disabled={cbuGuardado}
-                    inputProps={{
-                      inputMode: "numeric",
-                      maxLength: 22,
-                      pattern: "[0-9]*",
-                    }}
-                  />
-                  <Box sx={{ flexGrow: 1, mt: 1 }} />
-                  {!perfilIncompleto && (
-                    <Stack spacing={1.25} sx={{ mt: 1, width: "100%" }}>
-                      <SAEButton
-                        variant="contained"
-                        onClick={handleGuardarCbu}
-                        disabled={cbu.length !== 22 || cbuGuardado}
-                        sx={{ mt: "auto", width: "100%" }}
-                      >
-                        {C.cbuSaveButton}
-                      </SAEButton>
-                    </Stack>
-                  )}
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid> */}
         </Grid>
 
         {/* Mini-sección: documentos de beca económica */}
-        {!loadingDocuments && hasEconomica && (
+        { hasEconomica && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: "#123666" }}>
               {C.economicScholarshipDocumentsTitle}
@@ -558,6 +484,7 @@ function ScholarshipsContent() {
                       uploadDisabled={item.subido}
                       deleteDisabled={!item.subido}
                       showRequirement
+                      isDeleting={documentoAEliminar === item && loadingDocuments}
                     />
                   </Grid>
                 ))}

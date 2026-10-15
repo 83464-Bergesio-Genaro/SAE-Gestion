@@ -28,13 +28,12 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 import { useAuth } from "../../../shared/context/sharedContext";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TravelProvider } from "../../context/providers/travelProvider";
 import { useTravel } from "../../context/studentContext";
 import { HashLink as Link } from "react-router-hash-link";
 
 import SAEPage from "../../../assets/components/page/SAEPage";
-import SAESpinner from "../../../assets/components/spinner/SAESpinner";
 import SAEButton from "../../../assets/components/buttons/SAEButton";
 import DocumentCard from "../../../assets/components/documents/DocumentCard";
 import DocumentPreviewDialog from "../../../assets/components/documents/DocumentPreviewDialog";
@@ -43,8 +42,6 @@ import TitleBox from "../../../assets/components/titleBox";
 import StudentHeaderPage from "../../../assets/components/headerPage/headerPageStudent.jsx";
 
 import { TRIPS_STRINGS } from "../../../utils/strings/student.strings";
-import { TRAVEL_REQUIRED_DOCUMENTS } from "../../../utils/common/common.config";
-//import { useNavigate } from "react-router-dom";
 
 const baseUrl = import.meta.env.BASE_URL;
 const C = TRIPS_STRINGS;
@@ -486,7 +483,7 @@ function TravelDocumentsSection() {
     handleArchivoChange,
     requestDeleteDocument,
     documentosParaMostrar,
-    loadingDocumentos,
+    loadingDocuments,
     documentoAEliminar,
     openPopup,
     closeDeleteDialog,
@@ -502,11 +499,6 @@ function TravelDocumentsSection() {
             title={C.myDocumentTitle}
             description={C.myDocumentSubtitle}
           />
-          {loadingDocumentos ? (
-            <Stack alignItems="center" sx={{ py: 5 }}>
-              <SAESpinner size="S" />
-            </Stack>
-          ) : (
             <Grid container spacing={3} sx={{ mt: 1 }}>
               {documentosParaMostrar.map((item) => (
                 <Grid
@@ -524,11 +516,12 @@ function TravelDocumentsSection() {
                     notUploadedLabel={C.docStateNotUploaded}
                     uploadedLabel={C.docStataUplodaded}
                     showRequirement
+                    isDeleting={documentoAEliminar === item && loadingDocuments}
                   />
+                  
                 </Grid>
               ))}
             </Grid>
-          )}
         </section>
       )}
       <SAEDeleteDialog

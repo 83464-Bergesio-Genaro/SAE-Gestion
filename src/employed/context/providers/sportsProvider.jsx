@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import EditIcon from "@mui/icons-material/Edit";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
 
 import * as api from "../../../api/DeporteService";
 import { ObtenerUsuariosXLegajo } from "../../../api/EmpleadoService.js";
@@ -204,6 +205,7 @@ export function SportsProvider({ children, autoLoad = true }) {
       }),
     [open],
   );
+  
   const openEditEspacio = useCallback(
     (x) =>
       open("espacio", "edit", {
@@ -228,6 +230,11 @@ export function SportsProvider({ children, autoLoad = true }) {
   const openEditDeporte = useCallback(
     (x) =>
       open("deporte", "edit", { id: x.id, nombre: x.nombre, activo: x.activo }),
+    [open],
+  );
+  const openShowDeporte = useCallback(
+    (x) =>
+      open("deporte", "show", { id: x.id, nombre: x.nombre, activo: x.activo }),
     [open],
   );
 
@@ -386,7 +393,7 @@ export function SportsProvider({ children, autoLoad = true }) {
         }
 
         default:
-          return "";
+          return ""; 
       }
     },
     [dialogData, dialogMode, dialogType],
@@ -709,16 +716,26 @@ export function SportsProvider({ children, autoLoad = true }) {
       generateSportsColumns(deportesRows, {
         overrides: { activo: booleanColumn() },
         actions: actionColumn(({ row }) => (
-          <IconButton
-            size="small"
-            onClick={() => openEditDeporte(row)}
-            sx={{ color: "var(--primary)" }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
+          <>
+            <IconButton
+              size="small"
+              onClick={() => openEditDeporte(row)}
+              sx={{ color: "var(--primary)" }}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={() => openShowDeporte(row)}
+              sx={{ color: "var(--primary)" }}
+            >
+              <Diversity3Icon fontSize="small" />
+            </IconButton>
+          </>
         )),
       }),
-    [deportesRows, openEditDeporte],
+      
+    [deportesRows, openEditDeporte,openShowDeporte],
   );
   const torneosColumns = useMemo(
     () =>

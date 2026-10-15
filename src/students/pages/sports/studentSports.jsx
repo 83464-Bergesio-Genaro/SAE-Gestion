@@ -109,8 +109,8 @@ function StudentSportsContent() {
                   onPreview={handlePreview}
                   onFileChange={handleArchivoChange}
                   onDelete={requestDeleteDocument}
-                  uploadDisabled={item.subido}
-                  deleteDisabled={!item.subido}
+                  uploadDisabled={loadingDocuments|| item.subido}
+                  deleteDisabled={loadingDocuments|| !item.subido}
                   notUploadedLabel={C.docStateNotUploaded}
                   uploadedLabel={C.docStataUplodaded}
                   showRequirement

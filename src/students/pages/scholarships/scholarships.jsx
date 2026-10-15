@@ -449,8 +449,8 @@ function ScholarshipsContent() {
                   handleArchivoChange(event, documento)
                 }
                 onDelete={DeleteDocument}
-                uploadDisabled={item.subido}
-                deleteDisabled={!item.subido}
+                uploadDisabled={loadingDocuments||item.subido}
+                deleteDisabled={loadingDocuments||!item.subido}
                 showRequirement
                 isDeleting={documentoAEliminar === item && loadingDocuments}
               />
@@ -481,8 +481,8 @@ function ScholarshipsContent() {
                         handleArchivoChange(event, documento)
                       }
                       onDelete={DeleteDocument}
-                      uploadDisabled={item.subido}
-                      deleteDisabled={!item.subido}
+                      uploadDisabled={loadingDocuments||item.subido}
+                      deleteDisabled={loadingDocuments||!item.subido}
                       showRequirement
                       isDeleting={documentoAEliminar === item && loadingDocuments}
                     />

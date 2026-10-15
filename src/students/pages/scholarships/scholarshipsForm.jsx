@@ -29,12 +29,8 @@ import {
   SCHOLARSHIP_STRINGS,
   PROFILE_STRINGS,
 } from "../../../utils/strings/student.strings";
-import { PERSONAL_FIELDS } from "../../../utils/common/common.config";
 import {
   SCHOLARSHIP_TYPE,
-  MAX_FILE_SIZE_MB,
-  MAX_FILE_SIZE_BYTES,
-  DEFAULT_ACCEPTED_EXTENSIONS,
 } from "../../../utils/common/constants";
 
 import {
@@ -517,9 +513,9 @@ export function ScholarshipsContent() {
                   }
                   onDelete={(documento) => setDocumentoAEliminar(documento)}
                   uploadDisabled={
-                    item.subido || uploadingDocumentoId === getDocumentKey(item)
+                    loadingDocuments||item.subido || uploadingDocumentoId === getDocumentKey(item)
                   }
-                  deleteDisabled={!item.subido}
+                  deleteDisabled={loadingDocuments||!item.subido}
                   showRequirement
                   isDeleting={documentoAEliminar === item && loadingDocuments}
                 />
@@ -600,9 +596,9 @@ export function ScholarshipsContent() {
                   onDelete={handleDocumentoEconomicoDelete}
                   
                   uploadDisabled={
-                    item.subido || uploadingDocumentoId === getDocumentKey(item)
+                    loadingDocuments||item.subido || uploadingDocumentoId === getDocumentKey(item)
                   }
-                  deleteDisabled={!item.subido}
+                  deleteDisabled={loadingDocuments||!item.subido}
                   showRequirement
                   isDeleting={documentoAEliminar === item && loadingDocuments}
                 />
